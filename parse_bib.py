@@ -2,6 +2,7 @@ import bibtexparser
 import requests
 from pathlib import Path
 
+# pick number of lines to read from bib file
 N = 2000
 
 with open('anthology.bib') as bibtex_file:
