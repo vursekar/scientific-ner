@@ -4,7 +4,7 @@ from pathlib import Path
 
 N = 2000
 
-with open('anthology+abstracts.bib') as bibtex_file:
+with open('anthology.bib') as bibtex_file:
     bibtex_str = [next(bibtex_file) for x in range(N)]
 
 bibtex_str = ''.join(bibtex_str)
