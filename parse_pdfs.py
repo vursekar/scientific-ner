@@ -1,11 +1,12 @@
 import os
 from PyPDF2 import PdfReader
 import spacy
+import re
 
 pdfs_folder = 'scraped_pdfs/'
 text_folder = 'tokenized_texts/'
 
-filenames = os.listdir(pdfs_folder)
+filenames = ["bert.pdf"]#os.listdir(pdfs_folder)
 nlp = spacy.load("en_core_web_sm")
 
 for filename in filenames:
@@ -21,7 +22,8 @@ for filename in filenames:
             for page in reader.pages:
                 text = page.extract_text()
                 text = text.encode("ascii", "ignore").decode()
-                text = text.replace("\n", " ")
+                text = re.sub(r"-+ *\n+ *", "", text)
+                text = re.sub("\n", " ", text)
 
                 doc = nlp(text)
 

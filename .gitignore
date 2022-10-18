@@ -1,0 +1,8 @@
+# Ignore Mac system files
+.DS_store
+
+# Ignore all PDF files
+*.pdf
+
+# Ignore all bib files
+*.bib
