@@ -6,7 +6,7 @@ import re
 pdfs_folder = 'scraped_pdfs/'
 text_folder = 'tokenized_texts/'
 
-filenames = ["bert.pdf"]#os.listdir(pdfs_folder)
+filenames = os.listdir(pdfs_folder)
 nlp = spacy.load("en_core_web_sm")
 
 for filename in filenames:
