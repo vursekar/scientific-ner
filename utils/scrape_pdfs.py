@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 import requests
 from pathlib import Path
+import os
 
 path_to_csv = 'anthology.csv'
-num_files = 50
+num_files, num_test_files = 200, 50
 
 np.random.seed(0)
 
@@ -15,9 +16,28 @@ acl_df = acl_df[acl_df.publisher.isin(['Association for Computational Linguistic
 idxs = np.random.choice(acl_df.shape[0], num_files, replace=False)
 urls = acl_df.iloc[idxs]['link_to_pdf'].values
 
-for url in urls:
+test_urls, train_urls = urls[:num_test_files], urls[num_test_files:],
+
+for url in test_urls:
     filename = url.split('/')[-1]
     print(filename)
-    filepath = Path('scraped_pdfs/{}'.format(filename))
+    filepath = Path('scraped_test_pdfs/{}'.format(filename))
+
+    if os.path.exists(filepath):
+        print('exists, skipping')
+        continue
+
+    response = requests.get(url)
+    filepath.write_bytes(response.content)
+
+for url in train_urls:
+    filename = url.split('/')[-1]
+    print(filename)
+    filepath = Path('scraped_train_pdfs/{}'.format(filename))
+
+    if os.path.exists(filepath):
+        print('exists, skipping')
+        continue
+
     response = requests.get(url)
     filepath.write_bytes(response.content)
