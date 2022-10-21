@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 
 path_to_csv = 'anthology.csv'
-num_files, num_test_files = 200, 50
+num_files, num_test_files = 300, 50
 
 np.random.seed(0)
 

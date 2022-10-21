@@ -1,0 +1,151 @@
+Domain Adaptation for Sentiment Analysis using Keywords in the Target Domain as the Learning Weight ɹJing Bai ɹɹ Hiroyuki Shinnou ɹɹ Kanako Komiya Ibaraki University , Department of Computer and Information Sciences 4 - 12 - 1 Nakanarusawa , Hitachi , Ibaraki JAPAN 316 - 8511 f17nm719x , hiroyuki.shinnou.0828 , kanako.komiya.nlp g @vc.ibaraki.ac.jp
+Abstract This paper proposes a new method of instance - based domain adaptation for sentiment analysis .
+First , our method deﬁnes the likelihood of keywords , through the value of inverse document frequency ( IDF ) , for each word in documents in the target domain .
+Next , the keyword content rate of a document is calculated using the likelihood of keywords and the domain adaptation is performed by giving the keyword content rate to each document in the source domain as the weight .
+The experiment used an Amazon dataset to demonstrate the effectiveness of our proposed method .
+Although the instance - based method has not shown great efﬁciency , the advantages combining instance - based method and feature - based method are shown in this paper .
+1 Introduction This paper proposes a new method of instance - based domain adaptation for sentiment analysis .
+Sentiment analysis involves judging a polarity , positive or negative , of a review such as a movie review .
+This is one of the document classiﬁcation tasks and supervised learning can be used to solve it .
+However , if the domain of the test data is different from the domain for the learning data ( for example , book reviews ) , the accuracy of the classiﬁer obtained through standard supervised learning reduced .
+This is the problem with domain shift .
+The solution to this problem is domain adaptation .
+Domain adaptation can be roughly divided into two categories : feature - based and instance - based ( Panand Yang , 2010 ) .
+In summary , both are weightedlearning methods , but feature - based gives weights to features and instance - based gives weight to instance .
+Here , we present a new instance - based method .
+Generally , the instance - based method assumes a covariate shift , and gives the weight based on the probability density ratio between target domain and source domain .
+However , the computational cost for the instance - based method is too high .
+The method presented here is simple and its effect is better than methods using a typical probability density ratio .
+Our method ﬁrst deﬁnes lw , the likelihood of the keyword of the word wusing the IDF in the target domain .
+Using lw , the weight of a review xin the source domain is set as the keyword content rate wx .
+After that , weighted - learning is performed by givingwxto each document in the source domain xto overcome the domain shift .
+In the experiment , we used Amazon dataset ( Blitzer et al . , 2007 ) , and compared our proposed method with two typical instance - based methods : unconstrained least squares importance ﬁtting ( uLSIF ) ( Yamada et al . , 2011 ) using the probability density ratio and the method deﬁning weight through Naive Bayes model ( Shinnou and Sasaki , 2014 ) , to demonstrate the effectiveness of the proposed method .
+2 Related Work Domain adaptation is roughly divided into two types : the supervised approach using labeled data in the target domain and the unsupervised approach that does not use them .
+For supervised approach , Daum ´ e ’s method ( Daum ´ e III , 2007 ) has become a PACLIC 32 37   32nd Pacific Asia Conference on Language , Information and Computation   Hong Kong , 1 - 3 December 2018  
+Copyright 2018 by the authors
+standard method because of its simplicity and high ability .
+The method in the current research is an unsupervised approach .
+Unsupervised approaches can further be divided into two types : feature - based and instance - based ( Pan and Yang , 2010 ) .
+They are both weighted learning methods ; feature - based methods give weights to features and instance - based methods give weights to instances .
+Among featurebased methods , the most representative method is structural correspondence learning ( SCL ) ( Blitzer et al . , 2006 ) .
+In addition , CORAL ( Sun et al . , 2016 ) has attracted much attention for its simplicity and high ability in recent years .
+Moreover , the feature - based methods with deep learning ( Glorot et al . , 2011 ) , the expanded CORAL ( Sun and Saenko , 2016 ) and adversarial networks ( Ganin and Lempitsky , 2015)(Tzeng et al . , 2017 ) are also considered as the state of the art .
+On the other hand , instance - based methods have not been studied as much as feature - based methods .
+The instance - based method assumes a covariate shift .
+A covariate shift assumes PS(cjx ) = PT(cjx ) andPS(x )
+= PT(x ) .
+Under a covariate shift , PT(cjx ) can be obtained by the weighted learning that uses the probability density ratio r= PT(x)=P
+S(x)as the weight of the document of the source data
+x.
+There are a variety of methods for calculating the probability density ratio .
+The simplest way to calculate the ratio is directly estimate PS(x)andPT(x ) , but in the case of complex models , the problem will be more complicated .
+Thus , the method that directly models the probability density ratio was studied .
+Among these methods , uLSIF ( Yamada et al . , 2011 ) is widely used because the time complexity of the method is relatively small .
+However , P(x)of bag - of - words can be modeled by Naive Bayes model if the problem is limited to natural language processing .
+Therefore , ( Shinnou and Sasaki , 2014 ) deﬁned Pr(x ) , the prior of x , as follows : PR(x )
+= ∏n i=1PR(fi ) , where xdenotes a data in the domain Randxhas a set of features , that is , x = ff1 ; f2;   ; fng .
+They also obtain PR(fi ) using the following equation : PR(f )
+= n(R;f ) +1 N(R)+2 .
+Here , n(R;f)is the frequency of feature fin the domain R , and n(R)is the number of data in the domain R. Therefore , the probability density ratiois obtained as follows : r = PT(x ) PS(x)=n(T ; f ) + 1 N(T ) + 2N(S ) + 2 n(S ; f ) + 1(1 ) 3 Proposed Method 3.1 Likelihood of the Keyword in the Target Domain The likelihood of the keyword in the target domain islx , and lxis set as the value of IDF in the target domain of w : lx= log(N di ) + 1 Here Nis the number of articles in the article collection in the target domain , and diis the number of articles containing the word win the article collection in the target domain .
+3.2 The Content of Keywords in the Source Case Set the weight wxof the instance xin
+the source domain .
+The words ( ﬁle ) xisfwigK i=1 , and the frequency within xfor word wiisfi .
+Using these , wx is given by the following equation : wx=1∑k i=1fiK∑ i=1filwi 4 Experiment The Amazon dataset ( Blitzer et al . , 2007 ) used in the experiment is speciﬁcally developed using the processed_acl.tar.gz ﬁle on the following website .
+https://www.cs.jhu.edu/ ˜mdredze/ datasets / sentiment/.
+The data include books ( B ) , dvd ( D ) , electronics ( E ) , and kitchen ( K ) .
+The number of ﬁles contained in each domain is shown in Table 2 .
+There are 1000 positive data and negative data in each domain , and these 2000 data are used as training data in this domain .
+PACLIC 32 38   32nd Pacific Asia Conference on Language , Information and Computation   Hong Kong , 1 - 3 December 2018   Copyright 2018 by the authors
+Table 1 : Experimental result IDEAL NONE uLSIF NB our method BˠD 0.822 0.806 0.806 0.811 0.809 BˠE 0.852 0.761 0.756 0.755 0.765 BˠK 0.878 0.845 0.778 0.779 0.785 DˠB 0.831 0.762 0.733 0.745 0.741 DˠE 0.852 0.761 0.748 0.753 0.758 DˠK 0.878 0.795 0.773 0.782 0.789 EˠB 0.831 0.712 0.714 0.723 0.719 EˠD 0.822 0.722 0.708 0.723 0.714
+EˠK 0.878 0.849 0.854 0.857 0.855 KˠB 0.831 0.713 0.707 0.714 0.715 KˠD 0.822 0.740 0.733 0.723 0.736 KˠE 0.852 0.842 0.847 0.852 0.845 Average 0.846 0.776 0.763 0.768 0.769 Table 2 : The number of ﬁles in each domain positive negativ etest data books 1,000 1,000 4,465 dvd 1,000 1,000 3,586 electronics 1,000 1,000 5,681 kitchen 1,000 1,000 5,945 The learning algorithm is an SVM with scikitlearn .
+The core is linear , the value of the c parameter is ﬁxed at 0.1 , and the scikit - learn SVM supports Weighted - Learning1 , so the scikit - learn SVM is used here .
+domain adaptations are : BˠD , BˠE , BˠK , D ˠB , DˠE , DˠK , EˠB , EˠD , EˠK , KˠB , K ˠD , KˠE.
+See Table 1 for the results of the two methodsʢuLSIF ( Yamada et al . , 2011 ) and using equation ( 1 ) of Naive Bayesʣfor determining the rate density ratio of each domain and the proposed method.ʠNONEʡin Table 1 means that the domain adaptation method was not used but simply applies the classiﬁer formed from the training data of the source domain to the result of the test data in the target domain was applied .
+In addition , IDEAL is a result using the training data in the target domain to learn through the classiﬁer and apply it to the test data in the target domain .
+Using the case as a weighted method , a compari1http://scikit-learn.org/stable/auto _ examples / svm / plot_weighted_samples.htmlson of uLSIF , NB , the our method shows that the six highest correct answer rates in the 12 domain adaptations are obtained by our method , and the remaining six highest positive answer rates are obtained by NB .
+When we take 12 averages , the solution rate of our method is more than that of NB , and our method is weighted with example and , which is excellent .
+5 Discussion NONE in Table1 is compared with the case weighting method ( uLSIF , NB , and our method ) .
+It is clear that NONE has a high positive solution rate .
+For theae data only , the instance - based method has no effect on domain adaptation .
+However , feature - based and instance - based methods are easy to combine .
+Here , the four domains applied in paper ( Sun et al . , 2016 ) are adapted to B ˠE , DˠB , EˠKandKˠD , and SCL conversion training is used ﬁrst .
+The prime vector of the data , then experiment with the weighted - learning in this transformed vector is performed using the proposed method .
+The results are shown in Table 3 .
+The CORAL in Table 3 is taken from ( Sun et al . , 2016 ) .
+From Table 3,it can be seen that SCL has no effect .
+After SCL is combined with our method , the accuracy is not high enough .
+However , when SCL is combined with the proposed method , the precision for SCL alone is improved .
+The positive effect of PACLIC 32 39   32nd Pacific Asia Conference on Language , Information and Computation   Hong Kong , 1 - 3 December 2018   Copyright 2018 by the authors
+Table 3 : Combination of feature - based method and instance - based method IDEAL NONE CORAL our methodSCL SCL + our method BˠE 0.852 0.761 0.763 0.760 0.757 0.756 DˠB 0.831 0.762 0.783 0.756 0.732 0.733 EˠK 0.878 0.849 0.836 0.849 0.852 0.853 KˠD 0.822 0.740 0.739 0.743 0.732 0.733 Average 0.846 0.778 0.780 0.777 0.768 0.769 ؞؞؞؞؞؞AutoEncoder 1W2W
+T Sx x / T
+Sx x/ ؞؞؞؞؞؞ Sx؞؞؞NN'yw y y lossu ) , ' ( Learning Sxencoded yw label weig ht
+Figure 1 : AE+NN+Weighted - Learning the combined the instance - based and feature - based methods can be conﬁrmed .
+There are many ways in useing the feature - based method , in addition to SCL , so it can be improved by combining these techniques with the proposed method .
+In addition , although the weighted - learning SVM is used in this paper , the loss value of the loss function in the neural network is multiplied by the weight , and it is easier to realize weighted - learning as the loss value .
+There are many options for using the domain adaptation method on deep learning , and these solutions combined with instance - based are easier to compute .
+In a simple example , we used the AutoEncoder ( AE ) as the feature - based method .
+Using AE , the dimension of the data in the source and target domain was reduced , that is , encoded .
+In learning and testing , we used the connected data of the orig - inal data and the encoded data instead of the original data .
+In learning , as described above , the value of the loss function was multiplied by the weight obtained by our method and was taken as the loss valueʢFIG . 1ʣ .
+Only the experiment of BˠE is performed , and the results in Table 4 ͱFIG . 2 were obtained .
+In addition , in this experiment , neural network learning was ended in 50 epochs , and the correct rate was the result from evaluating the model obtained by learning data after 50 epochs .
+Moreover , the dimension was reduced to 200 .
+Every method used the same multi - layer perceptron , which has three layers .
+The use of the connected data of the original data and the encoded data is a feature - based method .
+FIG .
+2 shows that this feature - based method NN+AE improves the precision of the standard neural network NN .
+Moreover , combining PACLIC 32 40   32nd Pacific Asia Conference on Language , Information and Computation   Hong Kong , 1 - 3 December 2018   Copyright 2018 by the authors
+0.70.710.720.730 .
+740.750.760.770.78 1 2 3 4 5 6 7 8 9 1011121314151617181920212223242526272829303132333435363738394041424344454647484950 epochprec isionNN+AE+WT    0.7697 NN+AE    0.7667 NN     0.7618Figure 2 : Weighted - Learning by neural network Table 4 : weighted - learning by neural network IDEAL NONE NN NN+AE NN+AE+WT 0.852 0.761 0.7618 0.7667 0.7697 NN+AE
+and our method further improves it .
+This result shows that the combination of the featurebased method and the instance - based method is easy in network learning and effective .
+In the future , we are planning to design a domain adaptation method in this framework .
+6 Conclusion This paper proposed a method for instance - based domain adaptation of sentiment analysis .
+For outline , from the target domain , using IDF to set the likelihood of keywords , and the data in the source domain , the content rate in the target domain keyword , and the keyword content rate as the weight .
+In the experiment , we compared our proposed method with two typical instance - based methods : uLSI using the probability density ratio and the method deﬁning weight through Naive Bayes model .
+However , using an instance - based alone to perform domain adaptation has a very small effect , the combining instance - based method and feature - based method is assured as shown in this paper .
+Further , the combination is easy to implement in the neural network model .
+Thus , we will investigate this approach in future .
+References John Blitzer , Ryan McDonald , and Fernando Pereira . 2006 .
+Domain adaptation with structural correspondence learning .
+In EMNLP-2006 , pages 120–128 .
+John Blitzer , Mark Dredze , and Fernando Pereira . 2007 .
+Biographies , Bollywood , Boom - boxes and Blenders : Domain adaptation for Sentiment Classiﬁcation .
+In ACL-2007 , pages 440–447 .
+Hal Daum ´ e III .
+2007 .
+Frustratingly easy domain adaptation .
+In ACL-2007 , pages 256–263 .
+Yaroslav Ganin and Victor S. Lempitsky .
+2015 .
+Unsupervised domain adaptation by backpropagation .
+In ICML , pages 1180–1189 .
+Xavier Glorot , Antoine Bordes , and Yoshua Bengio .
+2011 .
+Domain Adaptation for Large - Scale Sentiment Classiﬁcation : A Deep Learning Approach .
+In ICML11 , pages 513–520 .
+PACLIC 32 41   32nd Pacific Asia Conference on Language , Information and Computation   Hong Kong , 1 - 3 December 2018   Copyright 2018 by the authors
+Sinno Jialin Pan and Qiang Yang .
+2010 .
+A survey on transfer learning .
+Knowledge and Data Engineering , IEEE Transactions on , 22(10):1345–1359 .
+Hiroyuki Shinnou and Minoru Sasaki .
+2014 .
+Domain Adaptations for Word Sense Disambiguation under the Problem of Covariate Shift ( in Japanese ) .
+Journal of Natural Language Processing , 21(1):61–79 .
+Baochen Sun and Kate Saenko .
+2016 .
+Deep coral : Correlation alignment for deep domain adaptation .
+In Computer Vision – ECCV 2016 Workshops , pages 443 – 450 .
+Baochen Sun , Jiashi Feng , and Kate Saenko .
+2016 .
+Return of Frustratingly Easy Domain Adaptation .
+AAAI .
+Eric Tzeng , Judy Hoffman , Kate Saenko , and Trevor Darrell . 2017 .
+Adversarial discriminative domain adaptation .
+arXiv preprint arXiv:1702.05464 .
+Makoto Yamada , Taiji Suzuki , Takafumi Kanamori , Hirotaka Hachiya , and Masashi Sugiyama .
+2011 .
+Relative density - ratio estimation for robust distribution comparison .
+Neural Computation , 25(5):1370–1370 .
+PACLIC 32 42   32nd Pacific Asia Conference on Language , Information and Computation   Hong Kong , 1 - 3 December 2018   Copyright 2018 by the authors

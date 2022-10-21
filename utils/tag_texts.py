@@ -62,6 +62,12 @@ for filename in filenames:
 
     print(filename)
 
+    output_path = os.path.join(path_to_tagged,filename[:-4]+'.json')
+
+    if os.path.exists(output_path):
+        print("File exists; skipping")
+        continue
+
     data = []
 
     with open(os.path.join(path_to_tokenized,filename)) as f:

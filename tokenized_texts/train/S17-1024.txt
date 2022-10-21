@@ -1,0 +1,400 @@
+Proceedings of the 6th Joint Conference on Lexical and Computational Semantics ( * SEM 2017 ) , pages 199–208 , Vancouver , Canada , August 3 - 4 , 2017 .
+c  2017 Association for Computational Linguistics Parsing Graphs with Regular Graph Grammars Sorcha Gilroy University of Edinburgh s.gilroy@sms.ed.ac.ukAdam Lopez University of Edinburgh alopez@inf.ed.ac.ukSebastian Maneth Universit ¨at Bremen smaneth@uni-bremen.de Abstract Recently , several datasets have become available which represent natural language phenomena as graphs .
+Hyperedge Replacement Languages ( HRL ) have been the focus of much attention as a formalism to represent the graphs in these datasets .
+Chiang et al .
+( 2013 ) prove that HRL graphs can be parsed in polynomial time with respect to the size of the input graph .
+We believe that HRL are more expressive than is necessary to represent semantic graphs and we propose the use of Regular Graph Languages ( RGL ; Courcelle 1991 ) , which is a subfamily of HRL , as a possible alternative .
+We provide a topdown parsing algorithm for RGL that runs in time linear in the size of the input graph .
+1 Introduction NLP systems for machine translation , summarization , paraphrasing , and other tasks often fail to preserve the compositional semantics of sentences and documents because they model language as bags of words , or at best syntactic trees .
+To preserve semantics , they must model semantics .
+In pursuit of this goal , several datasets have been produced which pair natural language with compositional semantic representations in the form of directed acyclic graphs ( DAGs ) , including the Abstract Meaning Representation Bank ( AMR ; Banarescu et al . 2013 ) , the Prague Czech - English Dependency Treebank ( Haji ˇc et al . , 2012 ) , Deepbank ( Flickinger et al . , 2012 ) , and the Universal Conceptual Cognitive Annotation ( Abend and Rappoport , 2013 ) .
+To make use of this data , we require models of graphs .
+Consider how we might use compositional semantic representations in machine translationAnna fehlt ihrem KaterAnna ’s cat misses hermiss arg0 arg1
+cat poss Anna Figure 1 : Semantic machine translation using AMR ( Jones et al . , 2012 ) .
+The edge labels identify ‘ cat ’ as the object of the verb ‘ miss ’ , ‘ Anna ’ as the subject of ‘ miss ’ and ‘ Anna ’ as the possessor of ‘ cat ’ .
+Edges whose head nodes are not attached to any other edge are interpreted as node labels .
+( Figure 1 ) , a two - step process in which semantic analysis is followed by generation .
+Jones et al .
+( 2012 ) observe that this decomposition can be modeled with a pair of synchronous grammars , each deﬁning a relation between strings and graphs .
+Necessarily , one projection of this synchronous grammar produces strings , while the other produces graphs , i.e. , is a graph grammar .
+A consequence of this representation is that the complete translation process can be realized by parsing : to analyze a sentence , we parse the input string with the string - generating projection of the synchronous grammar , and read off the synchronous graph from the resulting parse .
+To generate a sentence , we parse the graph , and read off the synchronous string from the resulting parse .
+In this paper , we focus on the latter problem : using graph grammars to parse input graphs .
+We call this graph recognition to avoid confusion with other parsing problems .
+Recent work in NLP has focused primarily onhyperedge replacement grammar ( HRG ; Drewes et al . 1997 ) , a context - free graph grammar formalism that has been studied in an NLP context by several researchers ( Chiang et al . , 2013 ; Peng et al . , 2015 ; Bauer and Rambow , 2016 ) .
+In particular , Chiang et al . ( 2013 ) propose that HRG could be used to represent semantic graphs , and precisely characterize the complexity of a CKY - style199
+algorithm for graph recognition from Lautemann ( 1990 ) to be polynomial in the size of the input graph .
+HRGs are very expressive — they can generate graphs that simulate non - context - free string languages ( Engelfriet and Heyker , 1991 ; Bauer and Rambow , 2016 ) .
+This means they are likely more expressive than we need to represent the linguistic phenomena that appear in existing semantic datasets .
+In this paper , we propose the use of Regular Graph Grammars ( RGG ; Courcelle 1991 ) a subfamily of HRG that , like its regular counterparts among string and tree languages , is less expressive than context - free grammars but may admit more practical algorithms .
+By analogy to Chiang ’s CKY - style algorithm for HRG .
+We develop an Earley - style recognition algorithm for RGLs that is linear in the size of the input graph .
+2 Regular Graph Languages We use the following notation .
+If nis an integer , [ n]denotes the set{1, ... ,n } .
+Let Γbe an alphabet , i.e. , a ﬁnite set .
+Then s∈Γ∗denotes that s is a sequence of arbitrary length , each element of which is in Γ. We denote by|s|the length of s. A ranked alphabet is an alphabet Γpaired with an arity mapping ( i.e. , a total function ) rank : Γ→N. Deﬁnition 1 . Ahypergraph ( or simply graph ) over a ranked alphabet
+Γis a tuple G= ( VG , EG , attG , labG , extG)whereVGis a ﬁnite set of nodes;EGis a ﬁnite set of edges ( distinct from VG ) ; att G : EG→V∗ Gmaps each edge to a sequence of nodes ; lab G : EG→Γmaps each edge to a label such that |attG(e)|=rank(lab G(e ) ) ; and ext Gis an ordered subset of VGcalled the external nodes ofG.
+We assume that the elements of ext Gare pairwise distinct , and the elements of att G(e)for each edgeeare also pairwise distinct .
+An edge eis attached to its nodes by tentacles , each labeled by an integer indicating the node ’s position in attG(e ) = ( v1, ... ,v k ) .
+The tentacle from eto viwill have label i , so the tentacle labels lie in the set[k]wherek = rank(e ) .
+To express that a node vis attached to the ith tentacle of an edge e , we say vert ( e , i )
+= v. Likewise , the nodes in ext G are labeled by their position in ext G.
+We refer to theith external node of Gby ext G(i)and in ﬁgures this will be labeled ( i ) .
+The rank of an edge eiskif att(e ) = ( v1, ... ,v k)(or equivalently , rank(lab ( e ) ) = k ) .
+The rank of a hypergraph G , denoted by rank ( G ) is the size of ext G.Example 1 .
+Hypergraph Gin Figure 2 has four nodes ( shown as black dots ) and three hyperedges labeleda , b , andX(shown boxed ) .
+The bracketed numbers ( 1)and(2)denote its external nodes and the numbers between edges and the nodes are tentacle labels .
+Call the top node v1and , proceeding clockwise , call the other nodes v2,v3 , andv4 .
+Call its edges e1,e2ande3 .
+Its deﬁnition would state att G(e1 )
+= ( v1,v2 ) , attG(e2 ) = ( v2,v3 ) , attG(e3 ) = ( v1,v4,v3 ) , labG(e1 ) = a , labG(e2 ) = b , labG(e3 )
+= X , and ext G= ( v4,v2 ) .
+Deﬁnition 2 . LetGbe a hypergraph containing an edgeewith att G(e )
+= ( v1, ... ,v k)and letH be a hypergraph of rank kwith node and edge sets disjoint from those of G. The replacement ofeby His the graph G / prime = G[e / H ] .
+Its node set VG / primeis V∪VHwhereV = VG−{v1, ... ,v k } .
+Its edge set isEG / prime= ( EG−{e})∪EH .
+We deﬁne att G /
+prime=
+att∪attHwhere for every e / prime∈(EG−{e } ) , att(e ) is obtained from att G(e / prime)by replacing viby theith external node of H. Let lab G / prime = lab∪labHwhere lab is the restriction of lab Gto edges inEG−{e } .
+Finally , let ext G / prime = extG. Example 2 .
+A replacement is shown in Figure 2 . 2.1 Hyperedge Replacement Grammars Deﬁnition 3 .
+Ahyperedge replacement grammar G= ( NG , TG , PG , SG)consists of ranked ( disjoint ) alphabets NGandTGof nonterminal and terminal symbols , respectively , a ﬁnite set PGof productions , and a start symbol SG∈NG .
+Every production in PGis of the form X→Gwhere Gis a hypergraph over NG∪TGand rank ( G ) = rank(X ) .
+For each production p : X→G , we useL(p ) to refer toX(the left - hand side of p ) andR(p ) to refer toG(the right - hand side of p ) .
+An edge is a terminal edge if its label is terminal and a nonterminal edge if its label is nonterminal .
+A graph is a terminal graph if all of its edges are terminal .
+The terminal subgraph of a graph is the subgraph consisting of all terminal edges and their incident nodes .
+Given a HRGG , we say that graph Gimmediately derives graphG / prime , denotedG→G / prime , iff there is an edge e∈EGand a nonterminal X∈NGsuch that lab G(e )
+= XandG / prime= G[e / H ] , whereX→His inPG .
+We extend the idea of immediate derivation to its transitive closureG→∗G / prime , and say here that Gderives G / prime .
+For every X∈NGwe also use Xto de-200
+Xa b(1 ) ( 2 ) G(2)c(1 ) a ( 3)d H(1)c da
+( 2 ) ba G[e / H]211 2 1 2321 1 21 221 1 21 21 2 1 2 Figure 2 : The replacement of the X - labeled edge einGby the graphH. Sp : X ( 1)1go1 2 Iarg0Y Z s : ( 1 ) ( 2)1 21 arg0arg1 Xq : W Y ( 2)(1)1 21 1 2arg1 arg0Wt:(1 ) 1 want Yr : Z X ( 2)(1)1 21 1 2arg1 arg0Zu:(1 ) 1 need Table 1 : Productions of a HRG .
+The labels p , q , r , s , t , andu label the productions so that we can refer to them in the text .
+Note thatYcan rewrite in two ways , either via production r ors .
+note the graph consisting of a single edge ewith lab(e )
+= Xand nodes ( v1, ... ,v rank(X))such that att G(e )
+=
+( v1, ... ,v rank(X ) ) , and we deﬁne the language LX(G)as{G|X→∗G∧Gis terminal } .
+The language ofGisL(G )
+= LSG(G ) .
+We call the family of languages that can be produced by any HRG the hyperedge replacement languages ( HRL ) .
+We assume that terminal edges are always of rank 2 , and depict them as directed edges where the direction is determined by the tentacle labels : the tentacle labeled 1 attaches to the source of the edge and the tentacle labeled 2 attaches to the target of the edge .
+Example 3 .
+Table 1 shows a HRG deriving AMR graphs for sentences of the form ‘ I need to want to need to want to ... to want to go ’ .
+Figure 3 is a graph derived by the grammar .
+The grammar is somewhat unnatural , a point we will return to ( § 4 ) .
+We can use HRGs to generate chain graphs(1)arg1 arg1 arg1 arg1need want need want go
+Iarg0arg0 arg0arg0arg0
+Figure 3 : Graph derived by grammar in Table 1 . S ( 1)S ( 2 ) ( 1 ) ( 2)1 2a 1 2b ab Figure 4 : A HRG producing the string language anbn .
+( strings ) by restricting the form of the productions in the grammars .
+Figure 4 shows a HRG that produces the context - free string languageanbn .
+HRGs can simulate the class of mildly context - sensitive languages that is characterized , e.g. , by linear context - free rewriting systems ( LCFRS;Vijay - Shanker et al . 1987 ) , where the fan - out of the LCFRS will inﬂuence the maximum rank of nonterminal required in the HRG , see ( Engelfriet and Heyker , 1991 ) .
+2.2 Regular Graph Grammars A regular graph grammar ( RGG ; Courcelle 1991 ) is a restricted form of HRG .
+To explain the restrictions , we ﬁrst require some deﬁnitions .
+Deﬁnition 4 .
+Given a graph G , apath inGfrom a nodevto a nodev / primeis a sequence ( v0,i1,e1,j1,v1)(v1,i2,e2,j2,v2 ) ... ( vk−1,ik , ek , jk , vk)(1 ) such thatv0 = v , vk = v / prime , and for each r∈[k ] , vert(er , ir ) = vr−1andvert(er , jr ) = vr .
+The length of this path is k.
+A path is terminal if every edge in the path has a terminal label .
+A path is internal if eachviis internal for 1≤i≤k−1 .
+Note that the endpoints v0andvkof an internal path can be external .
+Deﬁnition 5 .
+A HRGGis a Regular Graph Grammar ( or simply RGG ) if each nonterminal inNGhas rank at least one and for each p∈PG the following hold:201
+( C1)R(p)has at least one edge .
+Either it is a single terminal edge , all nodes of which are external , or each of its edges has at least one internal node .
+( C2 ) Every pair of nodes in R(p)is connected by a terminal and internal path .
+Example 4 .
+The grammar in Table 1 is an RGG .
+Although HRGs can produce context - free languages ( and beyond ) as shown in Figure 4 , the only string languages RGGs can produce are the regular string languages .
+See Figure 5 for an example of a string generating RGG .
+Similarly , RGGs can produce regular tree languages , but not context - free tree languages .
+Figure 6 shows a tree generating RGG that generates binary trees the internal nodes of which are represented by a - labeled edges , and the leaves of which are represented by b - labeled edges .
+Note that these two results of regularity of the string- and tree - languages generated by RGG follow from the fact that graph languages produced by RGG are MSO - deﬁnable ( Courcelle , 1991 ) , and the well - known facts that the regular string and graph languages are MSO - deﬁnable .
+X ( 1)aY ( 1)b 1 1 Figure 5 : A RGG for a regular string language .
+X(1 ) YZ(1)1a 1 2 1 1b Figure 6 : A RGG for a regular tree language .
+We call the family of languages generated by RGGs the regular graph languages ( RGLs ) .
+3 RGL Recognition To recognize RGG , we exploit the property that every nonterminal including the start symbol has rank at least one ( Deﬁnition 5 ) , and we assume that the corresponding external node is identiﬁed in the input graph .
+This mild assumption may be reasonable for applications like AMR parsing , where grammars could be designed so that the external node is always the unique root .
+Later we relax this assumption .
+The availability of an identiﬁable external node suggests a top - down algorithm , and we take in - spiration from a top - down recognition algorithm for the predictive top - down parsable grammars , another subclass of HRG ( Drewes et al . , 2015 ) .
+These grammars , the graph equivalent of LL(1 ) string grammars , are incomparable to RGG , but the algorithms are related in their use of top - down prediction and in that they both ﬁx an order of the edges in the right - hand side of each production .
+3.1 Top - Down Recognition for RGLs Just as the algorithm of Chiang et al .
+( 2013 ) generalizes CKY to HRG , our algorithm generalizes Earley ’s algorithm ( Earley , 1970 ) .
+Both algorithms operate by recognizing incrementally larger subgraphs of the input graph , using a succinct representation for subgraphs that depends on an arbitrarily chosen marker node mof the input graph .
+Deﬁnition 6 .
+( Chiang et al . 2013 ; Deﬁnition 6 ) LetIbe a subgraph of a graph G. Aboundary node ofIis a node which is either an endpoint of an edge in G\Ior an external node of G. A boundary edge ofIis an edge in Iwhich has a boundary node as an endpoint .
+The boundary representation ofIis the tuple b(I )
+= /angbracketleftbn(I ) , be(I),m∈I / angbracketrightwhere
+1 .
+bn ( I)is the set of boundary nodes of I 2 . be ( I)is the set of boundary edges of I 3.(m∈I)is a ﬂag indicating whether the marker node is in I. Chiang et al .
+( 2013 ) prove each subgraph has a unique boundary representation , and give algorithms that use only boundary representations to compute the union of two subgraphs , requiring time linear in the number of boundary nodes ; and to check disjointness of subgraphs , requiring time linear in the number of boundary edges .
+For each production pof the grammar , we impose a ﬁxed order on the edges of R(p ) , as in Drewes
+et al . ( 2015 ) .
+We discuss this order in detail in§3.2 .
+As in Earley ’s algorithm , we use dotted rules to represent partial recognition of productions : X→¯e1 ... ¯ei−1·¯ei ... ¯enmeans that we have identiﬁed the edges ¯e1to¯ei−1and that we must next recognize edge ¯ei .
+We write ¯eand ¯vfor edges and nodes in productions and eandv for edges and nodes in a derived graph .
+When the identity of the sequence is immaterial we abbreviate it asα , for example writing X→·α .
+We present our recognizer as a deductive proof system ( Shieber et al . , 1995 ) .
+The items of the202
+Name Rule Conditions PREDICT[b(I),p : X→¯e1 ... ·¯ei ... ¯en , φp][q : Y→α ]
+[ φp(¯ei),q : Y→·α , φ0q[extR(q)=φp(¯ei)]]lab(¯ei ) = Y SCAN[b(I),X→¯e1 ... ·¯ei ... ¯en , φp][e = edglab(¯ei)(v1, ... ,v m ) ]
+[ b(I∪{e}),X→¯e1 ... ·¯ei+1 ... ¯en , φp[att(¯ei ) = ( v1, ... ,v m)]]φp(¯ei)(j)∈VG⇒ φp(¯ei)(j ) = vert(e , j ) COMPLETE[b(I),p : X→¯e1 ... ·¯ei ... ¯en , φp][b(J),q : Y→α·,φq ]
+[ b(I∪J),X→¯e1 ... ·¯ei+1 ... ¯en , φp[att(¯ei )
+= φp(extR(q))]]φp(¯ei)(j)∈VG⇒ φp(¯ei)(j ) = φq(extR(q))(j ) , lab(¯ei )
+= Y , EI∩EJ=∅ Table 2 : The inference rules for the top - down recognizer .
+recognizer are of the form
+[ b(I),p : X→¯e1 ... ·¯ei ... ¯en , φp ] whereIis a subgraph that has been recognized as matching ¯e1 , ... , ¯ei−1;p : X→¯e1 , ... , ¯enis a production in the grammar with the edges in order ; andφp : ER(p)→V∗ Gmaps the endpoints of edges inR(p)to nodes inG.
+For each production p , we number the nodes in some arbitrary but ﬁxed order .
+Using this , we construct the function φ0 p : ER(p)→V∗ R(p)such that for ¯e∈ER(p)if att ( ¯e ) = ( ¯v1,¯v2)then φ0 p(¯e )
+= ( ¯v1,¯v2 ) .
+As we match edges in the graph with edges in p , we assign the nodes ¯vto nodes in the graph .
+For example , if we have an edge ¯ein a production psuch that att ( ¯e ) = ( ¯v1,¯v2)and we ﬁnd an edge ewhich matches ¯e , then we update φpto record this fact , written φp[att(¯e )
+= att(e ) ] .
+We also use φpto record assignments of external nodes .
+If we assign the ith external node to v , we writeφp[extp(i )
+= v ] .
+We writeφ0 pto represent a mapping with no grounded nodes .
+Since our algorithm makes top - down predictions based on known external nodes , our boundary representation must cover the case where a subgraph is empty except for these nodes .
+If at some point we know that our subgraph has external nodes φ(¯e ) , then we use the shorthand φ(¯e)rather than the full boundary representation /angbracketleftφ(¯e),∅,m∈φ(¯e)/angbracketright .
+To keep notation uniform , we use dummy nonterminalS∗/negationslash∈NGthat derivesSGvia the productionp0 .
+For graphG , our system includes the axiom : [ extG , p0 : S∗→·SG , φ0 p0[extR(p0)=extG]].Ourgoal is to prove :
+[ b(G),pS : S∗→SG·,φpS ] whereφpShas a single edge ¯ein its domain which has labelSGinR(pS)andφpS(¯e )
+= extG. As in Earley ’s algorithm , we have three inference rules : PREDICT , SCAN and COMPLETE ( Table 2 ) .
+P REDICT is applied when the edge after the dot is nonterminal , assigning any external nodes that have been identiﬁed .
+S CAN is applied when the edge after the dot is terminal .
+Using φp , we may already know where some of the endpoints of the edge should be , so it requires the endpoints of the scanned edge to match .
+C OMPLETE requires that each of the nodes of ¯eiinR(p)have been identiﬁed , these nodes match up with the corresponding external nodes of the subgraph J , and that the subgraphs IandJare edge - disjoint .
+We provide a high - level proof that the recognizer is sound and complete .
+Proposition 1 . LetGbe a HRG and Ga graph .
+Then the goal [ b(G),pS : S∗→SG·,φpS]can be proved from the axiom
+[ extG , pS : S∗→·SG , φpS[extR(pS)=extG]]if and only if G∈ L(G ) .
+Proof .
+We prove that for each X∈NG , [ b(G),pX : X∗→X·,φpX]can be proved from [ extG , pX : X∗→·X , φ pX[extR(pX)=extG]]if and only ifG∈LX(G)where the dummy nonterminalX∗was added to the set of nonterminals andpX : X∗→Xwas added to the set of productions .
+We prove this by induction on the number of edges inG. We assume that each production in the grammar contains at least one terminal edge .
+If the HRG is not in this form , it can be converted into this form203
+and in the case of RGGs they are already in this form by deﬁnition .
+Base Case : LetGconsist of a single edge .
+If : AssumeG∈LX(G ) .
+SinceGconsists of one edge , there must be a production q : X→G.
+Apply PREDICT to the axiom and pX : X∗→Xto obtain the item [ φpX(X),q : X→·G , φ0 q[extG = φpX(X ) ] ] .
+Apply SCAN to the single terminal edge that makes up Gto obtain[b(G),q : X→G·,φq]and ﬁnally apply COMPLETE to this and the axiom reach the goal [ b(G),pX : X∗→X , φ pX ] .
+Only if : Assume the goal can be reached from the axiom and G = e. Then the item [ b(e),q : X→e , φq]must have been reached at some point for someq∈PG .
+Therefore q : X→eis a production and so e = G∈LX(G ) .
+Assumption : Assume that the proposition holds whenGhas fewer than kedges .
+Inductive Step : AssumeGhaskedges .
+If : AssumeG∈LX(G ) , then there is a productionq : X→HwhereHhas nonterminals Y1, ...
+,Y nand there are graphs H1, ... ,H nsuch thatG = H[Y1 / H1] ...
+[Yn / Hn ] .
+Each graph Hi fori∈[n]has fewer than kedges and so we apply the inductive hypothesis to show that we can prove the items [ b(Hi),ri : Yi→Ji , φri]for each i∈[n ] .
+By applying COMPLETE to each such item and applying SCAN to each terminal edge of Hwe reach the goal
+[ b(G),pX : X∗→X·,φpX ] .
+Only If : Assume the goal can be proved from the axiom .
+Then we must have at some point reached an item of the form [ b(G),q : X→ H , φ q]and thatHhas nonterminals Y1, ...
+,Y n.
+This means that there are graphs H1, ... ,H nsuch that[b(Hi),pYi : Y∗ i→Yi , φpYi]for eachi∈[n ]
+andG = H[Y1 / H1] ...
+[Yn / Hn ] .
+Since each Hi has fewer than kedges , we apply the inductive hypothesis to get that Hi∈LYi(G)for eachi∈[n ] and therefore G∈LX(G ) .
+Example 5 .
+Using the RGG in Table 1 , we show how to recognize the graph in Figure 7 , which can be derived by applying production sfollowed by productionu , where the external nodes of Yare ( v3,v2 ) .
+Assume the ordering of the edges in productionsis arg1 , arg0 , Z ; the top node is ¯v1 ; the bottom node is ¯v2 ; and the node on the right is ¯v3 ; and that the marker node is not in this subgraph — we elide reference to it for simplicity .
+Let ¯v4be the top node of R(u)and¯v5be the bottom node ofR(u ) .
+The external nodes of Yare determinedtop - down , so the recognize of this subgraph is triggered by this item : [ { v3,v2},Y→·arg1 arg0Z , φ0 s[extR(s)= ( v3,v2)]](2 ) whereφs(arg1 )
+= ( ¯v1,v3),φs(arg0 ) = ( ¯v1,v2 ) , andφs(Z ) = ( ¯v1 ) .
+Table 3 shows how we can prove the item
+[ /angbracketleft{v3,v2},{e3,e2}/angbracketright , Y→arg1arg0Z·,φ ] The boundary representation /angbracketleft{v3,v2},{e3,e2}/angbracketright
+in this item represents the whole subgraph shown in Figure 7 .
+v1 v4
+v2v3 ... ... need ( e1 ) arg0 ( e2)arg1 ( e3 ) Figure 7 : Top left subgraph of Figure 3 .
+To refer to nodes and edges in the text , they are labeled v1,v2,v3,e1,e2 , ande3 .
+3.2 Normal Ordering Our algorithm requires a ﬁxed ordering of the edges in the right - hand sides of each production .
+We will constrain this ordering to exploit the structure of RGG productions , allowing us to bound recognition complexity .
+If s= ¯e1 ... ¯enis an order , deﬁnesi : j= ¯ei ... ¯ej .
+Deﬁnition 7 . Lets= ¯e1 , ... , ¯enbe an edge order of a right - hand side of a production .
+Then sis normal if it has the following properties : 1.¯e1is connected to an external node , 2.s1 : jis a connected graph for all j∈[n ] 3 . if¯eiis nonterminal , each endpoint of ¯eimust be incident with some terminal edge ¯ejfor which j < i .
+Example 6 .
+The ordering of the edges of productionsin Example 5 is normal .
+Arbitrary HRGs do not necessarily admit a normal ordering .
+For example , the graph in Figure 8 can not satisfy Properties 2 and 3 simultaneously .
+However , RGGs do admit a normal ordering .
+( 1 ) X ( 2)a 1 2 b Figure 8 : This graph can not be normally ordered.204
+Current Item Reason 1.[{v3,v2},Y→·arg1arg0Z , φ0 s[extR(s)= ( v3,v2 ) ] ]
+Equation 2 2.[/angbracketleft{v3,v2,v1},{e3}/angbracketright , Y→arg1·arg0Z , φs[att(arg1 )
+= ( v1,v3 ) ] ]
+SCAN : 1 . ande3 = edgarg1(v1,v3 ) 3.[/angbracketleft{v3,v2,v1},{e3,e2}/angbracketright , Y→arg1arg0·Z , φs[att(arg0 )
+= ( v1,v2 ) ] ]
+SCAN : 2 . ande2 = edgarg0(v1,v2 ) ]
+4.[(v1),Z→·need , φ0 u[extR(u)= ( v1 ) ] ] PREDICT : 3 . andZ→need 5.[/angbracketleft{v1,v4},{e1}/angbracketright , Z→need·,φu[att(need ) = ( v1,v4 ) ] ] SCAN : 4 . ande1 = edgneed(v1,v4 )
+6.[/angbracketleft{v3,v2},{e3,e2}/angbracketright , Y→arg1arg0Z·,φs[att(Z )
+= ( v1 ) ] ] COMPLETE :
+3 . and 5 .
+Table 3 : The steps of recognizing that the subgraph shown in Figure 7 is derived from productions r2anduin the grammar in Table 1 .
+Proposition 2 .
+IfGis an RGG , for every p∈PG , there is a normal ordering of the edges in R(p ) .
+Proof .
+IfR(p)contains a single node then it must be an external node and it must have a terminal edge attached to it since R(p)must contain at least one terminal edge .
+If R(p)contains multiple nodes then by C2 there must be terminal internal paths between all of them , so there must be a terminal edge attached to the external node , which we use to satisfy Property 1 .
+To produce a normal ordering , we next select terminal edges once one of their endpoints is connected to an ordered edge , and nonterminal edges once all endpoints are connected to ordered edges , possible by C2 .
+Therefore , Properties 2 and 3 are satisﬁed .
+A normal ordering tightly constrains the recognition of edges .
+Property 3 ensures that when we apply P REDICT , the external nodes of the predicted edge are all bound to speciﬁc nodes in the graph .
+Properties 1 and 2 ensure that when we apply S CAN , at least one endpoint of the edge is bound ( ﬁxed ) .
+3.3 Recognition Complexity Assume a normally - ordered RGG .
+Let the maximum number of edges in the right - hand side of any production be m ; the maximum number of nodes in any right - hand side of a production k ; the maximum degree of any node in the input graph d ; and the number of nodes in the input graph n.
+As previously mentioned , Drewes et al .
+( 2015 ) also propose a HRG recognizer which can recognize a subclass of HRG ( incomparable to RGG ) called the predictive top - down parsable grammars .
+Their recognizer in this case runs in O(n2)time .
+A well - known bottom - up recognizing algorithm for HRG was ﬁrst proposed by Lautemann ( 1990).In this paper , the recognizer is shown to be polynomial in the size of the input graph .
+Later , Chiang et al .
+( 2013 ) formulate the same algorithm more precisely and show that the recognizing complexity isO((3d×n)k+1)wherekin their case is the treewidth of the grammar .
+Remark 1 .
+The maximum number of nodes in any right - hand side of a production ( k ) is also the maximum number of boundary nodes for any subgraph in the recognizer .
+COMPLETE combines subgraphs IandJonly when the entire subgraph derived from Yhas been recognized .
+Boundary nodes of Jare also boundary nodes of Ibecause they are nodes in the terminal subgraph of R(p)whereYconnects .
+The boundary nodes of I∪Jare also bounded by k since form a subset of the boundary nodes of I. Remark 2 .
+Given a boundary node , there are at most ( dm)k−1ways of identifying the remaining boundary nodes of a subgraph that is isomorphic to the terminal subgraph of the right - hand side of a production .
+The terminal subgraph of each production is connected by C2 , with a maximum path length of m. For each edge in the path , there are at most d subsequent edges .
+Hence for the k−1remaining boundary nodes there are ( dm)k−1ways of choosing them .
+We count instantiations of C OMPLETE for an upper bound on complexity ( McAllester , 2002 ) , using similar logic to ( Chiang et al . , 2013 ) .
+The number of boundary nodes of I , J andI∪Jis at mostk .
+Therefore , if we choose an arbitrary node to be some boundary node of I∪J , there are at most ( dm)k−1ways of choosing its remaining boundary nodes .
+For each of these nodes , there are at most ( 3d)kstates of their attached boundary edges : inI , inJ , or in neither .
+The total number205
+of instantiations is O(n(dm)k−1(3d)k ) , linear in the number of input nodes and exponential in the degree of the input graph .
+Note that in the case of the AMR dataset ( Banarescu et al . 2013 ) , the maximum node degree is 17 and the average is 2.12 .
+We observe that RGGs could be relaxed to produce graphs with no external nodes by adding a dummy nonterminal S / primewith rank 0 and a single productionS / prime→S. To adapt the recognition algorithm , we would ﬁrst need to guess where the graph starts .
+This would add a factor of nto the complexity as the graph could start at any node .
+4 Discussion and Conclusions We have presented RGG as a formalism that could be useful for semantic representations and we have provided a top - down recognition algorithm for them .
+The constraints of RGG enable more efﬁcient recognition than general HRG , and this tradeoff is reasonable since HRG is very expressive — when generating strings , it can express non - context - free languages ( Engelfriet and Heyker , 1991 ; Bauer and Rambow , 2016 ) , far more power than needed to express semantic graphs .
+On the other hand , RGG is so constrained that it may not be expressive enough : it would be more natural to derive the graph in Figure 4 from outermost to innermost predicate ; but constraint C2 makes it difﬁcult to express this , and the grammar in Table 1 does not .
+Perhaps we need less expressivity than HRG but more than RGG .
+HRL MSOL Graphs CFTL CFL∗RTL
+Trees RL StringsRGLDAGAL Figure 9 : A Hasse diagram of various string , tree and graph language families .
+An arrow from family A to family B indicates that family A is a subfamily of family B. A possible alternative would be to consider Restricted DAG Grammars ( RDG ; Bj ¨orklund et al . 2016 ) .
+Parsing for a ﬁxed such grammar can be achieved in quadratic time with respect to the input graph .
+It is known that for a ﬁxed HRG generatingk - connected hypergraphs consisting of hyperedges of rank konly , parsing can be carried out in cubic time ( k - HRG ; ( Drewes , 1993)).More general than RDGs a is the class of graph languages recognized by DAG automata ( DAGAL ; Blum and Drewes 2016 ) , for which the deterministic variant provides polynomial time parsing .
+Note that RGGs can generate graph languages of unbounded node degree .
+With respect to expressive power , RDGs and k - HRGs are incomparable to RGGs .
+Figure 9 shows the relationships between the context - free and regular languages for strings , trees and graphs .
+Monadic - second order logic ( MSOL ; Courcelle and Engelfriet 2011 ) is a form of logic which when restricted to strings gives us exactly the regular string languages and when restricted to trees gives us exactly the regular tree languages .
+RGLs lie in the intersection of HRG and MSOL on graphs but they do not make up this entire intersection .
+Courcelle ( 1991 ) deﬁned ( non - constructively ) this intersection to be the strongly context - free languages ( SCFL ) .
+We believe that there may be other formalisms that are subfamilies of SCFL which may be useful for semantic representations .
+All inclusions shown in Figure 9 are strict .
+For instance , RGL can not produce “ star graphs ” ( one node that has edges to n other nodes ) , while DAGAL and HRL can produce such graphs .
+It is well - known that HRL and MSOL are incomparable .
+There is a language in RGL that is not in DAGAL , for instance , “ ladders ” ( two string graphs of nnodes each , with an edge between the ith node of each string ) .
+Another alternative formalism to RGG that is deﬁned as a restriction of HRG are Tree - like Grammars ( TLG ; Matheja et al . 2015 ) .
+They deﬁne a subclass of SCFL , i.e. , they are MSO deﬁnable .
+TLGs have been considered for program veriﬁcation , where closure under intersection of the formalism is essential .
+Note that RGGs are also closed under intersection .
+While TLG and RDG are both incomparable to RGG , they share important characteristics , including the fact that the terminal subgraph of every production is connected .
+This means that our top - down recognition algorithm is applicable to both .
+In the future we would like to investigate larger , less restrictive ( and more linguistically expressive ) subfamilies of SCFL .
+We plan to implement and evaluate our algorithm experimentally .
+Acknowledgments This work was supported in part by the EPSRC Centre for Doctoral Training in Data Science,206
+funded by the UK Engineering and Physical Sciences Research Council ( grant EP / L016427/1 ) and the University of Edinburgh ; and in part by a Google faculty research award ( to AL ) .
+We thank Clara Vania , Sameer Bansal , Ida Szubert , Federico Fancellu , Antonis Anastasopoulos , Marco Damonte , and the anonymous reviews for helpful discussion of this work and comments on previous drafts of the paper .
+References Omri Abend and Ari Rappoport .
+2013 .
+Universal conceptual cognitive annotation ( ucca ) .
+In ACL ( 1 ) .
+The Association for Computational Linguistics , pages 228–238 .
+http://dblp.unitrier.de/db/conf/acl/acl2013-1.html#AbendR13 .
+Laura Banarescu , Claire Bonial , Shu Cai , Madalina Georgescu , Kira Grifﬁtt , Ulf Hermjakob , Kevin Knight , Philipp Koehn , Martha Palmer , and Nathan Schneider .
+2013 .
+Abstract meaning representation for sembanking .
+In Proceedings of the 7th Linguistic Annotation Workshop and Interoperability with Discourse .
+Association for Computational Linguistics , Soﬁa , Bulgaria , pages 178–186 .
+http://www.aclweb.org/anthology/W13-2322 .
+Daniel Bauer and Owen Rambow .
+2016 .
+Hyperedge replacement and nonprojective dependency structures .
+In Proceedings of the 12th International Workshop on Tree Adjoining Grammars and Related Formalisms ( TAG+12 ) , June 29 - July 1 , 2016 , Heinrich Heine University , D ¨usseldorf , Germany .
+pages 103 – 111 .
+http://aclweb.org/anthology/W/W16/W163311.pdf .
+Henrik
+Bj ¨orklund , Frank Drewes , and Petter Ericson .
+2016 .
+Between a Rock and a Hard Place – Uniform Parsing for Hyperedge Replacement DAG Grammars , Springer International Publishing , Cham , pages 521–532 .
+https://doi.org/10.1007/9783-319-30000-9 40 .
+Johannes Blum and Frank Drewes . 2016 .
+Properties of regular DAG languages .
+In Language and Automata Theory and Applications - 10th International Conference , LATA 2016 , Prague , Czech Republic , March 14 - 18 , 2016 , Proceedings .
+pages 427–438 .
+https://doi.org/10.1007/978-3-319-30000-9 33 .
+David Chiang , Jacob Andreas , Daniel Bauer , Karl Moritz Hermann , Bevan Jones , and Kevin Knight .
+2013 .
+Parsing graphs with hyperedge replacement grammars .
+In Proceedings of the 51st Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) .
+Association for Computational Linguistics , Soﬁa , Bulgaria , pages 924–932 .
+http://www.aclweb.org/anthology/P13-1091.Bruno Courcelle .
+1991 .
+The monadic second - order logic of graphs V : on closing the gap between deﬁnability and recognizability .
+Theor .
+Comput .
+Sci . 80(2):153–202 .
+https://doi.org/10.1016/03043975(91)90387-H. Bruno Courcelle and Joost Engelfriet .
+2011 .
+Graph Structure and Monadic Second - Order Logic , a Language Theoretic Approach .
+Cambridge University Press .
+Frank Drewes .
+1993 .
+Np - completeness of kconnected hyperedge - replacement languages of order k. Inf . Process .
+Lett . 45(2):89–94 .
+https://doi.org/10.1016/0020-0190(93)90221-T. Frank Drewes , Berthold Hoffmann , and Mark Minas .
+2015 .
+Predictive Top - Down Parsing for Hyperedge Replacement Grammars , Springer International Publishing , Cham , pages 19–34 .
+https://doi.org/10.1007/978-3-319-21145-9 2 . Frank Drewes , Hans - J ¨org Kreowski , and Annegret Habel .
+1997 .
+Hyperedge replacement graph grammars .
+In Grzegorz Rozenberg , editor , Handbook of Graph Grammars and Computing by Graph Transformation , World Scientiﬁc , pages 95–162 .
+Jay Earley .
+1970 .
+An efﬁcient context - free parsing algorithm .
+ACM , New York , NY , USA , volume 13 , pages 94–102 . https://doi.org/10.1145/362007.362035 .
+Joost Engelfriet and Linda Heyker . 1991 .
+The string generating power of context - free hypergraph grammars .
+Journal of Computer and System Sciences 43(2):328–360 .
+Dan Flickinger , Yi Zhang , and Valia Kordoni .
+2012 .
+Deepbank : a dynamically annotated treebank of the Wall Street Journal .
+In Proceedings of the Eleventh International Workshop on Treebanks and Linguistic Theories ( TLT11 ) .
+Lisbon , pages 85–96 .
+HU .
+Jan Haji ˇc , Eva Haji ˇcov´a , Jarmila Panevov , Petr Sgall , Ond ˇrej Bojar , Silvie Cinkov ´ a , Eva Fu ˇc´ıkov´a , Marie Mikulov ´ a , Petr Pajas , Jan Popelka ,
+Ji ˇr´ı Semeck ´ y , Jana ˇSindlerov ´ a , Jan ˇStˇep´anek , Josef Toman , Zdeˇnka Ure ˇsov´a , and Zden ˇekˇZabokrtsk ´ y. 2012 .
+Announcing prague czech - english dependency treebank 2.0 .
+In Nicoletta Calzolari ( Conference Chair ) , Khalid Choukri , Thierry Declerck , Mehmet Uur Doan , Bente Maegaard , Joseph Mariani , Asuncion Moreno , Jan Odijk , and Stelios Piperidis , editors , Proceedings of the Eight International Conference on Language Resources and Evaluation ( LREC’12 ) .
+European Language Resources Association ( ELRA ) , Istanbul , Turkey .
+Bevan Jones , Jacob Andreas , Daniel Bauer , Karl Mortiz Hermann , and Kevin Knight .
+2012 .
+Semanticsbased machine translation with hyperedge replacement grammars .
+In Proceedings of COLING .207
+Clemens Lautemann .
+1990 .
+The complexity of graph languages generated by hyperedge replacement .
+Acta Informatica 27(5):399–421 .
+https://doi.org/10.1007/BF00289017 .
+Christoph Matheja , Christina Jansen , and Thomas Noll .
+2015 .
+Tree - Like Grammars and Separation Logic , Springer International Publishing , Cham , pages 90–108 .
+https://doi.org/10.1007/978-3-31926529-2 6 .
+David McAllester . 2002 .
+On the complexity analysis of static analyses .
+J. ACM 49(4):512–537 .
+https://doi.org/10.1145/581771.581774 .
+Xiaochang Peng , Linfeng Song , and Daniel Gildea . 2015 .
+A synchronous hyperedge replacement grammar based approach for AMR parsing .
+In Proceedings of the 19th Conference on Computational Natural Language Learning , CoNLL 2015 , Beijing , China , July 30 - 31 , 2015 .
+pages 32–41 .
+http://aclweb.org/anthology/K/K15/K15-1004.pdf .
+Stuart M. Shieber , Yves Schabes , and Fernando C. N. Pereira .
+1995 .
+Principles and implementation of deductive parsing .
+Journal of Logic Programming 24(1 - 2 ) .
+K. Vijay - Shanker , David J. Weir , and Aravind K. Joshi . 1987 .
+Characterizing structural descriptions produced by various grammatical formalisms .
+InProceedings of the 25th Annual Meeting on Association for Computational Linguistics .
+Association for Computational Linguistics , Stroudsburg , PA , USA , ACL ’ 87 , pages 104–111 .
+https://doi.org/10.3115/981175.981190.208

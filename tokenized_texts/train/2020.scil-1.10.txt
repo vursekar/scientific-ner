@@ -1,0 +1,534 @@
+Interpreting Verbal Irony : Linguistic Strategies and the Connection to the Type of Semantic Incongruity Debanjan Ghosh ⇤ 1 , Elena Musi2 , Kartikeya Upasani3 , Smaranda Muresan4 1McGovern Institute for Brain Research , MIT , Cambridge , MA 2University of Liverpool , Liverpool , UK 3Facebook Conversational AI , CA 4Data Science Institute , Columbia University , New York , NY dg513@mit.edu , elena.musi@liverpool.ac.uk , kart@fb.com , smara@columbia.edu
+Abstract Human communication often involves the use of verbal irony or sarcasm , where the speakers usually mean the opposite of what they say .
+To better understand how verbal irony is expressed by the speaker and interpreted by the hearer we conduct a crowdsourcing task : given an utterance expressing verbal irony , users are asked to verbalize their interpretation of the speaker ’s ironic message .
+We propose a typology of linguistic strategies for verbal irony interpretation and link it to various theoretical linguistic frameworks .
+We design computational models to capture these strategies and present empirical studies aimed to answer three questions : ( 1 ) what is the distribution of linguistic strategies used by hearers to interpret ironic messages ? ; ( 2 ) do hearers adopt similar strategies for interpreting the speaker ’s ironic intent ? ; and ( 3 ) does the type of semantic incongruity in the ironic message ( explicit vs. implicit ) inﬂuence the choice of interpretation strategies by the hearers ?
+1 Introduction It is well understood that recognizing whether a speaker is ironic or sarcastic is essential to understanding their actual sentiments and beliefs .
+For instance , the utterance “ pictures of holding animal carcasses are so ﬂattering ” is an expression of verbal irony , where the speaker has a negative sentiment towards “ pictures of holding animal carcasses ” , but uses the positive sentiment word “ ﬂattering ” .
+This inherent characteristic of verbal irony is called semantic incongruity — incongruity between the literal evaluation and the context ( e.g. , between the positive sentiment words and the negative situation in this example ) .
+Most NLP research on verbal irony or sarcasm has focused on the task of sarcasm detection treating ⇤ Part of the research was carried out while Debanjan was a Ph.D. candidate at Rutgers University.it as a binary classiﬁcation task using either the utterance in isolation or adding contextual information such as conversation context , author context , visual context , or cognitive features ( Davidov et al . , 2010 ; Maynard and Greenwood , 2014 ; Wallace et
+al . , 2014 ; Joshi et al . , 2015 ; Bamman and Smith , 2015 ; Muresan et al . , 2016 ; Amir et
+al . , 2016 ; Mishra et al . , 2016 ; Ghosh and Veale , 2017 ; Felbo et al . , 2017 ; Ghosh et al . , 2017 ; Hazarika et al . , 2018 ; Tay et
+al . , 2018 ;
+Ghosh et al . , 2018 ; Oprea and Magdy , 2019 ) .
+Such approaches have focused their analysis on the speakers ’ beliefs and intentions for using irony ( Attardo , 2000 ) .
+However , sarcasm and verbal irony are types of interactional phenomena with speciﬁc perlocutionary effects on the hearer ( Haverkate , 1990 ) .
+Thus , we argue that , besides recognizing the speaker ’s sarcastic / ironic intent , it is equally important to understand how the hearer interprets the speaker ’s sarcastic / ironic message .
+For the above utterance , the strength of negative sentiment perceived by the hearer depends on whether they interpret the speaker ’s actual meaning as “ picture . .
+. are not ﬂattering ” vs. “ pictures . .
+. are so gross ” ( Table 1 ) .
+The intensity of negative sentiment is higher in the latter interpretation than in the former .
+Kreuz ( 2000 ) noted that most studies in linguistics and psychology have conducted experiments analyzing reaction times ( Gibbs , 1986 ; Katz et al . , 2004 ) or situational context ( Ivanko and Pexman , 2003 ) , featuring a setup with in vitro data aimed at testing the validity of speciﬁc theories of irony .
+Instead , our study adopts a naturalistic approach to understand hearers ’ reception of irony looking at what linguistic strategies are recurrently used by hearers to interpret the non - literal meaning underlying ironic utterances .
+We leverage the crowdsourcing task introduced byGhosh et al . ( 2015 ) for their work on detecting whether a word has a literal or sarcastic in-
+terpretation , later adopted by Peled and Reichart ( 2017 ) .
+The task is framed as follows : given a speaker ’s ironic message , ﬁve annotators ( e.g. , Turkers on Amazon Mechanical Turk ( MTurk ) ) are asked to verbalize their interpretation of the speaker ’s ironic message ( i.e. , their understanding of the speaker ’s intended meaning ) ( see Table1;Simdenotes the speaker ’s ironic message , while H intdenotes the hearer ’s interpretation of that ironic message ) .
+The crowdsourcing experiments are reported in Section 2 .
+The paper makes three contributions .
+First , we propose a data - driven typology of linguistic strategies that hearers use to interpret ironic messages and discuss its relevance in verifying theoretical frameworks of irony ( Section 4 ) .
+Second , we propose computational models to capture these strategies ( Section 5 ) .
+Third , we present two studies that aim to answer two questions : ( 1 ) does the type of semantic incongruity in the ironic message ( explicit vs. implicit ; see Section 3 ) inﬂuence the choice of interpretation strategies by the hearers ?
+( Section 6.2 ) ; ( 2 ) do interpretation strategies of verbal irony vary by hearers ?
+We make all datasets and code available.1 2 Datasets of Speakers ’ Ironic Messages and Hearers ’ Interpretations To generate a parallel dataset of speakers ’ ironic messages and hearers ’ interpretations we conduct a crowdsourcing experiment .
+Given a speaker ’s ironic message ( S i m ) , ﬁve Turkers ( hearers ) on MTurk are asked to verbalize their interpretation of the speaker ’s ironic message ( i.e. , their understanding of the speaker ’s intended meaning ) ( Hint ) .
+The design of the MTurk task was ﬁrst introduced by Ghosh et al . ( 2015 ) , who use the resulting dataset to identify words that can have both a literal and a sarcastic sense .
+Peled and Reichart ( 2017 ) employed similar design to generate a parallel dataset to use for generating interpretations of sarcastic messages using machine translation approaches .
+They use skilled annotators in comedy writing and literature paraphrasing and give them the option not to rephrase ( we refer to Peled and Reichart ( 2017 ) ’s dataset as SIGN ) .
+We perform this new crowdsourcing task and do not rely entirely on the above two datasets for two reasons : ( 1 ) we focus on verbal irony , and ( 2 ) we always require an interpretation from the Turkers .
+Un1https://github.com/debanjanghosh/interpreting verbal ironylike the above two studies , the main goal of our research is to analyze the linguistics strategies employed by hearers in interpreting verbal irony .
+We collected messages that express verbal irony from Twitter using the hashtags # irony , # sarcastic , and # sarcasm .
+We chose Twitter as a source since the presence of the hashtags allows us to select sentences where the speaker ’s intention was to be ironic .
+Furthermore , even though Twitter users can not be considered representative of the entire population , they are unlikely to be skewed with respect to topics or gender .
+We manually checked and kept 1,000 tweets that express verbal irony .
+We do not draw any theoretical distinction between sarcasm and irony since we can not assume that Twitter users also differentiate between # irony and # sarcasm , blurred even in scholarly literature .
+The Turkers were provided with detailed instructions and examples of the task including the standard deﬁnition of verbal irony taken from the Merriam - Webster dictionary ( “ use of words to express something other than and especially the opposite of the literal meaning ” ) .
+We decided to suggest them a guiding deﬁnition for two reasons .
+First , hearers do not usually focus on literal vs. non literal meaning , as shown by studies measuring processing times for both types of statements ( Inhoff et al . , 1984 ) .
+Therefore , when asked to rephrase the speakers ’ intended meaning , hearers would have probably come up with sentences expressing the speaker ’s imagined discursive goals , rather than disclosing their perceived literal meaning .
+Second , it is reasonable to assume that Turkers would have looked up the standard meaning of ironic utterance given by an online dictionary to ease up their task , possibly coming up with biased deﬁnitions .
+The Turkers were instructed to consider the entire message in their verbalization to avoid asymmetry in length between the S imand H int .
+W e obtained a dataset of 5,000 S im - Hintpairs where ﬁve Turkers rephrase each S
+i m.
+A total of 184 Turkers participated in the rephrasing task .
+Table1shows examples of speaker ’s ironic messages ( Sim ) and their corresponding hearers ’ interpretations ( Hi int ) .
+Next , we ran a second MTurk task to verify whether the generated H intmessages are plausible interpretations of the ironic messages .
+This time we employ three Turkers per task and only Turkers who were not involved in the content generation task were allowed to perform this
+Sim H1 int H2 int H3 int 1 .
+Ed Davey is such a passionate , inspiring speakerEd Davey is a boring , uninspiring speakerEd Davey is such a dull , monotonous speakerEd Davey is not a passionate , inspiring speaker 2 . ca n’t believe how much captain America looks like meI wish I looked like Captain America .
+I need to lose weightscan’t believe how much captain America looks different from meI do n’t , but I wish I looked like Captain America 3 .
+Pictures of you holding dead animal carcasses are so ﬂatteringHate hunting season and the pictures of you holding dead animal are so grossPictures of you holding dead animal carcasses is an unﬂattering lookPictures of you holding dead animal carcasses are not ﬂattering Table 1 : Examples of speaker ’s ironic messages ( S i m ) and interpretations given by 3 Turkers ( Hi int ) .
+task .
+We observe that Turkers labeled 5 % ( i.e. , 238 verbalizations ) of H ints as invalid and low quality ( e.g. , wrong interpretation ) .
+For both tasks , we allowed only qualiﬁed Turkers ( i.e. , at least 95 % approval rate and 5,000 approved HITs ) , paid 7 cents / task and gave sixty minutes to complete each task .
+The ﬁnal dataset contains 4,762 pairs S imHint .
+3 Semantic Incongruity in Ironic Messages : Explicit vs. Implicit Attardo ( 2000 ) and later Burgers ( 2010 ) distinguish between two theoretical aspects of irony : irony markers andirony factors .
+Irony markers are meta - communicative signals , such as interjections or emoticons that alert the reader that an utterance might be ironic .
+In contrast , irony factors can not be removed without destroying the irony , such as the incongruity between the literal evaluation and its context ( “ semantic incongruity ” ) .
+Incongruity expresses the contrast between the conveyed sentiment ( usually , positive ) and the targeted situation ( usually , negative ) .
+This contrast can be explicitly or implicitly expressed in the ironic message .
+Following Karoui et al .
+( 2017 ) , we consider that semantic incongruity is explicit , when it is lexicalized in the utterance itself ( e.g. , both the positive sentiment word(s ) and the negative situation are available to the reader explicitly ) .
+On Twitter , beside sentiment words , users often make use of hashtags ( e.g. , “ Studying 5 subjects . . .
+# worstsaturdaynight ” ) or an image ( e.g. , “ Encouraging how Police feel they ’re above the law .
+URL ”
+; the URL shows a police car not paying parking ) to express their sentiment .
+We consider these cases as explicit , since the incongruity is present in the utterance even if via hashtags or other media .
+For implicit incongruity , we consider cases where one of the two incongruent terms ( “ propositions ” in Karoui et
+al . ( 2017 ) ) is not lexicalized and has to be reconstructed from the con - text ( either outside word knowledge or a larger conversational context ) .
+For example “ You are such a nice friend ! ! ! ” , or “ Driving in Detroit is fun ;) ” are cases of ironic messages where the semantic incongruity is implicit .
+Based on these definitions of explicit and implicit incongruity , two expert annotators annotated the S im - Hintdataset ( 1000 ironic messages ) as containing explicit or implicit semantic incongruity .
+The inter - annotator agreement was =0.7 , which denotes good agreement similar to Karoui et
+al . ( 2017 ) .
+The annotation showed that 38.7 % of the ironic messages are explicit , while 61.3 % are implicit .
+In the following section we propose a typology of linguistic strategies used in hearers ’ interpretations of speakers ’ ironic messages and in section 6.2we discuss the correlation of linguistic strategies with the type of semantic incongruity .
+4 Interpreting Verbal Irony : A Typology of Linguistic Strategies Given the deﬁnition of verbal irony , we would expect that Turkers ’ interpretation of speaker ’s ironic message will contain some degree of opposite meaning with respect to what the speaker has said .
+However , it is unclear what linguistic strategies the Turkers will use to express that .
+To build our typology , from the total set of S im - Hint pairs obtained through crowdsourcing ( i.e. , 4,762 pairs ; see Section 2 ) we selected a devset of 500 Sim - Hintpairs .
+Our approach does not assume any speciﬁc theory or irony , but it is data - driven : a linguist expert in semantics and pragmatics analyzed thedevset to formulate the lexical and pragmatic phenomena attested in the data .
+The assembled typology is , thus , the result of a bottom - up procedure .
+A S im - Hintpair can be annotated with more than one strategy .
+The core linguistic strategies are explained below and synthesized in Table 2 .
+Typology Distribution ( % ) Antonyms - lexical antonyms ( 42.2 ) - antonym phrases ( 6.0 ) Negation - simple negation ( 28.4 ) Antonyms OR Negation - weakening sentiment ( 23.2 ) - interrogative ! declarative ( 5.2 ) - desiderative constructions ( 2.8 ) Pragmatic inference ( 3.2 ) Table 2 : Typology of linguistic strategies and their distribution ( in % ) over the devset 4.1 Linguistic Strategies Lexical and phrasal antonyms :
+This category contains lexical antonyms ( e.g. , “ love ” $ “ hate ” , “ great ” $ “ terrible ” ) as well as indirect antonyms ( Fellbaum , 1998 ) , where the opposite meaning can only be interpreted in context ( e.g. , “ passionate speaker ” !
+“ boring speaker ” ; Table 1 ) .
+Although the typical antonym of “ passionate ” is “ unpassionate ” , “ boring ” works in this context as a lexical opposite since a speaker who is passionate entails that he is not boring .
+Besides lexical antonyms , Turkers sometimes use antonym phrases ( e.g. , “ I ca n’t wait ” !
+“ not looking forward ” , “ I like ( to visit ER ) ” !
+“ I am upset ( to visit ER ) ” ) .
+Negation : Here , Turkers negate the main predicate .
+This strategy is used in the presence of copulative constructions where the predicative expression is an adjective / noun expressing sentiment ( e.g. , “ is great ” !
+“ isnotgreat ” ) and of verbs expressing sentiment ( e.g. , “ love ” !
+“ do not love ” ) or propositional attitudes ( e.g. , “ I wonder ” !
+“ I do n’t wonder ” ) .
+Weakening the intensity of sentiment : The use of negation and antonyms is sometimes accompanied by two strategies that reﬂect a weakening of sentiment intensity .
+First , when S imcontains words expressing a high degree of positive sentiment , the hearer ’s interpretation replaces them with more neutral ones ( e.g. , “ I loveit”!“I do n’t likeit ” ) .
+Second , when S imcontains an intensiﬁer , it is eliminated in the Turkers ’ interpretation .
+Intensiﬁers specify the degree of value / quality expressed by the words they modify ( M´endez - Naya , 2008 ) ( e.g. , “ cake for breakfast .
+sohealthy ” !
+“ cake for breakfast .
+nothealthy ” ) .
+Interrogative to Declarative Transformation ( + Antonym / Negation ): This strategy , usedmostly in conjunction with the negation or antonym strategies , consists in replacing the interrogative form with a declarative form , when S imis a rhetorical question ( for brevity , RQ ) ( e.g. , “ do n’t youloveﬁghting ? ” !
+“ Ihate ﬁghting ” ) .
+Counterfactual Desiderative Constructions : When the ironic utterance expresses a positive / negative sentiment towards a past event ( e.g. , “ glad you relayed this news ” ) or an expressive speech act ( e.g. , “ thanks Xthat picture needed more copy ” ) the hearer ’s interpretation of intended meaning is expressed through the counterfactual desiderative constructions I wish ( that ) p ( “ I wish you had n’t relayed . . .
+” , “ I wish Xdidn’t copy . . . ” ) .
+Differently from antonymic phrases , this strategy stresses on the failure of the speaker ’s expectation more than on their commitment to the opposite meaning .
+Pragmatic Inference :
+In addition to the above strategies , there are cases where the interpretation calls for an inferential process to be recognized .
+For instance , “ made 174 this month . . .
+I ’m gon na buy a yacht ! ” ! “ made 174 this month . . .
+I am so poor ” .
+The distribution of the strategies on the devset is represented in Table 2 . 4.2 Links to Theoretical Frameworks In linguistic literature many different approaches to irony have been provided .
+Here we focus on the three accounts ( w.r.t . examples from S im - Hint corpus ) that bear a different views on pragmatic factors .
+According to Grice ( 1975 ) , ironic messages are uttered to convey a meaning opposite to that literally expressed , ﬂouting the conversational maxim of quality “ do not say what you believe to be false ” .
+In verbal irony , the violation of the maxim is frequently signaled by “ the opposite ” of what is said literally ( e.g. , intended meaning of “ carcasses are ﬂattering ” is they are gross ; Table 1 ) .
+The linguistic strategies of antonyms ( e.g. “ worst day of my life ” ) and simple negation ( “ yeap we totally do nt drink alcohol every single day ” [ ... ] )
+cover the majority of the S imHintcorpus and seem to ﬁt the Gricean ( Grice , 1975 ) account of irony , since the hearer seems to have primarily recognized the presence of semantic incongruity .
+However , as touched upon byGiora ( 1995 ) , antonyms anddirect negation are not always semantically equivalent strategies , since the second sometimes allows a graded interpretation : if “ x is not encouraging ” , it is not nec-
+essarily bad , but simply “ x < encouraging ” .
+Such an implicature is available exclusively with items allowing mediated contraries , such as sentiment words ( Horn , 1989 ) .
+Direct negation with sentiment words implies that just one value in a set is negated , while the others are potentially afﬁrmed .
+The spectrum of interpretations allowed by negation as a rephrasing strategy indicates that hearers recognize that the relevance of the ironic utterance in itself plays a role next to what the utterances refers to ( if the rephrased utterance is intended as “ x is not encouraging at all ” , the perceived irrelevance of the corresponding ironic utterance is more prominent than in “ x is not very encouraging ” ) .
+The fact that the interpretation of irony has a propositional scope is even clearer when the ironic sentence in interrogative form ( “ and they all lived happily ever after ? ” ) is rephrased as a declarative ( e.g. “ I doubt they all lived happily ever after ” ): the hearers recognizes that the question has a rhetoric value since otherwise contextually irrelevant .
+The intentional falsehood of Gricean analysis is also not deemed by Sperber and Wilson ( 1986 ) ; Wilson and Sperber ( 2012 ) as a necessary and sufﬁcient condition for irony .
+According to their theory of echoic mentioning , irony presupposes the mention to the inappropriateness of the entire sentence : in asserting “ awesome weather in Scotland today ” the speaker does not simply want to express that the weather was horrible but he signals that assuming that the weather would be nice was irrelevant and , thus , ridiculous .
+Kreuz and Glucksberg ( 1989 ) expand the Relevance Theory approach talking about echoic reminding to account for cases such as “ could you be just a little louder , please ?
+My baby is n’t trying to sleep ” where the extreme politeness reminds the hearer that the question is indeed a request and that the mother bears a certain stance and has certain expectations towards the addressee .
+Similarly , the use of the pragmatic inference strategy can not be fully explained in Gricean terms : the rephrase “ made 174 this month . . .
+I am so poor ” for “ made 174 this month . . .
+I am gon na buy a yatch ” more than pointing to the presence of lexical incongruity , show that the hearers knows for background knowledge that the assertion of “ buying a yatch ” is completely irrelevant in the context of a low salary situation .
+Rephrasing strategies using counterfactual desiderative constructions ( e.g. “ I really wish my friends and fam - ily would check up on my after yesterday ’s near death experience ” ) show , instead , that the interpretation of irony involves an echoic reminding to the speaker ’s ( social ) expectations which failed to be fulﬁlled .
+Overall , using the results of our crowdsourcing experiment with main existing theories of irony , it turns out that the theories have a complementary explanatory power .
+In Section 6.2we investigate weather this situation might relate to the presence of explicit / implicit irony .
+5 Empirical Analysis of Interpretation Strategies Here our goal is to perform a comparative empirical analysis to understand how hearers interpret verbal irony .
+To accomplish this , we propose computational models to automatically detect these linguistic strategies in two datasets : ( 1 ) Sim - Hintdataset and ( 2 ) the SIGN dataset .
+As stated in Section 2 , albeit for a different purpose , the task designed in Peled and Reichart ( 2017 ) is identical to ours : they used a set of 3,000 sarcastic tweets and collected ﬁve interpretation verbalization , including an option to just copy the original message if it was not deemed ironic .
+They used workers skilled in comedy writing and literature paraphrasing .
+SIGN contains 14,970 pairs .
+To evaluate our models , we asked two annotators to annotate two testsets of 500 pairs each from the S im - Hintand the SIGN dataset ( i.e. , denoted bySIGN test ) , respectively .
+Note , the testset for the S im - Hinthas no overlap with the devset of 500 S im - Hintpairs used to identify the strategies ( Section 4 ) .
+Agreement between the annotators for both sets is high with >0.9 .
+In SIGN test , 79 instances were just copies of the original message , which we eliminated , thus the SIGN testcontains only 421 instances .
+5.1 Computational Methods Lexical Antonyms .
+To detect whether an S imHintpair uses the lexical antonyms strategy , we ﬁrst need to build a resource of lexical antonyms .
+We use the MPQA sentiment Lexicon ( Wilson et al . , 2005 ) , Hu and Liu ( 2004 ) ’s opinion lexicon , antonym pairs from Mohammad et al .
+( 2013 ) , antonyms from WordNet , and pairs of opposite verbs from Verbocean ( Chklovski and Pantel , 2004 ) .
+Given this lexicon of lexical antonyms , the task is now to detect whether a given S im - Hintpair
+dev test SIGN test Strategies P R F1 P R F1 P R F1 Lexant 89.0 95.7 92.2 97.2 89.9 93.4 89.4 97.9 93.5 Simple neg 92.0 89.4 90.7 88.3 88.3 88.3 93.3 91.2 92.2 ANweaksent 93.6 87.9 90.7 95.0 91.9 93.4 93.3 87.5 90.3 AN I!D 53.1 65.4 58.6 80.0 0.44 57.2 85.7 70.6 77.4 ANdesiderative 100.0 92.9 96.3 100.0 100.0 100.0 100.0 66.7 80.0 AntPhrase+PragInf 86.2 53.2 65.8 70.7 85.3 77.4 89.5 68.0 77.3 Table 3 : Evaluation of Computational Methods on dev , testandSIGN testset ( in % ) uses the lexical antonyms strategy .
+We use a heuristic approach based on word - alignment and dependency parsing ( similar to contradiction detection ( De Marneffe et al . , 2008 ) ) .
+Word - to - word alignments between S im - Hintare extracted using a statistical machine translation ( SMT ) alignment method - IBM Model 4 with HMM alignment from Giza++ ( Och and Ney , 2004 ) .
+We consider a lexical antonym strategy if : 1 ) antonym words are aligned ; 2 ) they are the roots of the respective dependency trees or if the nodes modiﬁed by the lexical antonyms are the same in their respective trees ( e.g. , ‘ can you show any more of steelers ” !
+“ show lessof steelers ” , the candidate lexical antonyms are more andlessand they are the objects of the same predicate in S im - Hint : show ) .
+Out of 211 S im - Hintpairs that are marked as having lexical antonym strategy ( devset ) , 12 instances are identiﬁed by only the dependency parses , 67 instances by the word - alignments , and 100 instances by both ( P / R / F1 scores are 92.1 % , 77.7 % and 84.3 % ) , respectively on devdataset .
+However , sometimes both dependency and wordalignment methods fail .
+In “ circling down the bowl .
+Yay”!“circling down the bowl .
+awful ” , although the lexical antonyms yayandawfulexist , neither the alignment nor the dependency trees can detect it ( 25 such instances in the dev set ) .
+To account for this , after having run the dependency and alignment methods , we also just search whether a S im - Hintpair contains a lexical antonym pair .
+This improves the ﬁnal recall and on thedevset we achieve 89.0 % precision , 95.7 % recall , and 92.2 % F1 on devdataset ( Lex ant Strategy ; Table 3show results both on devand the testsets ) .
+Note , just searching whether a lexical antonym pair is present in a S im - Hintpair results in low precision ( 58.6 % ) but high recall ( 80 % ) .
+Simple negation .
+This strategy ( denoted as Simple neg in Table 3and Table 4 ) involves identifying the presence of negation and its scope .
+Here , however , the scope of negation is con - strained since generally Turkers negated only a single word ( i.e. , “ love ” !
+“ notlove ” ) .
+Thus our problem is easier than the general problem of ﬁnding the scope of negation ( Li and Lu , 2018 ; Qian et al . , 2016 ; Fancellu et al . , 2016 ) .
+We use 30 negation markers from Reitan et al . ( 2015 ) to ﬁnd negation scope in tweets .
+We ﬁrst detect whether a negation marker appears in either H intor
+S i m , but not in both ( negation can appear in S imfor ironic blame )
+If the marker is used , we extract its parent node from the dependency tree , and if this node is also present in the other utterance , then Negation strategy is selected .
+For instance , in “ looks just like me ” ! “ does not look like me ” , the negation notis modifying the main predicate looks in H int , which is also the main predicate in S im(words are lemmatized ) .
+In the next section , we discuss if the parent nodes are not the same but similar and with different sentiment strength .
+Weakening the intensity of sentiment .
+The ﬁrst strategy — replacing words expressing a high degree of positive / negative sentiment with more neutral ones ( ‘ I lovebeing sick ” !
+“ Idon’t like being sick ) — , is applied only in conjunction with the negation strategy .
+We measure the difference in strength using the Dictionary of Affect ( Whissell et al . , 1986 ) .
+Out of 31 S im - Hintpairs in the devset , we automatically identify 28 interpretations that use this approach .
+For the second strategy — removing the intensiﬁer ( I am really happy ” !
+“ I am disappointed ’ ) — , we ﬁrst determine whether the intensiﬁer exists in S imand is eliminated from H int .
+We use only adjective and adverb intensiﬁers from Taboada et al .
+( 2011 ) , primarily to discard conjunctions such as “ so ” ( “ no water soI ca n’t wash . . . ” ) .
+This strategy is used together with both lexical antonyms andSimple negation strategies .
+For a candidate S im - Hintpair , if the lexical antonym strategy is selected and aS andaHare the lexical antonyms , we determine whether any intensiﬁer modiﬁes aSand
+no intensiﬁer modiﬁes aH. If the Negation strategy is se-
+lected , we identify the negated term in the H int and then search its aligned node from the S imusing the word - word alignment .
+Next , we search in the S imif any intensiﬁer is intensifying the aligned term .
+The strategies are denoted as AN weaksent in Table 3and Table 4 .
+Interrogative to Declarative Transformation ( + Antonym / Neg ) .
+To capture this strategy we need to determine ﬁrst if the verbal irony was expressed as a rhetorical question .
+To build a classiﬁer to detect RQ , we collect two categories of tweets ( 4 K each ) ( 1 ) tweets labeled with # sarcasm or # irony that also contain “ ? ” , and ( 2 ) information seeking tweets containing “ ? ” .
+We train a binary classiﬁer using SVM RBF Kernel with default parameters .
+The features are Twitter - trained word embeddings ( Ghosh et al . , 2015 ) , modal verbs , pronouns , interrogative words , negations , and position of “ ? ” in a tweet .
+We evaluate the training model on the devdata and the P / R / F1 are 53.2 % , 65.4 % , and 58.6 % , respectively ( in future work we plan to develop more accurate models for RQ detection ) .
+Once we detect the ironic message was expressed as a RQ , we identify the speciﬁc interpretation strategy accompanying the transformation from interrogative to declarative form : antonym or negation .
+These combined strategies are denoted as AN I!Din Table 3and Table 4 .
+Desiderative Constructions : Currently , we use a simple regular expression “ I [ w ] ⇤ wish ” to capture counterfactual cases ( AN desiderative in Tables3and Table 4 ) .
+Note , when the Simple negation and lexical antonyms strategies are combined with other strategy ( e.g. , removing of intensiﬁer ) , we consider this combined strategy for the interpretation of verbal irony and not the simple negation orlexical antonym strategy ( i.e. , we do not double count ) .
+Phrasal antonyms and pragmatic inference : Identifying phrasal antonyms and pragmatic inference is a complex task , and thus we propose a method of phrase matching based on phrase extraction via unsupervised alignment technique in SMT .
+We use IBM Model 4 with HMM ( Giza++ ; ( Och and Ney , 2000 ) ) , phrase extraction via Moses ( Koehn et al . , 2007 ) and the IRST tool to build the required language models .
+As postprocessing , we ﬁrst remove phrase pairs obtained from the S im - Hintbitext that are also present in the set of extracted phrases from the H int - HintStrategies S im - Hint SIGN Lexant 2,198 ( 40.0 ) 9,691 ( 51.8 ) Simple neg 1,596 ( 29.1 ) 3,827 ( 20.5 )
+ANweaksent 895 ( 16.3 ) 2,160 ( 11.6 ) AN I!D 329 ( 6.0 ) 933 ( 5.0 ) ANdesiderative 92 ( 1.7 ) 86 ( 0.5 ) AntPhrase+PragInf 357 ( 6.5 ) 1912 ( 10.1 ) Table 4 : Distribution of interpretation strategies on two datasets ( in % ) bitext .
+This increases the likelihood of retaining semantically opposite phrases , since phrases extracted from the H int - Hintbitext are more likely to be paraphrastic .
+Second , based on the translation probability scores   , for phrase eif we have a set of aligned phrases fsetwe reject phrases that have  scores less than1 size(fset ) .
+Finally , 11,200 phrases are extracted from the S im - Hint bitext .
+The low recall for this strategy is expected since there are too many ways that users can employ pragmatic inference or rephrase the utterance without directly using any antonym or negation .
+In future , we will explore neural MT ( Cho et al . , 2014 ) and use external data to generate more phrases .
+Since we have not manually evaluated these phrase pairs , we only use this strategy after we have tried all the remaining strategies ( AntPhrase+PragInf in Table 3and Table 4 ) .
+5.2 Results and Distribution of Linguistic Strategies The performance of the models is similar on both testand SIGN testsets , showing consistently good performance ( Table 3 ; 90 % F1 for all strategies , except the AntPhrase+PragInf and AN I!D ) .
+Given these results , we can now apply these models to study the distribution of these strategies in the entire datasets ( Table 4 ) .
+The strategy distribution between our dataset S im - HintandSIGN dataset is similar and matches the distribution on the manual annotations on the devdataset in Table2 .
+The sum of the strategies can exceed the total number of the pairs since a tweet can contain several ironic sentences that are interpreted by Turkers .
+For instance , in “ Dave too nice ... a nicefella ” !
+“ Dave not nice .
+. .
+a mean fella ” we observe the application of two strategies , lexical antonyms ( e.g. , nice!mean ) and negation ( e.g. , nice!not nice ) .
+6 Discussion 6.1 Hearer - dependent Interpretation Strategies We investigate how hearers adopt strategies for interpreting the speaker ’s ironic intent .
+To implement this study , we selected three Turkers ( e.g. , H1,H2 , and H3 ; In Table 1,Hi intare generated by the correspondent Turker Hi ) , from our crowdsourced data , who were able to rephrase at least ﬁve hundred identical S immessages .
+Note , we can not carry this experiment on the SIGN dataset ( Peled and Reichart , 2017 ) because the annotators ’ information is absent there .
+Although the three Turkers choose lexical antonym andsimple negation as two top choices , there is some variation among them .
+H1and H2choose antonyms more frequently than negationwhile in contrary Turker H3choose negation more than antonyms , sometime combined with the weakening of sentiment strategy .
+As we mentioned in Section 4.2 , antonyms and direct negation are not semantically equivalent strategies since the latter , allows a graded interpretation : if “ x is not inspiring ” , it is not necessarily bad , but simply “ x < inspiring ” ( Giora , 1995 ) .
+In Table 1 , the S im - Hint pair “ passionate ” !
+“ boring ” and “ ﬂattering ” !
+“ gross ” ( interpretation of H1 ) have more contrast than the pair “ passionate ” !
+“ not passionate ” and “ so ﬂattering ” !
+“ not ﬂattering ” ( interpretation of H3 ) .
+This suggests that H1perceive the intensity of negative sentiment towards the target of irony ( “ Ed Davey ” and “ picture of dead animals ” , respectively ) higher than Turker H3 .
+All three Turkers have chosen the remaining strategies with similar frequencies .
+6.2 Message - dependent Interpretation Strategies Interpretation Strategies and the Type of Semantic Incongruity : We investigate whether the type of semantic incongruity in the ironic message ( explicit vs. implicit ; see Section 3 ) inﬂuences the choice of interpretation strategies by the hearers .
+To do this , we looked at S im - level distribution of interpretation strategies used by the hearers for the same ironic message
+S i m. Table 5represents
+the correlation of linguistic strategies with the type of semantic incongruity ( explicit vs. implicit ) as well as the presence and absence of irony markers .
+We notice that Turkers use lexical antonymsStrategies incongruity marker Exp .
+Imp .
++  
+Lexant 48.5 34.8 35.7 42.2 Simple neg 24.9 32.3 28.9 30.0 ANweaksent 14.3 17.6 15.7 16.8 AN I!D 5.9 6.1 12.3 3.1 ANdesiderative 1.3 1.9 0.9 2.0 AntPhrase+PragInf 5.2 7.1 6.2 6.6 Table 5 : Rephrasing Strategies against Incongruency and Irony Markers on S im - Hintdataset ( in % )
+Figure 1 : Strategies selected per message ( in % ) as interpretation strategy more when the semantic incongruity is explicit than implicit ( 48.5 % vs. 34.8 % ): the presence of explicit sentiment triggered the use of the antonym strategy .
+In contrary they use simple negation more when the semantic incongruity is implicit than explicit .
+We also analyze the interpretation strategies w.r.t .
+to the presence ( + ) or absence (   ) of irony markers .
+We implement various morpho - syntactic as well as typographic markers ( similar to ( Ghosh and Muresan , 2018 ) ) to identify the presence of markers .
+We observe that Lexantstrategy is used more in cases where the markers are absent .
+In S im - Hint , markers are present twice as much in the case of implicit ( 21 % ) than explicit incongruity ( 10 % ) .
+This ﬁnding validates ( Burgers et al . , 2012 ) who argued speakers will likely use markers to signal their ironic intent in implicit incongruity .
+Message interpreted the same by all hearers : In Figure 1 , the vertical columns ( purple : S imHintand grey : SIGN ) depict the distribution ( in % ) of tweets strategy - wise .
+In S im - Hintdataset , for 17 % of messages ( 124 S ims ) all ﬁve Turkers use the same strategy to interpret the S ims ( labeled as5on the X - axis ) , whereas for 26 % ( 188 S ims ) , 4 Turkers used same strategy ( labeled as 4,1 on Xaxis ) and so on .
+We observe when the S ims are marked by strong subjective words e.g. , “ great ” , “ best ” , etc . ,
+they
+have been replaced in 90 % of cases as lexical antonyms ( e.g. , “ great ” !
+“ terrible ” ) .
+In addition , the majority of adjectives are used in attributive position ( i.e. , “ lovely neighbor is vacuuming at night ” ) , thus blocking paraphrases involving predicate negation .
+However , not all strong subjective words guarantee the use of direct opposites in the H ints ( e.g. , “ ﬂattering ” ! “ not ﬂattering ” ; See Table 1 ) .
+The choice of strategies may also depend upon the target of ironic situation ( Ivanko and Pexman , 2003 ) .
+We implement the bootstrapping algorithm from Riloff et al .
+( 2013 ) to identify ironic situations in S ims that are rephrased by Lexical antonym strategy .
+We ﬁnd utterances containing stereotypical negative situations regarding health issues ( e.g. , “ having migraines ” , “ getting killed by chemicals ” ) and other undesirable negative states such as “ oversleeping ” , “ luggage lost ” , “ stress in life ” are almost always interpreted via lexical antonym strategy .
+Utterances where all ﬁve Turkers used simple negation , if negative particles are positioned in the ironic message with a sentential scope ( e.g. , “ not a biggie ” , “ not awkward ” ) then they are simply omitted in the interpretations .
+This trend can be explained according to the inter - subjective account of negation types ( Verhagen , 2005 ) .
+Sentential negation leads the addressee to open up an alternative mental space where an opposite predication is at stake .
+7 Related Work Most NLP research on verbal irony or sarcasm has focused on the task of sarcasm detection treating it as a binary classiﬁcation task using either the utterance in isolation or adding contextual information such as conversation context , author context , visual context , or cognitive features ( Gonz ´ alezIb´a˜nez et al . , 2011 ; Liebrecht et al . , 2013 ; Wallace et
+al . , 2014 ; Zhang et al . , 2016 ; Ghosh and Veale , 2016 ; Schifanella et al . , 2016 ; Xiong et al . , 2019 ; Castro et al . , 2019 )
+.
+Unlike this line of work , our research focuses on how the hearer interprets an ironic message .
+The ﬁndings from our study could have multiple impacts on the sarcasm detection task .
+First , interpretation strategies open up a scope of “ graded interpretation ” of irony instead of only a binary decision ( i.e. , predicting the strength of irony ) .
+Second , nature of semantic incongruence and stereotype irony situations can be useful features in irony detection .
+Recently , Peled and Reichart ( 2017 ) proposed a computational model based on SMT to generate interpretations of sarcastic messages .
+We aim to deepen our understanding of such interpretations by introducing a typology of linguistic strategies .
+We study the distribution of these strategies via both hearer - dependent and messagedependent interpretations .
+Psycholinguistics studies that have dealt with the hearers ’ perception , have mainly focused on how ironic messages are processed : through the analysis of reaction times ( Gibbs , 1986 ; Katz et al . , 2004 ) , the role of situational context ( Ivanko and Pexman , 2003 ) and in tackling speaker - hearer social relations by annotating ironic texts from different genres ( Burgers , 2010 ) .
+However , no attention has been paid to correlations between how ironic message is expressed and how it is interpreted by the hearer , including what linguistic strategies the hearers employ .
+8 Conclusions We leveraged a crowdsourcing task to obtain a dataset of ironic utterances paired with the hearer ’s verbalization of their interpretation .
+We proposed a typology of linguistic strategies for verbal irony interpretation and designed computational models to capture these strategies with good performance .
+Our study shows ( 1 ) Turkers mostly adopt lexical antonym and negation strategies to interpret speaker ’s irony , ( 2 ) interpretations are correlated to stereotype ironic situations , and ( 3 ) irony expression ( explicit vs. implicit incongruity and absence or presence of markers ) inﬂuences the choice of interpretation strategies and match with different explanatory theories ( the Gricean approach links up better with explicit incongruity , while Relevance Theory with the implicit one ) .
+The latter can have an impact on irony detection by bringing out more discriminative semantic and pragmatic features .
+Acknowledgements We thank Rituparna Mukherjee , Daniel Chaparro , Pedro P ´ erez S ´ anchez , and Renato Augusto Vieira Nishimori who helped us in annotating as well as in running experiments .
+This paper partially based on the work supported by the DARPA - DEFT program .
+The views expressed are those of the authors and do not reﬂect the ofﬁcial policy or position of the Department of Defense or the U.S. Government .
+References Silvio Amir , Byron C Wallace , Hao Lyu , and Paula Carvalho M ´ ario J Silva . 2016 .
+Modelling context with user embeddings for sarcasm detection in social media .
+arXiv preprint arXiv:1607.00976 .
+Salvatore Attardo .
+2000 .
+Irony markers and functions : Towards a goal - oriented theory of irony and its processing .
+Rask 12(1):3–20 .
+David Bamman and Noah A Smith . 2015 .
+Contextualized sarcasm detection on twitter .
+In Ninth International AAAI Conference on Web and Social Media .
+Christian Burgers , Margot Van Mulken , and Peter Schellens . 2012 .
+Verbal irony differences in usage across written genres .
+Journal of Language and Social Psychology 31(3):290–310 .
+Christian Frederik Burgers .
+2010 .
+Verbal irony : Use and effects in written discourse .
+[ Sl : sn ] .
+Santiago Castro , Devamanyu Hazarika , Ver ´ onica P´erez - Rosas , Roger Zimmermann , Rada Mihalcea , and Soujanya Poria .
+2019 .
+Towards multimodal sarcasm detection ( an obviously perfect paper ) .
+arXiv preprint arXiv:1906.01815 .
+Timothy Chklovski and Patrick Pantel .
+2004 .
+Verbocean : Mining the web for ﬁne - grained semantic verb relations .
+In EMNLP .
+volume 4 , pages 33–40 .
+Kyunghyun Cho , Bart Van Merri ¨enboer , Caglar Gulcehre , Dzmitry Bahdanau , Fethi Bougares , Holger Schwenk , and Yoshua Bengio .
+2014 .
+Learning phrase representations using rnn encoder - decoder for statistical machine translation .
+arXiv preprint arXiv:1406.1078 .
+Dmitry Davidov , Oren Tsur , and Ari Rappoport .
+2010 .
+Semi - supervised recognition of sarcastic sentences in twitter and amazon .
+In Proceedings of the Fourteenth Conference on Computational Natural Language Learning .
+CoNLL ’ 10 .
+Marie - Catherine De Marneffe , Anna N Rafferty , and Christopher D Manning .
+2008 .
+Finding contradictions in text .
+In ACL .
+volume 8 , pages 1039–1047 .
+Federico Fancellu , Adam Lopez , and Bonnie Webber .
+2016 .
+Neural networks for negation scope detection .
+InProceedings of the 54th Annual Meeting of the Association for Computational Linguistics .
+volume 1 , pages 495–504 .
+Bjarke Felbo , Alan Mislove , Anders Søgaard , Iyad Rahwan , and Sune Lehmann . 2017 .
+Using millions of emoji occurrences to learn any - domain representations for detecting sentiment , emotion and sarcasm .
+In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing .
+Association for Computational Linguistics , pages 1615–1625 .
+https://doi.org/ 10.18653 / v1 / D17 - 1169 .Christiane Fellbaum .
+1998 .
+WordNet .
+Wiley Online Library .
+Aniruddha Ghosh and Tony Veale .
+2016 .
+Fracking sarcasm using neural network .
+In Proceedings of NAACL - HLT .
+pages 161–169 .
+Aniruddha Ghosh and Tony Veale . 2017 .
+Magnets for sarcasm : Making sarcasm detection timely , contextual and very personal .
+In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing .
+Association for Computational Linguistics , pages 482–491 .
+https:// doi.org/10.18653/v1/D17-1050 .
+Debanjan Ghosh , Alexander R. Fabbri , and Smaranda Muresan .
+2018 .
+Sarcasm analysis using conversation context .Computational
+Linguistics 44(4):755 – 792 . https://doi.org/10.1162/coli_a _ 00336 .
+Debanjan Ghosh , Weiwei Guo , and Smaranda Muresan . 2015 .
+Sarcastic or not : Word embeddings to predict the literal or sarcastic meaning of words .
+In Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing .
+Association for Computational Linguistics , Lisbon , Portugal , pages 1003–1012 .
+http://aclweb.org/ anthology / D15 - 1116 .
+Debanjan Ghosh and Smaranda Muresan .
+2018 . ”
+with 1 follower i must be awesome : P. ” exploring the role of irony markers in irony recognition .
+In Twelfth International AAAI Conference on Web and Social Media .
+Debanjan Ghosh , Alexander Richard Fabbri , and Smaranda Muresan . 2017 .
+The role of conversation context for sarcasm detection in online interactions .
+In Proceedings of the 18th Annual SIGdial Meeting on Discourse and Dialogue .
+Association for Computational Linguistics , Saarbrcken , Germany , pages 186–196 .
+http://aclweb . org / anthology / W17 - 5523 .
+Raymond W Gibbs .
+1986 .
+On the psycholinguistics of sarcasm .
+Journal of Experimental Psychology : General 115(1):3 .
+Rachel Giora .
+1995 .
+On irony and negation .
+Discourse processes 19(2):239–264 .
+Roberto Gonz ´ alez - Ib ´ a˜nez , Smaranda Muresan , and Nina Wacholder .
+2011 .
+Identifying sarcasm in twitter : A closer look .
+In ACL ( Short Papers ) .
+Association for Computational Linguistics , pages 581–586 .
+H Paul Grice . 1975 . ”
+logic and conversation ” in cole , p. , and morgan , j.(eds . ) .
+Syntax & Semantics 3 . Henk Haverkate . 1990 .
+A speech act analysis of irony .
+Journal of Pragmatics 14(1):77–109 .
+Devamanyu Hazarika , Soujanya Poria , Sruthi Gorantla , Erik Cambria , Roger Zimmermann , and Rada Mihalcea .
+2018 .
+Cascade :
+Contextual sarcasm detection in online discussion forums .
+InProceedings of
+the 27th International Conference on Computational Linguistics .
+Association for Computational Linguistics , pages 1837–1848 .
+http://aclweb.org/ anthology / C18 - 1156 .
+Laurence Horn .
+1989 .
+A natural history of negation .
+The University of Chicago Press .
+Minqing Hu and Bing Liu .
+2004 .
+Mining and summarizing customer reviews .
+In Proceedings of the tenth ACM SIGKDD international conference on Knowledge discovery and data mining .
+ACM , pages 168 – 177 .
+Albrecht Werner Inhoff , Susan D Lima , and Patrick J Carroll .
+1984 .
+Contextual effects on metaphor comprehension in reading .
+Memory & Cognition 12(6):558–567 .
+Stacey L Ivanko and Penny M Pexman .
+2003 .
+Context incongruity and irony processing .
+Discourse Processes 35(3):241–279 .
+Aditya Joshi , Vinita Sharma , and Pushpak Bhattacharyya . 2015 .
+Harnessing context incongruity for sarcasm detection .
+In ACL ( 2 ) .
+pages 757–762 .
+Jihen Karoui , Farah Benamara , V ´ eronique Moriceau , Viviana Patti , Cristina Bosco , and Nathalie Aussenac - Gilles . 2017 .
+Exploring the impact of pragmatic phenomena on irony detection in tweets : A multilingual corpus study .
+Association for Computational Linguistics ( ACL ) .
+Albert N Katz , Dawn G Blasko , and Victoria A Kazmerski .
+2004 .
+Saying what you do n’t mean : Social inﬂuences on sarcastic language processing .
+Current Directions in Psychological Science 13(5):186–189 .
+Philipp Koehn , Hieu Hoang , Alexandra Birch , Chris Callison - Burch , Marcello Federico , Nicola Bertoldi , Brooke Cowan , Wade Shen , Christine Moran , Richard Zens , et al . 2007 .
+Moses : Open source toolkit for statistical machine translation .
+In Proceedings of the 45th Annual Meeting of the ACL on Interactive Poster and Demonstration Sessions .
+Association for Computational Linguistics , pages 177 – 180 .
+Roger J Kreuz .
+2000 .
+The production and processing of verbal irony .
+Metaphor and Symbol 15(1 - 2):99 – 107 .
+Roger J Kreuz and Sam Glucksberg .
+1989 .
+How to be sarcastic : The echoic reminder theory of verbal irony .
+Journal of experimental psychology : General 118(4):374 .
+Hao Li and Wei Lu .
+2018 .
+Learning with structured representations for negation scope extraction .
+In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 2 : Short Papers ) .
+volume 2 , pages 533–539.CC Liebrecht , FA Kunneman , and APJ van den Bosch .
+2013 .
+The perfect solution for detecting sarcasm in tweets # not .
+In Proceedings of the 4th Workshop on Computational Approaches to Subjectivity , Sentiment and Social Media Analysis .
+Diana Maynard and Mark A Greenwood .
+2014 .
+Who cares about sarcastic tweets ?
+investigating the impact of sarcasm on sentiment analysis .
+In Proceedings of LREC .
+Bel´en M ´ endez - Naya . 2008 .
+Special issue on english intensiﬁers .
+English Language and Linguistics 12(02):213–219 .
+Abhijit Mishra , Diptesh Kanojia , Seema Nagar , Kuntal Dey , and Pushpak Bhattacharyya .
+2016 .
+Harnessing cognitive features for sarcasm detection .
+InProceedings of the 54th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) .
+Association for Computational Linguistics , Berlin , Germany , pages 1095–1104 .
+https:// doi.org/10.18653/v1/P16-1104 .
+Saif M. Mohammad , Bonnie J. Dorr , Graeme Hirst , and Peter D. Turney .
+2013 .
+Computing lexical contrast .
+Computational Linguistics 39(3):555–590 .
+Smaranda Muresan , Roberto Gonzalez - Ibanez , Debanjan Ghosh , and Nina Wacholder . 2016 .
+Identiﬁcation of nonliteral language in social media : A case study on sarcasm .Journal of the Association for Information Science and Technology http://dx .
+doi.org/10.1002/asi.23624 .
+Franz Josef Och and Hermann Ney . 2000 .
+Giza++ : Training of statistical translation models .
+Franz Josef Och and Hermann Ney .
+2004 .
+The alignment template approach to statistical machine translation .
+Computational linguistics 30(4):417–449 .
+Silviu Oprea and Walid Magdy .
+2019 .
+Exploring author context for detecting intended vs perceived sarcasm .
+In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics .
+pages 2854–2859 .
+Lotem Peled and Roi Reichart .
+2017 .
+Sarcasm sign : Interpreting sarcasm with sentiment based monolingual machine translation .
+arXiv preprint arXiv:1704.06836 .
+Zhong Qian , Peifeng Li , Qiaoming Zhu , Guodong Zhou , Zhunchen Luo , and Wei Luo . 2016 .
+Speculation and negation scope detection via convolutional neural networks .
+In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing .
+pages 815–825 .
+Johan Reitan , Jørgen Faret , Bj ¨orn Gamb ¨ack , and Lars Bungum . 2015 .
+Negation scope detection for twitter sentiment analysis .
+In Proceedings of the 6th Workshop on Computational Approaches to Subjectivity , Sentiment and Social Media Analysis .
+pages 99–108 .
+Ellen Riloff , Ashequl Qadir , Prafulla Surve , Lalindra De Silva , Nathan Gilbert , and Ruihong Huang .
+2013 .
+Sarcasm as contrast between a positive sentiment and negative situation .
+In Proceedings of the Conference on Empirical Methods in Natural Language Processing .
+Association for Computational Linguistics , pages 704–714 .
+Rossano Schifanella , Paloma de Juan , Joel Tetreault , and Liangliang Cao . 2016 .
+Detecting sarcasm in multimodal social platforms .
+In Proceedings of the 2016 ACM on Multimedia Conference .
+ACM , pages 1136–1145 .
+Dan Sperber and Deirdre Wilson .
+1986 .
+Relevance : Communication and cognition , volume 142 .
+Harvard University Press Cambridge , MA .
+Maite Taboada , Julian Brooke , Milan Toﬁloski , Kimberly V oll , and Manfred Stede . 2011 .
+Lexicon - based methods for sentiment analysis .
+Computational linguistics 37(2):267–307 .
+Yi Tay , Anh Tuan Luu , Siu Cheung Hui , and Jian Su . 2018 .
+Reasoning with sarcasm by reading inbetween .
+In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) .
+Association for Computational Linguistics , pages 1010–1020 .
+http : //aclweb.org / anthology / P18 - 1093 .
+Arie Verhagen .
+2005 .
+Constructions of intersubjectivity : Discourse , syntax , and cognition .
+Oxford University Press on Demand .
+Byron C Wallace , Do Kook Choe , Laura Kertz , and Eugene Charniak .
+2014 .
+Humans require context to infer ironic intent ( so computers probably do , too ) .
+InACL ( 2 ) .
+pages 512–516 .
+Cynthia Whissell , Michael Fournier , Rene Pelland , Deborah Weir , and Katherine Makarec .
+1986 .
+A dictionary of affect in language : Iv . reliability , validity , and applications .
+Perceptual and Motor Skills 62(3):875–888 .
+Deirdre Wilson and Dan Sperber .
+2012 .
+Explaining irony .
+Meaning and relevance pages 123–145 .
+Theresa Wilson , Janyce Wiebe , and Paul Hoffmann .
+2005 .
+Recognizing contextual polarity in phraselevel sentiment analysis .
+In Proceedings of the conference on human language technology and empirical methods in natural language processing .
+Association for Computational Linguistics , pages 347–354 .
+Tao Xiong , Peiran Zhang , Hongbo Zhu , and Yihui Yang .
+2019 .
+Sarcasm detection with self - matching networks and low - rank bilinear pooling .
+In The World Wide Web Conference . ACM , pages 2115 – 2124 .
+Meishan Zhang , Yue Zhang , and Guohong Fu . 2016 .
+Tweet sarcasm detection using deep neural network .
+InCOLING .

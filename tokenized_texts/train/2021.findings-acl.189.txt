@@ -1,0 +1,378 @@
+Findings of the Association for Computational Linguistics : ACL - IJCNLP 2021 , pages 2152–2161 August 1–6 , 2021 .
+© 2021 Association for Computational Linguistics2152Attending via both Fine - tuning and Compressing Jie Zhou1,2 , Y uanbin Wu2 , Qin Chen2 , Xuanjing Huang3 , and Liang He1,2 1Shanghai Key Laboratory of Multidimensional Information Processing 2School of Computer Science and Technology , East China Normal University jzhou@ica.stc.sh.cn , { ybwu , qchen , lhe } @cs.ecnu.edu.cn 3School of Computer Science ,
+Fudan University xjhuang@fudan.edu.cn
+Abstract Though being a primary trend for enhancing interpretability of neural networks , attention mechanism ’s reliability and validity are still under debate .
+In this paper , we try to pu - rify attention scores to obtain a more faithfulexplanation of downstream models .
+Speciﬁ-cally , we propose a framework consisting of alearner and a compressor , which performs ﬁnetuning and compressing iteratively to enhancethe performance and interpretability of the attention mechanism .
+The learner focuses onlearning better text representations to achievegood decisions by ﬁne - tuning , while the com - pressor aims to perform compressions over the representations to retain the most useful clues for explanations with a V ariational in - formation bottleneck A Ttention ( V A T ) mecha - nism .
+Extensive experiments on eight bench - mark datasets show the great advantages ofour proposed approach in terms of both performance and interpretability .
+1 Introduction Attention mechanisms ( Bahdanau et al . , 2014 ) h a v e achieved great success in various natural language processing ( NLP ) tasks .
+They are introduced to mimic the human eye focusing on important parts in the inputs when predicting labels .
+The existing studies show attention mechanisms can improve not only the performance but also the interpretability of the models ( Mullenbach et al . , 2018 ; Xie et al . , 2017 ; Xu et
+al . , 2015 ) .
+Li et
+al .
+( 2016 ) pointed the view : “ Attention provides an important way to explain the workings of neural models ” .
+Additionally , Wiegreffe and Pinter ( 2019 ) showed that attention mechanisms could help understand the inner workings of a model .
+The basic assumption of understanding of models with attention scores is that the inputs ( e.g. , words ) with high attentive weights are essential formaking decisions .
+However , as far as we know , it has not been formally veriﬁed .
+Existing research ( Jain and Wallace , 2019 ) also shows that attention is not explicable , and there are a lot of controversy regarding to the result explanations ( Wiegreffe and Pinter , 2019 ; Jain and Wallace , 2019 ) .
+Moreover , we ﬁnd that though the attention mechanism can help improve the performance for text classiﬁcation in our experiments , it may focus on the irrelevant information .
+For example , in the sentence “ A very funny movie . ” , the long short - term memory model with standard attention ( LSTM - A TT ) infers a correct sentiment label while pays more attention to the irrelevant word “ movie ” , making the result difﬁcult to explain .
+In general , the attention weights are only optimized to encode the task - relevant information while are not restricted to imitate human behavior .
+In order to enhance the interpretability of the attention mechanism , recent studies turn to integrate the human provided explanation signals into the attention models .
+Rei and Søgaard ( 2018 ) regularized the attention weights with a small amount of word - level annotations .
+Barrett et al .
+( 2018 )
+; Bao et al .
+( 2018 ) improved the explanation of attention by aligning explanations with human - provided rationales .
+These methods rely on additional labour consuming labelling for enhancing explanations , which is hard to extend to other datasets or tasks .
+In this paper , we aim to train a more efﬁcient and effective interpretable attention model without any pre - deﬁned annotations or pre - collected explanations .
+Speciﬁcally , we propose a framework consisting of a learner and a compressor , which enhances the performance and interpretability ofthe attention model for text classiﬁcation 1 .
+The learner learns text representations by ﬁne - tuning 1We focus on the task of text classiﬁcation , but our method can be easily extended to other NLP or CV tasks with attention mechanisms .
+2153the encoder .
+Regarding to the compressor , we are motivated by the effectiveness of the information bottleneck ( IB ) ( Tishby et al . , 1999 ) to enhance performance ( Li and Eisner , 2019 ) or detect important features ( Bang et al . , 2019 ; Chen and Ji , 2020 ; Jiang et al . , 2020 ; Schulz et al . , 2020 ) , and present a V ariational information bottleneck A Ttention ( V A T ) mechanism using IB to keep the most relevant clues and forget the irrelevant ones forbetter attention explanations .
+In particular , IB isintegrated into attention to minimize the mutualinformation ( MI ) with the input while preserving as much MI as possible with the output , which provides more accurate and reliable explanations by controlling the information ﬂow .
+To evaluate the effectiveness of our proposed approach , we adapt two advanced neural models ( LSTM and BERT ) within the framework and conduct experiments on eight benchmark datasets .
+The experimental results show that our adapted models outperform the standard attention - based models over all the datasets .
+Moreover , they exhibit great advantages with respect to interpretability by both qualitative and quantitative analyses .
+Speciﬁcally , we obtain signiﬁcant improvements by applying our model to the semi - supervised word - level sentiment detection task , which detects the sentiment words based on attention weights via only sentencelevel sentiment label .
+In addition , we provide the case studies and text representation visualization to have an insight into how our model works .
+The main contributions of this work are summarized as follows .
+•We propose a novel framework to enhance the performance and interpretability of the attention models , where a learner is used to learn good representations by ﬁne - tuning and a compressor is used to obtain good attentive weights by compressing iteratively .
+•We present a V ariational information bottleneck A Ttention ( V A T ) mechanism for the compressor , which performs compression over the text representation to keep the task related information while reduce the irrelevant noise via information bottleneck .
+•Extensive experiments show the great advantages of our models within the proposed framework , and we perform various qualitative and quantitative analyses to shed light on why our models work in both performance and interpretability.2 Related Work In this section , we survey related attention mech - anisms ( Bahdanau et al . , 2014 ) and review the most relevant studies on information bottleneck ( IB ) ( Tishby et al . , 1999 ) .
+Attention has been proved can help explain the internals of neural models ( Li et al . , 2016 ; Wiegreffe and Pinter , 2019 ) though it is limited ( Jain and Wallace , 2019 ) .
+Many researchers try to improve the interpretability of the attention mechanisms .
+Rei and Søgaard ( 2018 ) leveraged small amounts of word - level annotations to regularize attention .
+Kim et al .
+( 2017 ) introduced a structured attention mechanism to learn attention variants from explicit probabilistic semantics .
+Barrett et al .
+( 2018 )
+; Bao et al .
+( 2018 ) aligned explanations with human - provided rationales to improve the explanation of attention .
+Unlike these methods that require prior attributions or human explanations , the V A T method enforces the attention to learn the vital information while ﬁlter the noise via IB .
+A series of studies motivate us to utilize IB to improve the explanations of attention mechanisms .
+Li and Eisner ( 2019 ) compressed the pre - trained embedding ( e.g. , BERT , ELMO ) , remaining onlythe information that helps a discriminative parserthrough variational IB .
+Zhmoginov et
+al .
+( 2019 ) utilized the IB approach to discover the salient region .
+Some works ( Jiang et al . , 2020 ; Chen et al . , 2018 ; Guan et al . , 2019 ; Schulz et al . , 2020 ; Bang et al . , 2019 ) proposed to identify vital features or attributions via IB .
+Moreover , Chen and Ji ( 2020 ) designed a variational mask strategy to delete the useless words in the text .
+As far as we are aware , we are the ﬁrst ones to leverage IB into attention mechanisms to train more interpretable attention with better accuracy .
+3
+Our Approach In this section , we introduce our framework consist - ing of a learner and a compressor with a V ariational information bottleneck A Ttenttion ( V A T ) mecha - nism .
+Given an attention - based neural network model , we formulate our idea within the frameworkof variational information bottleneck ( VIB ) ( Tishby et al . , 1999 ) .
+Our framework aims to improve the attention ’s interpretalility with better performance by restricting the attention to capture the crucial words while ﬁlter the useless information .
+2154X R ෠܇ࢻX R Z ෠܇ࢻ p(Z|R)ൌpሺࢆȁࢻǡࢄሻ q(෡܇|Z)Learner Compressor Figure 1 : The framework .
+The learner aims to learn the good text representation Xby ﬁne - tuning , and the compressor aims to learn good attention weights by com - pressing the attentive representations to capture the im - portant words while forget the redundant information via V
+A T.
+The blue circles mean the corresponding parameters of the modules are ﬁxed .
+3.1 Overview Our framework is composed of a learner and a compressor , which performs ﬁne - tuning and compressing iteratively ( Figure 1 ) .
+The learner aims to learn a task - speciﬁc contextual word representation by ﬁne - tuning .
+The compressor enforces the model to learn task - relevant information while reduce irrelevant information via IB .
+We iteratively perform the learner and compressor ( ﬁne - tuning and compressing ) to improve each other .
+Learner .
+We adopt a basic attention - based neural network model as a learner to learn representations of the words based on the good attention weights learned by the compressor .
+The model is optimized by cross - entropy loss to learn the label - relevantinformation .
+In this phase , we ﬁx the attention ’s parameters so that the model will focus on updating the encoder to learn word representations .
+Compressor .
+To restrict the attention to capture the vital information while reduce the noise , we integrate IB into attention mechanisms to compress the text attentive representation .
+We ﬁx the encoder ’s parameters so that the model will focus on learning the attention weights based on current representations obtained from the learner .
+3.2 Basic Attention Model ( Learner )
+In this section , we describe our learner , which is an attention - based neural network model .
+First , given at e x tT “ tw1,w2, ... ,w |T|u , where |T|is the length of text T , we feed it into an encoder with aEncoder … … X𝝈 𝒖MLP𝐘 RZ 𝜶Min I(Z ; R)Max I(Z ; Y)q(𝐘|Z )
+Z = u+𝝈⊙𝛜     𝛜~𝑵ሺ𝟎 , 𝑰ሻ   p(Z|R ) VAT T Figure 2 : The architecture of our V A T ( Compressor ) .
+First , we obtain the input text ’s word representations X via an encoder trained by the learner .
+Then , we calculateZby compressing the text representation Rthat is the weighted sum of Xbased on the attention α , while remaining the maximum information to judge Yby inputtingZinto a MLP classiﬁer for predicting .
+word embedding layer .
+We adopt LSTM and BERT models as our encoder , and other models can also be applied to our framework .
+We obtain the contextaware word representations x“rx1,x2, ... ,x |T|s , wherexiis the hidden vector of the word wi .
+x“encoder pT , θencoder q , ( 1 ) whereθencoder is the parameters of the encoder .
+Based on the contextual word representations , attention mechanism ( Bahdanau et al . , 2014 ) 2is utilized to capture the important parts in the text and obtain the text representation R , which is calculated as , R“nÿ i“1αixi αi“softmax pvJ atanh pWaxiqq(2 ) whereθattention “ tva , Wauis the trainable parameters of the attention , which is not updatedin this step to learn the word representation x based the good attention learned by the compressor.α“rα1,α2, ... ,α |T|sis the attention weights .
+Finally , we input the text representation Rinto a 2In this paper , we only explore the local attention mechanism on our framework , other attention mechanisms ( e.g. , multi - head attention ( V aswani et al . , 2017 ) ) can also be applied .
+We would like to explore it in future work .
+2155multi - layer perceptron ( MLP ) to predict the probability .
+The cross - entropy loss is used to optimize the model .
+3.3 Variational Information Bottleneck Attention ( Compressor ) The learner optimizes the sentence representations by minimizing the cross - entropy loss , which does not restrict the model to ignore the useless information .
+Thus , we compress sentence representations Rinto a latent representation Zthat retains most useful information to infer the label Y. We propose to accomplish this by integrating VIB into the attention mechanism ( Figure 2 ) .
+To ensure Zcontains maximum ability to predict Y(IpZ;Yq ) while has the least redundant information form R(´IpZ;Rq ) , we use the standard IB theory ( Tishby et al . , 1999 ) and deﬁne the objective function as : max αIpZ;Yq´β¨IpZ;Rq ( 3 ) whereIp¨;¨qmeans the mutual information and β is a coefﬁcient to balance two components .
+The main challenge is to estimate the lower bound for IpZ;Yqand
+the upper bound for IpZ;Rq.3
+The joint probability pθpr , y , z qcan be factored aspprq¨ppy|rq¨pθpz|rqbased on the independence assumption4 .
+By replacing the conditional distribution pθpy|zqwith a variational approximationqφpy|zq , we obtain a lower bound of IpZ;Yq.qφpy|zqis a simple classiﬁer that runs on a compressed text representation z. IpZ;Yqhkkkkkkkkkkkkkikkkkkkkkkkkkkj Epθpy , z qrlogpθpy|zq ppyqs´lower bound hkkkkkkkkkkkkkikkkkkkkkkkkkkj Epθpy , z qrlogqφpy|zq ppyqs “ EpθpzqrKLppθpy|zq}qφpy|zqqs ě 0(4 ) whereKL r¨}¨s represents Kullback - Leibler divergence .
+Speciﬁcally , we regard ppyqas constant and then minimize Epθpy , z qrlogqφpy|zqs .
+Since we must ﬁrst sample rto sample y , z frompθpr , y , z q , the lower bound of IpZ;Yqis computed as , IpZ;YqěEppr , y qrEpθpz|rqrlogqφpy|zqss ( 5 ) We calculate the upper bound of IpZ;Rqby replacingpθpzqwith a variational distribution rψpzq , 3We give the main steps as follows and the detailed derivation is provided in supplementary materials .
+4YÑRÑZ : YandZare independent given R.upper boundhkkkkkkkkkkkkkkkkkkkkkikkkkkkkkkkkkkkkkkkkkkj EpprqrEpθpz|rqrlogpθpz|rq rψpzqss ´ IpZ;Rqhkkkkkkkkkkkkkkkkkkkkkikkkkkkkkkkkkkkkkkkkkkj EpprqrEpθpz|rqrlogpθpz|rq ppzqss “ EpprqrKLpppzq}rψpzqqs ě 0 ( 6 ) The upper bound of IpZ;Rqis computed as , IpZ;RqďEpprqrEpθpz|rqrlogpθpz|rq rψpzqss “ EpprqrKLrpθpz|rq}rψpzqss(7 )
+Then , we obtain the lower bound Lof IB by substituting Equation 5and 7into Equation 3 : L“Eppr , y qrEpθpz|rqrlogqφpy|zqs ´ β¨KLrpθpz|rq}rψpzqss(8 )
+The ﬁrst component in Lis to keep the most useful information in pθpz|rqfor inferring y , while the second one is to regularize pθpz|rqwith a predeﬁned prior distribution rψpzq(e.g . , Gaussian distribution ) .
+To compute pθpz|rq , we adopt the reparametrization trick for multivariate Gaussians ( Rezende et al . , 2014 ) , which obtains the gradient of parameters that derive zfrom a random noise /epsilon1 .
+z“u`σd / epsilon1,/epsilon1 „ Np0,Iq ( 9 ) where dmeans element - wise multiplication .
+uand σdenote the mean and covariance deﬁned by two functions of R , whereR “ α¨xthat is learned based on attention .
+In particular , two MLP are used to predict uandσ .
+Finally , we input the zinto a MLP to predict qφpy|zqand optimize the attention ’s parameter via Equation 8 . 4 Experiment Setup We adopt two typical neural network models , attention - based LSTM ( Hochreiter and Schmidhuber , 1997 ) and BERT ( Devlin et al . , 2019 ) , to explore our V A T algorithm .
+4.1 Datasets and Baselines Datasets To evaluate the effectiveness of our V A T model , we conduct the experiments over eight benchmark datasets : IMDB ( Maas et al . , 2011 ) , Stanford Sentiment Treebank with ( includes SST 1 and its binary version SST -2 ) ( Socher et al . , 2013 ) , Y elp ( Zhang et al . , 2015 ) ,
+AG News ( Zhang et al . , 2015 ) , TREC ( Li and Roth , 2002 ) , subjective / objective classiﬁcation Subj ( Pang and Lee , 2005 ) and Twitter ( Rosenthal et al . , 2015 , 2014 ) .
+The statistics information of these datasets are shown in Table 1 .
+2156IMDB
+SST -1
+SST -2
+Y elp AG News
+Trec Subj Twitter Class 2
+5 2 2 4 6 2 3 Length 268 18 19 138 32 10 23 22#train 20,000 8,544 6,920 500,000 114,000 5,000 8,000 7,969#dev 5,000 1,1101 872 60,000 6,000 452 1,000 1,375#test 25,000 2,210 1,821 38,000 7,600 500 1,000 3,795 Table 1 : The statistics information of the datasets , where Class is the number of the class
+, Length is average text length , and # train/#dev/#test counts the number of samples in the train / dev / test sets .
+IMDB SST -1
+SST -2
+Y elp AG News
+Trec Subj Twitter Average LSTM - base 88.79 45.20 85.45 95.10 91.91 90.00 89.00 71.25 82.09 LSTM - A TT 88.16 46.29 84.73 95.06 91.88 91.00 90.80 70.75 82.33 LSTM - V
+A T 88.98 47.42 86.22 95.32 92.04 92.80 91.10 71.62 83.19 BERT -base 91.90 51.44 91.60 96.07 93.52 96.60 96.50 75.28 86.61 BERT -A TT
+91.81 51.13 91.16 97.20 93.41 96.40 96.20 74.84 86.52 BERT -V A T 92.11 51.99 91.98 97.36 93.71 97.20 96.70 77.13 87.27 Table 2 : The main results of text classiﬁcation .
+Baselines We compare our model with two kinds of models , basic models ( LSTM / BERT -base ) and attention - based models ( LSTM / BERT -A TT ) .
+LSTM - base takes the max - pooling of the LSTM ’s hidden vectors as text representation .
+For BERT base , the “ [ CLS ] ” representation is obtained as the sentence representation .
+LSTM - A TT model is a standard attention - based LSTM model that has the same structure as the learner .
+We obtain the BERT A TT by replacing the LSTM encoder with BERT in LSTM - A TT .
+Our models are marked with V A T ( LSTM - V A T , BERT -V A T ) , which integrate VIB into attention - based neural models .
+4.2 Implementation Details For LSTM - based models , we use GloV e embedding ( Pennington et al . , 2014 ) with 300 - dimension to initialize the word embedding and ﬁne - tune it during the training .
+We randomly initialize all outof - vocabulary words and weights with the uniform distribution Up´0.1,0.1q .
+For the BERT -based models , we ﬁne - tune pre - trained BERT -base model .
+The dimension of hidden state vectors of LSTM is 100 and the max sentence length is 256 in ourexperiments .
+Adam ( Kingma and Ba , 2014 ) i s utilized as the optimizer with learning rate 0.001 ( for LSTM - based model ) and 0.00001 ( for BERT based model ) .
+We also search different values βPt0.01,0.1,1,10u .
+5 Experiments First , we perform our models and baselines on eight benchmark datasets and visualize the text representation to verify the effectiveness of V A T ( Section 5.1 ) .
+Second , to further investigate our V A T model , we adopt two popular explanation metrics for quantitative evaluation ( Section 5.2 ) .
+Third , we apply our models to semi - supervision sentiment detection task to evaluate the explanation of our model ( Section 5.3 ) .
+Fourth , we explore the inﬂuence of our iteration strategy in Section 5.4 and provide case studies in Section 5.5 .
+For the limitation of the space , we may only list the results on parts of the datasets in some cases since the conclusions are similar for other datasets .
+The complete results are presented in the supplementary materials .
+5.1 Main Results We report the accuracy of our V A T and baselines based on LSTM and BERT ( Table 2 ) .
+From these results , we ﬁnd the following observations : 1)our models ( LSTM / BERT -V A T ) outperform all the corresponding baselines over all the eight datasets , which denotes the effectiveness of our V A T on both LSTM and BERT -based models ; 2)compared with attention - based models ( LSTM / BERT -A TT ) , our models obtain better results .
+It indicates reducing the irrelevant information in input via V
+A T can improve the performance of the models .
+Furthermore , we visualize the sentence representations obtained from LSTM / BERT -A TT and -V A T models ( Figure 3 ) .
+We randomly select 1000 samples from the test set for each dataset .
+We can ﬁnd that our V A T model can reduce the distance of the samples in a class and add the distance ofthe samples in different classes .
+For example , itis hard to split the positive samples from the neg - ative ones based on the representations obtained from LSTM - A TT for the IMDB dataset , while the divider line based on our V A T is clear .
+These ob-
+2157(a ) IMDB ( LSTM ) ( b ) Subj ( LSTM ) ( c ) Twitter ( LSTM ) ( d ) IMDB ( BERT ) ( e ) Subj ( BERT ) ( f ) Twitter ( BERT ) Figure 3 : Visualization of text representation obtained from LSTM / BERT -A TT and LSTM / BERT -V
+A T. We use t - SNE to transfer 100/768 - dimensional feature space into two - dimensional space .
+IMDB SST -1
+SST -2
+Y elp AG News
+Trec Subj Twitter Accuracy LSTM - base 88.79 45.20 85.45 95.10 91.91 90.00 89.00 71.25 AOPCRandom 0.30 5.97 7.58 1.02 1.87 19.40 1.50 4.72 LSTM - A TT 5.27 12.94 20.54 6.64 5.99 31.00 2.10 19.10 LSTM - V A T 6.13 14.34 21.58 7.12 6.59 37.20 6.30 20.37 Accuracy BERT -base 91.90 51.44 91.60 96.07 93.52 96.60 96.50 75.28 AOPCRandom 0.60 33.26 41.46 3.60 44.20 65.80 45.70 59.21 BERT -A TT 2.81
+33.98 41.52 4.73 52.22 71.60 45.70 59.39 BERT -V A T 3.17 34.03 41.52 6.64 54.70 72.20 45.80 59.45 Table 3 : The results of AOPC .
+( a ) IMDB ( LSTM ) ( b ) IMDB ( BERT ) Figure 4 : The inﬂuence of Top- Kfor LSTM / BERT based models in terms of AOPC .
+servations show our V A T model can learn a better task - speciﬁc representation by enforcing the model to reduce the task - irrelevant information .
+5.2 Quantitative Evaluation In this section , we evaluate our V A T model using two metrics , AOPC and post - hoc accuracy , which are widely used for explanations ( Chen and Ji,2020 ) .
+Note that well - trained LSTM / BERT -base is used for evaluating the performance of classiﬁcation .
+AOPC .
+To evaluate the faithfulness of explanations to our models , we adopt the area over theperturbation curve ( AOPC ) ( Nguyen , 2018 ; Samek et al . , 2016 ) metric .
+It calculates the average change of accuracy over test data by deleting top K words via attentive weights .
+The larger the value of AOPC , the better the explanations of the models .
+Table 3displays
+the results with K “ 5 .
+We compare our models with random and basic attention - based models .
+From the results , we observe that : 1)basic attention - based models ( LSTM / BERT -A TT ) can ﬁnd the important words in the sentence to some extent .
+Comparing with random ( Random ) , LSTM / BERT -A TT obtains signiﬁcant improvement ; 2)Our models ( LSTM / BERT V A T ) outperform the standard attention - based models .
+It indicates that integrating VIB into the attention mechanism can help improve the interpretability of the models by ﬁltering the useless informa - tion ; 3)BERT model is sensitive to the context ; deleting the words will destroy the semantic information of the sentence and signiﬁcantly affect the model ’s performance .
+We also explore the inﬂuence of top- K(Figure 4 ) .
+Intuitively , the more words we delete , the larger accuracy the models reduce .
+Our models reduce more performance than random and attention - based
+2158IMDB
+SST -1
+SST -2
+Y elp AG News
+Trec Subj Twitter Accuracy LSTM - base 88.79 45.20 85.45 95.10 91.91 90.00 89.00 71.25 Post - hocRandom 58.48 34.21 71.33 64.74 62.45 71.40 78.40 54.07 LSTM - A TT 83.96 40.56 82.70 87.80 78.96 73.60 87.40 70.20 LSTM - V A T 84.41 43.39 84.35 88.82 81.43 79.20 89.10 71.23 Accuracy BERT -base 91.90 51.44 91.60 96.07 93.52 96.60 96.50 75.28 Post - hocRandom 51.50 20.27 50.52 50.21 26.74 26.60 50.60 40.50 BERT -A TT 51.72 29.19 58.92 53.63 37.53 34.20 61.90 53.68 BERT -V A T 53.40 30.23 61.34 56.58 43.08 36.80 65.40 56.05 Table 4 : The results of post - hoc accuracy .
+( a ) IMDB ( LSTM ) ( b ) IMDB ( BERT ) Figure 5 : The inﬂuence of Top- K for LSTM - based models in terms of post - hoc . models .
+For the IMDB dataset , when deleting top 20words ( average length is 268 ) , the accuracy reduces about 19 points for our LSTM - V A T model while it is about 2 points for the random model .
+Post - hoc Accuracy .
+We also adopt the post - hoc accuracy ( Chen et al . , 2018 ) to evaluate the inﬂuence of task - speciﬁc essential words on the performance of LSTM - based and BERT -based models .
+For each test sample , we select the top Kwords based on their attentive weights as input to make a prediction and compare it with the ground truth .
+Table 4presents the performance with K “ 5 .
+First , it is interesting to ﬁnd that the post - hoc accuracy with ﬁve most important words on Sbuj dataset ( 89.10 ) is even better than the original sentence ( 89.00 ) .
+Additionally , we obtain comparable results with only ﬁve words for SST -1 , SST -2 , and Twitter datasets .
+These show that our model can reduce the noise information since most of the words are useless for predictions in some cases .
+Second , for BERT -based models , the context words are also important for classiﬁcation even though they may not be task - speciﬁc .
+Similarly , we investigate the inﬂuence of top- K for post - hoc ( Figure 5 ) .
+The LSTM - base model with top- 10 words selected by our LSTM - V A T model can achieve comparable results with the original samples in most cases .
+Additionally , for theIMDB dataset , the accuracy of LSTM - base with one word selected by our V A T model is even better than the one with 20 words selected randomly.5.3 Semi - Supervised Word - Level Sentiment Detection We perform semi - supervised word - level sentiment detection in Twitter ( Rosenthal et al . , 2015 , 2014 ) to evaluate the interpretability of our V A T.
+This task requires to detect the sentiment words in a tweet via the sentiment polarity of the whole tweet .
+In the following example from the dataset , positive words ( “ good ” and “ fantastic ” ) are marked with a bold font and the overall polarity of the tweet is positive : Good morning becky !
+Thursday is going to be fantastic !
+We use the SemEval 2013 Twitter dataset , which contains word - level sentiment annotation .
+We remove the samples with the neutral sentiment .
+We report word - level precision , recall , and F - measure for evaluating the models ( Table 5 ) , the same as ( Rei and Søgaard , 2018 ) .
+Note that we select the top - K(we set it as 1 and 5 here ) words according to the attention weights as the sentiment words .
+We compare our V A T model with random and attention - based models .
+The results show attentionbased models can capture the important words in the text , to a certain extent .
+Since our V A T can reduce irrelevant information , it performs better than the standard attention model .
+Also , LSTM - based models outperform BERT -based models for this task in most cases .
+It is because that BERT learns much semantic information from the text , and context information plays a vital role in prediction .
+5.4 Inﬂuence of Iteration We propose to train the learner and compressor iteratively so that the learner optimizes the wordrepresentations based on the good attention , and the compressor optimizes the attention based on the good word representations .
+To have a deep look at how it works , we ﬁrst provide our V A T model ’s accuracy with different iterations ( Table 6 ) .
+From the results , we can ﬁnd that the model ’s performance will improve at ﬁrst , then it will converge .
+2159Positive Negative P@1 R@1 F1@1 P@5 R@5
+F1@5 P@1 R@1
+F1@1 P@5 R@5
+F1@5 Random 14.88 4.78 6.56 14.59 23.34 16.06 20.52 5.61 8.19 17.18 23.68 17.97 LSTM - A TT 58.70 26.04 32.73 30.30 54.17 34.70 47.13 15.74 21.39 28.24 42.04 30.33 LSTM - V
+A T 65.20 29.38 36.60 33.04 58.40 37.77 60.00 21.42 28.76 32.70 49.19 35.35 BERT -A TT 46.44 16.52 21.82 33.13 52.52 35.66 37.74 9.19 13.46 30.82 39.65 30.23 BERT -V A T 55.24 20.62 26.90 37.26 58.39 40.09 43.83 11.15 16.20 36.42 44.55 35.30 Table 5 : The results of semi - supervision word - level sentiment detection in twitter .
+( a ) AG News ( LSTM ) ( b ) AG News ( BERT ) Figure 6 : Visualization of text representation obtained from LSTM / BERT -V A T with different iterations .
+We use t - SNE to transfer 100/768 - dimensional feature space into two - dimensional space .
+Method Text Prediction LSTM -ATT
+I admired this work a lot .
+Positive   √ LSTM -VAT I admired this work a lot .
+Positive   √ LSTM -ATT
+That sucks if you have to take the sats tomorrow .
+Neutral    灤 LSTM -VAT
+That sucks if you have to take the sats tomorrow .
+Negative √ Figure 7 : Two examples of attention visualization .
+Red denotes the attentive weights of the words .
+A deeper color indicates a larger value .
+Dataset 012345 LSTM - V A TTwitter 70.75 71.62 70.96 70.67 71.06 70.98 IMDB 88.16 88.98 88.22 88.84 88.14 88.60 BERT -V
+A TTwitter 74.84 75.26 77.71 77.13 76.68 76.76 IMDB 91.81 92.06 92.11 92.09 91.92 91.96 Table 6 : The accuracy with different iteration number with our LSTM / BERT -V A T model .
+Also , we draw change of the sentence representation with different iterations ( Figure 6 ) .
+Similarly , we observe that ﬁne - tuning and compressing iteratively can improve the sentence representations .
+The samples with the same class are close , and the samples with different classes have a large distance .
+5.5 Case Studies To understand why our proposed V A T model is more effective than the standard attention - based model , we visualize two examples of LSTM - based models using attention heatmaps ( Figure 7).First , the standard attention - based LSTM model focuses on the wrong words ( e.g. , “ this ” , “ work ” ) even though it predicts the right sentiment while our V A T model ﬁnds the correct words ( e.g. , “ admired ” , “ lot ” ) .
+It indicates integrating IB into attention can help it focus on the key words and reduce the noisyinformation .
+Second , our proposed model can also improve the attention ’s performance by capturing the critical words accurately .
+For example , in thesentence “ That sucks if you have to take the sats tomorrow . ” , our model predicts the right class label by attending the words “ sucks ” and “ have to . ”
+6 Conclusions and Future Work
+This paper proposes a V A T -based framework to improve the performance and interpretability of attentions via both ﬁne - tuning and compressing .
+The experimental results on eight benchmark datasets for text classiﬁcation verify the effectiveness of
+2160our models within this framework .
+In addition , we apply the framework for sentiment detection , which further demonstrates the superiority in terms of interpretability .
+It is also interesting to ﬁnd that training the models by ﬁne - tuning and compressing iteratively is effective to improve the text representations .
+In the future , we will investigate the effectiveness of our proposed attention framework for other tasks and areas , such as machine translation and visual question answering .
+Acknowledgement
+The authors wish to thank the reviewers for their helpful comments and suggestions .
+This research is ( partially ) supported by NSFC ( 62076097),STCSM ( 18ZR1411500 ) , the Fundamental Research Funds for the Central Universities .
+This research is also funded by the Science and Tech - nology Commission of Shanghai Municipality ( 19511120200 & 20511105102 ) .
+The computation is performed in ECNU Multifunctional Platformfor Innovation ( 001 ) .
+The corresponding authors are Y uanbin Wu and Liang He .
+References Dzmitry Bahdanau , Kyunghyun Cho , and Y oshua Bengio .
+2014 .
+Neural machine translation by jointlylearning to align and translate .
+arXiv preprint arXiv:1409.0473 .
+Seojin Bang , Pengtao Xie , Heewook Lee , Wei Wu , and Eric Xing .
+2019 .
+Explaining a black - box using deep variational information bottleneck approach .
+arXiv preprint arXiv:1902.06918 .
+Y ujia Bao , Shiyu Chang , Mo Y u , and Regina Barzilay .
+2018 .
+Deriving machine attention from human ra - tionales .
+In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 1903–1913 .
+Maria Barrett , Joachim Bingel , Nora Hollenstein , Marek Rei , and Anders Søgaard .
+2018 .
+Sequenceclassiﬁcation with human attention .
+In Proceedings of the 22nd Conference on Computational Natural Language Learning , pages 302–312 .
+Hanjie Chen and Y angfeng Ji . 2020 .
+Learning variational word masks to improve the interpretability ofneural text classiﬁers .
+In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing ( EMNLP ) , pages 4236–4251 .
+Jianbo Chen , Le Song , Martin Wainwright , and Michael Jordan .
+2018 .
+Learning to explain : Aninformation - theoretic perspective on model interpretation .
+In International Conference on Machine Learning , pages 883–892.Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019 .
+Bert : Pre - training of deepbidirectional transformers for language understand - ing .
+In NAACL - HLT ( 1 ) .
+Chaoyu Guan , Xiting Wang , Quanshi Zhang , Runjin Chen , Di He , and Xing Xie . 2019 .
+Towards a deep and uniﬁed understanding of deep neural models in nlp .
+In International conference on machine learning , pages 2454–2463 .
+PMLR .
+Sepp Hochreiter and J ¨urgen Schmidhuber .
+1997 .
+Long short - term memory .
+Neural computation , 9(8):1735–1780 .
+Sarthak Jain and Byron C Wallace .
+2019 .
+Attention is not explanation .
+In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , V olume 1
+( Long and Short Pa - pers ) , pages 3543–3556 .
+Zhiying Jiang , Raphael Tang , Ji Xin , and Jimmy Lin . 2020 .
+Inserting information bottleneck for attribu - tion in transformers .
+In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing : Findings , pages 3850–3857 .
+Y oon Kim , Carl Denton , Luong Hoang , and Alexander M. Rush .
+2017 .
+Structured attention networks .
+In5th International Conference on Learning Representations , ICLR 2017 , Toulon , France , April 24 - 26 , 2017 , Conference Track Proceedings .
+Diederik P Kingma and Jimmy Ba . 2014 .
+Adam : A method for stochastic optimization .
+arXiv preprint arXiv:1412.6980 .
+Jiwei Li , Will Monroe , and Dan Jurafsky .
+2016 .
+Understanding neural networks through representation erasure .
+arXiv preprint arXiv:1612.08220 .
+Xiang Lisa Li and Jason Eisner .
+2019 .
+Specializing word embeddings ( for parsing ) by information bottleneck .
+In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing , EMNLP - IJCNLP 2019 , Hong Kong , China , November 3 - 7 , 2019 , pages 2744–2754 .
+Xin Li and Dan Roth . 2002 .
+Learning question classiﬁers .
+In COLING 2002 : The 19th International Conference on Computational Linguistics .
+Andrew Maas , Raymond E Daly , Peter T Pham , Dan Huang , Andrew Y Ng , and Christopher Potts . 2011 .
+Learning word vectors for sentiment analysis .
+In Proceedings of the 49th annual meeting of the association for computational linguistics : Human language technologies , pages 142–150 .
+James Mullenbach , Sarah Wiegreffe , Jon Duke , Jimeng Sun , and Jacob Eisenstein .
+2018 .
+Explainable pre - diction of medical codes from clinical text .
+In Proceedings of the 2018 Conference of the North Amer - ican Chapter of the Association for Computational
+2161Linguistics : Human Language Technologies , V olume 1 ( Long Papers ) , pages 1101–1111 .
+Dong Nguyen .
+2018 .
+Comparing automatic and human evaluation of local explanations for text classiﬁcation .
+In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , V olume 1 ( Long Papers ) , pages 1069–1078 .
+Bo Pang and Lillian Lee . 2005 .
+Seeing stars : exploiting class relationships for sentiment categorization with respect to rating scales .
+In Proceedings of the 43rd Annual Meeting on Association for Computational Linguistics , pages 115–124 .
+Jeffrey Pennington , Richard Socher , and Christopher D Manning .
+2014 .
+Glove : Global vectors for word rep - resentation .
+In Proceedings of the 2014 conference on empirical methods in natural language process - ing ( EMNLP ) , pages 1532–1543 .
+Marek Rei and Anders Søgaard .
+2018 .
+Zero - shot sequence labeling : Transferring knowledge from sentences to tokens .
+In Proceedings of the 2018 Conference of the North American Chapter of the Asso - ciation for Computational Linguistics : Human Language Technologies , V olume 1 ( Long Papers ) , pages 293–302 .
+Danilo Jimenez Rezende , Shakir Mohamed , and Daan Wierstra .
+2014 .
+Stochastic backpropagation and approximate inference in deep generative models .
+InInternational Conference on Machine Learning , pages 1278–1286 .
+Sara Rosenthal , Preslav Nakov , Svetlana Kiritchenko , Saif Mohammad , Alan Ritter , and V eselin Stoyanov . 2015 .
+SemEval-2015 task 10 : Sentiment analysisin Twitter .
+In Proceedings of the 9th International Workshop on Semantic Evaluation ( SemEval 2015 ) , pages 451–463 .
+Sara Rosenthal , Alan Ritter , Preslav Nakov , and V eselin Stoyanov .
+2014 .
+SemEval-2014 task 9 : Sentiment analysis in Twitter .
+In Proceedings of the 8th International Workshop on Semantic Evaluation ( SemEval 2014 ) , pages 73–80 .
+Wojciech Samek , Alexander Binder , Gr ´ egoire Montavon , Sebastian Lapuschkin , and Klaus - RobertM¨uller .
+2016 .
+Evaluating the visualization of what a deep neural network has learned .
+IEEE transactions on neural networks and learning systems , 28(11):2660–2673 .
+Karl Schulz , Leon Sixt , Federico Tombari , and Tim Landgraf . 2020 .
+Restricting the ﬂow : Informationbottlenecks for attribution .
+In 8th International Conference on Learning Representations , ICLR 2020 , Addis Ababa , Ethiopia , April 26 - 30 , 2020 .
+Richard Socher , Alex Perelygin , Jean Wu , Jason Chuang , Christopher D Manning , Andrew Y Ng , and Christopher Potts . 2013 .
+Recursive deep mod - els for semantic compositionality over a sentimenttreebank .
+In Proceedings of the 2013 conference on empirical methods in natural language processing , pages 1631–1642 .
+Naftali Tishby , Fernando C Pereira , and William Bialek .
+1999 .
+The information bottleneck method .
+InProceedings of the 37th annual Allerton Conference on Communication , Control , and Computing , page 368–377 .
+Ashish V aswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N Gomez , ŁukaszKaiser , and Illia Polosukhin . 2017 .
+Attention is all you need .
+In Advances in neural information processing systems , pages 5998–6008 .
+Sarah Wiegreffe and Y uval Pinter .
+2019 .
+Attention is not not explanation .
+In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLPIJCNLP ) , pages 11–20 .
+Qizhe Xie , Xuezhe Ma , Zihang Dai , and Eduard Hovy . 2017 .
+An interpretable knowledge transfer modelfor knowledge base completion .
+In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics ( V olume 1 : Long Papers ) , pages 950–962 .
+Kelvin Xu , Jimmy Ba , Ryan Kiros , Kyunghyun Cho , Aaron Courville , Ruslan Salakhudinov , Rich Zemel , and Y oshua Bengio . 2015 .
+Show , attend and tell : Neural image caption generation with visual atten - tion .
+In International conference on machine learning , pages 2048–2057 .
+Xiang Zhang , Junbo Zhao , and Y ann LeCun . 2015 .
+Character - level convolutional networks for text clas - siﬁcation .
+Advances in neural information processing systems , 28:649–657 .
+Andrey Zhmoginov , Ian Fischer , and Mark Sandler . 2019 .
+Information - bottleneck approach to salient re - gion discovery .
+arXiv preprint arXiv:1907.09578 .

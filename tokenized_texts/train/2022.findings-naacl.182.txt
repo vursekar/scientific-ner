@@ -1,0 +1,648 @@
+Findings of the Association for Computational Linguistics : NAACL 2022 , pages 2367 - 2387 July 10 - 15 , 2022 © 2022 Association for Computational Linguistics Am I Me or You ?
+State - of - the - Art Dialogue Models Can not Maintain an Identity Kurt Shuster Jack Urbanek Arthur Szlam Jason Weston Facebook AI Research Abstract State - of - the - art dialogue models still often stumble with regards to factual accuracy and self - contradiction .
+Anecdotally , they have been observed to fail to maintain character identity throughout discourse ; and more specifically , may take on the role of their interlocutor .
+In this work we formalize and quantify this deficiency , and show experimentally through human evaluations that this is indeed a problem .
+In contrast , we show that discriminative models trained specifically to recognize who is speaking can perform well ; and further , these can be used as automated metrics .
+Finally , we evaluate a wide variety of mitigation methods , including changes to model architecture , training protocol , and decoding strategy .
+Our best models reduce mistaken identity issues by nearly 65 % according to human annotators , while simultaneously improving engagingness .
+Despite these results , we find that maintaining character identity still remains a challenging problem .
+1 Introduction The exchange of stories from one ’s past , or descriptions of activities in one ’s present , are a fundamental part of human discourse .
+Trustworthy human conversationalists keep their stories roughly straight within a conversation .
+An interlocutor taking on your own stories and persona as theirs is especially jarring and unnatural .
+However , despite the improvements in state - of - the - art open - domain dialogue modeling , both in terms of distributional accuracy metrics like perplexity , and subjectively in terms of human judgements ( Adiwardana et al . , 2020 ; Roller et al . , 2021 ) , interactions with those agents reveal that they can not keep their stories straight .
+In particular , they are likely to take on the role of their interlocutor ; for example , if an agent ’s partner says they are a software engineer , the agent is likely to say it is a software engineer too ( Roller et al . , 2021 ) , or worse , appropriate their partners just told tale of a trip to NAACL as their own .
+SomeSetting : Barn , Farm Partner : Thief Self : Guest Guest : Hail who goes there ? !
+Thief :
+Hello friend I mean you no harm Model Response Guest : I am not your friend , I am your thief !
+I am here to steal from you !
+Character Token Probabilities Thief : 0.39 Guest : 0.23 Setting : Castle Kitchens , Inside Palace Partner : Hunter Self : Helper Hunter :
+Hi Helper : Hello .
+What brings you to the kitchen ?
+Hunter :
+I am chopping some meat that is to be sold .
+Helper : Could you spare me a piece ?
+I ’m starving .
+Hunter :
+It ’s 3 cents a pound , if you have 3 cents then
+yeah Model Response Helper : I do n’t have any money .
+I ’m just a poor hunter trying to make a living .
+Character Token Probabilities Hunter : 0.39 Helper : 0.12 Table 1 : Failures of a 2.7B parameter transformer pretrained on 1.5B examples from a large dialogue corpus ( Roller et al . , 2021 ) and fine - tuned on LIGHT ( Urbanek et al . , 2019 ) .
+The bold words in redhighlight the model mistaking its identity for its partner ’s .
+( Top ) The model believes it is a thief , rather than a guest .
+( Bottom )
+The model believes it is a hunter rather than a helper .
+Token probabilities are given at the position of the mistake for the two names .
+example failure cases are given in Table 1 , where models incorrectly take on the name , role or activities of their partner instead of their assigned role .
+These failures are related to the general problems of repetition in language models ( Holtzman et al . , 2020 ) , the weak influence of word order ( Sinha et al . , 2021 ) and inability to avoid contradictions ( Nie et al . , 2021 ) .
+In this work we formalize and quantify this behavior , show that to some extent it can be detected automatically with a specifically trained classifier , and then study a wide variety of mitigations .
+These include multi - objective training , unlikelihood training ( Li et al . , 2020 ; Welleck et
+al . , 2020),2367
+classifier - assisted re - ranking based generation , and several forms modifying the attention mechanisms of the decoder in a sequence to sequence model .
+Our best methods can reduce mistaken identity issues by 65 % , while simultaneously improving inconversation engagingness ; indeed , our models that can stick to their role in conversation are judged by humans to be significantly more engaging than their baseline counterparts .
+Despite these advances , we find that there is still considerable space to improve these results further in future work .
+We make publicly available both our trained models and code to reproduce results1 .
+2 Related Work Role - Playing in Open - Domain Dialogue Much recent work has explored training open - domain dialogue models on large and small dialogue corpora , with the former imbuing raw conversational ability and the latter providing necessary conversational skills .
+Most crowd - sourced datasets require acting out a role to some capacity in conversation ( though indeed Mazaré et
+al .
+( 2018 ) study extraction of roles from raw data ) .
+Some involve providing persona lines that a model must assume throughout the conversation ( Zhang et al . , 2018 ; Dinan et al . , 2020 ;
+Xu et
+al . , 2021 ) ; others require more subtle " roles " , such as a listener ( Rashkin et al . , 2019 ) , or a teacher and student ( Dinan et al . , 2019b ; Gopalakrishnan et al . , 2019 ; Zhou et
+al . , 2018 ; Komeili et al . , 2021 ) .
+Zheng et al .
+( 2020 ) explore using a discriminative model to predict whether model responses contain similarity with their persona , similar to methods we employ in our work .
+Consistency in Open - Domain Dialogue A common paradigm in the state of the art of open - domain dialogue involves concatenating all relevant contextual information as input to a sequence to sequence neural model ( e.g. , transformers ( Vaswani et
+al . , 2017 ) ) to obtain a conditioned response .
+Such models can yield human - like and engaging responses ( Adiwardana et al . , 2020 ;
+Roller et al . , 2021 ) .
+Nevertheless , various consistency issues still plague such models .
+Recent studies have indicated that hallucination of incorrect knowledge is still far from a solved issue ( Shuster et al . , 2021 ; Santhanam et al . , 2021 ) , with some proposing specific datasets and tools for measuring precisely the levels of this undesired attribute ( Liu et al . , 2021 ) .
+Another clear 1URL will appear here.example of failure is the short - term memory of state - of - the - art models ( Xu et
+al . , 2021 ) , sometimes due to the lack of long - form training data or long - context models but often due to simply the modeling itself .
+To address consistency issues , a variety of methods have been explored .
+In the context of knowledge - grounded dialogue , different ways to attend most effectively over provided contextual information have been explored ( Zheng and Zhou , 2019 ; Ye et
+al . , 2020 ; Prabhumoye et al . , 2021 ; Wang et al . , 2019 ) .
+These works find that considering factual documents separately ( in some capacity ) improves model grounding .
+We explore such methods , but in the context of character identity .
+Another general problem is that of contradictions .
+Nie et al .
+( 2021 ) collect a dataset of contradictions in dialogue , and train classifiers that help re - rank model outputs at inference time ; Li et al .
+( 2020 ) explore unlikelihood training ( Welleck et al . , 2020 ) to reduce repetition and contradiction , among other undesired traits , in model generations .
+The character identity issue we study in this work can be seen as an important class of contradictions , but to the best of our knowledge , has not been explicitly focused on .
+3 Methods 3.1 Problem
+Setting We consider a two - party chat setting .
+The context provided to a model includes : ( i ) the name of its character and the partner ’s character ; ( ii ) an extended description of its own character ; ( iii ) and , information about the area in which the conversation takes place .
+The responsibility of the model is to engage its conversational partner , with no other goal prescribed ; however , it should stay within character and within the bounds of the defined setting .
+We operate in the context of LIGHT ( Urbanek et al . , 2019 ) , consisting of grounded fantasy roleplaying game conversations .
+The LIGHT environment involves humans and models interacting with thousands of objects in hundreds of locations , all while assuming the roles of one of hundreds of characters .
+The dataset consists of roughly 8.5k dialogues spanning 111k utterances .
+It is an ideal setting for this study because of the rich and varied personas with explicit backstories .
+To quantify the character identity problem , we take a state - of - the - art dialogue agent ( specifically , BlenderBot ( Roller et al . , 2021 ) )
+fine - tuned on the2368
+LIGHT dialogue dataset and ask human annotators if the agent mistakes its identity based on its utterances in context .
+The agent conditions its response on the LIGHT context and prior utterances in the dialogue history .
+We see in Table 4 that in roughly 6.5percent of utterances the model mistakes its identity ; this corresponds to a mistake in approximately 35percent of conversations .
+BlenderBot uses a Byte - Level BPE tokenizer ( Radford et al . , 2019 ) ; an artifact from the BlenderBot pre - training is that it only considers 128 such tokens in the past , and thus has no mechanism for recovering truncated information about the LIGHT context in later conversational turns .
+Our second baseline lengthens the input context to 1024 BPE tokens , which allows the entire context for every example to fit into the truncation length of the model ; we follow methods employed in Xu et
+al . ( 2021 ) to extend the positional embeddings of the model .
+We see in Table 4 that this actually makes the problem worse , resulting in 7.4percent of utterances with mistaken identity ( corresponding to a failure in approximately 38percent of conversations ) .
+3.2 Measuring Role - Playing Accuracy : RPA We first define a metric , role - playing accuracy ( RPA ) , to denote how often a model ’s responses are “ in - character ” ; by this , we mean how often the model ’s response could feasibly be said by their character , given their assigned character identity .
+Measuring RPA is a non - trivial task for a variety of reasons .
+First , some conversations involve pairs that can reasonably say similar things ( priest vs. priestess , man vs. woman , wizard vs. witch ) .
+Second , opening lines are often more generic ( “ hello ” , “ how fare your travels today ” ) , so either character can say it in conversation .
+The third reason stems from the data that we study ; we are relying on crowdsourced data in which humans are required to portray their characters .
+Some crowdworkers may be better than others , and there may be some noise in the dataset in which , e.g. , a horse may proclaim its love for a queen , or a knight may discuss at length the kingdom ’s tax collecting .
+Given the difficulties above , our primary measure of RPA involves human annotation of model responses , specifically evaluating whether a candidate response fits a given model ’s character .
+We thus have human crowdworkers chat with each model in a LIGHT setting ; each is given a character and asked to role - play , while the human an - notates each model response , determining whether the model is in character : we denote this metric as “ Mistaken Identity ” in our experiments , and other utterance - level annotations are collected .
+Further details regarding human evaluation are outlined in Section 4.7 .
+Despite the efficacy of human evaluation , it is both costly and slow ; as a proxy , we thus train models specifically designed to identify whether a candidate response from a model fits the model ’s role , and denote these as “ RPA Classifiers ” .
+We employ poly - encoder transformers ( Humeau et al . , 2020 ) to learn this metric , and structure the task as a ranking one ; the model receives the LIGHT setting and prior utterances of dialogue as input , as well as the response currently under consideration , and the model must choose the correct character from a fixed set of candidates .
+We also explore RPA classifiers trained on all partially complete sequences of labels , such that the classifiers can determine the character speaking without requiring the full utterance ; we call these left - to - right ( LTR ) RPA classifiers .
+Further details about how our RPA classifiers are built are given in Appendix B. 3.3 Mitigations In this section we describe several strategies for improving the role - playing accuracy of dialogue agents , specifically ways to improve our transformer baselines .
+3.3.1 Re - ranking Model Outputs via RPA We can employ an RPA classifier in response generation by using it to rank candidate model outputs .
+Utterance Re - ranking : Given a set of candidate responses , the RPA classifier can re - score the set and return the response yielding the highest probability of staying in character ( according to the RPA score on the complete candidate generations ) .
+The dialogue models employ beam - search to generate responses , and the candidates for re - ranking are the beams within beam - search .
+We also try nucleus sampling ( Holtzman et al . , 2020 ) and delayed beam - search ( Massarelli et al . , 2020 ) to see whether more diverse candidates have any effect .
+Partial And Complete Efficient Re - ranking ( PACER ): Re - ranking only the final beam candidates may be suboptimal because it is well known that those candidates are not very diverse ( Kulikov et al . , 2019 ) , meaning there may not be any good candidates to choose from in this final set .
+In order2369
+to generate utterances that agree with our classifiers , a possible improvement is to generate the utterance such that partial generations also agree with the classifier when generating left - to - right , ensuring that good candidates are surfaced .
+With access to LTR RPA classifiers , we can apply re - ranking to partial sequences .
+Unfortunately , re - ranking at every step of beam search , for every token , requires significant computation , such as in the recent FUDGE method ( Yang and Klein , 2021 ) .
+FUDGE re - scores tokens at each decoding step by multiplying the classifier probability with each token probability , and renormalizing , which is used for control tasks with lightweight classifiers in order to be tractable .
+In our proposed approach , called PACER , we re - score candidate tokens , for each beam , according to the probability that their inclusion yields the appropriate character classification , and then finally re - rank the complete candidate beams .
+To make this efficient , we crucially score only a small proportion of decoding steps ( e.g. , 5 % of token positions ) as well as for only a few candidate rescored tokens ( e.g. , top 10 only ) .
+We can control these hyperparameters to explore the speed vs. accuracy trade - off .
+3.3.2 Unlikelihood
+We explore utilizing an unlikelihood ( UL ) loss ( Li et al . , 2020 ; Welleck et
+al . , 2020 ) to force the model to stay in character during training .
+Unlikelihood training works as a counter to the standard maximum likelihood ( MLE ) training of language models ; while MLE training pushes the model to generate the correct tokens , UL training pushes the model to notgenerate incorrect tokens .
+While training on the LIGHT dataset with standard NLL loss , with some fixed probability we consider a candidate model generation for UL loss .
+The full generation is sent to the RPA classifier ; if the generation is classified as coming from the incorrect character , we examine each partial generated sequence of the output , and send these sequences to the LTR RPA classifier to determine whether the candidate partial sequences match the model ’s character .
+We apply UL loss to tokens that yield the wrong character classification .
+3.3.3 Multi - objective Training The RPA classifiers utilize the LIGHT setting and prior utterances of dialogue history to determine which character generates a candidate response .
+We hypothesize that the generation models themselves should be able to pick out and utilize these components as well .
+However , the RPA classifier models are trained explicitly for this task , whereas the seq2seq models are trained only to generate a plausible continuation of a dialogue history .
+We thus explore a setup in which the generation models are trained to identify the speaker of an utterance as well .
+To do this , we use the output representations from the model ( either encoder + decoder , or decoder only ) as inputs to nMOadditional transformer layers , where we vary nMO∈ { 0,2 } .
+The final outputs are used to compute a character score , similarly to the RPA classifier .
+The model can then be trained piece - wise .
+After initializing the model weights with those trained on the LIGHT response generation task , we then train only the extra layers with only the character classification objective ; once the classifier achieves suitable performance on the task , we can begin to back - propagate the character classification objective multi - tasking with the dialogue task itself to the generation model directly , in the hope that the model learns to update its internal representations of the context and/or the decoded response .
+3.3.4 Expanded Decoder Attention Maintaining identity relies on the model ’s capacity to understand which inputs from the conversational history are pertinent when generating a continuation of the preceding dialogue .
+In a standard , opendomain chit - chat scenario , the model has free reign to decide which elements of the context it would like to condition on when generating a response , as we are dealing with a nearly unconstrained output space ( so long as the output follows plausibly from the input ) .
+In LIGHT , however , we want to emphasize certain components of the context more so than others ; specifically , when role - playing as a character , we want the model to always be reminded of its role , so that it can conditionally generate an optimal response while staying in character .
+In this lens , one can view the task as “ grounding " on one ’s character information when conversing .
+Profile Grounding Inspired by models demonstrating good performance in knowledge - grounded dialogue ( Zheng and Zhou , 2019 ; Ye et al . , 2020 ; Prabhumoye et al . , 2021 ; Wang et al . , 2019 ) , we propose a simple extension to the transformer seq2seq architecture , specifically the decoder , to ensure the model knows to condition on the pro-2370
+file .
+The standard transformer decoder first uses self - attention over the decoded response , and then cross - attention over the encoder outputs .
+We add a third attention step , expanded attention , that attends again over an extracted subset of the input context ( encoded separately from the normal context ) .
+We explore various subsets of the context to determine which are most important for both RPA and other automated metrics , and call this method “ Profile ” grounding as the subsets generally include the character and role description .
+We utilize the exact same ( shared ) parameters for both the normal cross - attention and the expanded attention ; thus , model size is not affected .
+Automated Grounding Instead of directly telling the model what to re - attend to , we also explore whether the model can learn to do this automatically , based on its own ( or other ) representations of the context .
+The first method we consider is examining the decoder attention weights .
+Specifically , we use the attention weights from the decoder over the full context to choose ktokens to re - attend to .
+This operation is done on a per - layer basis , and thus allows different decoder layers to re - attend to ( potentially different ) components of the input .
+The second method we consider is a trainable mask ; this involves feeding the encoded context through a “ mask ” layer to select various tokens to re - attend to .
+Specifically , we feed the context through a linear projection layer followed by a softmax to select the top- ktokens .
+This set of tokens is then re - encoded by the encoder and fed to the decoder as the expanded attention context .
+Finally , we explore using the classifier attention weights over the context from the RPA classifier itself .
+Intuitively , the RPA classifier has learned what components of the input are necessary for determining which character is speaking ; if we look at these attention weights when considering the model ’s character , we know what the classifier thinks is important to use .
+Combined Methods We also consider combining expanded attention with re - ranking methods , or with multi - objective training , to see if the combination can improve results .
+For the latter we use the automated grounding trainable mask method .
+Train Ranking Accuracy ( Hits@1/427 ) split # Eval Contextual Utterances Full Datasplit LTR Datasplit 0 4 All 0 4 All LTR 64.8 84.3 83.9 61.7 80.5 80.5 Full 31.0 86.5 84.9 27.8 75.3 74.9 Table 2 : RPA classifier performance on the validation set , comparing a partial - sequence trained model ( “ LTR ” ) to one trained only on full sequences ( “ Full ” ) .
+Models were trained with 4 prior utterances of context .
+Re - ranker Params F1 RPA Cost # Toks Freq .
+None 0 0 15.8 88.4 1x Complete - only 0 0 16.0 93.0 1.1x Partial - only 10 5 % 15.9 88.6 1.3x Partial - only 10 33 % 158 91.1 4.2x Partial - only 10 100 % 15.6 93.6 11.2x Partial - only 50 5 % 15.9 88.9 3.0x PACER 10 5 % 16.1 93.3 1.2x PACER 10 33 % 15.9 94.6 3.8x PACER 10 100 % 15.8 96.3 11.5x Table 3 : Models ( 128 - truncated ) evaluated with various re - ranking schemes on the validation set .
+Cost is relative speed compared to no re - ranking at all .
+4 Experimental Results 4.1 RPA Classifiers We first assess the quality of our RPA classifiers .
+We measure hits@1/427 , where the model must correctly identify the character speaking out of 427 characters from the validation set , comparing the standard and left - to - right ( LTR ) models in Table 2 .
+We experiment with either 0 , 4 , or All prior context utterances .
+The LTR classifiers perform nearly as well as the full classifiers on the full datasplit , and outperform them on the LTR split .
+Given the robustness of the LTR RPA classifiers , we use this model for computing RPA throughout the remaining results , unless otherwise specified .
+Further results are given in Appendix Table 10 .
+4.2 Baseline Generation Performance We next train baseline models for the dialogue generation task itself .
+Performance on the LIGHT dataset test split for our baseline models can be found in Table 4 , with results on the validation set in Table 17 in the Appendix .
+While lengthening the context from 128 to 1024 tokens yields better perplexity , the model obtains worse F1 scores and does not improve much if at all on role playing ability , both when measured by the RPA classifiers and in human evaluations ( see also Table 19 ) .
+Further2371
+Automatic Metrics Human Evaluations Model PPL↓
+F1↑RPA↑Mistaken All - Good ↑
+Mis .
+Id. Engaging ↑ Identity ↓ in Conv .
+↓
+Human - - 92.68 1.34 % - 5.0 % Baselines 128 - Truncate Vanilla Baseline 12.64 15.69 87.61 6.45 % 76.0 % 35.1 % 4.04 1024 - Truncate Vanilla Baseline 12.43 15.68 87.71 7.35 % 75.0 % 38.4 % 4.16 Re - rankers 128 - Truncate Baseline + RPA Re - ranker - 15.87 92.09 5.56 % 80.3 % 34.7 % 4.14 128 - Truncate Baseline + PACER - 15.85 92.78 4.27 % 73.9 % 33.7 % 3.96 Modified Training Objectives RPA Unlikelihood ( Top-1 Token ) 13.10 15.18 87.48 7.13 % 72.8 % 39.4 % 3.87 RPA Unlikelihood ( All Tokens ) 13.31 14.77 88.07 10.51 % 67.7 % 43.0 % 3.87 Multi - Objective ( Vanilla , Dec. Only ) 12.86 15.67 87.67 10.00 % 74.8 % 49.0 % 4.21 Expanded Attention Methods Profile ( 128 , 2 rounds over ABC ) 12.37 15.74 91.70 4.82 % 81.6 % 28.4 % 4.18 Profile ( 1024 , 2 rounds over ABCD )
+12.23 15.66 92.18 4.00 % 83.8 % 23.8 % 4.34 Automated ( 1024 , Classifier Attn ) 12.27 15.75 90.93 5.51 % 76.0 % 29.1 % 4.04 Automated + MO ( 1024 , Dec. Only ) 13.01 15.52 88.95 4.43 % 78.6 % 23.0 % 4.12 Expanded Attention + Re - ranker Methods Profile ( 128 ) + RPA Re - ranker -15.88 95.16 2.23 % 84.4 % 14.7 % 4.24 Profile ( 128 ) + PACER - 15.79 95.31 4.07 % 85.7 % 24.5 % 4.32 Table 4 : Automated metrics and human evaluations for various models considered throughout the paper on the LIGHT testset .
+RPA ( Role - Playing Accuracy ) is measured by the 4 - utterance LTR classifier , see Sec . 3.2 .
+The human evaluations are per utterance , except for Engaging and Mistaken Identity in Conversation ( with the latter indicating % of conversations with mistaken identity ) .
+detailed training and optimization specifications are given in Appendix A. 4.3 RPA Re - ranker Performance Table 4 gives results for RPA - based re - ranking of generation models .
+Automated results show a slight bump in F1 on the LIGHT valid set , and indeed a bump in RPA .
+Including the intra - generation re - ranking with PACER yields an even higher RPA score .
+Table 3 contains the results of varying the candidate tokens re - ranked per intra - generation step ( # Toks ) and number of partial re - ranking steps ( Freq ) , both in terms of generation metrics / RPA and relative computational cost compared to reranking .
+Increasing # of toks or increasing the frequency can lead to improved F1 and RPA , but with significant latency increase for too high values ( e.g. over 11x when applying re - ranking for every partial step using the top 10 tokens each time ) .
+Applying both partial and final complete ranking helps performance .
+Note that re - ranker models use the same model to re - rank that is being used to measure RPA afterwards , making that metric biased .
+Hence , human evaluations are required for this model , which will be detailed in Section 4.7 , and which will indicate that re - ranking does in fact help.4.4 Unlikelihood Results of unlikelihood ( UL ) training are also given in Table 4 .
+We apply UL loss to the 128 - truncation model in two different ways : ( 1 ) Top-1 : apply the loss on the token that yields the most incorrect partial sequence RPA classification ; ( 2 ) All : apply the loss to all tokens that yield an incorrect RPA classification on partial sequences .
+The RPA UL methods suffer compared to the baselines in terms of PPL and F1 , yet they retain similar RPA metrics .
+We hypothesize that while the UL loss can adjust the model to refrain from generating outof - character responses , there are still far too many other tokens that may yield similar outcomes that are not penalized .
+Table 12 in Appendix D includes similar results with the 1024 - truncation model .
+4.5 Multi - Objective Training Multi - objective training results are in Table 5 , where the base model is a 1024 - truncation model .
+We measure generation metrics in terms of RPA ( with PPL and F1 in Table 13 in Appendix E ) , and classification metrics in terms of Hits@1/427 as before .
+The model is able to predict the appropriate character using either the decoder outputs or the encoder+decoder outputs .
+For each case , nMO = 2 yielded better results than nMO = 0 .
+Interestingly , despite the relatively strong performance of the model in classifying the right character ( 87.422372
+Input nMO Stage RPA Hits@1 Human N / A - 92.8 None 0 0 88.4 Multi - Objective Dec. only 2 1 88.4 39.3 Dec. only 2 2 87.7 87.4 Enc+Dec 2 1 88.4 70.9 Enc+Dec 2 2 88.8 71.6 Multi - Objective + Automated Expanded Attention Dec.
+Only 0 1 89.1 86.4 Dec. Only 0 2 89.1 89.1 Enc+Dec 2 1 88.4 83.3 Enc+Dec 2 2 89.1 88.5 Table 5 : Models trained with varying multi - objective setups , evaluated on the valid set .
+Models are initialized from a ( 1024 - truncation ) model fine - tuned on LIGHT .
+hits@1 for the best model ) , this does not translate to substantial RPA improvements over the baseline .
+4.6 Expanded Attention Profile Grounding Expanding the decoder attention yields significant gains across all automated metrics , as seen in Table 6 for a 1024 - truncate model ( and in Table 15 in Appendix F for a 128truncate model ) .
+As a baseline we explore simply re - attending to the full context again ; this indeed improves metrics across the board for the shortcontext model , but the long - context model actually suffers .
+However , both models improve substantially over the baseline when including the full LIGHT context without the dialogue history , and attention over sub - components of the LIGHT context still yields strong improvements .
+To see how much this expanded attention matters , we explored varying the number of rounds r∈ { 1,2,3}of expanded attention , i.e. , how many times the model attends to this additional context .
+In Table 6 , we also see that a second expanded attention round yields even better results , but performance drops off after applying a third round .
+Automated Grounding We show results for the automated grounding of expanded attention in Table 7 .
+Attempting to use the decoder attention weights to select expanded attention context yields no additional benefits , which is not surprising : if the model could identify the pertinent components of the input beforehand , it would not require a reattention .
+The trainable mask does not yield any benefits either .
+However , using the RPA classifier attention weights to inform the model which tokens to re - attend to yields improved performance across all three metrics compared to the baseline , and PPLExpanded Attention r 1024 - Truncate Model PPL F1 RPA Human 0 - - 92.80 None 0 12.35 15.85 88.42 ABCD + Dialogue Hist .
+1 12.47 15.82 88.34 ABCD 1 12.18 16.01 91.82 ABCD 2 12.17 15.95 92.60 ABCD 3 12.19 15.99 91.73 ABC 1 12.22 15.94 91.83 ABC 2 12.24 15.99 92.24 ABC 3 12.25 15.93 92.25 AB 1 12.27 15.87 90.97 A 1 12.30 15.80 89.13 B 1 12.34 15.76 89.46 Table 6 : Models trained with expanded attention ( profile grounding ) , evaluated on the valid set .
+Expanded attention input : A = Self Persona , B = Self Name , C = Partner Name , D = Setting Description .
+We also vary the number of rounds rof expanded attention .
+Exp .
+Attn .
+Grounding PPL F1 RPA Human - - 92.80 None 12.35 15.85 88.42 Profile Ground Best ( 2 rounds ) 12.17 15.95 92.60 Profile Ground Best ( 1 round ) 12.18 16.08 91.79 Profile Ground Random 12.43 15.74 87.62 Decoder Attn .
+12.39 15.40 87.59 Trainable Mask 12.40 15.75 88.43 Classifier Attn .
+( top- k ) 12.19 15.90 91.11 Classifier Attn .
+( bottom- k ) 12.31 15.89 88.71 Table 7 : Models trained with expanded attention ( automated grounding ) , evaluated on the valid set .
+We vary the method for selecting the extra context to re - attend to .
+All models are long - truncation ( 1024 ) .
+is nearly the same as profile grounding ( 12.19 vs. 12.18 ) , while RPA trails slightly behind ( 91.11 vs. 91.79 ) .
+We also include the usage of the bottom- k tokens from the classifier weights to emphasize that there is indeed signal from the top- k , as using the bottom tokens does not help .
+Automated Grounding + Multi - Objective Table 5 shows that combining automated grounding with the multi - objective task yields higher hits@1 compared to not using the trainable mask , especially in the first stage of multi - objective training .
+However , RPA scores are only fractionally better than the baseline .
+Appendix E includes results across more settings ( see Table 13 and Table 14 ) .
+Expanded Attention + RPA Re - ranking The expanded attention and RPA re - ranker methods can also both be applied to obtain effective models .
+Results are in Table 4 ; indeed , the combination yields the highest F1 and RPA scores.2373
+4.7 Human Evaluations We performed human evaluation on our models .
+For each model we collected 100 human - model conversations , set up similarly to the original LIGHT dataset conversations .
+During the conversation , crowdworkers were asked to annotate the model ’s response for the following attributes : 1 ) Mistaken Identity : your partner says something that would imply they believe they ’re someone other than who they ’re noted to be ; 2 ) Contradiction : your partner says something that contradicts something they ’ve said before ; 3 ) Wrong Location : your partner says something that would imply they believe they are in a different location than the provided one ; 4 ) Unrelated : your partner says something that does n’t follow the previous turns ; and 5 ) Repetitive : your partner says something they ’ve already said , or are driving the conversation in circles .
+Utterances that do not contain any of the negative attributes are denoted “ all good ” .
+Finally , we collect an engagingness score on a scale of 1 - 5 at the end of the conversation .
+More details in Appendix I. Results are given in Table 4 , with more details results ( and comparison with a retrieval baseline ) in Table 19 in the Appendix .
+The baseline model displays mistaken identity 6.45 % of the time , and has an average engagingness score of 4.04 .
+Longer context increases engagingness to 4.16 but also increases mistaken identity .
+Unlikelihood and multiobjective training similarly increase mistaken identity .
+The successful methods , then , are the beam reranking methods and the expanded attention models .
+The long - context beam re - ranker decreases mistaken identity to 4.81 % , while the profile expanded attention model improves to 4 % , and has the best engagingness of 4.34 .
+Combining RPA Reranking with expanded attention yields the lowest mistaken identity ( 2.38 % ) , while adding PACER leads to the highest all - good percentage ( 85.7 % ) .
+Correlations between automatic metrics and human evaluations are measured in Appendix K , where we find that RPA and mistaken identity are indeed strongly correlated .
+5 Qualitative Analysis 5.1 Re - rankers & Generation Settings
+We further explored three decoding settings : standard beam - search , delayed beam search ( Massarelli et al . , 2020 ) and nucleus sampling ( Holtzman et al . , 2020 ) , both in a re - ranking setting and not .
+When considering performance on automated metrics(provided in Table 20 in the Appendix ) , we see that generation settings other than beam search , when using a re - ranker , yield lower F1 scores but higher RPA scores , as the RPA re - ranker has more diversity of candidate responses from which to choose ; however , these methods perform worse in human evaluations , with nucleus sampling reranking yielding far more problems and far lower engagingness ratings .
+Qualitative analysis of outputs on the test set are in Appendix J.1 .
+5.2 Classifier Failure Modes We note that the human dialogue data is classified as being “ in character ” only 92.8 % of the time on the validation set by the LTR RPA classifier .
+We examine the scenarios in which the classifier is incorrect , with example input / output pairs in Table 21 in the Appendix .
+First , there are instances where either character could have said the output response ( row 1 ) .
+Second , there are instances where there are not enough clues in the context to provide an estimation of who said the response , for example at the beginning of the conversation ( row 2 ) .
+And , there are still some small amount of instances that the classifier simply fails ( row 3 ) .
+5.3 Model Failure Modes We analyze the results of turn annotation to understand what failure modes contribute to mistaken identity .
+A full list of such modes is in Table 16 ; the baseline model most often mistakes its partner for itself ( i.e. , the model thinks it is talking to itself ) .
+Other common failures include the model thinking that it is its partner ’s character , or emulating irrelevant characteristics .
+5.4 Per - Turn Character Accuracy Analysis We consider the RPA of various models when evaluated across the turns of conversation .
+Intuitively , baseline models would suffer as the conversation goes on for a variety of reasons ( character roles are truncated out of context , more input yields noisier outputs , etc . ) .
+Appendix Figure 1 shows the perturn results for a set of representative models .
+The human outputs are most often correct on the first turn , with gradual RPA decay throughout the conversation .
+The 128 - truncate baseline , as expected , suffers a dramatic performance drop after the first couple of turns .
+Meanwhile , with the profile expanded attention , we see near - human performance , with better RPA in later turns .
+Including RPA reranking improves dramatically over all turns.2374
+5.5 Expanded Attention Visualization To gain some insight into what is happening with the expanded attention , we mapped out the attention between context and response tokens for both a baseline model with no expanded attention , and a model with profile expanded attention .
+Figures 4 and 5 in the Appendix display the heat maps for an example context and response , with details on heat map construction given in Appendix M.
+We find that the baseline model spreads its attention out across both the LIGHT context and the dialogue history , with the majority of the attention looking at overlapping words in the context and the response and almost no attention on the character names .
+The expanded attention model concentrates on the recent dialogue history heavily in the first level of attention , and then concentrates on pertinent words in the context related to the character information ( i.e. , the character names ) in the second round of attention .
+6 Conclusion In this work we explored the problem of maintaining one ’s character in open dialogue , and showed that state - art - of - the - art models have a fundamental weakness in this regard .
+We provided a clear framing of the problem and showed one can build automatic metrics ( RPA ) that evaluate models using a classifier .
+We then explored a variety of methods throughout this paper .
+While a wide variety of well - known techniques , such as multi - objective or unlikelihood training , have little impact , we found that expanded attention and re - ranking are two approaches that can help to a degree , and their combination also improves results .
+Our introduced method PACER performs well and may be suitable for other tasks beyond the focus of this paper .
+Nevertheless , our best methods still lag behind human ( crowdworker ) performance in several regards , e.g. 1.34 % vs. 2.23 % in terms of mistaken identity per turn , or 5 % vs. 14.7 % per conversation .
+Therefore considerable progress still has to be made on this challenging problem .
+7 Ethical Considerations Limitations We note in the conclusion that the problem is not solved ; our best models still lag behind human performance in maintaining character identity .
+All results are tested in the LIGHT environment , comprising open - domain dialoguewithin constrained settings with assigned characters .
+The application of these methods to other role - playing ( or otherwise ) settings is left for future work , though we believe that such methods could be beneficial outside of LIGHT .
+Potential Risks We provide methods for mitigating mistaken identity in dialogue models .
+It follows that such methods yield models that are more convincingly role - playing as a given character .
+With more convincingly in - character models , someone with bad intentions could have a model imitate realworld people without consent , or worse , can say negative / harmful things while impersonating someone else .
+We note that our methods are orthogonal to improvements in dialogue safety ( Xu et al . , 2020 ; Dinan et al . , 2019a ) , and so can be used in tandem to mitigate these potential risks .
+Scientific Artifacts
+We make use of LIGHT in this work ( Urbanek et al . , 2019 ) ( released under CC - BY license ) , an English - language crowdsourced dataset .
+We also plan to release the code and models ( will be released under MIT license ) , with the intended use being for others ( and ourselves ) to reproduce and build upon the research discussed in this paper .
+References Daniel Adiwardana , Minh - Thang Luong , David R
+So , Jamie Hall , Noah Fiedel , Romal Thoppilan , Zi Yang , Apoorv Kulshreshtha , Gaurav Nemade , Yifeng Lu , et al . 2020 .
+Towards a human - like open - domain chatbot .
+arXiv preprint arXiv:2001.09977 .
+Jason Baumgartner , Savvas Zannettou , Brian Keegan , Megan Squire , and Jeremy Blackburn .
+2020 .
+The pushshift reddit dataset .
+arXiv preprint arXiv:2001.08435 .
+Emily Dinan , Samuel Humeau , Bharath Chintagunta , and Jason Weston . 2019a .
+Build it break it fix it for dialogue safety : Robustness from adversarial human attack .
+In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLP - IJCNLP ) , pages 4537–4546 , Hong Kong , China .
+Association for Computational Linguistics .
+Emily Dinan , Varvara Logacheva , Valentin Malykh , Alexander Miller , Kurt Shuster , Jack Urbanek , Douwe Kiela , Arthur Szlam , Iulian Serban , Ryan Lowe , Shrimai Prabhumoye , Alan W. Black , Alexander Rudnicky , Jason Williams , Joelle Pineau , Mikhail Burtsev , and Jason Weston .
+2020 .
+The second conversational intelligence challenge ( ConvAI2 ) .
+In The2375
+NeurIPS ’ 18 Competition , pages 187–208 , Cham .
+Springer International Publishing .
+Emily Dinan , Stephen Roller , Kurt Shuster , Angela Fan , Michael Auli , and Jason Weston .
+2019b .
+Wizard of wikipedia : Knowledge - powered conversational agents .
+In 7th International Conference on Learning Representations , ICLR 2019 , New Orleans , LA , USA , May 6 - 9 , 2019 .
+OpenReview.net .
+Karthik Gopalakrishnan , Behnam Hedayatnia , Qinglang Chen , Anna Gottardi , Sanjeev Kwatra , Anu Venkatesh , Raefer Gabriel , Dilek Hakkani - Tür , and Amazon Alexa AI . 2019 .
+Topical - chat : Towards knowledge - grounded open - domain conversations .
+In INTERSPEECH , pages 1891–1895 .
+Ari Holtzman , Jan Buys , Li Du , Maxwell Forbes , and Yejin Choi .
+2020 .
+The curious case of neural text degeneration .
+In 8th International Conference on Learning Representations , ICLR 2020 , Addis Ababa , Ethiopia , April 26 - 30 , 2020 .
+OpenReview.net .
+Samuel Humeau , Kurt Shuster , Marie - Anne Lachaux , and Jason Weston .
+2020 .
+Poly - encoders : Architectures and pre - training strategies for fast and accurate multi - sentence scoring .
+In 8th International Conference on Learning Representations , ICLR 2020 , Addis Ababa , Ethiopia , April 26 - 30 , 2020 .
+OpenReview.net .
+Diederik P. Kingma and Jimmy Ba . 2015 .
+Adam : A method for stochastic optimization .
+In 3rd International Conference on Learning Representations , ICLR 2015 , San Diego , CA , USA , May 7 - 9 , 2015 , Conference Track Proceedings .
+Mojtaba Komeili , Kurt Shuster , and Jason Weston .
+2021 .
+Internet - augmented dialogue generation .
+Ilia Kulikov , Alexander Miller , Kyunghyun Cho , and Jason Weston .
+2019 .
+Importance of search and evaluation strategies in neural dialogue modeling .
+In Proceedings of the 12th International Conference on Natural Language Generation , pages 76–87 , Tokyo , Japan .
+Association for Computational Linguistics .
+Margaret Li , Stephen Roller , Ilia Kulikov , Sean Welleck , Y - Lan Boureau , Kyunghyun Cho , and Jason Weston .
+2020 .
+Do n’t say that !
+making inconsistent dialogue unlikely with unlikelihood training .
+In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 4715–4728 , Online .
+Association for Computational Linguistics .
+Chia - Wei Liu , Ryan Lowe , Iulian Serban , Mike Noseworthy , Laurent Charlin , and Joelle Pineau .
+2016 .
+How not to evaluate your dialogue system : An empirical study of unsupervised evaluation metrics for dialogue response generation .
+Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing .
+Tianyu Liu , Yizhe Zhang , Chris Brockett , Yi Mao , Zhifang Sui , Weizhu Chen , and Bill Dolan .
+2021 .
+A token - level reference - free hallucination detection benchmark for free - form text generation .
+Ilya Loshchilov and Frank Hutter .
+2019 .
+Decoupled weight decay regularization .
+In International Conference on Learning Representations .
+Luca Massarelli , Fabio Petroni , Aleksandra Piktus , Myle Ott , Tim Rocktäschel , Vassilis Plachouras , Fabrizio Silvestri , and Sebastian Riedel .
+2020 .
+How decoding strategies affect the verifiability of generated text .
+In Findings of the Association for Computational Linguistics : EMNLP 2020 , pages 223–235 , Online .
+Association for Computational Linguistics .
+Pierre - Emmanuel Mazaré , Samuel Humeau , Martin Raison , and Antoine Bordes .
+2018 .
+Training millions of personalized dialogue agents .
+In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 2775–2779 , Brussels , Belgium . Association for Computational Linguistics .
+Alexander Miller , Will Feng , Dhruv Batra , Antoine Bordes , Adam Fisch , Jiasen Lu , Devi Parikh , and Jason Weston . 2017 .
+ParlAI : A dialog research software platform .
+In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing : System Demonstrations , pages 79–84 , Copenhagen , Denmark .
+Association for Computational Linguistics .
+Yixin Nie , Mary Williamson , Mohit Bansal , Douwe Kiela , and Jason Weston .
+2021 .
+I like fish , especially dolphins : Addressing contradictions in dialogue modeling .
+In Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing ( Volume 1 : Long Papers ) , pages 1699–1713 , Online .
+Association for Computational Linguistics .
+Shrimai Prabhumoye , Kazuma Hashimoto , Yingbo Zhou , Alan W Black , and Ruslan Salakhutdinov .
+2021 .
+Focused attention improves documentgrounded generation .
+In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 4274–4287 , Online .
+Association for Computational Linguistics .
+Alec Radford , Jeffrey Wu , Rewon Child , David Luan , Dario Amodei , and Ilya Sutskever . 2019 .
+Language models are unsupervised multitask learners .
+OpenAI Blog , 1(8 ) .
+Hannah Rashkin , Eric Michael Smith , Margaret Li , and Y - Lan Boureau .
+2019 .
+Towards empathetic opendomain conversation models : A new benchmark and dataset .
+In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 5370–5381 , Florence , Italy . Association for Computational Linguistics .
+Stephen Roller , Emily Dinan , Naman Goyal , Da Ju , Mary Williamson , Yinhan Liu , Jing Xu , Myle Ott , Eric Michael Smith , Y - Lan Boureau , and Jason Weston .
+2021 .
+Recipes for building an open - domain chatbot .
+In Proceedings of the 16th Conference of2376
+the European Chapter of the Association for Computational Linguistics : Main Volume , pages 300–325 , Online .
+Association for Computational Linguistics .
+Sashank Santhanam , Behnam Hedayatnia , Spandana Gella , Aishwarya Padmakumar , Seokhwan Kim , Yang Liu , and Dilek Hakkani - Tur . 2021 .
+Rome was built in 1776 : A case study on factual correctness in knowledge - grounded response generation .
+Kurt Shuster , Spencer Poff , Moya Chen , Douwe Kiela , and Jason Weston .
+2021 .
+Retrieval augmentation reduces hallucination in conversation .
+In Findings of the Association for Computational Linguistics : EMNLP 2021 , pages 3784–3803 , Punta Cana , Dominican Republic .
+Association for Computational Linguistics .
+Koustuv Sinha , Robin Jia , Dieuwke Hupkes , Joelle Pineau , Adina Williams , and Douwe Kiela . 2021 .
+Masked language modeling and the distributional hypothesis : Order word matters pre - training for little .
+InProceedings of the 2021 Conference on Empirical Methods in Natural Language Processing , pages 2888–2913 , Online and Punta Cana , Dominican Republic .
+Association for Computational Linguistics .
+Jack Urbanek , Angela Fan , Siddharth Karamcheti , Saachi Jain , Samuel Humeau , Emily Dinan , Tim Rocktäschel , Douwe Kiela , Arthur Szlam , and Jason Weston .
+2019 .
+Learning to speak and act in a fantasy text adventure game .
+In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLPIJCNLP ) , pages 673–683 , Hong Kong , China .
+Association for Computational Linguistics .
+Ashish Vaswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N. Gomez , Lukasz Kaiser , and Illia Polosukhin . 2017 .
+Attention is all you need .
+In Advances in Neural Information Processing Systems 30 : Annual Conference on Neural Information Processing Systems 2017 , December 4 - 9 , 2017 , Long Beach , CA , USA , pages 5998–6008 .
+Xinyi Wang , Jason Weston , Michael Auli , and Yacine Jernite .
+2019 .
+Improving conditioning in contextaware sequence to sequence models .
+Sean Welleck , Ilia Kulikov , Stephen Roller , Emily Dinan , Kyunghyun Cho , and Jason Weston .
+2020 .
+Neural text generation with unlikelihood training .
+In 8th International Conference on Learning Representations , ICLR 2020 , Addis Ababa , Ethiopia , April 26 - 30 , 2020 .
+OpenReview.net .
+Jing Xu , Da Ju , Margaret Li , Y - Lan Boureau , Jason Weston , and Emily Dinan . 2020 .
+Recipes for safety in open - domain chatbots .
+arXiv preprint arXiv:2010.07079 .
+Jing Xu , Arthur Szlam , and Jason Weston .
+2021 .
+Beyond goldfish memory : Long - term open - domain conversation .
+Kevin Yang and Dan Klein .
+2021 .
+FUDGE :
+Controlled text generation with future discriminators .
+In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 3511–3535 , Online .
+Association for Computational Linguistics .
+Hao - Tong Ye , Kai - Lin Lo , Shang - Yu Su , and Yun - Nung Chen .
+2020 .
+Knowledge - grounded response generation with deep attentional latent - variable model .
+Computer Speech & Language , 63:101069 .
+Saizheng Zhang , Emily Dinan , Jack Urbanek , Arthur Szlam , Douwe Kiela , and Jason Weston .
+2018 .
+Personalizing dialogue agents : I have a dog , do you have pets too ?
+In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 2204–2213 , Melbourne , Australia .
+Association for Computational Linguistics .
+Wen Zheng and Ke Zhou .
+2019 .
+Enhancing conversational dialogue models with grounded knowledge .
+In Proceedings of the 28th ACM International Conference on Information and Knowledge Management , CIKM ’ 19 , page 709–718 , New York , NY , USA .
+Association for Computing Machinery .
+Yinhe Zheng , Rongsheng Zhang , Minlie Huang , and Xiaoxi Mao . 2020 .
+A pre - training based personalized dialogue generation model with persona - sparse data .
+Proceedings of the AAAI Conference on Artificial Intelligence , 34(05):9693–9700 .
+Kangyan Zhou , Shrimai Prabhumoye , and Alan W Black .
+2018 .
+A dataset for document grounded conversations .
+In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 708–713 , Brussels , Belgium . Association for Computational Linguistics.2377
+A Training Details All models are trained with the ParlAI2framework ( Miller et al . , 2017 ) .
+Due to the large number of experimental setups and computational cost , we do not consider multiple training runs .
+Base Models RPA classifier Poly - encoders are initialized with the 622 M parameter models from Roller et al .
+( 2021 ) ; we also use this architecture for dialogue response ( retrieval ) models which we also evaluate ( see Table 19 ) .
+All generative models are initialized with BlenderBot , also from Roller et al .
+( 2021 ) , a 2.7B parameter transformer encoder / decoder model .
+Each model was pre - trained on 1.5B training examples from pushshift.io Reddit ( Baumgartner et al . , 2020 ) , with BlenderBot additionally fine - tuned on the BST tasks ( see Roller et
+al . ( 2021 ) for more details ) , before training on LIGHT .
+RPA Classifiers The RPA classifier models are trained with a cross - entropy loss over the correct label , with 99 random negatives chosen from the training set ; we ensured that each character in conversation showed up in the set of candidate labels .
+The models were trained with a batch size of 16 on 4 32 GB GPUs , with early stopping on the validation set according to valid accuracy .
+We used the Adam optimizer ( Kingma and Ba , 2015 ) with weight decay ( Loshchilov and Hutter , 2019 ) , sweeping over learning rates { 1e−5,5e−6 } .
+Generative Models All variants of generative models were trained using 8 32 GB GPUs , with early stopping on perplexity on the validation set .
+We used the Adam optimizer , sweeping over learning rates { 1e−5,7e−6 } , training with a batch size of 128 for the short - truncation models , and 32 for the long - truncation models .
+For the multiobjective models , we used the same loss ( and negative - sampling ) setup as the RPA classifiers for the character accuracy objective .
+During inference , unless otherwise specified , we generated using beam - search with beam size of 10 , enforcing a minimum length of 20 , and with tri - gram blocking with respect to both the context and the current generation .
+B RPA Classifier Training We build the training data for the RPA classifiers from the LIGHT dataset .
+The input is a concate2https://parl.aiDataset Train Valid Test LIGHT ( Urbanek et al . , 2019 ) 111k 6k 13k RPA , 0 - Utterance 212k 12k 26k
+RPA , 4 - Utterance 748k 45k 90k RPA , All - Utterance 34k 2k 4k RPA LTR , 0 - Utterance 3.3 M 205k 414k RPA LTR , 4 - Utterance 12 M 747k 1.5 M RPA LTR , All - Utterance 516k 31k 64k Table 8 : Number of training , valid , and test examples for the LIGHT dataset , as well as the RPA training splits ( both normal and LTR ) .
+nation of ( 1 ) the LIGHT context ( set of characters , setting , etc . ) ; ( 2 ) a fixed number of previous utterances in the conversation ; and ( 3 ) a candidate utterance from any point later in the conversation ( a special token separates the candidate utterance from the prior context ) .
+We experiment with either 0 , 4 , or N−2prior utterances ( dubbed “ All ” in relevant tables ) , where Nis the total number of utterances ( N−2allows the last turn for each speaker to be a candidate utterance ) .
+The left - toright ( LTR ) data split is built similarly , except each example ibecomes wiexamples , where wiis the number of tokens in the candidate utterance for example i. Statistics of the training dataset are given in Table 8 .
+Suppose we choose nas the number of prior utterances to include in the input , and let us denote D= 8538 to represent all the dialogues in the LIGHT train split , and U= 110877 to represent all the utterances in those dialogues .
+For the RPA classification dataset , each dialogue is presented twice , once from each character ’s POV .
+When n= N−1 , where Nis the length of a conversation , then we have roughly 2Dtraining examples .
+When n= 0 , we have roughly 2Utraining examples .
+For any value 0 < n < N −1 , we build out several examples from several slices of each conversation .
+Suppose we have dialogue diwithN utterances { u0 , u1 , ... , u N } .
+To build the training data from dialogue di , we select all continuous subsets of nutterances within di , forming contexts ci={ui , ... , u i+n } ∀ 0≤i≤N−i Then , we look at all N−iutterances following utterance ui+n , and use these as target utterances in the task .
+The goal of this is to build the model to be robust to dataset artifacts ; without this modification , the model could trivially pick out the character just by looking at the number of alternating utterances.2378
+# Prior No LIGHT Context LIGHT Context Utterances
+H@1/427 H@1/2
+H@1/427 H@1/2 0 10.4 60.3 77.6 77.7 4 87.3 87.4 86.5 86.5 All 85.7 86.7 89.3 89.8 Table 9 : RPA classifier performance on the validation set , as measured by Hits@1/427 and Hits@1/2 ( all characters and participant characters as candidates , respectively ) .
+Each model is trained and evaluated with that # of prior utterances .
+# Train - time Hits@1/427 Prior Utterances # Eval Prior Utterances 0 4 All Without LIGHT Context 0 10.35 18.58 17.71 4 2.10 87.31 84.35 All 7.02 81.26 85.70 With LIGHT Context 0
+77.64 66.20 58.61 4 31.04 86.48 84.90 All 32.54 82.73 89.26 Table 10 : RPA classifier performance on the validation set , as measured by hits@1/427 .
+Highlighted numbers indicate models evaluated on the split on which they were trained .
+These measures force the model to fully understand the task and react accordingly .
+C RPA Classifier Performance : Additional Results In Table 10 , we see how each RPA classifier performs on the various datasplits , varying the number of prior utterances used during training and evaluation .
+Each model performs best on the split on which it was trained ( the highlighted numbers ) .
+C.1 Left - to - Right Dynamic Classification We find that the left - to - right RPA classifiers are correctly sensitive to per - token perturbations in the input , and can accurately predict the speaker at the token level .
+In Table 11 , we give an example where the classifier changes its character prediction , depending on the candidate utterance .
+D Unlikelihood : Additional Results In Table 12 , we compare UL models across different truncation lengths ; the same story applies to the 1024 - truncation models .
+We additionally include a third method , Random-3 , where we apply the loss randomly to 3 tokens that yield incorrect RPA classifications .
+This method performs about thesame as the Top-1 method , but the RPA is lower , indicating that the Top-1 method at least is providing some signal .
+E Multi - Objective : Additional Results E.1 Perplexity & F1
+Table 13 displays full PPL and F1 scores corresponding to the models in Table 5 .
+E.2 Multi - Objective + Automated Grounding In Table 14 , we see how , when using either the encoder+decoder or just the decoder outputs , we do not require additional multi - objective layers ( as we did in the non - automated - grounding case ) .
+F Expanded Attention : Additional Results We provide results for both the 128 - truncate and 1024 - truncate models with profile grounding in Table 15 .
+Trends remain the same for both models .
+G Full Valid Results Table 17 includes results on the LIGHT validation set for models in Table 4 .
+H Retrieval Re - rankers We evaluated a Poly - encoder baseline model with an RPA re - ranker as well .
+The Poly - encoder scores utterances from the full training set as candidates , and the candidates for re - ranking are the top- k ranked utterances ; results are in Table 18 .
+Retrieval models benefit dramatically from the re - ranking , improving to almost 99 % RPA as measured by the LTR classifier .
+As the candidate responses for retrieval models come from the set of all training utterances , and due to overlap between the set of characters appearing in the train and valid sets , we can examine how often the model output was originally spoken by its partner ’s character ; this can be seen as a proxy for mistaken identity .
+We find that the re - ranker reduces the amount of time that the model returns a message its partner said , indicating some viable and promising results .
+I Full Human Evaluation Results In Table 19 , we display the full results of human evaluations across all dimensions .
+We note that the Poly - encoder model is best at not mistaking location or being repetitive , but this is expected given its retrieving over human - written utterances .
+In2379
+Figure 1 : Per - turn RPA classifications , for a variety of models .
+Error bars show the difference between the model ’s RPA value and the human ’s RPA value.2380
+Setting : Turquoise Shore , Shore A beautiful turquoise color water by the shore .
+It is filled with many gems and gold .
+Character 1 : Sea Witch .
+I am a sea witch .
+I pray on young sailors who hope to find adventure and treasures on the open sea .
+I lure them in with magic spells and promise of riches .
+Character 2 : Mermaid .
+I am one of the most beautiful mermaids to live in the sea .
+I like to watch the other sea creatures swim by me , including dolphins , who are my favorite creatures because they are so friendly .
+I fear the people who live on land because they hunt my kind Classified Utterance : Hey there Mermaid !
+Long time , no see .
+Classified Utterance : Hey there Sea Witch !
+Long time , no see .
+Correct Speaker : Sea Witch Correct Speaker : Mermaid Word Predicted Speaker Confidence Word Predicted Speaker Confidence Hey sea witch 0.5156
+Hey sea witch 0.5156 there sea witch 0.5467 there sea witch 0.5467 Mermaid !
+sea witch 0.9978 sea mermaid 0.9968 witch mermaid 1.000 Long sea witch 0.9981 Long mermaid 1.000 time , sea witch 0.9979 Time mermaid 1.000 no sea witch 0.9982 no mermaid 1.000 see .
+sea witch 0.9985 see .
+mermaid 1.000 Table 11 : Left - to - right dynamic classification examples .
+A candidate utterance is shown , along with the classifier ’s predictions at each partial decoded sequence .
+Left : The true next utterance in the dialogue , with the RPA classifier ’s predictions and confidence token by token .
+Right : A perturbed utterance .
+If we switch the name being addressed , the model switches its predictions immediately .
+Unlikelihood Method PPL F1 RPA Human - - 92.80 None ( 128 ) 12.54 15.80 88.54 None ( 1024 ) 12.35 15.85 88.42 128 - Truncation RPA UL : Top-1 Token 13 15.35 88.54 RPA UL : All tokens 12.86 15.28 88.86 RPA UL : Random-3 12.99 15.37 87.85 1024 - Truncation RPA UL : Top-1 Token 12.49 15.66 88.12 RPA UL : All tokens 12.57 15.83 88.06 Table 12 : Models trained with unlikelihood loss , evaluated on the valid set .
+We vary the tokens to which we apply UL loss .
+Input nMO Stage PPL F1 RPA Hits@1 Human N / A - - 92.8 None 0 0 12.4 15.9 88.4 Multi - Objective Dec. only 2 1 12.4 15.9 88.4 39.3 Dec. only 2 2 12.8 16.0 87.7 87.4 Enc+Dec 2 1 12.4 15.9 88.4 70.9 Enc+Dec 2 2 12.5 15.8 88.8 71.6 Multi - Objective + Automated Expanded Attention Dec.
+Only 0 1 13.2 15.7 89.1
+86.4 Dec. Only 0 2 12.9 15.9 89.1 89.1 Enc+Dec 2 1 12.9 15.8 88.4 83.3 Enc+Dec 2 2 12.7 15.8 89.1 88.5 Table 13 : Models trained with varying multi - objective setups , evaluated on the valid set .
+Models are initialized from a ( 1024 - truncation ) model fine - tuned on LIGHT.Input nMO Stage PPL F1 RPA Hits@1/427 Human 0 - - 92.80 None 0 0 12.35 15.85 88.42 Dec.
+Only 0 1 13.22 15.66 89.08 86.37 Dec. Only 0 2 12.92 15.88 89.10 89.10 Enc+Dec 0 1 13.24 15.55 88.83 85.78 Enc+Dec 0 2 13.44 15.61 89.29 89.22 Enc+Dec 2 1 12.94 15.80 88.39 83.25 Enc+Dec 2 2 12.69 15.77 89.05 88.49 Table 14 :
+Models trained with varying multi - objective + automated grounding setups , evaluated on the valid set .
+The base model in all cases is initialized from a generation model fine - tuned on LIGHT .
+Exp .
+r 128 - Truncate Model 1024 - Truncate Model Attn .
+PPL F1 RPA PPL F1 RPA Human 0 - - 92.80 - - 92.80 None 0 12.59 15.80 88.28 12.35 15.85 88.42 ABCD+ 1 12.23 15.87 90.59 12.47 15.82 88.34 ABCD 1 12.25 15.97 90.94 12.18 16.01 91.82 ABCD 2 12.23 15.89 90.83 12.17 15.95 92.60 ABCD 3 12.26 15.81 90.44 12.19 15.99 91.73 ABC 1 12.33 15.82 91.50 12.22 15.94 91.83 ABC 2 12.31 16.03 92.03 12.24 15.99 92.24 ABC 3 12.33 15.90 91.59 12.25 15.93 92.25 AB 1 12.42 15.92 90.31 12.27 15.87 90.97 A 1 12.46 16.05 90.22 12.30 15.80 89.13 B 1 12.53 15.85 89.85 12.34 15.76 89.46 Table 15 : Models trained with expanded attention ( profile grounding ) , evaluated on the valid set .
+Expanded attention input : A = Self Persona , B = Self Name , C = Partner Name , D = Setting Description , + = dialogue history .
+We also vary the number of rounds rof expanded attention.2381
+Percentage Model : Beam Baseline Delayed Beam Baseline Delayed Beam with Re - ranker thinks it is someone else / partner 0 % 13.04 % 19.23 % Thinks partner ’s character is its character ( i.e. , thinks it is talking to itself )
+57.69 % 56.52 % 11.54 % emulates partner ’s characteristic 0 % 4.35 % 0 % incorrectly identifies partner 19.23 % 17.39 % 30.77 % talks about its character in the 3rd person 0 % 4.35 % 0 % emulates irrelevant characteristic 3.85 % 0 % 7.69 % combines self and partner persona 7.69 % 0 % 9.62 % incorrectly identifies 3rd party character 0 % 0 % 1.92 % claims it does not know who it is 0 % 0 % 1.92 % noise 11.54 % 4.35 % 17.31 % Table 16 : Turn annotation analysis of RPA Re - rankers .
+Model PPL F1 RPA Human - - 92.80 Baselines 128 - Truncate Vanilla Baseline 12.54 15.80 88.54 1024 - Truncate Vanilla Baseline 12.35 15.85 88.42 Re - rankers 128 - Truncate Baseline + Re - ranker - 16.14 92.99 128 - Truncate Baseline + PACER - 16.13 93.31 RPA UL ( Top-1 Token ) 13.00 15.35 88.54 RPA UL ( All Tokens ) 12.86 15.28 88.86 Multi - Objective ( Vanilla , Dec. Only ) 12.78 16.00 87.71 Expanded Attention Methods Profile Grounding ( 128 , 2 Rounds over ABC ) 12.31 16.03 92.03 Profile Grounding ( 1024 , 2 Rounds over ABCD ) 12.17 15.95 92.60 Automated Grounding ( 1024 , Classifier Attn . )
+12.19 15.90 91.11 Automated Grounding + MO ( 1024 Dec. Only ) 12.92 15.88 89.10 Expanded Attention + Re - ranker Methods Profile ( 128 ) + RPA Re - ranker - 16.21 95.62 Profile ( 128 ) + PACER - 16.18 95.82 Table 17 : Validation statistics for various models considered throughout the paper .
+Metric Baseline Re - ranker RPA ( normal ) 85.47 94.29 RPA ( LTR ) 86.31 99.76 % Partner Said Response 3.20 2.02 Table 18 : Retrieval models with character output rerankers ; performance on the validation set .
+Figure 2 , we show a screenshot of the instructions for the evaluation task provided to crowdworkers on Amazon Mechanical Turk .
+J Generation Settings J.1 Test Output Analysis We provide qualitative analysis of the various generation methods below .
+No Re - ranking When examining the baseline with no re - ranking , we found that nucleus sampling can help when beam search does not work ; however , both can go out of character the farther one goes in conversation .
+Beam Search Re - rankers The beam outputs in standard beam search are at times too similar , inwhich case re - ranking does next to nothing , unless a viable response is available .
+Nucleus Sampling Re - rankers Using nucleus setting in a re - ranking setup yields more diverse choices to choose from ; however , sometimes the model simply does not address * any * character within the conversation .
+Delayed Beam Search Re - rankers This strikes a nice balance between sensible outputs from beam search and diversity from nucleus sampling .
+Mixed - Decoding Re - ranker Using mixed decoding ( re - ranking several decoding schemes ) can work quite well , as it is a nice blend of different generation methods .
+J.1.1 Turn Annotation Analysis Qualitative analysis of the turn annotation results are in Table 16 .
+We generally found that beam search fails the vast majority of the time when the model thinks that it is talking to itself ; i.e. , it confuses its partner for its own character .
+The rerankers can help shift the hallucination away from this regime.2382
+Figure 2 : Instructions provided to annotators in human evaluations .
+Model Contradiction Mistaken Mistaken Off - Topic Repetitive All - Good Clean Mistaken Avg .
+Identity Location Convo Identity Engagingness In Convo Human - 1.34 % - - - - - 5 % Baselines Poly - Encoder 5.50 % 6.14 % 0.77 % 12.02 % 1.92 % 75.45 % 16.33 % 34.69 % 3.42 128 - Truncate Vanilla Baseline 8.26 % 6.45 % 2.71 % 4.26 % 4.00 % 76.00 % 26.80 % 35.05 % 4.04 1024 - Truncate Vanilla Baseline 7.48 % 7.35 % 2.66 % 6.21 % 4.31 % 75.03 % 22.22 % 38.38 % 4.16 Re - rankers 128 - Truncate Baseline + RPA Re - ranker ( Beam ) 4.83 % 5.56 % 3.62 % 4.35 % 3.26 % 80.31 % 20.19 % 34.65 % 4.14 128 - Truncate Baseline + RPA Re - ranker ( Nucleus ) 9.07 % 8.68 % 2.33 % 5.31 % 3.89 % 73.70 % 31.96 % 37.11 % 3.83 1024 - Truncate Baseline + RPA Re - ranker ( Beam ) 5.55 % 4.81 % 1.60 % 3.45 % 2.71 % 82.98 % 33.33 % 24.45 % 4.14 128 - Truncate Baseline + PACER 8.28 % 4.27 % 4.89 % 3.14 % 3.14 % 73.90 % 21.78 % 33.66 % 3.96 1024 - Truncate Baseline + PACER 7.63 % 7.13 % 2.38 % 3.63 % 3.75 % 79.25 % 28.00 % 36.00 % 4.18 Modified Training Objectives RPA Unlikelihood ( Top-1 Token ) 8.70 % 7.13 % 3.38 % 7.25 % 3.74 % 72.83 % 14.42 % 39.40 % 3.87 RPA Unlikelihood ( All Tokens ) 11.64 % 10.51 % 3.13 % 4.88 % 5.38 % 67.71 % 19.00 % 43.00 % 3.87 Multi - Objective ( Vanilla , Dec - Only ) 8.13 % 10.00 % 1.88 % 5.63 % 2.63 % 74.75 % 18.00 % 49.00 % 4.21 Expanded Attention Methods Profile Grounding ( 128 , 2 Rounds over ABC ) 5.32 % 4.82 % 3.21 % 4.45 % 2.84 % 81.58 % 27.45 % 28.43 % 4.18 Profile Grounding ( 1024 , 2 Rounds over ABCD ) 4.13 % 4.00 % 3.38 % 3.13 % 3.25 % 83.75 % 36.63 % 23.76 % 4.34 Automated Grounding ( Classifier Attn . )
+10.17 % 5.51 % 2.57 % 6.13 % 2.33 % 75.98 % 24.27 % 29.13 % 4.04 Automated Grounding + MO ( Dec. Only ) 8.23 % 4.43 % 2.03 % 3.80 % 5.19 % 78.61 % 38.00 % 23.00 % 4.12 Expanded Attention + Re - ranker Methods Profile Grounding ( 128 ) + RPA Re - ranker 5.33 % 2.23 % 1.61 % 4.22 % 2.98 % 84.37 % 36.27 % 14.71 % 4.25 Profile Grounding ( 1024 ) + RPA Re - ranker 6.00 % 3.60 % 1.20 % 0.42 % 0.30 % 85.25 % 40.00 % 21.90 % 4.35 Profile Grounding ( 128 ) + PACER 5.43 % 4.07 % 2.84 % 2.47 % 1.23 % 85.70 % 41.18 % 24.51 % 4.32 Profile Grounding ( 1024 ) + PACER 6.21 % 4.38 % 1.10 % 3.65 % 2.56 % 83.56 % 40.78 % 22.33 % 4.13 Table 19 : Human evaluations .
+Annotators chatting with models were asked to annotate whether model utterances contained any of the problem attributes listed , with “ All - Good ” indicating that there were no issues .
+“ Clean Convo ” is the percentage of conversations without any issues .
+J.2 Automated Metrics We experiment with various generation settings , with or without re - rankers ; results are in Table 20 .
+For the baseline and re - ranker models , beam search yields the highest F1 scores ; RPA can be improved with the other inference methods when combined with a re - ranker .
+We believe this may be due to the higher diversity of candidate responses generated from those methods .
+K Human + Automatic Eval Correlation We analyze the correlation between human annotations and the automatic metrics collected on the LIGHT validation set , as shown in Figure 3 ; we note some interesting trends : Perplexity perplexity appears to be positively correlated with mistaken identity , and negatively correlated with engagingness .
+So , perplexity is2383
+Normal Re - ranking Generation Setting F1 RPA F1 RPA Human - 92.80 - 128 - Truncation Model Beam Search 15.80 88.54 16.14 92.99 Delayed Beam Search 15.46
+88.74 15.48 93.18 Nucleus Sampling 15.70 89.25 15.44 97.12 Top - K Sampling 14.47 88.16 14.14 97.01 1024 - Truncation Model Beam Search 15.85 88.42 16.08 92.92 Delayed Beam Search 15.03 88.00 15.39 92.89
+Nucleus Sampling 15.42 88.22 15.25 97.24 Top - K Sampling 14.45 86.91 14.06 97.15 Table 20 : Performance on the LIGHT valid set for the baseline models with different generation settings , with or without re - rankers .
+All settings use tri - gram blocking with respect to the context and current generation , and have a minimum length of 20 .
+We set topp
+= 0.3for Nucleus sampling , topk = 50 for Top - K sampling , and use a beam - delay of 10 with topk = 10 for delayed beam search .
+Figure 3 : Correlation between human evaluations and automated metrics computed on the test set .
+a good indicator of how fluent and engaging the model is in conversation , and can indirectly point to a better understanding of the role - playing task .
+An important note is that we only tested this amongst models of the same size , and only for the models we tested , so it is not clear that larger models will necessarily bring improvements .
+F1 F1 word overlap is positively correlated with engagingness as well , so F1 may be a good proxy of model performance .
+Correlation with mistaken identity is negative here , implying that better F1 corresponds with better role - playing ability .
+However , we note that F1 is not a catch - all metric ( Liu et al . , 2016 ) .
+RPA RPA appears to be strongly negatively correlated with mistaken identity , indicating that it is indeed a good measure of the model ’s ability to stay in character .
+It is weakly negatively correlated with the other issues , and is somewhat positively correlated with engagingness as well .
+These correlations give us confidence that our RPA classifiers are adequately measuring role - playing ability within models .
+L Per - Turn Analysis , Expanded In Figure 1 , we see RPA results across turns of conversation for a wider variety of models .
+Human The human outputs are most often correct on the first turn , with gradual decay of accuracy throughout the conversation ( according to RPA ) .
+Vanilla & Long Context
+The vanilla baseline suffers a pretty dramatic drop off after the first couple of turns ; the long - context model achieves slightly higher character accuracy overall
+but we see similar drop offs farther down the conversation .
+RPA UL
+The unlikelihood models seem to recover somewhat in the initial turns of conversation , however later turns still yield sharp drop offs in RPA .
+Multi - objective Similarly to the UL case , we see the most gains in initial turns compare to the vanilla baselines ; however , we see even more dramatic drop offs towards the end of the conversation .
+Expanded Attention With profile grounding , we see near - human performance , with even better performance towards the end of the conversation .
+The automatic grounding improves over the baseline but is slightly worse than profile grounding .
+Combining automated grounding with multi - objective training leads to some benefits in earlier turns , but later turns still suffer .
+Re - ranking Although we ’re using the same RPA classifier to both re - ranker and score the model outputs , it is still interesting to examine on which turns the re - ranker benefits the model the most .
+We see in the last set of graphs that beam re - ranking2384
+Context : _ setting_name Turquoise Shore , Shore _ setting_desc
+A beautiful turquoise color water by the shore .
+It is filled with many gems and gold .
+_ partner_name sea witch _ self_name mermaid _ self_persona
+I am one of the most beautiful mermaids to live in the sea .
+I like to watch the other sea creatures swim by me , including dolphins , who are my favorite creatures because they are so friendly .
+I fear the people who live on land because they hunt my kind .
+Dialogue History :
+Hey there Mermaid !
+Long time , no see .
+Long time indeed !
+How have you been keeping ?
+Pretty good , You know how it goes .
+Just trying to find some unwitting victims .
+What are you doing in the Turquoise Shore ?
+I ’ve been catching waves with the dolphins all morning .
+I thought I would come and get some sunshine .
+What kind of victims do you expect to find in a tranquil place like this ?
+What do you know about that knight standing over there ?
+His armor is particularly garrish .
+You know I do n’t fraternize with land dwellers .
+I do n’t know , I like when they ’re shiny like that .
+He looks like a giant fishing lure .
+Classified Utterance : I suppose the only thing left to complete the illusion is for him to get wet .
+Correct Label : Mermaid Prediction : Sea Witch Context : _ setting_name Outside tower , Outside Tower _ setting_desc
+Moss grows from the tall stoic like structure adding to its mysterious presence .
+The stone walls appear insuperable like a mountain .
+The top is a pointed dome .
+_ partner_name enemy _ self_name horse _ self_persona
+We have hooves .
+four of them .
+and you can ride us .
+Oats please !
+Dialogue History :
+hello hello there Classified Utterance : What brings you here ?
+Correct Label : Horse Prediction : Enemy Context : Context : _ setting_name Royal Gardens , Outside Palace _ setting_desc Lined with rose bushes that look as if they have been watered by the God ’s , the Royal Gardens is a beauty to behold .
+An intricate labyrinth made of shrubs is at the center ending with a fountain .
+There are various benches on the sides of the rose bushes and a small lake in the back drop .
+_ partner_name king _ self_name a gardener pulling weeds _ self_persona
+I am the gardener of the castle .
+I plant thickets and plants .
+My work is beautiful .
+Dialogue History :
+Hi Classified Utterance : Why hello there , your majesty !
+Correct Label : a gardner Prediction : king Table 21 : Left - to - right dynamic classifier failure modes ; see discussion in Section 5.2 . seems to be most helpful in later turns , where other models generally drop off in efficacy .
+M Expanded Attention Visualization To build the heat maps in Figures 4 and 5 , we look at the maximum attention applied per - head , and the maximum weight applied across the model decoder layers ; other combinations were considered ( mean per - head , mean over layers or last layer ) and yielded similar findings .
+The speaker is the mermaid , whose partner is a sea - witch .
+The last utterance from the sea - witch is , “ What are you doing on the turquoise shore ? ” .
+The mermaid responds , “ I ’ve been catching waves with the dolphins all morning .
+What kind of victims do you expect to find in a tranquil place like this?”2385
+Figure 4 : Vanilla Attention .
+The speaker here is the mermaid , whose partner is a sea - witch .
+The last utterance from the sea - witch is , “ What are you doing on the turquoise shore ? ” .
+The mermaid responds , “ I ’ve been catching waves with the dolphins all morning .
+What kind of victims do you expect to find in a tranquil place like this ? ” .
+The vanilla model spreads its attention across the whole context ; blue boxes at the top are attentions over the character descriptions , while the bottom box is attention over the word “ victims”.2386
+Figure 5 : Profile Expanded Attention .
+The speaker here is the mermaid , whose partner is a sea - witch .
+The last utterance from the sea - witch is , “ What are you doing on the turquoise shore ? ” .
+The mermaid responds , “ I ’ve been catching waves with the dolphins all morning .
+What kind of victims do you expect to find in a tranquil place like this ? ” .
+Left original attention over the full context ; Right expanded attention over the additional context .
+The top two boxes are the partner name and self name ; the bottom box on the left refers to “ victims ” , and on the right refers to the “ dolphins”.2387

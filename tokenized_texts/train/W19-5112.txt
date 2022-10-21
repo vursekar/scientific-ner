@@ -1,0 +1,348 @@
+Proceedings of the Joint Workshop on Multiword Expressions and WordNet ( MWE - WN 2019 ) , pages 104–113 Florence , Italy , August 2 , 2019 .
+c  2019 Association for Computational Linguistics104Semantic Modelling of Adjective - Noun Collocations Using FrameNet Yana Strakatova , Erhard Hinrichs University of T ¨ubingen , Germany firstname.lastname@uni-tuebingen.de
+Abstract
+In this paper we argue that Frame Semantics ( Fillmore , 1982 ) provides a good framework for semantic modelling of adjective - noun collocations .
+More speciﬁcally , the notion of a frame is rich enough to account for nouns from different semantic classes and to model semantic relations that hold between an adjective and a noun in terms of Frame Elements .
+We have substantiated these ﬁndings by considering a sample of adjectivenoun collocations from German such as enger Freund ‘ close friend ’ and starker Regen‘heavy rain ’ .
+The data sample is taken from different semantic ﬁelds identiﬁed in the German wordnet GermaNet ( Hamp and Feldweg , 1997 ; Henrich and Hinrichs , 2010 ) .
+The study is based on the electronic dictionary DWDS ( Klein and Geyken , 2010 ) and uses the collocation extraction tool Wortproﬁl ( Geyken et al . , 2009 ) .
+The FrameNet modelling is based on the online resource available at http://framenet.icsi.berkeley.edu .
+Since FrameNets are available for a range of typologically different languages , it is feasible to extend the current case study to other languages .
+1 Introduction Collocations such as to make a mistake andblack coffee are multi - word expressions ( MWEs ) in which the choice of one constituent ( base ) is free , and the choice of the other one ( collocate ) is restricted and depends on the base ( Wanner et al . , 2006 ) .
+Collocations are in the grey area between free phrases like black car and idiomatic MWEs such as black sheep , and in some cases it is challenging to draw the line between those concepts .
+As opposed to mere co - occurrences of words based on their frequencies , collocations show a certain degree of lexical rigidity which results in their partial lexicalization .
+This createsdifﬁculties for the non - native speakers when interpreting and especially producing such expressions because a substitution of the restricted component with a synonymous word is not allowed by the language ( Bartsch , 2004 ) .
+Therefore , combinations such as * to do a mistake or * dark coffee are not acceptable and sound unnatural to the native speakers , but they still can be interpreted correctly .
+Idiomatic MWEs such as black sheep are semantically opaque and belong to the domain of ﬁgurative language .
+In spite of the fact that collocations have been getting more attention in the recent decades , there is a lack of systematic empirical studies on their semantic properties .
+Most of the previous corpus studies of collocations are concerned with their statistical properties and the ways to improve methods of automatic collocation extraction ( Church et al . , 1991 ; Smadja , 1993 ; Evert , 2004 ; Pecina , 2008 ; Bouma , 2009 ) .
+These authors have shown that automatic and/or manual extraction of collocations is not an easy task .
+Our research does not attempt to contribute to this growing body of research .
+Rather , we focus on the classiﬁcation and modelling of semantic relations that hold between a base and its collocate , e.g. the relation of degree that holds between the collocate heavy and its nominal base rain .
+More speciﬁcally , we will focus on the semantic relations that hold in adjective - noun collocations , since such collocations have received considerably less attention than verb - noun collocations .
+In our research , we utilize existing lexical resources that reliably identify adjective - noun collocations .
+For purely opportunistic reasons , we have chosen German as our language of investigation since there are a number of digital resources for German , including the DWDS ( short for the Digitales W ¨orterbuch der deutschen Sprache ) ( Klein and Geyken , 2010 ) and GermaNet ( Hamp and
+105Feldweg , 1997 ; Henrich and Hinrichs , 2010 ) , that offer a broad coverage of adjectives and nouns as the two word classes under investigation .
+The remainder of this paper is structured as follows : Section 2 introduces the notion of collocation in more detail and describes the related work on the semantic classiﬁcation of collocations .
+Section 3 presents our own proposal of how to deal with semantics of collocations ; we argue that the notion of a semantic frame in the sense of FrameNet ( Ruppenhofer et al . , 2016 ) provides a suitably general semantic framework that is applicable to a wide range of semantic ﬁelds .
+Furthermore , we argue that collocations offer an interesting empirical domain for validating the structure of semantic frames and for further developing the FrameNet framework itself .
+The paper concludes with summary of our approach and with the discussion of different directions for future work .
+2 Concept of collocation and related work Following the logic of Nesselhauf ( 2003 ) and Mel ’ ˇcuk ( 1998 ) , we consider the following types of statistical co - occurrences true collocations : 1 . the collocate has a speciﬁc sense with a limited number of words from different semantic ﬁelds , e.g. ‘ heavy ’ as intensiﬁer : heavy smoker , heavy rain , heavy trafﬁc .
+The adjective ’s sense is not prototypical , since it does not refer to the physical weight , but to intensity .
+2 . the collocate has a speciﬁc sense only with one or very few semantically related bases , e.g. black coffee .
+The adjective ’s sense here is not prototypical , since it does not refer to the colour , but to the fact , that no dairy products are added to the coffee .
+3 . the sense of the collocate is so speciﬁc that it can be used with only one or very few semantically closely related bases , e.g. aquiline nose / face ( Mel ’ ˇcuk , 1998 ) .
+That is the adjective ’s only sense .
+As our empirical basis we rely on the electronic dictionary DWDS .
+The DWDS contains a rich lexicographic treatment of collocations on the basis of the collocation extraction tool Wortproﬁl ( Geyken et al . , 2009 ) .
+Figure 1 shows an excerpt of the Wortproﬁl for the German noun Freund‘friend’.1It illustrates the information contained in such a word proﬁle .
+As Wanner ( 2006 ) emphasizes , collocation extraction typically only results in lists of collocations that are classiﬁed according to their morphosyntactic structure , but that do not provide any semantic information about the combinations .
+Semantic modelling of collocations requires a theoretical framework with a rich inventory that can be used for describing the relations between the base and its collocate .
+Such an inventory is offered in the form of Lexical Functions ( LFs ) in Mel ’ ˇcuk ’s
+Meaning$Text Theory ( Mel ’ ˇcuk , 1996 ) .
+A LF is a function in the mathematical sense : f ( x ) = y , where a general and abstract sense fis expressed by a certain lexical unit ydepending on the lexical unit xit is associated with ( Mel ’ ˇcuk , 1995 ) .
+The number of standard LFs is limited to about 60 , and they have ﬁxed names , e.g. for intensiﬁers the LF Magn is suggested :
+Magn [ RAIN ] = heavy .
+For other cases the non - standard LFs are suggested .
+They are very speciﬁc , and their names are formulated in a natural language : e.g. obtained in an illegal way
+[ MONEY ] = dirty .
+LFs have been widely used in lexicographic projects on describing French semantic derivations and collocations ( Polguere , 2000 ) , and have also been implemented in the Spanish online dictionary of collocations ( DiCE ) that focuses on describing emotion lexemes ( Vincze et al . , 2011 ) .
+Mel ’ ˇcuk and Wanner ( 1994 ) employ LFs to represent collocation information for German lexemes from the semantic ﬁeld of emotions .
+Wanner ( 2004 ) conducts experiments on automatic classiﬁcation of Spanish verb - noun collocations based on the typology of LFs , and continues to work on this problem using different algorithms ( Wanner et al . , 2006 ) .
+The works by Wanner ( 2004 ; 2006 ) mostly concentrate on verbal collocations , for which the Meaning - Text Theory provides at least 24 simple verbal LFs that can further be combined into complex LFs .
+By comparison , adjective - noun collocations have received less attention and the set of proposed adjectival LFs is relatively small : there are six simple adjectival LFs ( Mel ’ ˇcuk , 2015 ) .
+Thus , our main objective is to ﬁnd a suitable framework for describing adjectival collocations .
+Jousse ( 2007 ) proposes a way of formalizing non - standard adjectival LFs through assign1DWDS - Wortproﬁl for “ Freund ” , generated from Digitales W ¨orterbuch der deutschen Sprache , https://www.dwds.de/wp/Freund , accessed on 04.29.2019 .
+106 Figure 1 : The top-10 adjective collocates as listed in the Wortproﬁl for the noun Freund ‘ friend ’ .
+ing attributes to the base word , e.g. shape , size , colour , function .
+These attributes can be compared to Frame Elements in Frame Semantics ( Fillmore , 1982 ) and to the Qualia Roles in the theory of Generative Lexicon by J. Pustejovsky ( 1991 ) .
+Qualia roles have been implemented as the underlying framework in the construction of SIMPLE lexicon ( Bel et al . , 2000 ) .
+While they are easily applicable for the treatment of concrete nouns , they fail to suitably generalize the semantics of abstract nouns .
+By contrast , the concept of semantic roles in Frame Semantics is not restricted to concrete nouns , but applies equally well to other semantic ﬁelds as well ( for details see section 3 below ) .
+The main idea of Frame Semantics is that word meanings are deﬁned relative to a set of semantic frames , which represent non - linguistic entities such as events , states of affairs , beliefs , and emotions , and which are evoked by the use of corresponding words in a particular language .
+Semantic Frames for English are described in the lexical database FrameNet ( FrameNet - Database ) in terms of Frame Elements ( FEs ) ( Ruppenhofer et al . , 2016 ) .
+The database provides a rich coverage of nouns and adjectives from different semantic ﬁelds , currently there are 5558 nouns and 2396 adjectives , and the resource is under further development .
+The further advantage of FrameNet is that it can be adapted for other languages .
+As demonstrated by Boas ( 2005 ) and Pad ´ o ( 2007 ) , a transfer of existing frame annotations from English to other languages is possible : there is a high degree of cross - lingual parallelism both for frames ( 70 % ) and for Frame Elements ( 90 % ) ( Pad ´ o , 2007 ) .
+For the reasons outlined above , we will use Frame El - ements in the sense of FrameNet for the semantic modelling of adjective - noun collocations .
+3 Semantic Modelling of Collocations As motivated in the previous section , the main objective of this study is to develop a framework for semantic modelling of German adjectivenoun collocations .
+To assess the applicability of FrameNet for modelling of collocations , we have investigated eleven frames for nouns from various semantic ﬁelds ( see Table 1 ) .
+The corresponding semantic ﬁelds were assigned according to the information from the German wordnet GermaNet , and the estimates about the degree of concreteness of the chosen nouns are provided by the MRC Psycholinguistic Database ( Wilson , 1988 ) .
+The nominal bases have been chosen on the basis of frequency and richness of collocates .
+The stage of choosing the candidates for modelling showed that there are signiﬁcant differences in the behaviour of concrete and abstract nouns : the latter ones have a greater number and a richer variety of collocates ( see Table 2 ) .
+As explained in the previous section , we employ English FrameNet for German collocations .
+Semantic Frames in FrameNet describe non - linguistic concepts and deal with meanings rather than with particular lexical units in a language .
+Thus , a correct translation of the target German word into English makes it possible to apply the information contained in the English FrameNet to German data .
+In collocations , it is only the collocate ( the adjective ) that is language speciﬁc , and thus is problematic to translate .
+However , we consider the semantically transparent base ( noun ) to be the frame - evoking word , and such words do not cause any difﬁculties for translation .
+3.1 Modelling concrete nouns The number of true collocates for concrete nouns is relatively small due to several reasons .
+First of all , when combined with concrete nouns , most adjectives retain their prototypical meaning : enge Straße ‘ narrow street ’ , großes Haus ‘ big house ’ , hoher Turm ‘ tall tower ’ , such expressions are considered free phrases .
+In addition , there are a lot of cases where a concrete noun is part of an idiomatic expression.2 2Depending on the context , a combination of two words with concrete meaning can either be a free phrase or an idiom : roter Faden lit .
+‘ red thread ’ , ﬁg . ‘ common theme ’ ; raues Pﬂaster lit .
+‘ rough pavement ’ , ﬁg . ‘ harsh environment ’ ,
+107Lexical UnitMRC RatingSemantic ﬁeld in GermaNet Frame in FrameNet Schokolade ‘ chocolate ’ 576 Nahrung ‘ food ’ Food Droge ‘ drug ’ 555 Substanz ‘ substance ’ Intoxicants Schuh ‘ shoe ’ 600 Artifakt ‘ artefact ’ Clothing Wald ‘ forest ’ 609 Ort‘location ’ Biological area Regen ‘ rain ’ 600 natPhaenomen ‘ phenomenon ’ Precipitation Freund ‘ friend ’ 450 Mensch ‘ person ’ Personal relationship Interesse ‘ interest ’ 305 Kognition ‘ cognition ’ Emotion directed Angst ‘ fear ’ 326 Gef¨uhl‘feeling ’ Fear Thema ‘ issue / topic ’ 338 Kommunikation ‘ communication ’ Point ofdispute Strafe ‘ punishment ’ 358 Geschehen ‘ event ’ Rewards andpunishments Preis ‘ price ’ - Besitz ‘ possession ’ Commerce scenario Table 1 : The chosen nominal bases from different semantic ﬁelds .
+The ratings from the MRC Psycholinguistic Database ( Wilson , 1988 ) indicate the level of concreteness of the nouns ( in the range 100 to 700 ) .
+When concrete nouns do form true collocations , the sense of their collocates is not prototypical , yet it is highly conventionalized .
+Consider the following collocates of the word Schokolade ‘ chocolate ’ : schwarz lit .
+‘black ’ , dunkel ‘ dark ’ , weiß ‘ white ’ .
+In FrameNet the lexical unit ( LU ) ‘ chocolate ’ evokes the frame “ Food ” with Frame Elements ( FEs ) FOOD , CONSTITUENT PARTS , DESCRIPTOR , and TYPE .
+Although it is true that dark chocolate has a darker colour than milk chocolate , when we use the expression dunkle Schokolade , we do not refer to the colour of the product , but to the fact that it contains a high percentage of cocoa and little or no milk .
+The same is true for weiße Schokolade ‘ white chocolate ’ : it indeed has a very light colour , but it is due to the fact that such type of chocolate is made of cocoa butter and does not contain cocoa powder .
+FrameNet offers a suitable FE T YPE for describing the relation that holds between these adjectives and the noun .
+It is deﬁned in FrameNet as follows : “ This FE identiﬁes a particular Type of the food item ” ( FrameNet - Database ) .
+A similar logic is applied to the collocates of the noun Droge ‘ drug ’ : the collocates hart ‘ hard ’ , weich ‘ soft ’ , and leicht ‘ light ’ are accommodated by the FE T YPE within the frame “ Intoxicants”.3In the case of the artefact Schuh ‘ shoe ’ , there are only two collocates ( hochhackig ‘ high - heeled ’ , ﬂach ‘ ﬂat ’ ) and the corresponding frame “ Clothing ” offers a suitgoldene Nase ( verdienen ) lit .
+‘ ( to earn ) golden nose ’ , ﬁg . ‘ to earn a lot of money ’ ; etc .
+Some cases include metonymy : offenes Ohr lit .
+‘ open ear ’ , ﬁg .
+‘ person ready to listen ’ ; heller Kopf lit .
+‘ bright head ’ , ﬁg . ‘ smart person ’ .
+3Other similar examples are the collocations gr¨uner Tee ‘ green tea ’ and schwarzer Tee ‘ black tea’.able semantic role S TYLE .
+When a noun is less concrete , e.g. Regen ‘ rain ’ that is a natural phenomenon and thus is a process , the list of its collocates is longer .
+The noun evokes the frame “ Precipitation ” and all the collocates are accommodated by the suitable frame elements .
+For example , under Q UANTITY the following attributes are found : sintﬂutartig ‘ torrential ’ , stark ‘ heavy ’ , kr¨aftig ‘ heavy ’ , leicht ‘ light ’ .
+All those adjectives describe rain in terms of the amount of water that falls in the process .
+The same is true for the modiﬁer str¨omend ‘ pouring ’ , however , it carries an extra meaning of the manner in which it can rain and is therefore assigned to the FE M ANNER .
+3.2 Modelling abstract nouns Abstract concepts have a complex meaning which is reﬂected in the amount of semantic roles describing the corresponding frame and in the amount of attributes through which the semantic roles are realised in the language .
+For instance , according to the FrameNet Database ( FrameNet - Database ) , the frame “ Personal relationship ” evoked by the noun Freund ‘ friend ’ has the following non - core FEs : Depictive : Depictive phrase describing the Partners .
+Degree : Degree to which event occurs Duration : The length of the relationship .
+Manner : Manner of performing an action .
+Means : An act whereby a focal participant achieves an action indicated by the target .
+108LU FE name Collocates SchokoladeFood ( Core ) heiß ‘ hot ’ Descriptor edel ‘ premium ’ Type schwarz ‘ dark ’ , dunkel ‘ dark ’ , weiß ‘ white ’ Droge Type hart ‘ hard ’ , weich ‘ soft ’ , leicht ‘ soft ’ Schuh Style hochhackig ‘ high - heeled ’ , ﬂach ‘ ﬂat ’ WaldDescriptor tief‘deep ’ Contituent parts licht ‘ open ’ RegenPrecipitation ( Core ) sauer ‘ acid ’ Manner str¨omend ‘ pouring ’ Quantitysintﬂutartig ‘ torrential ’ , stark ‘ heavy ’ , kr¨aftig ‘ heavy ’ , leicht ‘ light ’ FreundDegree eng‘close ’ , dick ‘ close ’ ( Pl ) Duration alt‘old ’ Manner wahr ‘ true ’ , echt ‘ real ’ , falsch ‘ fake ’ Relationship fest‘boyfriend ’ InteresseExperiencer(Core ) ureigen ‘ vested ’ , widerstreitend ‘ conﬂicting ’ Topic(Core ) materiell ‘ material ’ Degreegroß ‘ strong / big ’ , stark ‘ strong ’ , hoch ‘ strong ’ , massiv ‘ massive ’ Mannerrege ‘ active ’ , lebhaft ‘ lively ’ , vital ‘ lively ’ , echt ‘ genuine ’ , wahr ‘ genuine ’ Parameterbreit ‘ broad ’ , handfest ‘ concrete ’ , elementar ‘ fundamental ’ , vital ‘ vital ’ Circumstances unmittelbar ‘ direct ’ AngstDegree groß ‘ strong / big ’ , tief‘deep ’ , h¨ollisch ‘ hellish ’ Circumstancespanisch ‘ panic ’ , unterschwellig ‘ subconscious ’ , krankhaft ‘ pathological ’ Mannerblank ‘ sheer ’ , pur‘pure ’ , nackt ‘ pure ’ , diffus ‘ vague ’ , dumpf ‘ vague ’ Topic existenziell ‘ existential ’ ThemaDomain sperrig ‘ unwieldy ’ , weich ‘ vague ’ Time brennend ‘ urgent ’ , dr¨angend ‘ pressing ’ Groupunbequem ‘ uncomfortable ’ , heikel ‘ delicate ’ , sensibel ‘ sensitive ’ , brisant ‘ controversial ’ , leidig ‘ vexed ’ Status groß ‘ big / major ’ , heiß ‘ hot ’ , beherrschend ‘ dominant ’ StrafeInstrument symbolisch ‘ symbolic ’ , unmenschlich ‘ inhumane ’ Degreedrakonisch ‘ draconian ’ , hart ‘ harsh ’ , empﬁndlich ‘ severe ’ saftig ‘ stiff ’ , streng ‘ strict ’ , scharf ‘ harsh ’ , schwer ‘ heavy ’ , deftig ‘ severe ’ , hoch ‘ high ’ , mild ‘ mild ’ , niedrig ‘ weak ’ Preis Ratehorrend ‘ horrendous ’ , stolz ‘ stiff ’ , hoch ‘ high ’ , erschwinglich ‘ affordable ’ , vern¨unftig ‘ reasonable ’ , niedrig ‘ low ’ , fest‘ﬁxed ’ , stabil ‘ stable ’ Table 2 : Semantic modelling of German adjective - noun collocations using Frame Elements from FrameNet .
+109Relationship :
+The Relationship between Partners .
+Source ofrelationship : The source of the relationship .
+The semantic roles as well as the name of the frame suggest that , in many contexts , the word ‘ friend ’ does not refer to a person as a human being of certain age , appearance , ethnicity , etc . , but to the relationship people are engaged in .
+In German , the adjectives englit .
+‘ narrow ’ or dick lit .
+‘ thick ’ are both used with Freund in the sense ‘ close ’ , thus describing the D EGREE of friendship .
+The collocate alt‘old ’ implies that the friendship has lasted for some time to the moment of speaking and can therefore be accommodate by the FE DURATION .
+When using wahr ‘ true ’ , echt ‘ real ’ , falsch ‘ fake ’ in connection with friendship , we refer to its quality , the most suitable FE of that kind in this case is M ANNER .
+There are also borderline cases , when the suitable FE is not obvious , as in the case of the word fest‘steady ’ ( lit .
+‘ solid ’ ) .
+At ﬁrst glance , the modiﬁer characterizes M ANNER ; however , in German , the expression fester Freund means ‘ boyfriend ’ that actually refers to the nature of the relationship between the partners .
+Therefore , the most suitable FE for that adjective is R ELATIONSHIP .
+All the adjectival modiﬁers ﬁnd corresponding semantic roles , however , not all the FEs are realised through adjectives and some of the slots such as M EANS or D EPICTIVE are left empty .
+Such unrealised FEs are not listed in Table 2 .
+An accurate mapping of collocates to corresponding FEs is possible for other semantic ﬁelds as well .
+Consider an example from the ﬁeld of cognition : Interesse ‘ interest ’ .
+In FrameNet it evokes the frame “ Emotion directed ” .
+It has an E XPERIENCER referred to by the adjectives ureigen ‘ vested ’ and widerstreitend ‘ conﬂicting ’ ; MANNER ( rege ‘ active ’ , lebhaft ‘ lively ’ , vital ‘ lively ’ , echt ‘ genuine ’ , and wahr ‘ genuine ’ ) ; TOPIC ( materiell ‘ material ’ ) ; P ARAMETER ( breit ‘ wide ’ , handfest ‘ concrete ’ , elementar ‘ fundamental ’ , and vital ‘ vital ’ ) ; and C IRCUMSTANCES ( unmittelbar ‘ direct ’ ) .
+It also has a property of intensity described in the frame as D EGREE .
+This FE accommodates the collocates groß ‘ strong ’ , stark ‘ strong ’ , hoch ‘ strong ’ , and massiv ‘ massive ’ .
+A similar pattern is found for the emotion noun Angst ‘ fear ’ .
+Consider its collocates : groß ‘ strong ’ , nackt ‘ pure ’ , h¨ollisch ‘ hellish ’ , panisch ‘ panic ’ , pur‘pure ’ , unterschwellig ‘ subconscious ’ , blank ‘ sheer ’ , diffus ‘ vague ’ , tief‘deep ’ , dumpf ‘ vague ’ , existenziell ‘ existential ’ , krankhaft ‘ pathological ’ The identiﬁed relevant FEs are as follows ( FrameNet - Database ): Degree : The extent to which the Experiencer ’s emotion deviates from the norm for the emotion .
+Circumstances : The Circumstances is the condition(s ) under which the Stimulus evokes its response .
+In some cases it may appear without an explicit Stimulus .
+Quite often in such cases , the Stimulus can be inferred from the Circumstances .
+Manner : Any description of the way in which the Experiencer experiences the Stimulus which is not covered by more speciﬁc FEs , including secondary effects ( quietly , loudly ) , and general descriptions comparing events ( the same way ) .
+Manner may also describe a state of the Experiencer that affects the details of the emotional experience .
+Topic :
+The Topic is the general area in which the emotion occurs .
+It indicates a range of possible Stimulus .
+The interpretation of some collocates is straightforward : the adjective existenziell ‘ existential ’ indicates the area of the stimulus and is modelled as T OPIC .
+The collocates groß ‘ strong ’ andtief‘deep ’ are used as intensiﬁers and are , therefore , assigned to the FE D EGREE .
+The word h¨ollisch ‘ hellish ’ is frequently used as an intensiﬁer with Schmerz ‘ pain ’ and carries the same meaning with ‘ fear ’ , thus it is also assigned to D EGREE .
+The other adjectives do not reveal any information about the intensity of the experienced emotion : blank ‘ sheer ’ , pur ‘ pure ’ , and nackt ‘ pure ’ rather imply that , at a particular moment , fear is the only emotion guiding the behaviour of a person .
+This interpretation ﬁts the deﬁnition of MANNER , and so do the collocates diffus ‘ vague ’ anddumpf ‘ vague ’ .
+The remaining three adjectives ( panisch , unterschwellig , krankhaft ) could also be assigned to M ANNER , however , there is more information in their meaning than it may seem .
+These collocations are very close to psychological terms , as well as ‘ existential ’ , but they refer to certain conditions under which fear might be
+110experienced rather than to the area of the stimulus .
+In such cases context is helpful ; consider the following examples from the DWDS - Wortproﬁl for the noun Angst4 : 1.Deshalb habe die Frau panische Angst vor ihrem sehr dominanten Mann gehabt .
+eng .
+‘ That is why the woman had a panic fear of her dominant husband ’ .
+2 .
+Dann spricht man von Erythrophobie , der krankhaften Angst zu err ¨oten .
+eng .
+‘ This is referred to as erythrophobia , a pathological fear of blushing ’ .
+3 .
+Es ist eine unterschwellige , allt ¨agliche Angst , mit der die B ¨urger leben .
+eng .
+‘ It is a subconscious everyday fear the citizens live with ’ .
+The examples illustrate that these three collocates describe a certain kind of fear triggered by a particular stimulus , but the stimulus itself can only be derived from the context .
+Thus , the most suitable semantic role for accommodating the collocates is CIRCUMSTANCES .
+All the above described cases demonstrate that semantic roles present in abstract collocations are quite diverse , and the relations can well be generalized using FrameNet ’s inventory of frame elements .
+There are , however , nouns , that seem to be less diverse when in comes to the number of attributes realized through adjectives .
+This is the case when a noun has a certain kind of scale at the core of its meaning .
+For instance , the noun Strafe ‘ punishment / penalty ’ is mostly modiﬁed in terms of how strict the inﬂicted punishment is : drakonisch ‘ draconian ’ , mild ‘ mild ’ , hart ‘ harsh ’ , empﬁndlich ‘ severe ’ , hoch ‘ high ’ , niedrig ‘ weak ’ , saftig ‘ stiff ’ , streng ‘ strict ’ , scharf ‘ harsh ’ , unmenschlich ‘ inhumane ’ , schwer ‘ heavy ’ , symbolisch ‘ symbolic ’ , deftig ‘ severe ’ They can all be accomodated by the FE D EGREE .
+However , two adjectives from this list stand out in their meaning : symbolisch ‘ symbolic ’ and unmenschlich ‘ inhumane ’ , they carry an extra meaning describing a kind of penalty , which is reﬂected in the FE
+I NSTRUMENT ( “ The Instrument with which the reward or punishment is carried out ” ( FrameNet - Database ) ) .
+4DWDS - Wortproﬁl for “ Angst ” , generated from Digitales W ¨orterbuch der deutschen Sprache , https://www.dwds.de/wp/Angst , accessed on 04.29.2019.A similar situation holds for nouns from other semantic ﬁelds .
+Consider the noun ‘ price ’ : it is deﬁned in FrameNet as “ the amount of money expected , required , or given in payment for something ” ( FrameNet - Database ) .
+The list of its collocates contains the following adjectives : horrend ‘ horrendous ’ , vern¨unftig ‘ reasonable ’ , erschwinglich ‘ affordable ’ , stolz ‘ stiff ’ , hoch ‘ high ’ , niedrig ‘ low ’ , fest ‘ ﬁxed ’ , stabil ‘ stable ’ They all refer to the scale “ the amount of money ” , the latter two emphasize that there are no changes on the scale , whereas the others show the degree of how high the certain amount is from the point of view of the customer .
+The noun ‘ price ’ evokes the frame ‘ Commerce scenario ” with the following FEs : B UYER , SELLER , G OODS , M ONEY , MEANS , PURPOSE , RATE , UNIT .
+The most suitable FE in this case is R ATE that according to FrameNet describes price or payment per unit of Goods and is therefore the closest to the concept of a scale in this frame .
+The examples illustrate that frame semantics offers a varied inventory for modelling semantic relations between the constituents of collocations independently of the semantic ﬁeld of the noun , either concrete or abstract .
+FrameNet provides frame semantic information about many lexical units ; however , it is still under development and there are cases , when the frame evoked by a noun does not reﬂect all the aspects of its meaning .
+This issue is discussed in more detail in the next subsection .
+3.3 Challenges More than one thousand frames are described in FrameNet , thus providing a rich coverage of the lexicon .
+However , there is always the fundamental issue of granularity that affects the groupings of LUs into frames .
+There are cases when adjectival collocates provide additional information about a word ’s semantics , but where there are no suitable FEs to accommodate this additional aspect of a word ’s meaning .
+The following examples illustrate the issue .
+Consider the collocates of the noun Zukunft ‘ future ’ : nah‘near ’ , unmittelbar ‘ immediate ’ , fern ‘ distant ’ , weit ‘ distant ’ , entfernt ‘ distant ’ , rosig ‘ rosy ’ , gl¨anzend ‘ bright ’ , licht ‘ bright ’ , golden ‘ golden ’ , strahlend ‘ bright ’ , hell ‘ bright ’ , bl¨uhend ‘ prosper-
+111ous ’ , leuchtend ‘ bright ’ , groß ‘ great ’ , glanzvoll ‘ bright ’ , dunkel ‘ dark ’ , d¨uster ‘ dark ’ , stabil ‘ stable ’ Some of them refer to the temporal proximity of future , the others are evaluative descriptors ( mostly positive ones ) .
+The frame evoked by ‘ future ’ in FrameNet is “ Alternatives ” with the following FEs ( FrameNet - Database ): Agent : An individual involved in the Event .
+Salient entity : An entity intimately involved in the Event .
+Situation :
+Something that may happen in the future , or at least whose factual status is unresolved .
+Number ofpossibilities : The number of different future Events under consideration .
+Purpose : The state - of - affairs that the Agent hopes to bring about which is associated with some of the possible Events but not others .
+None of the FEs reﬂects the evaluative or the temporal aspect of the meaning of the noun ‘ future ’ expressed by the collocates above .
+This means that additional FEs need to be inserted into the frame “ Alternatives ” .
+The most appropriate FEs appear to be D ESCRIPTOR which in FrameNet refers to descriptive characteristics and properties , and T IME .
+Consider another example : the frame “ Calendric unit ” is evoked by LUs denoting seasons , days of the week , months , times of the day , etc .
+The FEs describing this frame refer to different aspects of time .
+However , some , but not all of the LUs that evoke this frame have collocates referring to the weather or the state of nature : winter can be ‘ mild ’ or ‘ harsh ’ ( in the sense of temperature / weather ) , autumn , and September orOctober are ‘ golden ’ .
+Such LUs should be accommodated by a subframe that inherits from the frame “ Calendric unit ” and contains additional FEs referring to weather and/or state of nature .
+4 Conclusion and future work In this paper we have argued that Frame Semantics provides a good framework for semantic modelling of adjective - noun collocations .
+More speciﬁcally , the notion of a frame is rich enough to account for nouns from different semantic classes and to model semantic relations that hold between an adjective and a noun in terms of Frame Elements .
+We have substantiated these ﬁndings byconsidering a sample of adjective - noun collocations from German that are taken from different semantic ﬁelds identiﬁed in the German wordnet GermaNet .
+We are grateful to the anonymous reviewer for raising an interesting question concerning the applicability of FrameNet ’s semantic relations to adjective - noun free phrases as well .
+In future research , we plan to perform the modelling on a larger scale .
+For this purpose , we are currently preparing a large dataset containing more than 2000 German adjective - noun collocations .
+We will continue to use the dictionary DWDS and its collocation extraction tool Wortproﬁl as the empirical basis for obtaining the data .
+The resulting data sample will cover nouns and adjectives from all the semantic classes identiﬁed in GermaNet .
+We will use this dataset to examine FrameNet ’s coverage of lexical units from different semantic ﬁelds .
+But even if a lexical frame exists for a given noun , the Frame Elements included in the lexical frame may not sufﬁce .
+As described in the previous subsection , the structure of some semantic frames lacks important FEs , which therefore need to be added .
+Therefore , the overall objective in the future work is to examine various semantic frames and their Frame Elements in terms of their comprehensiveness and applicability for modelling diverse relations that hold between collocation constituents .
+A second important objective of our future research will be to address the question of reliability of annotations for the semantics of collocations on the basis of FrameNet .
+To this end , we plan to conduct an inter - annotator agreement study .
+This study will be informed by detailed instructions to the annotators in the form of written guidelines on how to identify the correct Frame Elements for a given collocation .
+As mentioned in Section 2 , one of the advantages of FrameNet is that it can be adapted for other languages .
+Therefore , it is worthwhile to conduct a comparative study on semantic annotation of collocations based on FrameNet for languages other than German .
+We plan to conduct such a study for Russian and English , since relevant resources and points of comparison are available for each of those two languages .
+For Russian , the Explanatory Combinatorial Dictionary of Russian ( Mel’cuk and Zholkovsky , 1984 ) describes collocations in terms of Lexical Functions ` a la Mel ’ ˇcuk .
+The Macmillan Collocations Dictionary
+112for Learners of English ( Macmillan , 2010 ) provides a rich coverage of English lexicon with semantic grouping of collocates for each base word and uses short deﬁnitions to describe such semantic sets .
+We plan to evaluate the relative merits of different annotation schemes and expect that it will be of further beneﬁt for our research on collocations as MWEs .
+Extending the present study to Russian will also provide an opportunity to compare the present approach that classiﬁes collocations in terms of Frame Elements with Mel ’ ˇcuk ’s classiﬁcation according to Lexical Functions .
+One noteworthy difference that is apparent already at this point is that FrameNet ’s semantic relations can also be applied to describe free phrases , whereas the application of LFs is limited to lexically restricted combinations ( Mel ’ ˇcuk , 1995 ; Mel ’ ˇcuk , 2015).5 Acknowledgements The authors gratefully acknowledge the ﬁnancial support of the research reported here by the grant Modellierung lexikalisch - semantischer Beziehungen von Kollokationen awarded by the Deutsche Forschungsgemeinschaft ( DFG ) .
+We would also like to thank three anonymous reviewers for their constructive remarks on an earlier version of this paper .
+References Sabine Bartsch .
+2004 .
+Structural and functional properties of collocations in English : A corpus study of lexical and pragmatic constraints on lexical cooccurrence .
+Gunter Narr Verlag .
+Nuria Bel , Federica Busa , Nicoletta Calzolari , Elisabetta Gola , Alessandro Lenci , Monica Monachini , Antoine Ogonowski , Ivonne Peters , Wim Peters , Nilda Ruimy , Marta Villegas , and Antonio Zampolli . 2000 .
+SIMPLE :
+A general framework for the development of multilingual lexicons .
+In Proceedings of the Second International Conference on Language Resources and Evaluation ( LREC’00 ) , Athens , Greece .
+European Language Resources Association ( ELRA ) .
+Hans C. Boas . 2005 .
+Semantic Frames as Interlingual Representations for Multilingual Lexical Databases .
+International Journal of Lexicography , 18(4):445 – 478 .
+Gerlof Bouma .
+2009 .
+Normalized ( pointwise ) mutual information in collocation extraction .
+Proceedings of GSCL , pages 31–40 .
+5We would like to thank an anonymous reviewer for raising this issue .
+Kenneth Church , William Gale , Patrick Hanks , and Donald Hindle .
+1991 .
+Using statistics in lexical analysis .
+In Lexical Acquisition : Exploiting OnLine Resources to Build a Lexicon , pages 115–164 .
+Erlbaum .
+Stefan Evert .
+2004 .
+The Statistics of Word Cooccurrences : Word Pairs and Collocations .
+Ph.D. thesis , Institut f ¨ur maschinelle Sprachverarbeitung , University of Stuttgart .
+Charles J. Fillmore .
+1982 .
+Frame Semantics .
+In Linguistics in the Morning Calm , pages 111–137 .
+Hanshin Publishing Co. , Seoul , South Korea .
+FrameNet - Database .
+Berkeley FrameNet Project .
+FrameNet Project .
+Alexander Geyken , Jorg Didakowski , and Alexander Siebert . 2009 .
+Generation of Word Proﬁles for Large German Corpora .
+Corpus Analysis and Variation in Linguistics , 1:141–157 .
+Birgit Hamp and Helmut Feldweg .
+1997 .
+GermaNet a Lexical - Semantic Net for German .
+In Proceedings of the ACL workshop Automatic Information Extraction and Building of Lexical Semantic Resources for NLP Applications .
+Verena Henrich and Erhard Hinrichs .
+2010 .
+GernEdiT - the GermaNet Editing Tool .
+In Proceedings of the Seventh conference on International Language Resources and Evaluation ( LREC’10 ) , Valletta , Malta .
+European Languages Resources Association ( ELRA ) .
+Anne - Laure Jousse .
+2007 .
+Formalizing non - standard lexical functions .
+Wiener Slawistischer Almanach , pages 219–228 .
+Wolfgang Klein and Alexander Geyken .
+2010 .
+Das digitale W ¨orterbuch der deutschen Sprache ( DWDS ) .
+In Lexicographica : International annual for lexicography , pages 79–96 .
+De Gruyter .
+Macmillan .
+2010 .
+Macmillan Collocations Dictionary for Learners of English .
+Macmillan Education .
+Igor Mel ’ ˇcuk .
+1998 .
+Collocations and lexical functions .
+In A P Cowie , editor , Phraseology .
+Theory , analysis , and applications , pages 23–53 .
+Clarendon Press , Oxford .
+Igor Mel ’ ˇcuk .
+2015 .
+Semantics : From meaning to text , volume 3 .
+John Benjamins Publishing Company .
+Igor A Mel ’ ˇcuk and Leo Wanner .
+1994 .
+Lexical co - occurrence and lexical inheritance .
+Emotion lexemes in German : A lexicographic case study .
+Lexikos , 4:86–161 .
+Igor Mel ’ ˇcuk .
+1996 .
+Lexical functions : a tool for the description of lexical relations in a lexicon .
+Lexical functions in lexicography and natural language processing , 31:37–102 .
+113Igor A Mel ’ ˇcuk .
+1995 .
+Russkij jazyk v modeli “ SmyslTekst ” .
+Moskva , Vena .
+Igor A Mel’cuk and Alexander K Zholkovsky .
+1984 .
+Explanatory Combinatorial Dictionary of Modern Russian .
+Wiener Slawistischer Almanach , Vienna .
+Nadja Nesselhauf .
+2003 .
+The use of collocations by advanced learners of English and some implications for teaching .
+Applied linguistics , 24(2):223–242 .
+Sebastian Pad ´ o. 2007 .
+Cross - lingual annotation projection models for role - semantic information .
+Ph.D. thesis , Saarland University .
+Pavel Pecina .
+2008 .
+Lexical Association Measures : Collocation Extraction .
+Ph.D. thesis , Faculty of Mathematics and Physics , Charles University in Prague , Prague , Czech Republic .
+Alain Polguere .
+2000 .
+Towards a theoreticallymotivated general public dictionary of semantic derivations and collocations for French .
+In Proceedings of the 9th EURALEX International Congress , pages 517–527 , Stuttgart , Germany .
+Institut f ¨ur Maschinelle Sprachverarbeitung .
+James Pustejovsky .
+1991 .
+The Generative Lexicon .
+Computational Linguistics , 17(4):409–441 .
+Josef Ruppenhofer , Michael Ellsworth , Myriam Schwarzer - Petruck , Christopher R Johnson , and Jan Scheffczyk . 2016 .
+FrameNet II : Extended theory and practice .
+Frank Smadja .
+1993 .
+Retrieving collocations from text : Xtract .
+Computational linguistics , 19(1):143–177 .
+Orsolya Vincze , Estela Mosqueira , and Margarita Alonso Ramos . 2011 .
+An online collocation dictionary of Spanish .
+In Proceedings of the 5th International Conference on Meaning - Text Theory .
+Barcelona , pages 275–286 .
+Leo Wanner .
+2004 .
+Towards automatic ﬁne - grained semantic classiﬁcation of verb - noun collocations .
+Natural Language Engineering , 10(2):95–143 .
+Leo Wanner , Bernd Bohnet , and Mark Giereth .
+2006 .
+Making sense of collocations .
+Computer Speech & Language , 20(4):609–624 .
+Michael Wilson .
+1988 .
+MRC Psycholinguistic Database : Machine - usable dictionary , version 2.00 .
+Behavior Research Methods , Instruments , & Computers , 20(1):6–10 .
