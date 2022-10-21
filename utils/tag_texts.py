@@ -4,8 +4,8 @@ import json
 import os
 
 
-path_to_tokenized = 'tokenized_texts/'
-path_to_tagged = 'tagged_texts/'
+path_to_tokenized = 'tokenized_texts/train/'
+path_to_tagged = 'tagged_texts/train/'
 filenames = os.listdir(path_to_tokenized)
 
 with open('entity_corpus/pwc_entities.json') as f:

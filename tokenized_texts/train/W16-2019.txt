@@ -1,0 +1,373 @@
+Proceedings of the 14th Annual SIGMORPHON Workshop on Computational Research in Phonetics , Phonology , and Morphology , pages 121–130 , Berlin , Germany , August 11 , 2016 .
+c  2016 Association for Computational Linguistics Morphotactics as Tier - Based Strictly Local Dependencies
+Al¨ena Aks ¨enova Thomas Graf Sedigheh Moradi Department of Linguistics Stony Brook University Stony Brook , NY 11794 , USA ∗mail@thomasgraf.net alena.aksenova@stonybrook.edu , sedigheh.moradi@stonybrook.edu
+Abstract It is commonly accepted that morphological dependencies are ﬁnite - state in nature .
+We argue that the upper bound on morphological expressivity is much lower .
+Drawing on technical results from computational phonology , we show that a variety of morphotactic phenomena are tierbased strictly local and do not fall into weaker subclasses such as the strictly local or strictly piecewise languages .
+Since the tier - based strictly local languages are learnable in the limit from positive texts , this marks a ﬁrst important step towards general machine learning algorithms for morphology .
+Furthermore , the limitation to tier - based strictly local languages explains typological gaps that are puzzling from a purely linguistic perspective .
+1 Introduction Different aspects of language have different levels of complexity .
+A lot of recent work in phonology ( see Graf ( 2010 ) , Heinz ( 2011a ; 2011b ; 2015 ) , Chandlee ( 2014 ) , Jardine ( 2015 ) and references therein ) argues that phonological well - formedness conditions are subregular and hence do not require the full power of ﬁnite - state automata .
+This is particularly noteworthy because computational phonology still relies heavily on ﬁnite - state methods ( Kaplan and Kay , 1994 ; Frank and Satta , 1998 ; Riggle , 2004 ) .
+A similar trend can be observed in computational syntax , where the original characterization as mildly context - sensitive string languages ( Huybregts , 1984 ; Shieber , 1985 ) is now being reinterpreted in terms of subregular tree languages ( Graf , 2012 ; Graf and Heinz , 2015 ) .
+Curiously missing from these investigations is morphology .
+While linguistic theories sometimes consider morphology a part of syntax , computational morphology recognizes that the weak generative capacity of morphology is much closer to phonology than syntax .
+Consequently , computational morphology involves largely the same ﬁnite - state methods as computational phonology ( Koskenniemi , 1983 ; Karttunen et al . , 1992 ) .
+This raises the question whether morphology , just like phonology , uses only a fraction of the power furnished by these tools .
+A positive answer would have important repercussions for linguistics as well as natural language processing .
+The subregular classes identiﬁed in computational phonology are learnable in the limit from positive text ( Heinz et al . , 2012 ) , so a subregular theory of morphology would greatly simplify machine learning while also explaining how morphological dependencies can be acquired by the child from very little input .
+A subregular model of morphology would also be much more restricted with respect to what processes are predicted to arise in natural languages .
+It thus provides a much tighter typological ﬁt than the regular languages .
+In this paper , we argue that the subregular view of morphology is indeed correct , at least for morphotactics .
+Morphotactics describes the syntax of morphemes , that is to say , their linear order in the word and the conditions that license their presence or enforce their absence .
+One can distinguish surface morphotactics from underlying morphotactics .
+The former regulates the shape of the pronounced surface strings , whereas the latter is only concerned with the arrangements of the morphemes in the initial representation rather than how said morphemes are realized in speciﬁc environments .
+We only consider underlying morphotactics in this paper .
+The following example may clarify the distinction .
+In German , the past participle of a verb is121
+formed via a circumﬁx .
+The ﬁrst part of the circumﬁx is always the preﬁx ge- , whereas the second part may be the sufﬁx -enor - tdepending on the verb stem .
+In addition , the sufﬁxes can also occur on their own , e.g. on inﬁnitives or the third person singular form of the verb .
+Surface morphotactics thus has to ensure that ge - always appears with one of these two sufﬁxes , and that the form of the sufﬁx matches the stem .
+At the same time , it does not need to worry about matching -enor - twith ge - since these forms can occur independently as realizations of different morphemes .
+Underlying morphotactics , on the other hand , is unaware of the surface realizations and only knows that some abstract preﬁx GE- must always occur with the abstract sufﬁx -EN , and the other way round .
+The fact that -EN has a surface realization that is indistinguishable from the inﬁnitival marker , which does not require the preﬁx GE- , is irrelevant for underlying morphotactics .
+More succinctly : underlying morphotactics regulates the distribution of morphemes , surface morphotactics the distribution of allomorphs .
+This paper considers a variety of phenomena — circumﬁxation , variable afﬁx ordering , unbounded preﬁxation — and concludes that they all belong to the class of tier - based strictly local languages .
+We ﬁrst show that even though many morphotactic dependencies are strictly local , that is not the case for all of them ( Sec . 2.1 ) .
+While some of these outliers are strictly piecewise ( Sec . 2.2 ) , tier - based strictly local grammars are needed to handle the full range of data points ( Sec . 2.3 ) .
+This prompts our conjecture that all dependencies that are part of underlying morphotactics stay within the class of tier - based strictly local languages .
+We then use this hypothesis in Sec . 3 to explain two typological gaps with respect to compounding markers and circumﬁxation .
+2 Subregular Patterns in Morphology The regular languages are one of the best understood language classes , with many attractive properties .
+Yet it is often forgotten that this class properly includes many weaker ones ( McNaughton and Pappert , 1971 ) , some of which have recently attracted much interest in computational phonology .
+At the very bottom of the hierarchy one ﬁnds strictly local and strictly piecewise languages ( Rogers et al . , 2010 ) , and a little bit higher up the tier - based strictly local languages ( Heinz et
+al . ,Regular Star - Free LTT LT SLPT SP TSL Figure 1 : The subregular hierarchy as given in Heinz et
+al . ( 2011 ) ; language classes in dashed boxes are studied in this paper 2011 ) .
+The subregular hierarchy includes many other classes ( see Fig . 1 ) , but the previous three are noteworthy because they are conceptually simple and efﬁciently learnable in the limit from positive data ( Heinz et al . , 2012 ; Jardine and Heinz , 2016 ) while also furnishing sufﬁcient power for a wide range of phonological phenomena ( Heinz , 2015 ; Jardine , 2015 ) .
+In this section , we investigate the role of strictly local , strictly piecewise and tier - based strictly local patterns in morphotactics .
+We show that some but not all patterns are strictly local or strictly piecewise , whereas all typologically instantiated patterns seem to ﬁt in the class of tier - based strictly local languages .
+2.1 Strictly Local A string language Lover alphabet Σisstrictly local(SL )
+iff there is some k∈Nsuch that Lis generated by a strictly k - local grammar G. Such a grammar consists of a ﬁnite set of k - grams , each one of which describes an illicit substring .
+More precisely , given a string w∈Σ∗ , let ˆwk:= /multicloserightkw / multicloseleftk(where / multicloseright,/multicloseleft/∈Σ ) and k - grams ( w):= { s|sis a substring of ˆwk−1of length k } .
+Then Ggenerates string wiffk - grams ( w)∩G=∅. That is to say , Ggenerates every string over Σthat does not contain an illicit substring .
+Most phonological dependencies can be described in strictly local terms — see Heinz ( 2015 ) for numerous examples .
+Consider for instance the well - known process of word-ﬁnal obstruent devoicing that forces voiced obstruents at the end of the word to be realized as voiceless : moro
+z
+[ maro s ] ‘ frost ’ in Russian , Ba d[bat ] ‘ bath ’ in German ) .
+If one considers phonotactics rather than mappings from underlying representations to surface forms , this is tantamount to a ban against word-ﬁnal voiced obstruents .
+Said ban , in turn , is captured by a strictly 2 - local grammar Gthat contains all bigrams of the form v / multicloseleft , with va voiced122
+obstruent .
+The speciﬁcation of SL grammars can be simpliﬁed by applying mappings .
+In the case at hand , one could deﬁne a function fthat replaces every voiced obstruent by the designated symbol ♦ so that the grammar Gcan be reduced to the single bigram ♦ /multicloseleft .
+One has to be careful , though .
+The SL languages are not closed under relabelings , in fact , every regular language is the image of a strictly 2local language under some relabeling .
+However , the directionality of the ♦ -relabeling above is the opposite : ﬁrst the relabeling is applied , and then the grammar ﬁlters out strings in the image of that relabeling .
+As long as the relabeling is a manyto - one map between alphabets ( and thus does not introduce distinctions that were n’t already part of the original alphabet ) , this provably does not increase weak generative capacity for any of the formalisms discussed in this paper .
+We make use of such relabelings in the following sections in order to convert natural language patterns into more easily described formal languages .
+For morphotactics , though , this raises the issue how the size of the atomic units should be chosen .
+One could posit that morphology , just like phonology , treats every phonological segment as a symbol .
+In that case , stems and morphemes are strings of symbols .
+Alternatively , one may treat each morpheme , including stems , as an atomic symbol .
+This is an important decision when it comes to modeling the interactions of morphology and phonology such as phonologically conditioned allomorphy .
+Fortunately our results are independent of this choice , due to the productive nature of compounding .
+To better understand why different representations could in principle affect subregular complexity , note ﬁrst that whether a stem is represented as a single , atomic symbol or as a sequence of phonological segments seems to determine if preﬁxes and sufﬁxes might be separated by an unbounded amount of symbols .
+Consider a circumﬁx u- -v , where neither part of the afﬁx may occur without the other .
+A concrete example is the nominalization circumﬁx ke- -an in Indonesian ( Mahdi , 2012 ; Sneddon , 1996 ): ( 1 ) a. tingii high b. keNMN - tinggi high - an -NMN ‘ altitude’If a stem is a single symbol x , then xand uxv are well - formed whereas uxandxvare not due to u- -v being a circumﬁx whose subparts can not occur in isolation .
+This generalization is easily captured by the strictly 3 - local grammar { /multicloserightxv , ux / multicloseleft } .
+However , if stems are sequences of symbols , then the well - formed patterns are of the form x+or ux+v(since the length of stems is in principle unbounded ) .
+The illict strings , on the other hand , are of the form /multicloserightx+vandux+/multicloseleft .
+But no strictly local grammar can generate the former patterns without also generating the latter .
+That is due to the strictly local languages being closed under sufﬁx substitution closure .
+Sufﬁx Substitution Closure Language Lis SL iff there exists a k∈Nsuch that for all strings u1,v1,u2,v2and any string xof length k−1 , ifu1xv1,u2xv2∈L , then u1xv2∈L.
+If there is no upper bound on the length of stems , then we can infer from xk∈Landuxkv∈Lthat both xkv∈Land
+uxk∈L. It seems , then , that circumﬁxes are strictly local only if each stem is an atomic symbol .
+But this line of reasoning erroneously assumes that the circumﬁx can only apply to individual stems , which ignores the availability of compounding .
+Returning to Indonesian , we see that its nominalization marker is not restricted to single stems and can also apply to compounds .
+( 2 ) a. maha bigsiswa pupil ‘ student ’ b. keNMN - maha bigsiswa pupil - an -NMN ‘ student affairs ’ Compounding is an unbounded process , so even if each stem is mapped to a single symbol x , one ends up with the same patterns as with the segmental mapping approach :
+x+and ux+vare well - formed , while ux+and x+vare ill - formed .
+Since the choice of representation does not affect the subregular complexity results , we opt for the segmental mapping , which does not require us to use compounding in all our natural language data points .
+The details of the segmental mapping are as follows : within a stem , all segments are replaced by some distinguished symbol .
+We choose xfor123
+this purpose .
+All morphemes , on the other hand , are replaced by single symbols .
+Symbols are chosen to maximize clarity of exposition , so that we sometimes assign each morpheme a unique symbol and sometimes map irrelevant morphemes to a randomly chosen ﬁller symbol .
+For some linguistic phenomena we follow linguistic convention in assuming that the underlying representations contain additional distinguished symbols to mark the edges of the stem — this will be mentioned explicitly for all relevant cases .
+The preceding discussion yielded as a nice sideresult that circumﬁxation is not SL unless each part of the circumﬁx can also occur on its own .
+Few circumﬁxes display that kind of freedom , wherefore not all aspects of morphotactics are SL .
+However , large swaths of morphology still are , with a couple of examples from English given below : ( 3 ) a. una - do xx b. break xxxxx - able -b ( 4 ) a. punch
+xxxxx - ed -c b. put xxx - ε -c
+Any kind of afﬁx that only consists of one part and whose distribution is determined within a locally bounded domain is part of strictly local morphotactics .
+Although we did not carry out any rigorous quantitative comparisons , we believe the majority of morphological dependencies to belong to this class .
+2.2 Strictly Piecewise While SL covers a wide range of phenomena , it is n’t just circumﬁxes that require more power .
+Problems arise whenever a dependency involves both the domain of preﬁxes and the domain of sufﬁxes — because they can be separated by arbitrarily many symbols — and such conﬁgurations are not limited to circumﬁxes .
+In most languages the ordering of afﬁxes tends to be ﬁxed , but there are languages in which afﬁxes are ordered relatively freely and do not follow a strict template , thereby creating non - local dependencies .
+Let us consider the following data from Swahili:(5 ) a. aSBJ : CL.1 - viOBJ : CL.8 - soma read -vyo
+-REL : CL.8 u - v - xxxx - c ‘ reads ’ b. aSBJ : CL.1 - siNEG - vyoREL : CL.8 - viread soma -OBJ : CL.8 u - w - c - v - xxxx ‘ does n’t read ’ This data is taken from Stump ( 2016 ) .
+Based on his discussion of vyo , the following forms are ungrammatical .
+( 6 ) a. * aSBJ : CL.1 - vyoREL : CL.8 - viOBJ : CL.8soma read u - c - v - xxxx b. * aSBJ : CL.1 - vyoREL : CL.8 - viOBJ : CL.8soma read - vyo -REL : CL.8 u - c - v - xxxx - c c. * aSBJ : CL.1 - siNEG - vyoREL : CL.8viOBJ : CL.8 - soma read - vyo REL : CL.8u - w - c - v - xxxx - c d. * aSBJ : CL.1 - siNEG - viOBJ : CL.8 - soma read -vyo
+REL : CL.8u - w - v - xxxx - c Different generalizations can be drawn from these data sets , some of which are more complex than others .
+The ﬁrst generalization states that vyois only licensed if it follows either a segment that is part of a stem or the preﬁx si .
+This is a strictly 2 - local pattern , and it explains both ( 6a ) and ( 6b ) .
+Alternatively , one may conclude that ( 6b ) is ill - formed because there is more than one occurrence of vyo .
+Such a ban against two instances of vyois also supported by the ill - formedness of ( 6c ) , which is unexpected under the ﬁrst generalization .
+Preventing the presence of two instances of vyois beyond the power of any SL grammar G : ifuvx+c⊂L(G)124
+and uwcvx+⊂L(G )
+, then L(G)must also contain strings of the form uwcvx+c(due to sufﬁx substitution closure ) .
+The second generalization is similar to the phonological requirement that no word may contain more than one primary stress , which is strictly piecewise ( SP ; Heinz ( 2010 ) , Rogers et al .
+( 2010 ) )
+.
+SP grammars work exactly the same as SL grammar except that instead of illicit substrings they list illicit subsequences .
+Given a string w , its set of k - sequences is k - seqs(w):=/braceleftbig s|sis a subsequence of ˆwk−1of length k / bracerightbig .
+A strictly k - piecewise grammar Gis a ﬁnite set of k - grams over Σ∪{/multicloseright,/multicloseleft } , and the language generated by GisL:={w|k - seqs(w)∩G=∅ } .
+The ban against two occurrences of vyo is strictly 2 - piecewise — the grammar only need to contain the bigram vyo vyo .
+The intersection of the strictly 2 - local and strictly 2 - piecewise languages does not contain ( 6a)–(6c ) , as desired .
+But it does contain ( 6d ) .
+Both generalizations miss that even though vyocan occur as a preﬁx and as a sufﬁx , it is a preﬁx if and only if siis present .
+This kind of conditional positioning can not be captured by SL grammars , and the culprit is once again sufﬁx substitution closure .
+But SP grammars by themselves are not sufﬁcient , either .
+Suppose we increase the locality rank from 2to 3and include sixvyoas an illicit subsequence in our SP grammar .
+This forces vyoto be a preﬁx in the presence of si .
+However , it still incorrectly allows for vyoto be a preﬁx in the absence of si .
+No SP grammar can prevent this outcome .
+The problem is that any word of the form uvyov x contains only subsequences that also occur in the well - formed usi vyo v x. Consequently , any SP grammar that generates the latter also generates the former .
+It is only in combination with the SL grammar that we can correctly rule out preﬁx vyowithout a preceding si .
+Swahili ’s inﬂectional morphology thus provides evidence that SL is not enough to handle all aspects of morphotactics and must be supplemented by some mechanism to handle long - distance dependencies , with SP being one option .
+But even the combination of SL and SP can not capture all non - local dependencies .
+In Swahili , the inability of SP mechanisms to enforce the presence of siwith preﬁx vyocould be remedied by the strictly local requirement that vyomay only occur after sior a stem .
+This elegant interactionof SL and SP is not always possible , however .
+The most noteworthy case are circumﬁxes .
+Consider some arbitrary circumﬁx u- -v .
+Clearly all subsequences of ux+are subsequences of ux+v , so if the latter is generated by some SP grammar then by deﬁnition the former must be , too .
+The underlying problem is that SP grammars can only enforce the absence of an afﬁx , not its presence .
+Circumﬁxes where the presence of one afﬁx entails the presence of the other afﬁx thus are not SP .
+It seems that we must move higher up the subregular hierarchy in order to accommodate circumﬁxes , which will also have the welcome side - effect of providing a simpler account for the distribution of Swahili vyo .
+2.3 Tier - Based Strictly Local As pointed out in the previous section , the Swahili pattern is n’t too dissimilar from the phonological requirement that no word has more than one primary stress .
+However , the distribution of primary stress is more speciﬁc than that : every phonological word has exactly one primary stress .
+Ensuring the presence of at least one primary stress is beyond the capabilities of SP grammars — once again this holds because every subsequence of an ill - formed word without primary stress is also a subsequence of the well - formed counterpart with exactly one primary stress .
+A better model for primary stress assignment is furnished by tier - based strictly local ( TSL ; Heinz et al .
+( 2011 ) ) grammars , which also happen to be powerful enough for circumﬁxation .
+A TSL grammar is an SL grammar that operates over a tier , a speciﬁc substructure of the string .
+Given a tier - alphabet T⊆Σ , letETbe a mapping that erases all symbols in a string that do not belong to T. First , ET(ε )
+= ε .
+Then for a∈Σand w∈Σ∗ , ET(aw):=/braceleftBigg a·ET(w)ifa∈T ET(w ) otherwise TheT - tier of a string wis its image under ET .
+A tier - based strictly k - local grammar Gis a pair /angbracketleftK , T / angbracketrightwhere Kis a strictly k - local grammar over tier - alphabet
+T.
+The grammar generates the language L(G):={w|ET(w)∈L(K ) } .
+Note that every SL language is a TSL language with T= Σ.
+The distribution of primary stress is tier - based strictly 2 - local .
+Assuming that primary stress is indicated as some diacritic on symbols , the tieralphabet Tcontains all symbols with this diacritic.125
+This is tantamount to projecting a tier that only contains segments with primary stress .
+The grammar then contains the bigram /multicloseright / multicloseleftto block words with an empty primary stress tier , i.e. words that contain no primary stress .
+In addition , every bigram uvforu , v∈Tis added to rule out words with more than one primary stress .
+The requirement of exactly one primary stress per word thus boils down to having exactly one segment on the primary stress tier , which is a strictly local dependency over that tier .
+The Swahili pattern from the previous section can also be analyzed as tier - based strictly local , and the same is true for circumﬁxation .
+For Swahili we project a tier that contains only the afﬁxvyo , and we do not allow more than one segment on this tier .
+As a result , vyooccurs at most once per word .
+To ensure that vyois a preﬁx whenever siis present , we furthermore postulate a marker # that indicates the edges of the stem .
+The projected tier then includes all instances of vyo , siand the marker # ( of which there are exactly two ) .
+On this tier , the 4 - gram si##vyocorrectly excludes all ill - formed cases of vyoas a sufﬁx , whereas /multicloserightvyo # # prevents vyofrom occurring as a preﬁx in the absence of si .
+Adapting the ban against two instances of vyoto this slightly expanded tier is left as an exercise to the reader .
+In order to regulate the distribution of circumﬁxes such as u-
+-v , we have to project a tier that contains only those subparts uandv .
+If the afﬁxes can never occur by themselves , then we block /multicloserightv andu / multicloseleft .
+Removing one of those two bigrams creates asymmetric cases where one of the afﬁxes — but not the other — is sometimes allowed to be present by itself .
+We also add uuandvvto block strings where the preﬁx parts outnumber or are outnumbered by the sufﬁx parts of the circumﬁx .
+Note that this has the side effect of also prohibiting unbounded circumﬁxation , a point we return to in Sec .
+3.2 .
+At this point , we can safely say that natural language morphotactics is at least TSL ( barring the discovery of any intermediate classes between SL and TSL , or SP and TSL ) .
+SL is sufﬁciently powerful for large parts of morphology , but any kind of dependency that involves both preﬁxes and sufﬁxes is likely not SL .
+Some patterns that are not SL are SP , but these also turn out to be TSL .
+To the best of our knowledge , there are no morphological dependencies that are SP but not TSL ( eventhough the two language classes are incomparable ) .
+We thus put forward the following conjecture : Subregular Morphotactics All morphotactic dependencies are tier - based strictly local .
+As any universal claim about the real world , our conjecture can not be proved conclusively — the fact that no counterexamples have been encountered does not guarantee that counterexamples will never be encountered .
+But there are additional reasons to consider TSL a better ﬁt for morphotactics than one of the more powerful classes .
+Moving beyond TSL in the subregular hierarchy would take us into the class of star - free languages , which are equivalent to the string sets deﬁnable in ﬁrst - order logic with the transitive closure of the successor relation .
+As mentioned before , every language that is generated by a tier - based strictly k - local grammar can be identiﬁed in the limited from positive text , provided the learner knows the value of k.
+The class of star - free languages , on the other hand , is not learnable in the limit from positive text .
+It also makes largely incorrect typological predictions : Unlike TSL , the class of starfree languages is closed under union and relative complement .
+But the union or relative complement of two morphotactic systems attested in natural languages rarely yields linguistically plausible morphotactics .
+Similarly , it is trivial to write ﬁrstorder formulas for highly unnatural patterns , e.g. that every word containing two instances of abut less than three bs must contain no substring of the form cd+c .
+These points show that moving from TSL to star - free means losing essential properties of natural language morphotactics .
+Future work may of course identify more adequate classes in the vicinity of TSL .
+Given our current , more limited knowledge of the subregular hierarchy , however , the strongest empirically defensible stance is that tier - based strict locality is both sufﬁcient and necessary for natural language morphotactics .
+3 Beyond Tier - Based Strictly Local ?
+If the subregular hypothesis is correct , then no morphological pattern may exceed the computational power furnished by tier - based strictly local grammars .
+In particular , whenever the combination of two attested TSL patterns is not TSL , that combination should not be attested .
+The subreg-126
+ular hypothesis thus provides a principled explanation for typological gaps .
+In this section we consider two such cases related to compounding markers and the limits of circumﬁxation .
+3.1 Case Study 1 : Compounding Markers Compounding describes the combination of two or more stems to form a compound lexeme , where the stems may belong to different categories .
+Languages differ with respect to whether compounding is ( at least sometimes ) explicitly marked .
+In the following we exhibit two TSL compounding patterns from Turkish and Russian whose combination is not typologically attested .
+We then explain why this combined pattern is not TSL , deriving the otherwise puzzling typological gap .
+Turkish possessive compounds ( see Aslan and Altan ( 1998 ) for a detailed description ) obey the general pattern stem - stem+-o , where ostands for the compounding marker -sI. ( 7 ) a. bahc ¸e gardenkap I gate - sI -COMP xxxxx - xxxx - o ‘ garden gate ’
+b. t¨urk turkishkahve coffee - sI -COMP xxxx - xxxxx - o ‘ Turkish coffee ’ c. t¨urk turkishbahc ¸e gardenkap I gate - sI -COMP(∗-sI ) ( ∗-COMP )
+xxxx - xxxxx - xxxx - o(-*o ) ‘ Turkish garden gate ’ The compounding marker is added when two stems are combined .
+Addition of further stems does not increase the number of compounding markers , it is always a single marker for the whole word .
+The resulting pattern stem-(stem+-o)is tierbased strictly 2 - local under the assumption that a designated symbol occurs between stems , say /square .
+For then we can project a tier that contains only /squareando , with the only illicit bigrams on this tier being / multicloserighto , o / square , and / square / multicloseleft .
+Russian compounding , on the other hand , follows the pattern ( stem - o)∗-stem , which means that the addition of a new stem to the compound requires the appearance of the compounding marker -o - between the stems : ( 8) a. vod water - o - COMP -voz carry xxx - o - xxx‘water - carrier ’ b. vod
+-o- voz -o- voz water - COMP - carry - COMP - carry xxx - o - xxx - o - xxx ‘ carrier of water - carriers ’ Assuming once again the presence of the special symbol # — which marked the edges of stems in the previous section — we can show this pattern to also be tier - based strictly 2 - local .
+In this case , the illicit bigrams are # # , oo,/multicloserighto , and o / multicloseleft .
+Observe that we can remove the ﬁrst one of these bigrams to allow for cases where the compounding marker is optional .
+One may wonder now whether it is possible for natural languages to display a combination of the compounding patterns seen with Russian and Turkish .
+From a linguistic perspective , the expected answer is yes .
+If compounding can be marked by a sufﬁx as in Turkish , and compounding can introduce a marker with each step as in Russian , then it should be possible to introduce a sufﬁx with each compounding step .
+But to the best of our knowledge , no language instantiates this system .
+From a computational perspective , on the other hand , this typological gap is expected because the described system is not TSL — as a matter of fact , it is n’t even regular .
+A language Lthat sufﬁxes a marker to a compound with each compounding step would produce compounds where the number of compound markers is proportional to the number of stems .
+Lethbe a map that replaces all stems by s , all compound markers by o , and all other material by some other symbol .
+Intersecting h(L)with the regular language s+o+yields the language smon , m > n .
+This string set is easily shown to be context - free ( e.g. via the Myhill - Nerode theorem ) , and since regular languages are closed under homomorphisms and intersection , it follows that L can not be regular .
+But every TSL language is regular , so the combination of Russian and Turkish outlined above is not TSL .
+The absence of this compounding pattern in the typology of natural languages thus lends further support to our conjecture that natural language morphotactics is limited to TSL dependencies .
+3.2 Case Study 2 : Unbounded Afﬁxation Circumﬁxation already played an important role in motivating TSL as a reasonable lower bound on how much power is required for natural lan-127
+guage morphotactics .
+We now show that just like compounding markers , circumﬁxation also suggests that TSL marks the upper bound on required expressivity .
+In particular , unbounded afﬁxation is widely attested across languages , whereas unbounded circumﬁxation is not .
+A number of languages allow some of their afﬁxes to occur multiple times .
+For instance , the Russian temporal preﬁx posle- can appear iteratively in the beginning of a word like zavtra ‘ tomorrow ’ .
+( 9 ) a. posleAFTER -zavtra tomorrow a - xxxxxx
+‘ the day after tomorrow ’
+b. posleAFTER -posleAFTER -zavtra tomorrow a - a - xxxxxx
+‘ the day after the day after tomorrow ’
+The very same pattern is also found in German , with morgen ‘ tomorrow ’ , ¨uber - morgen ‘ the day after tomorrow ’ , ¨uber- ¨uber - morgen ‘ the day after the day after tomorrow ’ , and so on .
+German also has the pattern ur - groß - vater , ur - ur - groß - vater , which is the analog of English great grandfather , great great grandfather and its iterations ( various linguistic diagnostics show that these are morphological words rather than phrases ) .
+Note that in all those cases it is impossible to insert other preﬁxes between the iterated preﬁx:∗ur - groß - ur - ur - großvater .
+In sum , some afﬁxes can be freely iterated as long as no other afﬁxes intervene .
+These patterns are all TSL by virtue of being strictly 2 - local .
+We illustrate this claim with German .
+We ignore the problem of how groß can be restricted to occur only with speciﬁc stems ( if stems are atomic symbols , this is trivial , otherwise it requires a strictly k - local grammar over the string of phonological segments where kis large enough to contain both groß and the relevant stems ) .
+We also assume , as before , that there is some marker # that marks the edges of stems .
+Then to ensure that the relevant strings of preﬁxes follow the pattern ur∗groß # , the sequences großur , großgroß , and ur#are marked as illicit .
+Unbounded preﬁxation thus stays within the class of TSL dependencies .
+An interesting counterpart to Russian and German is Ilocano ( Galvez Rubino , 1998 ) , which uses the circumﬁx ka- -an with a function similar to posle and¨uber.(10 ) a. bigat morning xxxxx ‘ morning ’ b. kaNEXT -bigat morning - an -NEXT a - xxxxx - a / prime ‘ the next morning ’
+Crucially , Ilocano differs from Russian and German in that the circumﬁx can not be iterated .
+( 11 ) * kaNEXT -kaNEXT -bigat morning - an -NEXT - an -NEXT a - a - xxxxx - a / prime - a / prime ‘ the next morning after the next one ’ Given our previous discussion of circumﬁxation in Sec . 2.3 , Ilocano clearly instantiates a tier - based strictly 2 - local pattern , too .
+As before , there is little linguistic reason why unbounded circumﬁxation should be blocked .
+If afﬁxation can be unbounded to construct more and more complex versions of day after tomorrow , and day after tomorrow can be derived via circumﬁxation , then one would expect unbounded circumﬁxation to be a viable option .
+But once again there is a clear computational reason as to why this does not happen : the corresponding morphotactic system would no longer be TSL .
+LetLbe some minor variant of Russian where posle- is instead a circumﬁx pos- -le .
+As before we lethbe a homomorphism that replaces all stems bys , the two parts of the circumﬁx by o , and all other material by some distinct symbol .
+The intersection of h(L)with the regular language o+so+ is the context - free string set onson .
+Therefore Lis supra - regular and can not be tier - based strictly local .
+Unbounded circumﬁxation simply can not be reconciled with the subregular hypothesis .
+4 Conclusion The received view is that all of morphology is easily modeled with ﬁnite - state machines ( Koskenniemi , 1983 ; Karttunen et al . , 1992 ) .
+We contend that this view is overly generous and that tighter bounds can be established , at least for speciﬁc subparts of morphology .
+Morphotactics deﬁnes the restrictions on the possible orderings of morphological units , and we argued based on data from typologically diverse languages that the power of natural language morphotactics is severely restricted:128
+Subregular Morphotactics All morphotactic dependencies are tier - based strictly local .
+In contrast to regular languages , tier - based strictly local languages are efﬁciently learnable in the limit from positive text ( Heinz et al . , 2012 ; Jardine and Heinz , 2016 ) .
+Our result thus marks a ﬁrst step towards provably correct machine learning algorithms for natural language morphology .
+Admittedly , morphotactics is just one of several parts of morphology .
+We put aside allomorphy and only considered the distribution of morphemes in the underlying forms .
+Even within that narrow area we did not thoroughly explore all facets , for instance inﬁxation and incorporation .
+Nonetheless our results show that the success of the subregular perspective need not be limited to phonology .
+At least morphotactics can be insightfully studied through this lens , too .
+In addition , there has been a lot of progress in extending the subregular hierarchy from languages to transductions ( see Chandlee ( 2014 ) and references therein ) , and we are conﬁdent that these results will allow us to expand the focus of investigation from morphotactics to morphology at large .
+It will also be interesting to see how uniform the complexity bounds are across different modules of morphology .
+In phonology , suprasegmental dependencies tend to be more complex than segmental ones ( Jardine , 2015 ) .
+Most constructions in this paper involve derivational morphology , but the afﬁx vyoin Swahili is related to inﬂectional morphology and turned out to have a distribution that is neither SL nor SP ( although it can be captured with a combination of the two ) .
+So both derivational and inﬂectional morphotactics occupy points in TSL\(SL∪SP ) .
+In this regard it is also worth noting that some phonological processes such as tone plateauing belong to SP\TSL , whereas no morphological dependencies seem to be part of this subclass .
+We hope to address these and related issues in future work .
+References Erhan Aslan and Asli Altan .
+1998 .
+The role of -(s )
+Iin turkish indeﬁnite nominal compounds .
+Dil , 131:57 – 75 .
+Jane Chandlee .
+2014 .
+Strictly Local Phonological Processes .
+Ph.D. thesis , University of Delaware .
+Robert Frank and Giorgio Satta .
+1998 .
+Optimality theory and the generative complexity of constraint violability .
+Computational Linguistics , 24:307–315.Carl R. Galvez Rubino .
+1998 .
+Ilocano : IlocanoEnglish , English - Ilocano : Dictionary and Phrasebook .
+Hippocrene Books Inc. , U.S. Thomas Graf and Jeffrey Heinz .
+2015 .
+Commonality in disparity : The computational view of syntax and phonology .
+Slides of a talk given at GLOW 2015 , April 18 , Paris , France .
+Thomas Graf . 2010 .
+Logics of phonological reasoning .
+Master ’s thesis , University of California , Los Angeles .
+Thomas Graf . 2012 .
+Locality and the complexity of minimalist derivation tree languages .
+In Philippe de Groot and Mark - Jan Nederhof , editors , Formal Grammar 2010/2011 , volume 7395 of Lecture Notes in Computer Science , pages 208–227 , Heidelberg .
+Springer .
+Jeffrey Heinz , Chetan Rawal , and Herbert G. Tanner . 2011 .
+Tier - based strictly local constraints in phonology .
+In Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics , pages 58–64 .
+Jeffrey Heinz , Anna Kasprzik , and Timo K ¨otzing . 2012 .
+Learning with lattice - structure hypothesis spaces .
+Theoretical Computer Science , 457:111 – 127 .
+Jeffrey Heinz .
+2010 .
+Learning long - distance phonotactics .
+Linguistic Inquiry , 41:623–661 .
+Jeffrey Heinz .
+2011a .
+Computational phonology — part I : Foundations .
+Language and Linguistics Compass , 5:140–152 .
+Jeffrey Heinz .
+2011b .
+Computational phonology — part II : Grammars , learning , and the future .
+Language and Linguistics Compass , 5:153–168 .
+Jeffrey Heinz .
+2015 .
+The computational nature of phonological generalizations .
+Ms. , University of Delaware .
+M. A. C. Huybregts .
+1984 .
+The weak adequacy of context - free phrase structure grammar .
+In Ger J. de Haan , Mieke Trommelen , and Wim Zonneveld , editors , Van Periferie naar Kern , pages 81–99 .
+Foris , Dordrecht .
+Adam Jardine and Jeffrey Heinz .
+2016 .
+Learning tierbased strictly 2 - local languages .
+Transactions of the ACL , 4:87–98 .
+Adam Jardine .
+2015 .
+Computationally , tone is different .
+Phonology .
+to appear .
+Ronald M. Kaplan and Martin Kay . 1994 .
+Regular models of phonological rule systems .
+Computational Linguistics , 20(3):331–378 .
+Lauri Karttunen , Ronald M. Kaplan , and Annie Zaenen .
+1992 .
+Two - level morphology with composition .
+In COLING’92 , pages 141–148.129
+Kimmo Koskenniemi .
+1983 .
+Two - level morphology : A general computational model for word - form recognition and production .
+Publication 11 , University of Helsinki , Department of General Linguistics , Helsinki .
+Waruno Mahdi .
+2012 .
+Distinguishing cognate homonyms in Indonesian .
+Oceanic Linguistics , 51(2):402–449 .
+Robert McNaughton and Seymour Pappert . 1971 .
+Counter - Free Automata .
+MIT Press , Cambridge , MA .
+Jason Riggle .
+2004 .
+Generation , Recognition , and Learning in Finite - State Optimality Theory .
+Ph.D. thesis , University of California , Los Angeles .
+James Rogers , Jeffrey Heinz , Gil Bailey , Matt Edlefsen , Molly Vischer , David Wellcome , and Sean Wibel .
+2010 .
+On languages piecewise testable in the strict sense .
+In Christan Ebert , Gerhard J ¨ager , and Jens Michaelis , editors , The Mathematics of Language , volume 6149 of Lecture Notes in Artiﬁcial Intelligence , pages 255–265 .
+Springer , Heidelberg .
+Stuart M. Shieber .
+1985 .
+Evidence against the contextfreeness of natural language .
+Linguistics and Philosophy , 8(3):333–345 .
+James Neil Sneddon .
+1996 .
+Indonesian Comprehensive Grammar .
+Routledge , London and New York .
+Greg Stump .
+2016 .
+Rule composition in an adequate theory of morphotactics .
+Manuscript , University of Kentucky.130
