@@ -12,3 +12,6 @@
 
 # Ignore all .data files
 *.data
+
+# Ignore large files
+paperswithcode_corpus/test.json
