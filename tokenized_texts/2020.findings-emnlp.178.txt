@@ -1,5 +1,5 @@
-Findings of the Association for Computational Linguistics : EMNLP 2020 , pages 19711980 November 16 - 20 , 2020 .
-c  2020 Association for Computational Linguistics1971head   1 head   2 head   3 head   H    head   1 head   2 head   3 head   H ( a ) Standard Dropout ( b )   DropHead
+Findings of the Association for Computational Linguistics : EMNLP 2020 , pages 1971–1980 November 16 - 20 , 2020 .
+c  2020 Association for Computational Linguistics1971head   1 head   2 head   3 head   H … … head   1 head   2 head   3 head   H ( a ) Standard Dropout ( b )   DropHead
 1972
 1973
 1974

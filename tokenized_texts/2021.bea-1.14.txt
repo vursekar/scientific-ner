@@ -1,73 +1,72 @@
-Proceedings of the 16thWorkshop on Innovative Use of NLP for Building Educational Applications , pages 130134 April 20 , 2021 2021 Association for Computational Linguistics130Estonian as a Second Language Teachers Tools Tiiu Uksik , Jelena Kallas , Kristina Koppel , Katrin Tsepelina , Raili Pool The Institute of the Estonian Language / Roosikrantsi 6 , 10119 Tallinn , Estonia ( tiiu.yksik , jelena.kallas , kristina.koppel)@eki.ee , katrin.tsepelina@eki.ee , raili.pool@ut.ee
-Abstract The paper describes Teachers Tools ( et Opetaja t ooriistad ) developed by the Institute of the Estonian Language for teachers and specialists of Estonian as a Second Language .
+Proceedings of the 16thWorkshop on Innovative Use of NLP for Building Educational Applications , pages 130–134 April 20 , 2021 © 2021 Association for Computational Linguistics130Estonian as a Second Language Teacher ’s Tools Tiiu ¨Uksik , Jelena Kallas , Kristina Koppel , Katrin Tsepelina , Raili Pool The Institute of the Estonian Language / Roosikrantsi 6 , 10119 Tallinn , Estonia ( tiiu.yksik , jelena.kallas , kristina.koppel)@eki.ee , katrin.tsepelina@eki.ee , raili.pool@ut.ee Abstract The paper describes “ Teacher ’s Tools ” ( et ˜Opetaja t ¨o¨oriistad ) developed by the Institute of the Estonian Language for teachers and specialists of Estonian as a Second Language .
 The toolbox includes four modules : vocabulary , grammar , communicative language activities and text evaluation .
-The vocabulary module provides graded word lists for young ( CEFR levels pre - A1C1 ) and adult ( CEFR levels A1C1 ) learners .
-The grammar module provides descriptions of young learners grammar competence .
+The vocabulary module provides graded word lists for young ( CEFR levels pre - A1 – C1 ) and adult ( CEFR levels A1 – C1 ) learners .
+The grammar module provides descriptions of young learners ’ grammar competence .
 The communicative language activities module gives teachers an overview of the typical situations that learners should be able to cope with .
 The text evaluation module marks lemmas in texts according to their CEFR assignment in the vocabulary module .
-So far the grammar and the communicative language activities modules have been developed only for young learners ( CEFR levels pre - A1B2 ) .
+So far the grammar and the communicative language activities modules have been developed only for young learners ( CEFR levels pre - A1 – B2 ) .
 The toolbox is aimed at providing support for the development of Estonian as an L2 courses , educational materials , exercises and tests within a CEFR - based framework .
 The project started in 2017 and is ongoing .
-1 Introduction Teachers Tools is a compatible toolkit developed for teachers and specialists of Estonian as a Second Language , providing an extensive overview of the development of lexical and grammatical competence in Estonian among L2 learners .
-The toolkit is accessible as a sub - page of the language portal S onaveeb1 .
-The framework of the project is based on the Common European Framework of Reference for Languages : Learning , Teaching , Assessment ( CEFR , 2001 ) , its Companion V olume with New Descriptors ( CEFR / CV , 2018 ) and the Collated Representative Samples of Descriptors of Language Competences Developed for Young 1https://sonaveeb.ee/teacher-toolsLearners for Ages 710 ( Szabo , 2018a ) and 1115 ( Szabo , 2018b ) .
-The toolkit distinguishes between adult ( CEFR levels A1C1 ) and young learners ( CEFR levels pre - A1C1 ) .
-The methodology of the project is adapted from similar projects for other languages ( e.g. Capel , 2010 , 2012 ; OKeeffe and Geraldine 2017 ; Alfter et al . , 2019 ) .
-2 Resources of Estonian as an L2 There are quite a few corpora available for the research of the Estonian Language ( the biggest Estonian corpus is the Estonian National Corpus 2019 ( 1,5 billions words))2 .
+1 Introduction “ Teacher ’s Tools ” is a compatible toolkit developed for teachers and specialists of Estonian as a Second Language , providing an extensive overview of the development of lexical and grammatical competence in Estonian among L2 learners .
+The toolkit is accessible as a sub - page of the language portal S ˜onaveeb1 .
+The framework of the project is based on the Common European Framework of Reference for Languages : Learning , Teaching , Assessment ( CEFR , 2001 ) , its Companion V olume with New Descriptors ( CEFR / CV , 2018 ) and the Collated Representative Samples of Descriptors of Language Competences Developed for Young 1https://sonaveeb.ee/teacher-toolsLearners for Ages 7–10 ( Szabo , 2018a ) and 11–15 ( Szabo , 2018b ) .
+The toolkit distinguishes between adult ( CEFR levels A1 – C1 ) and young learners ( CEFR levels pre - A1 – C1 ) .
+The methodology of the project is adapted from similar projects for other languages ( e.g. Capel , 2010 , 2012 ; O’Keeffe and Geraldine 2017 ; Alfter et al . , 2019 ) .
+2 Resources of Estonian as an L2 There are quite a few corpora available for the research of the Estonian Language ( the biggest Estonian corpus is the “ Estonian National Corpus 2019 ” ( 1,5 billions words))2 .
 However , at the beginning of the project in 2017 there was a clear lack of resources available for the research of Estonian as an L2 .
-In order to ll this gap , the Institute of Estonian Language compiled two types of corpora : 1 ) coursebook corpora and 2 ) learner corpora .
-As V olodina and Kokkinakis ( 2013 ) point out , the rst type of corpora provides information about what and when education professionals found important for students to learn ( passive linguistic competence ) , while learner corpora provide an indication of active linguistic competence .
-Both need to be studied since the second is directly inuenced by the rst .
-The coursebook corpora were compiled in several stages and resulted in two groups of corpora : Estonian as a Second Language Coursebook Content Corpus 20173(contains eight coursebooks for adult learners at levels A1C1 ; 500 000 tokens ) and Estonian as a Second Language School Coursebook Content Corpus 20214(contains 27 school coursebooks for grades 112 ; 1 300 000 tokens ) .
-The learner corpus was compiled in 20192021 and contains 6700 Estonian as an L2 young learners texts .
-These are texts written mostly as state standard - determining tests ( grades 3 and 6 ) , basic school nal examinations 2DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 08489L 3DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 06ADEL 4DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 0888BL
-131 Figure 1 : V ocabulary module ( grade 9 ) and state exams ( grade 12 ) for 20172021 .
+In order to ﬁll this gap , the Institute of Estonian Language compiled two types of corpora : 1 ) coursebook corpora and 2 ) learner corpora .
+As V olodina and Kokkinakis ( 2013 ) point out , the ﬁrst type of corpora provides information about what and when education professionals found important for students to learn ( passive linguistic competence ) , while learner corpora provide an indication of active linguistic competence .
+Both need to be studied since the second is directly inﬂuenced by the ﬁrst .
+The coursebook corpora were compiled in several stages and resulted in two groups of corpora : “ Estonian as a Second Language Coursebook Content Corpus 2017”3(contains eight coursebooks for adult learners at levels A1 – C1 ; 500 000 tokens ) and “ Estonian as a Second Language School Coursebook Content Corpus 2021”4(contains 27 school coursebooks for grades 1–12 ; 1 300 000 tokens ) .
+The learner corpus was compiled in 2019–2021 and contains 6700 Estonian as an L2 young learner ’s texts .
+These are texts written mostly as state standard - determining tests ( grades 3 and 6 ) , basic school ﬁnal examinations 2DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 08489L 3DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 06ADEL 4DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 0888BL
+131 Figure 1 : V ocabulary module ( grade 9 ) and state exams ( grade 12 ) for 2017–2021 .
 The data is available for analysis through the interface of the Estonian Learner Language Corpus EMMA5 .
 The texts were not corrected or altered .
-Both types of corpora were used for the development of Teachers Tools .
+Both types of corpora were used for the development of “ Teacher ’s Tools ” .
 The coursebook corpora were used primarily to create passive vocabulary word lists and for the analysis of explicit and implicit grammar teaching .
 The learner corpus was used for the creation and analysis of active vocabulary word lists and the dynamics of grammar acquisition .
-3 Modules of Teachers Tools Teachers Tools consists of four modules : vocabulary , grammar , communicative language activities and text evaluation .
-3.1 Vocabulary The vocabulary module includes young and adult learners word lists compiled on the basis of coursebook and learner corpus word lists in comparison with frequency distribution in the Estonian National Corpus 20176 .
-Currently , the vocabulary list for adult learners includes about 12 500 words for levels A1C1 .
-The young learners word list includes approx .
-9000 words for levels pre - A1B2 .
+3 Modules of ” Teacher ’s Tools ” “ Teacher ’s Tools ” consists of four modules : vocabulary , grammar , communicative language activities and text evaluation .
+3.1 Vocabulary The vocabulary module includes young and adult learners ’ word lists compiled on the basis of coursebook and learner corpus word lists in comparison with frequency distribution in the “ Estonian National Corpus 2017”6 .
+Currently , the vocabulary list for adult learners includes about 12 500 words for levels A1 – C1 .
+The young learners ’ word list includes approx .
+9000 words for levels pre - A1 – B2 .
 All words are presented as lemmas .
 Users can generate word lists based on learner type ( young or adult ) and POS .
 In addition , 24 topics ( clothes , furniture , birds etc . ) are compiled .
 The search results can be sorted alphabetically , by level or by POS ( see Figure 1 ) .
-5DOI : 10.15155/1 - 00 - 0000 - 0000 - 0000 - 001A5L 6DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 071e7l3.2 Grammar The grammar module is the rst attempt to create a systematic overview of Estonian L2 learners grammar competence development .
-The general methodology was adopted from the English Grammar Prole7project ( OKeeffe and Geraldine , 2017 ) .
+5DOI : 10.15155/1 - 00 - 0000 - 0000 - 0000 - 001A5L 6DOI : 10.15155/3 - 00 - 0000 - 0000 - 0000 - 071e7l3.2 Grammar The grammar module is the ﬁrst attempt to create a systematic overview of Estonian L2 learner ’s grammar competence development .
+The general methodology was adopted from the English Grammar Proﬁle7project ( O’Keeffe and Geraldine , 2017 ) .
 Currently , the grammar module provides descriptions of grammar competence on the morphology , derivation , phrase and sentence levels , from level pre - A1 up to level B2 ( see Figure 2 ) .
-The same grammatical category ( e.g. the use of the genetive case for nouns or the use of imperative mood for verbs ) may be described at all levels , but the functions and usage ( how often the learner makes mistakes and what kinds of mistakes ) are level - specic .
+The same grammatical category ( e.g. the use of the genetive case for nouns or the use of imperative mood for verbs ) may be described at all levels , but the functions and usage ( how often the learner makes mistakes and what kinds of mistakes ) are level - speciﬁc .
 Search options offer users choices of four main categories : morphology , derivation , phrase formation and sentence formation .
 The main categories contain 19 subcategories .
 For example , subcategories of morphology areverb , noun , adjective , numeral , pronoun , adverb .
 Every subcategory has grammatical markers ( e.g. number and case fornoun ) .
 The grammatical markers have values , for example number has values singular and plural .
-All descriptions are equipped with example sentences compiled either by experts or taken from coursebook and learners corpora .
-3.3 Communicative language activities The communicative language activities module is based on CEFR / CV descriptor scales , and examples are taken from Szabo ( 2018a , b ) , which include reception processes and strategies of written 7https://www.englishprole.org/english-grammarprole/egp-online ( 13.01.2021 )
+All descriptions are equipped with example sentences compiled either by experts or taken from coursebook and learner ’s corpora .
+3.3 Communicative language activities The communicative language activities module is based on CEFR / CV descriptor scales , and examples are taken from Szabo ( 2018a , b ) , which include reception processes and strategies of written 7https://www.englishproﬁle.org/english-grammarproﬁle/egp-online ( 13.01.2021 )
 132 Figure 2 : Grammar module Figure 3 : Communicative language activities module Figure 4 : Text evaluation module
 133and spoken texts ( listening and reading ) , written and oral text production and production strategies , and written and spoken interaction and interaction strategies .
-It covers young learners at levels A1B2 .
+It covers young learners at levels A1 – B2 .
 The architecture of the module is similar to that of the grammar module , containing main categories ( reception , production , interaction and mediation ) and subcategories , which are followed by detailed descriptions , including limitations : when and how well the language user can manage certain communicative activities ( see Figure 3 ) .
 For example , by choosing the main category reception and the subcategory overall listening comprehension , a teacher can see that at the A1 level the learner should be able to understand a simple description with short sentences , for example about the weather or how big a certain object is .
 3.4 Text evaluation The text evaluation tool helps to assess Estonian texts for their degrees of complexity according to the CERF ( see Figure 4 ) .
-Currently , the tool takes into account only lexical information and denes the CEFR level of each particular lemma based on CEFR vocabulary lists ( see Chapter 3.1 ) .
+Currently , the tool takes into account only lexical information and deﬁnes the CEFR level of each particular lemma based on CEFR vocabulary lists ( see Chapter 3.1 ) .
 Similar tools have also been developed for many other languages ( see e.g. Alfter , 2021 ) .
 The program runs on EstNLTK v 1.6 , which offers functionality to lemmatise and perform morphological analysis .
 The tool needs to be developed further .
 First , there is a need to implement methods for the improvement of the analysis of homonyms ( for example tamm can mean either an oakor adam , which is assigned different levels in word lists ) and multiword expressions .
-So far , the analysis is based only on single word lists , which is not sufcient .
-4 Summary Teachers Tools is the rst attempt to provide a systematic overview of the development of lexical and grammatical competence in Estonian as a Second Language .
+So far , the analysis is based only on single word lists , which is not sufﬁcient .
+4 Summary “ Teacher ’s Tools ” is the ﬁrst attempt to provide a systematic overview of the development of lexical and grammatical competence in Estonian as a Second Language .
 The project is a work in progress and further development of the toolkit is foreseen .
 We plan to add descriptions of the development of grammar competence and communicative language activities for adult learners .
-The enrichment of the text evaluation module with the possibility of measuring grammatical difculty and readability ( by for example adding Lix - index value ) is under development .
-Teachers Tools as a resource can be used for different CALL tasks , including auto - matic CEFR - related vocabulary and grammar exercise generation or lexical simplication tasks .
+The enrichment of the text evaluation module with the possibility of measuring grammatical difﬁculty and readability ( by for example adding Lix - index value ) is under development .
+“ Teacher ’s Tools ” as a resource can be used for different CALL tasks , including auto - matic CEFR - related vocabulary and grammar exercise generation or lexical simpliﬁcation tasks .
 The use of NLP for the development of such computerassisted tools has enormous potential for enhancing the teaching and learning of Estonian as an L2 .
-References Estonian Learner Language Corpus EMMA = Eesti keele oppija korpus EMMA .
+References Estonian Learner Language Corpus EMMA = Eesti keele ˜oppija korpus EMMA .
 University of Tartu .
-Language portal S onaveeb .
+Language portal S ˜onaveeb .
 The Institute of the Estonian Language .
 CEFR = the common european framework of reference for languages : Learning , teaching , assessment .
 2001 .
@@ -92,32 +91,32 @@ David Alfter .
 2021 .
 Exploring natural language processing for single - word and multi - word lexical complexity from a second language learner perspective .
 Ph.D. thesis , University of Gothenburg , Faculty of Humanities .
-David Alfter , Lars Borin , Ildiko Pil an , Therese Lindstrom Tiedemann , and Elena V olodina .
+David Alfter , Lars Borin , Ildiko Pil ´ an , Therese Lindstr¨om Tiedemann , and Elena V olodina .
 2019 .
-Larka :
-From Language Learning Platform to Infrastructure for Research on Language Learning , Link oping Electronic Conference Proceedings .
-Link oping University Press .
+L¨arka :
+From Language Learning Platform to Infrastructure for Research on Language Learning , Link ¨oping Electronic Conference Proceedings .
+Link ¨oping University Press .
 CLARIN Annual Conference ; Conference date : 08 - 10 - 2018 Through 10 - 10 - 2018 .
 Annette Capel .
 2010 .
 A1 - B2 vocabulary :
-Insights and issues arising from the English Prole Wordlists project .
-English Prole Journal , 1(1):111 .
+Insights and issues arising from the English Proﬁle Wordlists project .
+English Proﬁle Journal , 1(1):1–11 .
 Annette Capel .
 2012 .
-Completing the English V ocabulary Prole : C1 and C2 vocabulary .
-English Prole Journal , 1(2):114 .
-Anne OKeeffe and Mark Geraldine . 2017 .
-The english grammar prole of learner competence : Methodology and key ndings .
-International Journal of Corpus Linguistics , 4(22):457489 .
+Completing the English V ocabulary Proﬁle : C1 and C2 vocabulary .
+English Proﬁle Journal , 1(2):1–14 .
+Anne O’Keeffe and Mark Geraldine . 2017 .
+The english grammar proﬁle of learner competence : Methodology and key ﬁndings .
+International Journal of Corpus Linguistics , 4(22):457–489 .
 134Tunde Szabo .
-Collated Representative Samples of Descriptors of Language Competences Developed for Young   V olume 2 : Ages 11 - 15 . 2018a .
+Collated Representative Samples of Descriptors of Language Competences Developed for Young – V olume 2 : Ages 11 - 15 . 2018a .
 Council of Europe .
 Tunde Szabo .
-Collated Representative Samples of Descriptors of Language Competences Developed for Young   V olume 2 : Ages 11 - 15 . 2018b .
+Collated Representative Samples of Descriptors of Language Competences Developed for Young – V olume 2 : Ages 11 - 15 . 2018b .
 Council of Europe .
-Elena V olodina and Soe Johansson Kokkinakis .
+Elena V olodina and Soﬁe Johansson Kokkinakis .
 2013 .
 Compiling a corpus of CEFR - related texts .
 Antwerpen , Belgium .
-May 2729 .
+May 27–29 .

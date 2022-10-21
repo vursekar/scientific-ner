@@ -1,33 +1,32 @@
-Proceedings of the 2017 EMNLP System Demonstrations , pages 2530 Copenhagen , Denmark , September 711 , 2017 .
-c  2017 Association for Computational Linguistics SGNMT   A Flexible NMT Decoding Platform for Quick Prototyping of New Models and Search Strategies Felix StahlbergandEva HaslerandDanielle SaundersandBill Byrne Department of Engineering , University of Cambridge , UK SDL Research , Cambridge ,
+Proceedings of the 2017 EMNLP System Demonstrations , pages 25–30 Copenhagen , Denmark , September 7–11 , 2017 .
+c  2017 Association for Computational Linguistics SGNMT – A Flexible NMT Decoding Platform for Quick Prototyping of New Models and
+Search Strategies Felix Stahlberg†andEva Hasler‡andDanielle Saunders†andBill Byrne‡† †Department of Engineering , University of Cambridge , UK ‡SDL Research , Cambridge ,
 UK Abstract This paper introduces SGNMT , our experimental platform for machine translation research .
 SGNMT provides a generic interface to neural and symbolic scoring modules ( predictors ) with left - to - right semantic such as translation models like NMT , language models , translation lattices , n - best lists or other kinds of scores and constraints .
 Predictors can be combined with other predictors to form complex decoding tasks .
 SGNMT implements a number of search strategies for traversing the space spanned by the predictors which are appropriate for different predictor constellations .
-Adding new predictors or decoding strategies is particularly easy , making it a very efcient tool for prototyping new research ideas .
+Adding new predictors or decoding strategies is particularly easy , making it a very efﬁcient tool for prototyping new research ideas .
 SGNMT is actively being used by students in the MPhil program in Machine Learning , Speech and Language Technology at the University of Cambridge for course work and theses , as well as for most of the research work in our group .
-1 Introduction We are developing an open source decoding framework called SGNMT , short for Syntactically Guided Neural Machine Translation.1The software package supports a number of well - known frameworks , including TensorFlow2(Abadi et al . , 2016 ) , OpenFST ( Allauzen et al . , 2007 ) , Blocks / Theano ( Bastien et al . , 2012 ; van Merri enboer et
-al . , 2015 ) , and NPLM ( Vaswani et
-al . , 2013 ) .
+1 Introduction We are developing an open source decoding framework called SGNMT , short for Syntactically Guided Neural Machine Translation.1The software package supports a number of well - known frameworks , including TensorFlow2(Abadi et al . , 2016 ) , OpenFST ( Allauzen et al . , 2007 ) , Blocks / Theano ( Bastien et al . , 2012 ; van Merri ¨enboer et al . , 2015 ) , and NPLM ( Vaswani et al . , 2013 ) .
 The two central concepts in the 1http://ucam-smt.github.io/sgnmt/html/ 2SGNMT relies on the TensorFlow fork available at https://github.com/ehasler/tensorflowSGNMT tool are predictors anddecoders .
-Predictors are scoring modules which dene scores over the target language vocabulary given the current internal predictor state , the history , the source sentence , and external side information .
+Predictors are scoring modules which deﬁne scores over the target language vocabulary given the current internal predictor state , the history , the source sentence , and external side information .
 Scores from multiple , diverse predictors can be combined for use in decoding .
 Decoders are search strategies which traverse the space spanned by the predictors .
 SGNMT provides implementations of common search tree traversal algorithms like beam search .
 Since decoders differ in runtime complexity and the kind of search errors they make , different decoders are appropriate for different predictor constellations .
-The strict separation of scoring module and search strategy and the decoupling of scoring modules from each other makes SGNMT a very exible decoding tool for neural and symbolic models which is applicable not only to machine translation .
+The strict separation of scoring module and search strategy and the decoupling of scoring modules from each other makes SGNMT a very ﬂexible decoding tool for neural and symbolic models which is applicable not only to machine translation .
 SGNMT is based on the OpenFSTbased Cambridge SMT system ( Allauzen et al . , 2014 ) .
-Although the system is less than a year old , we have found it to be very exible and easy for new researchers to adopt .
+Although the system is less than a year old , we have found it to be very ﬂexible and easy for new researchers to adopt .
 Our group has already integrated SGNMT into most of its research work .
-We also nd that SGNMT is very well - suited for teaching and student research projects .
-In the 2015 - 16 academic year , two students on the Cambridge MPhil in Machine Learning , Speech and Language Technology used SGNMT for their dissertation projects.3The rst project involved using SGNMT with OpenFST for applying subword models in SMT ( Gao , 2016 ) .
-The second project developed automatic music composition by LSTMs where WFSAs were used to dene the space of allowable chord progressions in Bach chorales ( Tomczak , 2016 ) .
-The LSTM provides the creativity and the WFSA enforces constraints 3http://www.mlsalt.eng.cam.ac.uk/Main/ CurrentMPhils25
-Predictor Predictor state initialize ( ) predict next ( ) consume(token ) NMT State vector in the GRU or LSTM layer of the decoder network and current context vector .
+We also ﬁnd that SGNMT is very well - suited for teaching and student research projects .
+In the 2015 - 16 academic year , two students on the Cambridge MPhil in Machine Learning , Speech and Language Technology used SGNMT for their dissertation projects.3The ﬁrst project involved using SGNMT with OpenFST for applying subword models in SMT ( Gao , 2016 ) .
+The second project developed automatic music composition by LSTMs where WFSAs were used to deﬁne the space of allowable chord progressions in ‘ Bach ’ chorales ( Tomczak , 2016 ) .
+The LSTM provides the ‘ creativity ’ and the WFSA enforces constraints 3http://www.mlsalt.eng.cam.ac.uk/Main/ CurrentMPhils25
+Predictor Predictor state initialize ( · ) predict next ( ) consume(token ) NMT State vector in the GRU or LSTM layer of the decoder network and current context vector .
 Run encoder network to compute annotations .
 Forward pass through the decoder to compute the posterior given the current decoder GRU or LSTM state and the context vector .
 Feed back token to the NMT network and update the decoder state and the context vector .
-FST ID of the current node in the FST.Load FST from the le system , set the predictor state to the FST start node .
+FST ID of the current node in the FST.Load FST from the ﬁle system , set the predictor state to the FST start node .
 Explore all outgoing edges of the current node and use arc weights as scores .
 Traverse the outgoing edge from the current node labelled with token and update the predictor state to the target node .
 n - gram Currentn - gram history Set the current n - gram history to the begin - ofsentence symbol .
@@ -35,33 +34,33 @@ Return the LM scores for the current n - gram history .
 Addtoken to the currentn - gram history .
 Word count None Empty Return a cost of 1 for all tokens except < /s > .Empty
 UNK count Number of consumed UNK tokens .
-Set UNK counter to 0 , estimate the parameter of the Poisson distribution based on source sentence features .
-For</s > use the logprobability of the current number of UNKs given .
+Set UNK counter to 0 , estimate the λparameter of the Poisson distribution based on source sentence features .
+For</s > use the logprobability of the current number of UNKs givenλ .
 Use zero for all other tokens .
 Increase internal counter by 1 if token is UNK .
 Table 1 : Predictor operations for the NMT , FST , n - gram LM , and counting modules .
 that the chorales must obey .
 This second project in particular demonstrates the versatility of the approach .
 For the current , 2016 - 17 academic year , SGNMT is being used heavily in two courses .
-2 Predictors SGNMT consequently emphasizes exibility and extensibility by providing a common interface to a wide range of constraints or models used in MT research .
+2 Predictors SGNMT consequently emphasizes ﬂexibility and extensibility by providing a common interface to a wide range of constraints or models used in MT research .
 The concept facilitates quick prototyping of new research ideas .
 Our platform aims to minimize the effort required for implementation ; decoding speed is secondary as optimized code for production systems can be produced once an idea has been proven successful in the SGNMT framework .
 In SGNMT , scores are assigned to partial hypotheses via one or many predictors .
 One predictor usually has a single responsibility as it represents a single model or type of constraint .
-Predictors need to implement the following methods : initialize(src sentence )
+Predictors need to implement the following methods : •initialize(src sentence )
 Initialize the predictor state using the source sentence .
-getstate ( ) Get the internal predictor state .
-setstate(state )
-Set the internal predictor state .
-predict next ( ) Given the internal predictor state , produce the posterior over target tokens for the next position .
+•getstate ( )
+Get the internal predictor state .
+•setstate(state ) Set the internal predictor state .
+•predict next ( ) Given the internal predictor state , produce the posterior over target tokens for the next position .
 Predictor Description nmt Attention - based neural machine translation following Bahdanau et al .
 ( 2015 ) .
-Supports Blocks / Theano ( Bastien et al . , 2012 ; van Merri enboer et
-al . , 2015 ) and TensorFlow ( Abadi et al . , 2016 ) .
+Supports Blocks / Theano ( Bastien et al . , 2012 ; van Merri ¨enboer et al . , 2015 ) and TensorFlow ( Abadi et al . , 2016 ) .
 fst Predictor for rescoring deterministic lattices ( Stahlberg et al . , 2016 ) .
 nfst Predictor for rescoring nondeterministic lattices .
 rtn Rescoring recurrent transition networks ( RTNs ) as created by HiFST ( Allauzen et al . , 2014 ) with late expansion .
-srilm n - gram Kneser - Ney language model using the SRILM ( Heaeld et al . , 2013 ; Stolcke et al . , 2002 ) toolkit .
+srilm n - gram Kneser - Ney language model using the SRILM ( Heaﬁeld et
+al . , 2013 ; Stolcke et al . , 2002 ) toolkit .
 nplm Neuraln - gram language models based on NPLM ( Vaswani et al . , 2013 ) .
 rnnlm Integrates RNN language models with TensorFlow as described by Zaremba
 et
@@ -76,64 +75,59 @@ unkc Applies a Poisson model for the number of UNKs in the output .
 ngramc Integrates external n - gram posteriors , e.g. for MBR - based NMT according Stahlberg et al . ( 2017 ) .
 length Target sentence length model using simple source sentence features .
 Table 2 : Currently implemented predictors.26
-consume(token )
-Update the internal predictor state by adding token to the current history .
+•consume(token ) Update the internal predictor state by adding token to the current history .
 The structure of the predictor state and the implementations of these methods differ substantially between predictors .
 Tab . 2 lists all predictors which are currently implemented .
-Tab . 1 summarizes the semantics of this interface for three very common predictors : the neural machine translation ( NMT ) predictor , the ( deterministic ) nite state transducer ( FST ) predictor for lattice rescoring , and the n - gram predictor for applying n - gram language models .
+Tab . 1 summarizes the semantics of this interface for three very common predictors : the neural machine translation ( NMT ) predictor , the ( deterministic ) ﬁnite state transducer ( FST ) predictor for lattice rescoring , and the n - gram predictor for applying n - gram language models .
 We also included two examples ( word count and UNK count ) which do not have a natural left - to - right semantic but can still be represented as predictors .
 2.1 Example Predictor Constellations SGNMT allows combining any number of predictors and even multiple instances of the same predictor type .
 In case of multiple predictors we combine the predictor scores in a linear model .
 The following list illustrates that various interesting decoding tasks can be formulated as predictor combinations .
-nmt : A single NMT predictor represents pure NMT decoding .
-nmt , nmt , nmt : Using multiple NMT predictors is a natural way to represent ensemble decoding ( Hansen and Salamon , 1990 ; Sutskever et al . , 2014 ) in our framework .
-fst , nmt : NMT decoding constrained to an FST .
-This can be used for neural lattice rescoring ( Stahlberg et al . , 2016 ) or other kinds of constraints , for example in the context of source side simplication in MT ( Hasler et al . , 2016 ) or chord progressions in Bach ( Tomczak , 2016 ) .
+•nmt : A single NMT predictor represents pure NMT decoding .
+•nmt , nmt , nmt : Using multiple NMT predictors is a natural way to represent ensemble decoding ( Hansen and Salamon , 1990 ; Sutskever et al . , 2014 ) in our framework .
+•fst , nmt : NMT decoding constrained to an FST .
+This can be used for neural lattice rescoring ( Stahlberg et al . , 2016 ) or other kinds of constraints , for example in the context of source side simpliﬁcation in MT ( Hasler et al . , 2016 ) or chord progressions in ‘ Bach ’ ( Tomczak , 2016 ) .
 The fstpredictor can also be used to restrict the output of character - based or subword - unit - based NMT to a large word - level vocabulary encoded as FSA .
-nmt , rnnlm , srilm , nplm : Combining NMT with three kinds of language models : An RNNLM ( Zaremba et al . , 2014 ) , a Kneser - Ney n - gram LM ( Heaeld et al . , 2013 ; Stolcke et al . , 2002 ) , and a feedforward neural network LM ( Vaswani et al . ,
-2013).Decoder Description greedy Greedy decoding .
+•nmt , rnnlm , srilm , nplm : Combining NMT with three kinds of language models : An RNNLM ( Zaremba et al . , 2014 ) , a Kneser - Ney n - gram LM ( Heaﬁeld et al . , 2013 ; Stolcke et al . , 2002 ) , and a feedforward neural network LM ( Vaswani et al . , 2013).Decoder Description greedy Greedy decoding .
 beam Beam search as described in Bahdanau et al .
 ( Bahdanau et al . , 2015 ) .
-dfs Depth - rst search .
-Efciently enumerates the complete search space , e.g. for exhaustive FST - based rescoring .
+dfs Depth-ﬁrst search .
+Efﬁciently enumerates the complete search space , e.g. for exhaustive FST - based rescoring .
 restarting Similar to DFS but with better admissible pruning behaviour .
 astar A * search ( Russell and Norvig , 2003 ) .
-The heuristic function can be dened via predictors .
+The heuristic function can be deﬁned via predictors .
 sepbeam Associates hypotheses in the beam with only one predictor .
-Efciently approximates system - level combination .
+Efﬁciently approximates system - level combination .
 syncbeam Beam search which compares hypotheses after consuming a special synchronization symbol rather than after each iteration .
 bucket Multiple beam search passes with small beam size .
 Can have better pruning behaviour than standard beam search .
 vanilla Fast beam search decoder for ( ensembled ) NMT .
-This implementation is similar to the decoder in Blocks ( van Merri enboer et
-al . , 2015 )
-but can only be used for NMT as it bypasses the predictor framework .
+This implementation is similar to the decoder in Blocks ( van Merri ¨enboer et al . , 2015 ) but can only be used for NMT as it bypasses the predictor framework .
 Table 3 : Currently implemented decoders .
-nmt , ngramc , wc : MBR - based NMT following Stahlberg et al .
-( 2017 ) with n - gram posteriors extracted from an SMT lattice ( ngramc ) and a simple word penalty ( wc ) .
+•nmt , ngramc , wc : MBR - based NMT following Stahlberg et al . ( 2017 ) with n - gram posteriors extracted from an SMT lattice ( ngramc ) and a simple word penalty ( wc ) .
 3 Decoders Decoders are algorithms to search for the highest scoring hypothesis .
-The list of predictors determines how ( partial ) hypotheses are scored by implementing the methods initialize ( ) , getstate ( ) , setstate(),predict next ( ) , and consume ( ) .
+The list of predictors determines how ( partial ) hypotheses are scored by implementing the methods initialize ( · ) , getstate ( ) , setstate(·),predict next ( ) , and consume ( · ) .
 The Decoder class implements versions of these methods which apply to all predictors in the list .
-initialize()is always called prior to decoding a new sentence .
-Many popular search strategies can be described via the remaining methods getstate ( ) , setstate(),predict next ( ) , and consume ( ) .
+initialize(·)is always called prior to decoding a new sentence .
+Many popular search strategies can be described via the remaining methods getstate ( ) , setstate(·),predict next ( ) , and consume ( · ) .
 Algs .
-1 and 2 show how to dene greedy and beam decoding in this way.45 Tab .
+1 and 2 show how to deﬁne greedy and beam decoding in this way.45 Tab .
 3 contains a list of currently implemented decoders .
 The UML diagram in Fig .
 1 illustrates the relation between decoders and predictors .
 4Formally , predict next ( ) in Algs .
 1 and 2 returns pairs of tokens and their costs .
-5String concatenation is denoted with .27
+5String concatenation is denoted with · .27
 Figure 1 : Reduced UML class diagram .
-Algorithm 1 Greedy(src sen ) 1 : initialize ( srcsen ) 2 : h / angbracketleft < s>/angbracketright 3 : repeat 4 : Ppredict next ( ) 5 : ( t , c)arg max(t / prime , c / prime)Pc / prime 6 : hht 7 : consume ( t ) 8 : untilt=</s > 9 : return h NMT batch decoding The exibility of the predictor framework comes with degradation in decoding time .
+Algorithm 1 Greedy(src sen ) 1 : initialize ( srcsen ) 2 : h←/angbracketleft < s>/angbracketright 3 : repeat 4 : P←predict next ( ) 5 : ( t , c)←arg max(t / prime , c / prime)∈Pc / prime 6 : h←h·t 7 : consume ( t ) 8 : untilt=</s > 9 : return h NMT batch decoding The ﬂexibility of the predictor framework comes with degradation in decoding time .
 SGNMT provides two ways of speeding up pure NMT decoding , especially on the GPU .
-The vanilla decoding strategy exposes the beam search implementation in Blocks ( van Merri enboer et al . , 2015 ) which processes all active hypotheses in the beam in parallel .
+The vanilla decoding strategy exposes the beam search implementation in Blocks ( van Merri ¨enboer et al . , 2015 ) which processes all active hypotheses in the beam in parallel .
 We also implemented a beam decoder version which decodes multiple sentences at once ( batch decoding ) rather than in a sequential order .
-Batch decoding is potentially more efcient since larger batches can make better use of GPU parallelism .
-The key concepts of our batch decoder implementation are : We use a scheduler running on a separate CPU thread to construct large batches of computation ( GPU jobs ) from multiple sentences and feeding them to the jobs queue .
-The GPU is operated by a single thread which communicates with the CPU scheduler thread via queues containing jobs .
+Batch decoding is potentially more efﬁcient since larger batches can make better use of GPU parallelism .
+The key concepts of our batch decoder implementation are : •We use a scheduler running on a separate CPU thread to construct large batches of computation ( GPU jobs ) from multiple sentences and feeding them to the jobs queue .
+•The GPU is operated by a single thread which communicates with the CPU scheduler thread via queues containing jobs .
 This thread is only responsible for retrieving jobs in the jobs queue , computing them , and putting them in the jobs results queue , minimizing the down - time of GPU computation .
-Yet another CPU thread is responsible for processing the results computed on the GPUAlgorithm 2 Beam ( n , src sen ) 1 : initialize ( srcsen ) 2 : H{(/angbracketleft < s>/angbracketright,0.0,getstate ( ) ) } 3 : repeat 4 : Hnext 5 : for all ( h , c , s ) Hdo 6 : setstate ( s ) 7 : Ppredict next ( ) 8 : HnextHnext / uniontext ( t / prime , c / prime)P(ht / prime , c+c / prime , s ) 9 : end for 10 : H 11 : for all ( h , c , s ) n - best(Hnext)do 12 : setstate ( s ) 13 : consume ( h|h| ) 14 : HH{(h , c , getstate ( ) ) } 15 : end for 16 : until Best hypothesis in Hends with < /s > 17 : return Best hypothesis in H in the jobresults queue , e.g. by getting the n - best words from the posteriors .
+•Yet another CPU thread is responsible for processing the results computed on the GPUAlgorithm 2 Beam ( n , src sen ) 1 : initialize ( srcsen ) 2 : H←{(/angbracketleft < s>/angbracketright,0.0,getstate ( ) ) } 3 : repeat 4 : Hnext←∅ 5 : for all ( h , c , s ) ∈Hdo 6 : setstate ( s ) 7 : P←predict next ( ) 8 : Hnext←Hnext∪/uniontext ( t / prime , c / prime)∈P(h·t / prime , c+c / prime , s ) 9 : end for 10 : H←∅ 11 : for all ( h , c , s ) ∈n - best(Hnext)do 12 : setstate ( s ) 13 : consume ( h|h| ) 14 : H←H∪{(h , c , getstate ( ) ) } 15 : end for 16 : until Best hypothesis in Hends with < /s > 17 : return Best hypothesis in H in the jobresults queue , e.g. by getting the n - best words from the posteriors .
 Processed jobs are sent back to the CPU scheduler where they are reassembled into new jobs .
 This decoder is able to translate the WMT English - French test sets news - test2012 tonewstest2014 on a Titan X GPU with 911.6 words per second with the word - based NMT model described in Stahlberg et al .
 ( 2016).6This decoding speed seems to be slightly faster than sequential decoding with high - performance NMT decoders like Marian - NMT ( Junczys - Dowmunt et al . , 2016 ) with reported decoding speeds of 865 words per second.7However , batch decoding with MarianNMT is much faster reaching over 4,500 words 6Theano 0.9.0 , cuDNN 5.1 , Cuda 8 with CNMeM , IntelR / circlecopyrt Core i7 - 6700 CPU 7Note that the comparability is rather limited since even though we use the same beam size ( 5 ) and vocabulary sizes ( 30k ) , we use ( a ) a slightly slower GPU ( Titan X vs. GTX28
@@ -141,12 +135,12 @@ per second.8We think that these differences are mainly due to the limited multit
 We did not push for even faster decoding as speed is not a major design goal of SGNMT .
 Note that batch decoding bypasses the predictor framework and can only be used for pure NMT decoding .
 Ensembling with models at multiple tokenization levels SGNMT allows masking predictors with alternative sets of modelling units .
-The conversion between the tokenization schemes of different predictors is dened with FSTs .
+The conversion between the tokenization schemes of different predictors is deﬁned with FSTs .
 This makes it possible to decode by combining scores from both a subword - unit ( BPE ) based NMT ( Sennrich et al . , 2016 ) and a word - based NMT model with character - based NMT , masking the BPE - based and word - based NMT predictors with FSTs which transduce character sequences to BPE or word sequences .
 Masking is transparent to the decoding strategy as predictors are replaced by a special wrapper ( fsttok ) that uses the masking FST to translate predict next ( ) andconsume ( ) calls to ( a series of ) predictor calls with alternative tokens .
 The syncbeam variation of beam search compares competing hypotheses only after consuming a special word boundary symbol rather than after each token .
 This allows combining scores at the word level even when using models with multiple levels of tokenization .
-Joint decoding with different tokenization schemes has the potential of combining the benets of the different schemes : character- and BPE - based models are able to address rare words , but word - based NMT can model long - range dependencies more efciently .
+Joint decoding with different tokenization schemes has the potential of combining the beneﬁts of the different schemes : character- and BPE - based models are able to address rare words , but word - based NMT can model long - range dependencies more efﬁciently .
 System - level combination We showed in Sec . 2.1 how to formulate NMT ensembling as a set of NMT predictors .
 Ensembling averages the individual model scores in each decoding step .
 Alternatively , system - level combination decodes the entire sentence with each model separately , and selects the best scoring complete hypothesis over all models .
@@ -159,11 +153,11 @@ The single predictor is linked by the parent hypothesis .
 The initial stack in sepbeam contains hypotheses for each predictor ( i.e. system ) rather than only one as in normal beam search .
 We report a moderate gain of 0.5 BLEU over a single system on the Japanese - English ASPEC test set ( Nakazawa et al . , 2016 ) by combining three BPE - based NMT models from Stahlberg et al .
 ( 2017 ) using the sepbeam decoder .
-Iterative beam search Normal beam search is difcult to use in a time - constrained setting since the runtime depends on the target sentence length which is a priori not known , and it is therefore hard to choose the right beam size beforehand .
-Thebucket search algorithm sidesteps the problem of setting the beam size by repeatedly performing small beam search passes until a xed computational budget is exhausted .
+Iterative beam search Normal beam search is difﬁcult to use in a time - constrained setting since the runtime depends on the target sentence length which is a priori not known , and it is therefore hard to choose the right beam size beforehand .
+Thebucket search algorithm sidesteps the problem of setting the beam size by repeatedly performing small beam search passes until a ﬁxed computational budget is exhausted .
 Bucket search produces an initial hypothesis very quickly , and keeps the partial hypotheses for each length in buckets .
-Subsequent beam search passes rene the initial hypothesis by iteratively updating these buckets .
-Our initial experiments suggest that bucket search often performs on a similar level as standard beam search with the benet of being able to support hard time constraints .
+Subsequent beam search passes reﬁne the initial hypothesis by iteratively updating these buckets .
+Our initial experiments suggest that bucket search often performs on a similar level as standard beam search with the beneﬁt of being able to support hard time constraints .
 Unlike beam search , bucket search lends itself to risk - free ( i.e. admissible ) pruning since all partial hypotheses worse than the current best complete hypothesis can be discarded .
 4 Conclusion This paper presented our SGNMT platform for prototyping new approaches to MT which involve both neural and symbolic models .
 SGNMT supports a number of different models and constraints via a common interface ( predictors ) , and various search strategies ( decoders ) .
@@ -171,24 +165,24 @@ Furthermore , SGNMT focuses on minimizing the implementation effort for adding n
 SGNMT is actively being used for teaching and research and we29
 welcome contributions to its development , for example by implementing new predictors for using models trained with other frameworks and tools .
 Acknowledgments This work was supported by the U.K. Engineering and Physical Sciences Research Council ( EPSRC grant EP / L027623/1 ) .
-References Martn Abadi , Ashish Agarwal , Paul Barham , Eugene Brevdo , Zhifeng Chen , Craig Citro , Greg S Corrado , Andy Davis , Jeffrey Dean , Matthieu Devin , et al . 2016 .
-Tensorow : Large - scale machine learning on heterogeneous distributed systems .
+References Martın Abadi , Ashish Agarwal , Paul Barham , Eugene Brevdo , Zhifeng Chen , Craig Citro , Greg S Corrado , Andy Davis , Jeffrey Dean , Matthieu Devin , et al . 2016 .
+Tensorﬂow : Large - scale machine learning on heterogeneous distributed systems .
 arXiv preprint arXiv:1603.04467 .
 Cyril Allauzen , Bill Byrne , Adri ` a de Gispert , Gonzalo Iglesias , and Michael Riley .
 2014 .
 Pushdown automata in statistical machine translation .
-Computational Linguistics , 40(3):687723 .
+Computational Linguistics , 40(3):687–723 .
 Cyril Allauzen , Michael Riley , Johan Schalkwyk , Wojciech Skut , and Mehryar Mohri .
 2007 .
 OpenFst :
-A general and efcient weighted nite - state transducer library .
-In International Conference on Implementation and Application of Automata , pages 1123 .
+A general and efﬁcient weighted ﬁnite - state transducer library .
+In International Conference on Implementation and Application of Automata , pages 11–23 .
 Springer .
 Dzmitry Bahdanau , Kyunghyun Cho , and Yoshua Bengio .
 2015 .
 Neural machine translation by jointly learning to align and translate .
 In ICLR .
-Frederic Bastien , Pascal Lamblin , Razvan Pascanu , James Bergstra , Ian Goodfellow , Arnaud Bergeron , Nicolas Bouchard , David Warde - Farley , and Yoshua Bengio .
+Fr´ed´eric Bastien , Pascal Lamblin , Razvan Pascanu , James Bergstra , Ian Goodfellow , Arnaud Bergeron , Nicolas Bouchard , David Warde - Farley , and Yoshua Bengio .
 2012 .
 Theano :
 New features and speed improvements .
@@ -200,55 +194,55 @@ MPhil dissertation , University of Cambridge .
 Lars Kai Hansen and Peter Salamon .
 1990 .
 Neural network ensembles .
-IEEE transactions on pattern analysis and machine intelligence , 12(10):993 1001 .
+IEEE transactions on pattern analysis and machine intelligence , 12(10):993 – 1001 .
 Eva Hasler , Adri ` a de Gispert , Felix Stahlberg , Aurelien Waite , and Bill Byrne . 2016 .
-Source sentence simplication for statistical machine translation .
+Source sentence simpliﬁcation for statistical machine translation .
 Computer Speech & Language .
 Eva Hasler , Felix Stahlberg , Marcus Tomalin , Adri ` a de Gispert , and Bill Byrne . 2017 .
 A comparison of neural models for word ordering .
 In INLG , Santiago de Compostela , Spain .
-Kenneth Heaeld , Ivan Pouzyrevsky , Jonathan H. Clark , and Philipp Koehn .
+Kenneth Heaﬁeld , Ivan Pouzyrevsky , Jonathan H. Clark , and Philipp Koehn .
 2013 .
-Scalable modied Kneser - Ney language model estimation .
-In ACL , pages 690696 , Soa , Bulgaria .
+Scalable modiﬁed Kneser - Ney language model estimation .
+In ACL , pages 690–696 , Soﬁa , Bulgaria .
 Marcin Junczys - Dowmunt , Tomasz Dwojak , and Hieu Hoang .
 2016 .
 Is neural machine translation ready for deployment ?
 a case study on 30 translation directions .
 arXiv preprint arXiv:1610.01108 .
-Bart van Merri enboer , Dzmitry Bahdanau , Vincent Dumoulin , Dmitriy Serdyuk , David Warde - Farley , Jan Chorowski , and Yoshua Bengio .
+Bart van Merri ¨enboer , Dzmitry Bahdanau , Vincent Dumoulin , Dmitriy Serdyuk , David Warde - Farley , Jan Chorowski , and Yoshua Bengio .
 2015 .
 Blocks and fuel : Frameworks for deep learning .
 arXiv preprint arXiv:1506.00619 .
 Toshiaki Nakazawa , Manabu Yaguchi , Kiyotaka Uchimoto , Masao Utiyama , Eiichiro Sumita , Sadao Kurohashi , and Hitoshi Isahara . 2016 .
 ASPEC :
-Asian scientic paper excerpt corpus .
-In LREC , pages 22042208 , Portoroz , Slovenia .
+Asian scientiﬁc paper excerpt corpus .
+In LREC , pages 2204–2208 , Portoroz , Slovenia .
 Stuart J. Russell and Peter Norvig .
 2003 .
-Articial Intelligence :
+Artiﬁcial Intelligence :
 A Modern Approach , 2 edition .
 Pearson Education .
 Rico Sennrich , Barry Haddow , and Alexandra Birch . 2016 .
 Neural machine translation of rare words with subword units .
-In ACL , pages 17151725 , Berlin , Germany .
+In ACL , pages 1715–1725 , Berlin , Germany .
 Maryam Siahbani , Baskaran Sankaran , and Anoop Sarkar .
 2013 .
-Efcient left - to - right hierarchical phrase - based translation with improved reordering .
-InEMNLP , pages 10891099 , Seattle , Washington , USA .
+Efﬁcient left - to - right hierarchical phrase - based translation with improved reordering .
+InEMNLP , pages 1089–1099 , Seattle , Washington , USA .
 Felix Stahlberg , Adri ` a de Gispert , Eva Hasler , and Bill Byrne . 2017 .
 Neural machine translation by minimising the Bayes - risk with respect to syntactic translation lattices .
-In EACL , pages 362368 , Valencia , Spain .
+In EACL , pages 362–368 , Valencia , Spain .
 Felix Stahlberg , Eva Hasler , Aurelien Waite , and Bill Byrne . 2016 .
 Syntactically guided neural machine translation .
-In ACL , pages 299305 , Berlin , Germany .
+In ACL , pages 299–305 , Berlin , Germany .
 Andreas Stolcke et al . 2002 .
-SRILM   an extensible language modeling toolkit .
+SRILM – an extensible language modeling toolkit .
 In Interspeech , volume 2002 , page 2002 .
 Ilya Sutskever , Oriol Vinyals , and Quoc V .
 Le . 2014 .
 Sequence to sequence learning with neural networks .
-In NIPS , pages 31043112 .
+In NIPS , pages 3104–3112 .
 MIT Press .
 Marcin Tomczak . 2016 .
 Bachbot .
@@ -256,7 +250,7 @@ MPhil dissertation , University of Cambridge .
 Ashish Vaswani , Yinggong Zhao , Victoria Fossum , and David Chiang .
 2013 .
 Decoding with largescale neural language models improves translation .
-InEMNLP , pages 13871392 , Seattle , Washington , USA .
+InEMNLP , pages 1387–1392 , Seattle , Washington , USA .
 Wojciech Zaremba , Ilya Sutskever , and Oriol Vinyals .
 2014 .
 Recurrent neural network regularization .

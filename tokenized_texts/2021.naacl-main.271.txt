@@ -1,9 +1,9 @@
-Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 34573469 June 611 , 2021 .
-2021 Association for Computational Linguistics3457Better Feature Integration for Named Entity Recognition
+Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 3457–3469 June 6–11 , 2021 .
+© 2021 Association for Computational Linguistics3457Better Feature Integration for Named Entity Recognition
 Lu Xu1 , 2 , Zhanming Jie1 , 3 , Wei Lu1 , Lidong Bing2 1StatNLP Research Group , Singapore University of Technology and Design 2DAMO Academy , Alibaba Group3ByteDance xu_lu@mymail.sutd.edu.sg , allan@bytedance.com luwei@sutd.edu.sg , l.bing@alibaba-inc.com Abstract
-It has been shown that named entity recognition ( NER ) could benet from incorporating the long - distance structured information captured by dependency trees .
-We believe this is because both types of features   the contextual information captured by the linear sequences and the structured information captured by the dependency trees may complement each other .
-However , existing approaches largely focused on stacking the LSTM and graph neural networks such as graph convolutional networks ( GCNs ) for building improved NER models , where the exact interaction mechanism between the two different types of features is not very clear , and the performance gain does not appear to be signicant .
+It has been shown that named entity recognition ( NER ) could beneﬁt from incorporating the long - distance structured information captured by dependency trees .
+We believe this is because both types of features – the contextual information captured by the linear sequences and the structured information captured by the dependency trees may complement each other .
+However , existing approaches largely focused on stacking the LSTM and graph neural networks such as graph convolutional networks ( GCNs ) for building improved NER models , where the exact interaction mechanism between the two different types of features is not very clear , and the performance gain does not appear to be signiﬁcant .
 In this work , we propose a simple and robust solution to incorporate both types of features with our SynergizedLSTM ( Syn - LSTM ) , which clearly captures how the two types of features interact .
 We conduct extensive experiments on several standard datasets across four languages .
 The results demonstrate that the proposed model achieves better performance than previous approaches while requiring fewer parameters .
@@ -19,34 +19,34 @@ The paths to connect two entities are shown below the sentence .
 the structured information such as interactions between non - adjacent words can also be important for NER ( Finkel et al . , 2005 ; Jie et al . , 2017 ; Aguilar and Solorio , 2019 ) .
 However , sequence models such as bidirectional LSTM ( Hochreiter and Schmidhuber , 1997 ) are not able to fully capture the long - range dependencies ( Bengio , 2009 ) .
 For instance , Figure 1 ( top ) shows one type of structured information in NER .
-The words   Precision Castparts Corp.   can be easily inferred as ORGANIZATION by its context ( i.e. , Corp. ) .
-However , the second entity   PCP   could be misclassied as a PRODUCT entity if a model relies more on the context   begin trading with   but ignores the hidden information that   PCP   is the symbol of   Precision Castparts Corp. .
+The words “ Precision Castparts Corp. ” can be easily inferred as ORGANIZATION by its context ( i.e. , Corp. ) .
+However , the second entity “ PCP ” could be misclassiﬁed as a PRODUCT entity if a model relies more on the context “ begin trading with ” but ignores the hidden information that “ PCP ” is the symbol of “ Precision Castparts Corp. ” .
 Previous research works ( Li et al . , 2017 ; Jie and Lu , 2019 ; Wang et al . , 2019 ) have been using the parse trees ( Chomsky , 1956 , 1969 ; Sandra and Taft , 2014 ) to incorporate such structured information .
-Figure 1 ( Dependency Path ) shows that the rst entity can be connected to the second entity following the dependency tree with 5 hops .
+Figure 1 ( Dependency Path ) shows that the ﬁrst entity can be connected to the second entity following the dependency tree with 5 hops .
 Incorporating the dependency information can be done with graph neural networks ( GNNs ) such as graph convolutional networks ( GCNs ) ( Kipf and Welling , 2017 ) .
 However , simply stacking the LSTM and GCN architectures for NER can only provide us with modest improvements ; sometimes , it decreases performance ( Jie and Lu , 2019 ) .
 Based on the depen-
 3458dency path in Figure 1 , it requires a 5 - layer GCN to capture the connections between these two entities .
-However , deep GCN architectures often face training difculties , which cause a performance drop ( Hamilton et al . , 2017b ; Kipf and Welling , 2017 ) .
-Directly stacking GCN and LSTM has difculties in modeling the interaction between dependency trees and contextual information .
+However , deep GCN architectures often face training difﬁculties , which cause a performance drop ( Hamilton et al . , 2017b ; Kipf and Welling , 2017 ) .
+Directly stacking GCN and LSTM has difﬁculties in modeling the interaction between dependency trees and contextual information .
 To address the above limitations , we propose the Synergized - LSTM ( Syn - LSTM ) , a new recurrent neural network architecture that considers an additional graph - encoded representation to update the memory and hidden states , as shown in Figure 2 .
-More specically , the graph - encoded representation for each word can be obtained with GCNs .
+More speciﬁcally , the graph - encoded representation for each word can be obtained with GCNs .
 Our proposed Syn - LSTM allows the cell to receive the structured information from the graph - encoded representation .
 With the newly designed gating mechanism , our model is able to make independent assessments on the amounts of information to be retrieved from the word representation and the graph - encoded representation respectively .
 Such a mechanism allows for better integration of both contextual and structured information .
-Our contributions can be summarized as : We propose a simple and robust Syn - LSTM model to better incorporate the structured information conveyed by dependency trees .
+Our contributions can be summarized as : •We propose a simple and robust Syn - LSTM model to better incorporate the structured information conveyed by dependency trees .
 The output of the Syn - LSTM cell is jointly determined by both contextual and structured information .
-We adopt the classic conditional random elds ( CRF ) ( Lafferty et al . , 2001 ) on top of the Syn - LSTM for NER .
-We conduct extensive experiments on several standard datasets across four languages .
-The proposed model signicantly outperforms previous approaches on these datasets .
-We show that the proposed model can capture long - distance interactions between entities .
+We adopt the classic conditional random ﬁelds ( CRF ) ( Lafferty et al . , 2001 ) on top of the Syn - LSTM for NER .
+•We conduct extensive experiments on several standard datasets across four languages .
+The proposed model signiﬁcantly outperforms previous approaches on these datasets .
+•We show that the proposed model can capture long - distance interactions between entities .
 Our further analysis statistically demonstrates the proposed gating mechanism is able to aggregate the structured information selectively .
 2 Synergized - LSTM 2.1 Incorporating Structured Information To incorporate the long - range dependencies , we consider an additional graph - encoded representationgt(Figure 2 ) as the model input to integrate  tanhtanh  + + tanhct-1Previous Cell ht-1Previous Hidden xtCurrent Input gtGraph - encoded Representationftit ~ ctmt ~ stotctCurrent Cell htCurrent HiddenhtCurrent Hidden Figure 2 : Syn - LSTM cell .
 tis the current time step .
 contextual and structured information .
 The graphencoded representation gtcan be derived from Graph Neural Networks ( GNNs ) such as GCN ( Kipf and Welling , 2017 ) , which are capable of bringing in structured information through graph structure ( Hamilton et al . , 2017a ) .
 However , structured information sometimes is hard to encode , as we can see from the example in Figure 1 .
-One naive approach is to use a deep GNN to capture such information along multiple dependency arcs between two words , which could mess up information and lead to training difculties .
+One naive approach is to use a deep GNN to capture such information along multiple dependency arcs between two words , which could mess up information and lead to training difﬁculties .
 A straightforward solution is to integrate both structured and contextual information via LSTM .
 As shown in Figure 1 ( Hybrid Paths ) , the structured information can be passed to neighbors or context , which allows a model to use less number of GNN layers and alleviate such issues for long - range dependencies .
 The input to the LSTM can simply be the concatenation of word representation xtandgt at each position ( Jie and Lu , 2019)2 .
@@ -57,7 +57,7 @@ Thus , we need to design a new approach to incorporate both types of information
 34592.2 Syn - LSTM Cell We propose the Synergized - LSTM ( Syn - LSTM ) to better integrate the contextual and structured information to address the above limitations .
 The inputs of the Syn - LSTM cell include previous cell state ct 1 , previous hidden state ht 1 , current cell input xt , and an additional graph - encoded representation gt .
 The outputs of the Syn - LSTM cell include current cell state ctand current hidden state ht .
-Within the cell , there are four gates : input gate it , forget gateft , output gate ot , and an additional new gate mtto control the ow of information .
+Within the cell , there are four gates : input gate it , forget gateft , output gate ot , and an additional new gate mtto control the ﬂow of information .
 Note that the forget gate ftand output gate otare not just looking at ht 1andxt ; they are also affected by the graph - encoded representation gt .
 The cell state ct and hidden state htare computed as follows : ft=(W(f)xt+U(f)ht 1+Q(f)gt+b(f ) )
 ( 1 ) ot=(W(o)xt+U(o)ht 1+Q(o)gt+b(o ) ) ( 2 ) it=(W(i)xt+U(i)ht 1+b(i ) ) ( 3 ) mt=(W(m)gt+U(m)ht 1+b(m ) ) ( 4 ) ~ct= tanh(W(u)xt+U(u)ht 1+b(u ) ) ( 5 ) ~st= tanh(W(n)gt+U(n)ht 1+b(n ) )
@@ -74,7 +74,7 @@ selectively.xt-1 xt xt+1 xt+2 gL t-1 gL t gL t+1 gL t+2Syn - LSTM Syn - LSTM Syn
 Similar to the previous work ( Levy et al . , 2018 ) , it is also possible to show that the cell state ctimplicitly computes the element - wise weighted sum of the previous states by expanding Equation 7 : ct = ft  ct 1+it  ~ct+mt  ~st ( 9 ) = tX j=0(ij  tY k = j+1fk )  ~cj + tX j=0(mj  tY k = j+1fk )  ~sj ( 10 ) = tX j=0at j 
 ~cj+tX j=0qt j  ~sj ( 11 ) Note that the two terms , at jandqt j , are the product of gates .
 The value of the two terms are in the range from 0 to 1 .
-Since the ~ctand ~ strepresent contextual and structured features , the corresponding weights control the ow of information .
+Since the ~ctand ~ strepresent contextual and structured features , the corresponding weights control the ﬂow of information .
 3 Syn - LSTM - CRF
 The goal of named entity recognition is to predict the label sequence y = fy1;y2;:::;y nggiven the input sequence
 w = fw1;w2;:::;w ng , wherewt represents the t - th word and nis the number of words .
@@ -88,7 +88,7 @@ Jie and Lu ( 2019 ) highlight that the dependency relation helps to enhance the 
 Furthermore , previous methods ( Wang et al . , 2018 ;
 3460Wang and Lu , 2018 ) use embeddings of part - ofspeech ( POS ) tags as additional input representation .
 The input representation xtof our model is the concatenation of the word embedding vt , the character representation et , the dependency relation embedding rt , and the POS embedding pt :
-xt= [ vt;et;rt;pt ] ( 12 ) where both rtandptembeddings are randomly initialized and are ne - tuned during training .
+xt= [ vt;et;rt;pt ] ( 12 ) where both rtandptembeddings are randomly initialized and are ﬁne - tuned during training .
 For experiments with the contextualized representations ( e.g. , BERT ( Devlin et al . , 2019 ) ) , we further concatenate the contextual word representation to xt .
 For our task , we employ the graph convolutional network ( Kipf and Welling , 2017 ; Zhang et al . , 2018b ) to get the graph - encoded representation gt .
 Given a graph , an adjacency matrix Aof sizenn is able to represent the graph structure , where nis the number of nodes ; Ai;j= 1indicates that node iand nodejare connected .
@@ -97,8 +97,7 @@ A , andAi;j= 1 denotes that node iand nodej have dependency relation .
 Note that the purpose of graph - encoded representation gtis to incorporate the dependency information from neighbor nodes .
 The input and output representations of the l - th layer GCN at t - th position are denoted as gl 1 tand gl trespectively .
 Similar to the work by Zhang et al . ( 2018b ) , we use dt = Pn j=1At;j , which is the total number of neighbors of node t , to normalize the representation before going through the nonlinear function .
-The GCN operation is dened as : gl t= ReLU(nX j=1At;jWlgl 1 t = dt+bl)(13 )
-whereWlis a linear transformation and blis a bias .
+The GCN operation is deﬁned as : gl t= ReLU(nX j=1At;jWlgl 1 t = dt+bl)(13 ) whereWlis a linear transformation and blis a bias .
 The initial g0 tis the concatenation of word embeddingvt , character embedding et , and dependency relation embedding rt : g0 t= [ vt;et;rt ] .
 Bi - directional Syn - LSTM Layer With the word representation xtand the graph - encoded representation gt , a bi - directional Syn - LSTM is applied to generate contextual representation .
 The forward and backward Syn - LSTM enable the model to integrate the contextual and structured information from both directions .
@@ -109,9 +108,9 @@ htfrom forward Syn - LSTM and hidden state 3We treat the dependency edge as undi
 ht=
 [   ! ht ;  ht ] .
 CRF Layer The CRF ( Lafferty et al . , 2001 ) is widely used in NER tasks as it is capable of capturing the structured correlations between adjacent output labels .
-Given the sentence wand dependency tree  , the probability of the label sequence yis dened as : P(yjw ;  )
+Given the sentence wand dependency tree  , the probability of the label sequence yis deﬁned as : P(yjw ;  )
 = exp(score ( w ;  ; y))P y0exp(score ( w ;  ; y0))(14 )
-The score function is dened as : score ( w ;  ; y ) = nX t=0Tyt;yt+1+nX t=1Eyt(15 ) whereTyt;yt+1denotes the transition score from labelyttoyt+1,Eytdenotes the score of label ytat thet - th position and the scores are computed using the hidden state ht .
+The score function is deﬁned as : score ( w ;  ; y ) = nX t=0Tyt;yt+1+nX t=1Eyt(15 ) whereTyt;yt+1denotes the transition score from labelyttoyt+1,Eytdenotes the score of label ytat thet - th position and the scores are computed using the hidden state ht .
 We learn the model parameters by minimizing the negative log - likelihood and employ the Viterbi algorithm to obtain the best label sequence during evaluation .
 4 Experiments Datasets The proposed model is evaluated on four benchmark datasets : SemEval 2010 Task 1 ( Recasens et al . , 2010 )
 Catalan and Spanish datasets , and OntoNotes 5.0 ( Weischedel et al . , 2013 ) English and Chinese datasets .
@@ -126,7 +125,7 @@ We present the number of entities in terms of different sentence lengths to show
 Experimental Setup For Catalan , Spanish , and Chinese , we use the FastText ( Grave et al . , 2018 ) 300 dimensional embeddings to initialize the word embeddings .
 For OntoNotes 5.0 English , we adopt the publicly available GloVE ( Pennington et al . , 2014 ) 100 dimensional embeddings to initialize the word embeddings .
 For experiments with the contextualized representation , we adopt the pre - trained language model BERT ( Devlin et al . , 2019 ) for the four datasets .
-Specically , we use bert - as - service ( Xiao , 2018 ) to generate the contextualized word representation without ne - tuning .
+Speciﬁcally , we use bert - as - service ( Xiao , 2018 ) to generate the contextualized word representation without ﬁne - tuning .
 Following Luo et al .
 ( 2020 ) , we use the cased version of BERT large model for the experiments on the OntoNotes 5.0 English data .
 We use the cased version of BERT base model for the experiments on the other three datasets .
@@ -136,7 +135,7 @@ We adopt stochastic gradient descent ( SGD ) to optimize our model with batch si
 We select the best model based on the performance on the dev set5and apply it to the test set .
 We use the bootstrapping t - test to compare the results .
 Baselines We compare our model with several baselines with or without dependency tree information .
-The rst one is BERT - CRF , where we apply a CRF layer on top of BERT ( Devlin et al . , 2019 ) .
+The ﬁrst one is BERT - CRF , where we apply a CRF layer on top of BERT ( Devlin et al . , 2019 ) .
 Secondly , we compare with the BERT implementation by HuggingFace ( Wolf et al . , 2019 ) .
 For models with dependency trees , we take the models BiLSTM - GCN - CRF and dependency4We set the decay as 0.1 and the learning rate for each epoch equals to lr=(1 + decay (epoch  1 ) ) .
 5The experimental results on the dev set and other experimental details can be found in the Appendix .
@@ -158,7 +157,7 @@ Besides , we compare our model with previous works that have results on these da
 2010 Task 1 Catalan and Spanish datasets .
 Our Syn - LSTM - CRF model outperforms all existing models with F182.76 and 85.09 ( p < 10 5 ) compared to DGLSTM - CRF on Catalan and Spanish datasets when FastText word embeddings are used .
 Our model outperforms the BiLSTM - CRF model by 13.25 and 11.22 F1points , and outperforms BiLSTM - GCN - CRF ( Jie and Lu , 2019 ) model by 4.64 and 3.16 on Catalan and Spanish .
-The large performance gap between BiLSTMGCN - CRF and our model indicates that SynLSTM - CRF shows better compatibility with GCN , and this conrms that simply stacking GCN on top of the BiLSTM does not perform well .
+The large performance gap between BiLSTMGCN - CRF and our model indicates that SynLSTM - CRF shows better compatibility with GCN , and this conﬁrms that simply stacking GCN on top of the BiLSTM does not perform well .
 Our method outperforms GCN - BiLSTM - CRF model
 3462by 5.33 and 3.24 F1points on Catalan and Spanish .
 This shows that our proposed model demonstrates a better integration of contextual information and structured information .
@@ -189,14 +188,14 @@ Our model still consistently outper - Models P : R : F 1 Chiu and Nichols ( 2016
 The models with * symbol are our implementations .
 The models withysymbol are retrieved from Jie and Lu ( 2019 ) .
 There are also other methods ( Li et al . , 2020a , b ) that use external information , ( Yu et al . , 2020 ) use document - level information to encode the sentence , which are not direct comparisons to ours .
-forms the baseline models , specically by 2.04 in F1compared to BiLSTM - CRF , by 2.39 compared to BiLSTM - GCN - CRF , by 1.86 compared to GCNBILSTM - CRF and by 1.11 ( p<10 5 ) compared to DGLSTM - CRF when FastText is used .
+forms the baseline models , speciﬁcally by 2.04 in F1compared to BiLSTM - CRF , by 2.39 compared to BiLSTM - GCN - CRF , by 1.86 compared to GCNBILSTM - CRF and by 1.11 ( p<10 5 ) compared to DGLSTM - CRF when FastText is used .
 Note that the baseline BiLSTM - GCN - CRF model is 0.35 points worse than BiLSTM - CRF .
-Such results further conrm the effectiveness of our proposed SynLSTM - CRF for incorporating structured information .
-We nd a similar behavior when the contextualized word representation BERT is used .
+Such results further conﬁrm the effectiveness of our proposed SynLSTM - CRF for incorporating structured information .
+We ﬁnd a similar behavior when the contextualized word representation BERT is used .
 With the contextualized word representation , we achieve a higherF1score of 80.20 .
-5 Analysis Robustness Analysis To study the robustness of our model and check whether our model can regulate the ow of information from the graphencoded representation , we analyze the inuence of the quality of dependency trees .
+5 Analysis Robustness Analysis To study the robustness of our model and check whether our model can regulate the ﬂow of information from the graphencoded representation , we analyze the inﬂuence of the quality of dependency trees .
 We train and evaluate an additional dependency parser ( Dozat and Manning , 2017 ) .
-Specically , we train the
+Speciﬁcally , we train the
 3463Models P : R : F 1 Pradhan et al . ( 2013 ) 78.20 66.45 71.85 Lattice LSTM ( 2018 ) 76.34 77.01 76.67 BiLSTM - CRFy78.45 74.59 76.47 BiLSTM - GCN - CRFy76.35 75.89 76.12 GCN - BiLSTM - CRF78.30 75.07 76.65 DGLSTM - CRF ( 2019 ) 77.40 77.41 77.40 Syn - LSTM - CRF ( Ours ) 77.95 79.07 78.51 + Contextualized Word Representation BERT - CRF79.83 79.68 79.75
 Wolf et al .
 ( 2019)77.35 81.74 79.49 BiLSTM - CRF + ELMOy79.20 79.21 79.20 BiLSTM - CRF + BERT78.45 81.24 79.82 BiLSTM - GCN - CRF + ELMOy78.71 79.29 79.00 GCN - BiLSTM - CRF + BERT79.03 80.98 80.00 DGLSTM - CRF ( 2019 ) + ELMO 78.86 81.00 79.92 DGLSTM - CRF + BERT77.79 81.65 79.67 Syn - LSTM - CRF + BERT ( Ours ) 78.66 81.80 80.20 Table 4 : Experimental results
@@ -212,7 +211,7 @@ We observe that both models encounter a performance drop when we use the predict
 Our performance differences with the given parse trees are relatively smaller than the corresponding differences in DGLSTM - CRF + ELMO .
 Such an observation demonstrates the robustness of our proposed model against structured information from the trees of different quality .
 It is worthwhile to note that , with the predicted dependencies , our proposed Syn - LSTM - CRF + BERT is still able to outperform the strong baseline DGLSTM - CRF + ELMO even with the given parse trees on Catalan , English , and Chinese datasets .
-To further study the robustness , we conduct an analysis to investigate if the gate mt(Figure 2 ) has the ability to regulate the ow of information from the graph - encoded representation .
+To further study the robustness , we conduct an analysis to investigate if the gate mt(Figure 2 ) has the ability to regulate the ﬂow of information from the graph - encoded representation .
 Intuitively , the gatemtshould tend to have a small value when 6The performance of the dependency parser can be found in the Appendix.0 - 0.40.4 - 0.5 0.5 - 0.6 0.6 - 0.7 0.7 - 0.8 0.8 - 0.90.9 - 1012107 With Random Parse Tree With Given Parse Tree 0 - 0.40.4 - 0.5 0.5 - 0.6 0.6 - 0.7 0.7 - 0.8 0.8 - 0.90.9 - 1012107 With Random Parse Tree With Given Parse Tree Figure 4 : Left : Catalan , Right : Spanish .
 x - axis : the value of gate mt.y - axis : the number of words .
 1415 - 29 30 - 44 45 - 59 6060708090100 BiLSTM - CRF + BERT DGLSTM - CRF + ELMO Syn - LSTM - CRF +
@@ -227,7 +226,7 @@ Such behavior demonstrates that our proposed model can selectively aggregate the
 Effect of Sentence Length We compare the performance of our Syn - LSTM - CRF + BERT with BiLSTM - CRF + BERT and DGLSTM - CRF + ELMO models with respect to sentence length , and the results are shown in Figure 5 .
 We observe that the SynLSTM - CRF + BERT model consistently outperforms the two baseline models on the four languages8 .
 In particular , although the performance tends to drop as the sentence length increases , our proposed model shows relatively better performance when the sentence length is 60 .
-This conrms that the proposed Syn - LSTM - CRF + BERT is able to effectively incorporate structured information .
+This conﬁrms that the proposed Syn - LSTM - CRF + BERT is able to effectively incorporate structured information .
 Note that our 2 - layer GCN is computed based on the 7We found a similar behavior for OntoNotes 5.0 English and Chinese datasets , and the detailed result can be found in the Appendix .
 8See
 the Appendix for the results on OntoNotes 5.0 English and Chinese datasets .
@@ -244,12 +243,12 @@ Differences
 Note that DGLSTM - CRF + ELMO have better performance compared to DGLSTM - CRF + BERT based on Table 2 , 3 , 4 . dependency trees , which include both short - range dependencies and long - range dependencies .
 With the graph - encoded representation and the proposed Syn - LSTM - CRF + BERT , the individual word representation is enhanced by both contextual and structured information .
 Therefore , for the sentences with length of14 , we can still observe obvious improvements .
-The signicant performance improvements on the four datasets show the capability of our Syn - LSTM - CRF to capture the structured information despite the sentence length .
+The signiﬁcant performance improvements on the four datasets show the capability of our Syn - LSTM - CRF to capture the structured information despite the sentence length .
 Effect of Entity Length We conduct another evaluation on BiLSTM - CRF + BERT , DGLSTMCRF + ELMO , and Syn - LSTM - CRF + BERT models with respect to entity length 2f1;2;3;4;5;6gon the four languages .
 Table 6 shows the performance comparison of two models with respect to entity length .
 With the structured information , both DGLSTM - CRF + ELMO and Syn - LSTMCRF + BERT achieve better performance compared to BiLSTM - CRF + BERT .
 When the length of entity is 3 , Syn - LSTM - CRF + BERT achieves better results compared to DGLSTM - CRF + ELMO .
-This conrms that our proposed method can effectively incorporate the structured information .
+This conﬁrms that our proposed method can effectively incorporate the structured information .
 Our model consistently outperforms BiLSTM - CRF + BERT , and the performance tends to have more improvements when entities are getting longer except on the Chinese dataset .
 We note there are some special characteristics of the Chinese language .
 As mentioned by Jie and Lu ( 2019 ) , the percentage of entities that are able to perfectly form a sub - tree is only 92:9%for OntoNotes Chinese , as compared to 98:5%,100 % , 100 % for OntoNotes English , SemEval Catalan and Spanish .
@@ -257,19 +256,18 @@ Furthermore , the ratio of long entities is much higher for Catalan and Spanish 
 [ % ] based on entity length on Catalan , Spanish , English and Chinese datasets .
 Note that DGLSTM - CRF + ELMO have better performance compared to DGLSTM - CRF + BERT based on the results in the main paper .
 to English and Chinese .
-The experimental results on Catalan and Spanish datasets show signicant improvements for long entities .
+The experimental results on Catalan and Spanish datasets show signiﬁcant improvements for long entities .
 Such results show that the structured information conveyed by the dependency trees can be more crucial when entity length becomes longer .
 Number of GCN Layers To fully explore the impact of the number of GCN layers , we conduct another experiment on Syn - LSTM - CRF + BERT model with the number of GCN layers 2f1;2;3 g , and Figure 6 shows the performance on the dev set of the four languages .
 The last bar , indicated as A VG , is obtained by averaging the dev results on the four datasets .
 We observe that the overall performance is better when the number of GCN layers equals 2 .
-Note that similar behavior can also be found in the work by Kipf and Welling ( 2017 ) for document classication and node classication .
+Note that similar behavior can also be found in the work by Kipf and Welling ( 2017 ) for document classiﬁcation and node classiﬁcation .
 Therefore , we evaluate our proposed Syn - LSTMCRF model with 2 - layer GCN .
 3465Catalan Spanish English Chinese A VG708090100DevF1[%]1 layer 2 layer 3 layer Figure 6 : Performance of different number of layers of GCN on dev set .
-Model P : R : F 1 Syn - LSTM - CRF + BERT 90.14 91.58 90.85 1layer GCN 89.93 91.30 90.61 2layer GCN 89.50 89.93 89.72   original dependency 89.91 91.27 90.58   dependency embedding 89.85 91.31 90.58   POS embedding 89.84 90.95 90.46 Table 7 : Ablation study of the Syn - LSTM - CRF+ BERT model on OntoNotes 5.0 English .  
-means removing .
+Model P : R : F 1 Syn - LSTM - CRF + BERT 90.14 91.58 90.85 – 1layer GCN 89.93 91.30 90.61 – 2layer GCN 89.50 89.93 89.72 – original dependency 89.91 91.27 90.58 – dependency embedding 89.85 91.31 90.58 – POS embedding 89.84 90.95 90.46 Table 7 : Ablation study of the Syn - LSTM - CRF+ BERT model on OntoNotes 5.0 English . – means removing .
 Ablation Study
 To understand the contribution of each component , we conduct an ablation study on the OntoNotes 5.0 English dataset , and Table 7 presents the detailed results of our model with contextualized representation .
-We nd that the performance drops by 0.24 F1score when we only use 1 - layer GCN .
+We ﬁnd that the performance drops by 0.24 F1score when we only use 1 - layer GCN .
 Without GCN at all , the score drops by 1.13F1 .
 The original dependency contributes 0.27F1score .
 Removing the dependency relation embedding also decreases the performance by 0.27 F1 .
@@ -278,7 +276,7 @@ When we remove the POS tags embedding , the result drops by 0.39 F1 .
 However , the sequential nature of the LSTM makes it challenging to capture long - range dependencies .
 Zhang et al .
 ( 2018a ) propose the S - LSTM model to include a sentence state to allow both local and global information exchange simultaneously .
-Mogrier LSTM ( Melis et al . , 2020 ) mutually gates the current input and the previous output to enhance the interaction between the input and the context .
+Mogriﬁer LSTM ( Melis et al . , 2020 ) mutually gates the current input and the previous output to enhance the interaction between the input and the context .
 These two works do not consider structured information for the LSTM design .
 Since natural language is usually structured , Shen et al.(2018 )
 propose ON - LSTM to add a hierarchical bias to allow the neurons to be updated by following certain order .
@@ -288,13 +286,13 @@ Liu et al .
 ( 2010 ) propose to construct skip - edges to link similar words or words having typed dependencies to capture long - range dependencies .
 The later works ( Collobert et al . , 2010 ; Lample et al . , 2016 ; Chiu and Nichols , 2016b ) focus on using neural networks to extract features and achieved the stateof - the - art performance .
 Jie et al .
-( 2017 ) nd that some relations between the dependency edges and the entities can be used to reduce the search space of their model , which signicantly reduces the time complexity .
+( 2017 ) ﬁnd that some relations between the dependency edges and the entities can be used to reduce the search space of their model , which signiﬁcantly reduces the time complexity .
 Yu et al .
 ( 2020 ) employ pre - trained language model to encode document - level information to explore all spans with the graph - based dependency graph based ideas .
 The pre - trained language models ( e.g. , BERT ( Devlin et al . , 2019 ) , ELMO ( Peters et al . , 2018 ) ) further improve neuralbased approaches with a good contextualized representation .
 However , previous works did not focus on investigating how to effectively integrate structured and contextual information well .
 7 Conclusion In this paper , we propose a simple and robust SynLSTM model to better integrate the structured information leveraged from the long - range dependencies .
-Specically , we introduce an additional graphencoded representation to each recurrent unit .
+Speciﬁcally , we introduce an additional graphencoded representation to each recurrent unit .
 Such a graph - encoded representation can be obtained via GNNs .
 Through the newly designed gating mechanism , the hidden states are enhanced by contextual information captured by the linear sequence and structured information captured by the dependency trees .
 We present the Syn - LSTM - CRF for NER and adopt the GCN on dependency trees to obtain the graph - encoded representations .
@@ -302,7 +300,7 @@ Our extensive experiments and analysis on the datasets with four languages demon
 The robustness analysis demonstrates that our model is capable of selectively aggregating the information from the graph - encoded representation .
 3466Acknowledgements We would like to thank the anonymous reviewers for their helpful comments .
 This research is partially supported by Ministry of Education , Singapore , under its Academic Research Fund ( AcRF ) Tier 2 Programme ( MOE AcRF Tier 2 Award No : MOE2017 - T2 - 1 - 156 ) .
-Any opinions , ndings and conclusions or recommendations expressed in this material are those of the authors and do not reect the views of the Ministry of Education , Singapore .
+Any opinions , ﬁndings and conclusions or recommendations expressed in this material are those of the authors and do not reﬂect the views of the Ministry of Education , Singapore .
 References Gustavo Aguilar and Thamar Solorio .
 2019 .
 Dependency - aware named entity recognition with relative and global attentions .
@@ -319,7 +317,7 @@ Now Publishers .
 Jason P. C. Chiu and Eric Nichols .
 2016a .
 Named entity recognition with bidirectional lstm - cnns .
-Transactions of the Association of Computational Linguistics , 4:357370 .
+Transactions of the Association of Computational Linguistics , 4:357–370 .
 Jason P.C. Chiu and Eric Nichols .
 2016b .
 Named entity recognition with bidirectional LSTM - CNNs .
@@ -343,7 +341,7 @@ Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019 .
 BERT : Pre - training of deep bidirectional transformers for language understanding .
 In Proceedings of NAACL .
 Timothy Dozat and Christopher D Manning . 2017 .
-Deep biafne attention for neural dependency parsing .
+Deep biafﬁne attention for neural dependency parsing .
 In Proceedings of ICLR .
 Jenny Rose Finkel , Trond Grenager , and Christopher Manning .
 2005 .
@@ -365,7 +363,7 @@ William L. Hamilton , Zhitao Ying , and Jure Leskovec .
 2017b .
 Inductive representation learning on large graphs .
 In Proceedings of NIPS .
-Sepp Hochreiter and Jrgen Schmidhuber .
+Sepp Hochreiter and Jürgen Schmidhuber .
 1997 .
 Long short - term memory .
 Neural Computation .
@@ -373,13 +371,13 @@ Zhanming Jie and Wei Lu . 2019 .
 Dependency - guided lstm - crf for named entity recognition .
 In Proceedings of EMNLP .
 Zhanming Jie , Aldrian Obaja Muis , and Wei Lu . 2017 .
-Efcient dependency - guided named entity recognition .
+Efﬁcient dependency - guided named entity recognition .
 In Proceedings of AAAI .
 Thomas N Kipf and Max Welling . 2017 .
-Semisupervised classication with graph convolutional networks .
+Semisupervised classiﬁcation with graph convolutional networks .
 In Proceedings of ICLR .
 John Lafferty , Andrew McCallum , and Fernando Pereira . 2001 .
-Conditional random elds : Probabilistic models for segmenting and labeling sequence data .
+Conditional random ﬁelds : Probabilistic models for segmenting and labeling sequence data .
 In Proceedings of ICML .
 Guillaume Lample , Miguel Ballesteros , Sandeep Subramanian , Kazuya Kawakami , and Chris Dyer . 2016 .
 Neural architectures for named entity recognition .
@@ -392,14 +390,14 @@ Peng - Hsuan Li , Ruo - Ping Dong , Yu - Siang Wang , JuChieh Chou , and Wei - Y
 Leveraging linguistic structures for named entity recognition with bidirectional recursive neural networks .
 In Proceedings of EMNLP .
 Xiaoya Li , Jingrong Feng , Yuxian Meng , Qinghong Han , Fei Wu , and Jiwei Li . 2020a .
-A unied mrc framework for named entity recognition .
+A uniﬁed mrc framework for named entity recognition .
 In Proceedings of ACL .
 Xiaoya Li , Xiaofei Sun , Yuxian Meng , Junjun Liang , Fei Wu , and Jiwei Li .
 2020b .
 Dice loss for dataimbalanced nlp tasks .
 In Proceedings of ACL .
 Jingchen Liu , Minlie Huang , and Xiaoyan Zhu . 2010 .
-Recognizing biomedical named entities using skipchain conditional random elds .
+Recognizing biomedical named entities using skipchain conditional random ﬁelds .
 In Proceedings of the Workshop on BioNLP .
 3467Ying Luo , Fengshun Xiao , and Hai Zhao .
 2020 .
@@ -412,9 +410,9 @@ Christopher Manning , Mihai Surdeanu , John Bauer , Jenny Finkel , Steven Bethar
 2014 .
 The Stanford CoreNLP natural language processing toolkit .
 In Proceedings of ACL .
-Gbor Melis , Toms Kocisk , and Phil Blunsom .
+Gábor Melis , Tomás Kociský , and Phil Blunsom .
 2020 .
-Mogrier lstm .
+Mogriﬁer lstm .
 In Proceedings of ICLR .
 Jeffrey Pennington , Richard Socher , and Christopher Manning .
 2014 .
@@ -424,11 +422,11 @@ Matthew Peters , Mark Neumann , Mohit Iyyer , Matt Gardner , Christopher Clark ,
 2018 .
 Deep contextualized word representations .
 In Proceedings of NAACL .
-Sameer Pradhan , Alessandro Moschitti , Nianwen Xue , Hwee Tou Ng , Anders Bjrkelund , Olga Uryupina , Yuchen Zhang , and Zhi Zhong .
+Sameer Pradhan , Alessandro Moschitti , Nianwen Xue , Hwee Tou Ng , Anders Björkelund , Olga Uryupina , Yuchen Zhang , and Zhi Zhong .
 2013 .
 Towards robust linguistic analysis using ontonotes .
 In Proceedings of CoNLL .
-Marta Recasens , Llus Mrquez , Emili Sapena , M Antnia Mart , Mariona Taul , Vronique Hoste , Massimo Poesio , and Yannick Versley .
+Marta Recasens , Lluís Màrquez , Emili Sapena , M Antònia Martí , Mariona Taulé , Véronique Hoste , Massimo Poesio , and Yannick Versley .
 2010 .
 Semeval2010 task 1 : Coreference resolution in multiple languages .
 In Proceedings of the 5th International Workshop on Semantic Evaluation .
@@ -464,9 +462,9 @@ Tsung - Hsien Wen , Milica Gasic , Nikola Mrksic , Pei hao Su , David Vandyke , 
 2015 .
 Semantically conditioned lstm - based natural language generation for spoken dialogue systems .
 In Proceedings of EMNLP .
-Thomas Wolf , Lysandre Debut , Victor Sanh , Julien Chaumond , Clement Delangue , Anthony Moi , Pierric Cistac , Tim Rault , Remi Louf , Morgan Funtowicz , and Jamie Brew .
+Thomas Wolf , Lysandre Debut , Victor Sanh , Julien Chaumond , Clement Delangue , Anthony Moi , Pierric Cistac , Tim Rault , R’emi Louf , Morgan Funtowicz , and Jamie Brew .
 2019 .
-Huggingfaces transformers : State - of - the - art natural language processing .
+Huggingface ’s transformers : State - of - the - art natural language processing .
 ArXiv .
 Han Xiao . 2018 .
 bert - as - service .
@@ -497,7 +495,7 @@ For experiments with the contextualized representation , we adopt the pre - trai
 3468English Chinese Catalan Spanish Dependency LASy 94.89 89.28 93.25 93.35 Table 8 : Performance of the trained dependency parser .
 DatasetEntity Length 1 2 3 4 5 6 EnglishTrain 46,525 17,391 9,714 4,892 1,938 1,368 Dev 6,325 2,395 1,256 643 275 172 Test 6,129 2,598 1,359 706 278 187 ChineseTrain 47,285 9,668 3,626 1,139 467 358 Dev 6,969 1,397 473 169 55 41 Test 5,479 1299 473 146 55 42 CatalanTrain 8,819 3,897 1,742 264 119 437 Dev 1,370 676 269 40 18 58 Test 1,601 811 338 57 27 76 SpanishTrain 10,307 3,609 2,302 301 175 603 Dev 1,523 559 348 54 31 100 Test 1,755 702 369 59 34 127 Table 9 : Number of entities with respect to entity length for OntoNotes 5.0 English and Chinese , SemEval 2010 Catalan and Spanish datasets .
 language model BERT ( Devlin et al . , 2019 ) for the four datasets .
-Specically , we use bert - as - service ( Xiao , 2018 ) to generate the contextualized word representation without ne - tuning .
+Speciﬁcally , we use bert - as - service ( Xiao , 2018 ) to generate the contextualized word representation without ﬁne - tuning .
 Following Luo et al .
 ( 2020 ) , we select the 18thlayer of the cased version of BERT large model for the experiments on the OntoNotes 5.0 English data .
 We use the the9thlayer of cased version of BERT base model for the experiments on the rest three datasets .
@@ -521,13 +519,13 @@ We compare the performance of our Syn - LSTMCRF + BERT with BiLSTM - CRF + BERT 
 F Case Study We further show an example to visualize the propagation of non - local information ( Figure 9 ) .
 The example is selected from OntoNotes 5.0 English dataset .
 Even though the DGLSTM - CRF ( Jie and Lu , 2019 ) model is able to recognize " Tianshui " as a named entity , it predicts a wrong entity type as PERSON while the true type is GPE .
-If only looking at the rst half of the sentence , it is possible to predict " Tianshui " as PERSON because of the local information " age " .
-However , the second half of the sentence conrms that the entity type of
+If only looking at the ﬁrst half of the sentence , it is possible to predict " Tianshui " as PERSON because of the local information " age " .
+However , the second half of the sentence conﬁrms that the entity type of
 3469ModelsEnglish Chinese Catalan Spanish P : R : F 1P :
 R : F 1P :
 R : F 1P : : R F 1 Syn - LSTM - CRF 86.73 87.71 87.22 77.25 75.74 76.49 84.48 82.60 83.53 83.76 82.22 82.98 Syn - LSTM - CRF + BERT 88.10 90.27 89.17 78.05 78.84 78.45 89.87 89.76 89.81 88.50 88.60 88.55 Table 10 : Experimental results
 [ % ] on dev set .
-During Tanshui sgolden age , large andsmall boats were constantly coming andgoing intheharbor , anditwasnotusual toseeenormous steamships .ROOT
+During Tanshui ’ sgolden age , large andsmall boats were constantly coming andgoing intheharbor , anditwasnotusual toseeenormous steamships .ROOT
 Figure 9 : An example of dependency tree .
 The mentioned entity is highlighted in orange , and the entity type is GPE .
 " Tianshui " is GPE .

@@ -21,7 +21,7 @@ for filename in filenames:
         with open(textfile, 'w') as fout:
             for page in reader.pages:
                 text = page.extract_text()
-                text = text.encode("ascii", "ignore").decode()
+                # text = text.encode("ascii", "ignore").decode()
                 text = re.sub(r"-+ *\n+ *", "", text)
                 text = re.sub("\n", " ", text)
 

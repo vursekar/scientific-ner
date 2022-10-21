@@ -1,10 +1,10 @@
-Findings of the Association for Computational Linguistics : EMNLP 2021 , pages 19201934 November 711 , 2021 .
-2021 Association for Computational Linguistics1920Japanese Zero Anaphora Resolution Can Benet from Parallel Texts Through Neural Transfer Learning Masato Umakoshi , Yugo Murawaki , Sadao Kurohashi Graduate School of Informatics , Kyoto University Yoshida - honmachi , Sakyo - ku , Kyoto , 606 - 8501 , Japan { umakoshi , murawaki , kuro}@nlp.ist.i.kyoto-u.ac.jp Abstract Parallel texts of Japanese and a non - pro - drop language have the potential of improving the performance of Japanese zero anaphora resolution ( ZAR ) because pronouns dropped in the former are usually mentioned explicitly in the latter .
+Findings of the Association for Computational Linguistics : EMNLP 2021 , pages 1920–1934 November 7–11 , 2021 .
+© 2021 Association for Computational Linguistics1920Japanese Zero Anaphora Resolution Can Beneﬁt from Parallel Texts Through Neural Transfer Learning Masato Umakoshi , Yugo Murawaki , Sadao Kurohashi Graduate School of Informatics , Kyoto University Yoshida - honmachi , Sakyo - ku , Kyoto , 606 - 8501 , Japan { umakoshi , murawaki , kuro}@nlp.ist.i.kyoto-u.ac.jp Abstract Parallel texts of Japanese and a non - pro - drop language have the potential of improving the performance of Japanese zero anaphora resolution ( ZAR ) because pronouns dropped in the former are usually mentioned explicitly in the latter .
 However , rule - based cross - lingual transfer is hampered by error propagation in an NLP pipeline and the frequent lack of transparency in translation correspondences .
 In this paper , we propose implicit transfer by injecting machine translation ( MT ) as an intermediate task between pretraining and ZAR .
-We employ a pretrained BERT model to initialize the encoder part of the encoder - decoder model for MT , and eject the encoder part for netuning on ZAR .
+We employ a pretrained BERT model to initialize the encoder part of the encoder - decoder model for MT , and eject the encoder part for ﬁnetuning on ZAR .
 The proposed framework empirically demonstrates that ZAR performance can be improved by transfer learning from MT .
-In addition , we nd that the incorporation of the masked language model training into MT leads to further gains .
+In addition , we ﬁnd that the incorporation of the masked language model training into MT leads to further gains .
 1 Introduction Figuring out who did what to whom is an essential part of natural language understanding .
 This is , however , especially challenging for so - called prodrop languages like Japanese and Chinese because they usually omit pronouns that are inferable from context .
 The task of identifying the referent of such a dropped element , as illustrated in Figure 1(a ) , is referred to as zero anaphora resolution ( ZAR ) .
@@ -14,7 +14,7 @@ The number of annotated sentences is the order of tens of thousands or less ( Ka
 Hangyo et al . , 2012 ; Iida et al . , 2017 ) , and the considerable linguistic expertise required for annotation makes drastic corpus expansion impractical .
 Previous attempts to overcome this limitation exploit orders - of - magnitude larger parallel texts of Japanese and English , a non - pro - drop language ( Nakaiwa , 1999 ; Furukawa et al . , 2017 ) .
 The key idea is that Japanese zero pronouns can be recovered from parallel texts because they are usually mentioned explicitly in English , as in Figure 1(b ) .
-If translation correspondences are identied and the anaphoric relation in English is identied , then we can identify the antecedent of the omitted argument in Japanese .
+If translation correspondences are identiﬁed and the anaphoric relation in English is identiﬁed , then we can identify the antecedent of the omitted argument in Japanese .
 Their rule - based transfer from English to Japanese had met with limited success , however .
 It is prone to error propagation due to its dependence on word alignment , parsing , and English coreference resolution .
 More importantly , the great linguistic differences between the two language often lead to parallel sentences without transparent syntactic correspondences ( Figure 1(c ) ) .
@@ -23,15 +23,15 @@ By generating English translations , a neural MT model should be able to implici
 We expect the knowledge gained during MT training to be transferred to ZAR .
 Given that state - of - the - art ZAR models are based on BERT ( Ueda et al . , 2020 ; Konno et al . , 2020 , 2021 ) , it is a natural choice to explore intermediate task transfer learning ( Phang et al . , 2018 ; Wang et al . , 2019a ;
 Pruksachatkun et al . , 2020 ; Vu et al . , 2020 ):
-A pretrained BERT model is rst trained on MT and the resultant model is then ne - tuned on
+A pretrained BERT model is ﬁrst trained on MT and the resultant model is then ﬁne - tuned on
 ZAR.1
 A key challenge to this approach is a mismatch in model architectures .
 While BERT is an encoder , the dominant paradigm of neural MT is the encoder - decoder .
 Although both share Transformer ( Vaswani et al . , 2017 ) as the building block , 1In our preliminary experiments , we tested encoderdecoder pretrained models with no success .
-We briey revisit this in Section 4.7 .
+We brieﬂy revisit this in Section 4.7 .
 1921 Figure 1 : ( a ) An example of Japanese zero anaphora .
 The nominative argument of the underlined predicate is omitted .
-The goal of the task is to detect the omission and to identify its antecedent son .
+The goal of the task is to detect the omission and to identify its antecedent “ son ” .
 ( b ) The corresponding English text .
 The omitted argument in Japanese is present as a pronoun in English .
 ( c ) A Japanese - English pair ( Nabeshima and Brooks , 2020 , p. 74 ) whose correspondences are too obscure for rule - based transfer .
@@ -41,13 +41,13 @@ We use a pretrained BERT model to initialize the encoder part of the encoder - d
 While this technique was previously used by Imamura and Sumita ( 2019 ) and Clinchant et
 al .
 ( 2019 ) , they both aimed at improving MT performance .
-We show that by ejecting the encoder part for use in ne - tuning ( Figure 2 ) , we can achieve performance improvements in ZAR .
+We show that by ejecting the encoder part for use in ﬁne - tuning ( Figure 2 ) , we can achieve performance improvements in ZAR .
 We also demonstrate further improvements can be brought by incorporating encoder - side masked language model ( MLM ) training into the intermediate training on MT .
 2 Related Work 2.1 Zero Anaphora Resolution ( ZAR ) ZAR has been extensively studied in major East Asian languages , Chinese and Korean as well as Japanese , which not only omit contextually inferable pronouns but also show no verbal agreement for person , number , or gender ( Park et
 al . , 2015 ; Yin et al . , 2017 ; Song et al . , 2020 ; Kim et al . , 2021 ) .
 While supervised learning is the standard approach to ZAR ( Iida et al . , 2016 ; Ouchi et al . , 2017 ; Shibata and Kurohashi , 2018 ) , training data are so small that additional resources are clearly needed .
 Early studies work on case frame construction from a large raw corpus ( Sasano et al . , 2008 ; Sasano and Kurohashi , 2011 ; Yamashiro et al . , 2018 ) , pseudo training data generation ( Liu et al . , 2017 ) , and adversarial training ( Kurita et al . , 2018 ) .
-These efforts are , however , overshadowed by the surprising effectiveness of BERTs pretraining ( Ueda et al . , 2020 ; Konno et al . , 2020 ) .
+These efforts are , however , overshadowed by the surprising effectiveness of BERT ’s pretraining ( Ueda et al . , 2020 ; Konno et al . , 2020 ) .
 Adopting BERT , recent studies seek gains through multi - task learning ( Ueda et al . , 2020),data augmentation ( Konno et al . , 2020 ) , and an intermediate task tailored to ZAR ( Konno et al . , 2021 ) .
 The multi - task learning approach of Ueda et al .
 ( 2020 ) covers verbal predicate analysis ( which subsumes ZAR ) , and nominal predicate analysis , coreference resolution , and bridging anaphora resolution .
@@ -56,46 +56,46 @@ Konno et al .
 ( 2020 ) perform data augmentation by simply masking some tokens .
 They found that performance gains were achieved by selecting target tokens by part of speech .
 Konno et al .
-( 2021 ) introduce a more elaborate masking strategy as a ZAR - specic intermediate task They spot multiple occurrences of the same noun phrase , mask one of them , and force the model to identify the pseudo - antecedent .
+( 2021 ) introduce a more elaborate masking strategy as a ZAR - speciﬁc intermediate task They spot multiple occurrences of the same noun phrase , mask one of them , and force the model to identify the pseudo - antecedent .
 Our use of parallel texts in ZAR is inspired by Nakaiwa ( 1999 ) and Furukawa et al . ( 2017 ) , who identify a multi - hop link from a Japanese zero pronoun to its Japanese antecedent via English counterparts .
 Their rule - based methods suffer from accumulated errors and syntactically non - transparent correspondences .
 In addition , they do not handle inter - sentential anaphora , a non - negligible subtype of anaphora we cover in this paper .
 While we exploit MT to improve the performance of ZAR , the exploitation in the reverse direction has been studied .
 A line of research has been done on Chinese zero pronoun prediction ( ZPP ) with a primary aim of improving Chinese - English translation ( Wang et al . , 2016 , 2018 , 2019b ) .
 ZPP is different from ZAR in that it does not identify antecedents .
-This is understandable given that classication of zero pronouns into overt ones sufces for MT .
+This is understandable given that classiﬁcation of zero pronouns into overt ones sufﬁces for MT .
 Although Wang et al .
-( 2019b ) report mutual benets between MT and ZPP , it remains an
-1922 BERTDecoder!BERT"#"#$$[MASK][MASK];![MASK ] ;
-[ MASK]% [ reader]Pretraining ( MLM)Intermediate task ( MT w/ MLM ) Target task ( ZAR w/ related tasks)[reader]"#%[reader]"#%BERT;$[MASK]%"#$ % " # % " # " [ MASK];#%$[MASK]"[MASK]%[reader]Figure 2 : Overview of the proposed method .
+( 2019b ) report mutual beneﬁts between MT and ZPP , it remains an
+1922 BERTDecoder𝑡!BERT𝑡"𝑡#𝑡"𝑡#𝑡$𝑡$[MASK][MASK];ʼ𝑡![MASK];ʼ
+[ MASK]𝑡% [ reader]Pretraining ( MLM)Intermediate task ( MT w/ MLM ) Target task ( ZAR w/ related tasks)[reader]𝑡"𝑡#𝑡%[reader]𝑡"𝑡#𝑡%BERT;ʼ𝑡$[MASK]𝑢%𝑢"𝑢#𝑢$ 𝑡%𝑡"𝑡#𝑡%𝑡"𝑡#𝑡"[MASK];ʼ𝑡#𝑡%𝑡$[MASK]𝑡"[MASK]𝑡%[reader]Figure 2 : Overview of the proposed method .
 Left : The model is pretrained with the masked language model ( MLM ) objective ( known as BERT ) .
 Center :
 The pretrained BERT is used to initialize the encoder part of the encoder - decoder , which is trained on MT with the MLM objective .
-Right : The encoder is extracted from the MT model and is ne - tuned on ZAR and related tasks .
+Right : The encoder is extracted from the MT model and is ﬁne - tuned on ZAR and related tasks .
 Note that some special tokens are omitted for simplicity .
 open question whether MT helps ZAR as well .
-2.2 MT as an Intermediate Task Inspired by the great success of the pretraining / netuning paradigm on a broad range of tasks ( Peters et al . , 2018 ; Devlin et
-al . , 2019 ) , a line of research inserts an intermediate task between pretraining and ne - tuning on a target task ( Phang et al . , 2018 ; Wang et al . , 2019a ; Pruksachatkun et al . , 2020 ) .
-However , Wang et al . ( 2019a ) found that MT used as an intermediate task led to performance degeneration in various target tasks , such as natural language inference and sentiment classication.2They argue that the considerable difference between MLM pretraining and MT causes catastrophic forgetting ( CF ) .
+2.2 MT as an Intermediate Task Inspired by the great success of the pretraining/ﬁnetuning paradigm on a broad range of tasks ( Peters et al . , 2018 ; Devlin et
+al . , 2019 ) , a line of research inserts an intermediate task between pretraining and ﬁne - tuning on a target task ( Phang et al . , 2018 ; Wang et al . , 2019a ; Pruksachatkun et al . , 2020 ) .
+However , Wang et al . ( 2019a ) found that MT used as an intermediate task led to performance degeneration in various target tasks , such as natural language inference and sentiment classiﬁcation.2They argue that the considerable difference between MLM pretraining and MT causes catastrophic forgetting ( CF ) .
 Pruksachatkun et al .
 ( 2020 ) suggest injecting the MLM objective during intermediate training as a possible way to mitigate CF , which we empirically test in this paper .
-2.3 Use of BERT in MT Motivated by BERTs success in a wide range of applications , some studies incorporate BERT into MT models .
+2.3 Use of BERT in MT Motivated by BERT ’s success in a wide range of applications , some studies incorporate BERT into MT models .
 A straightforward way to do this is to initialize the encoder part of the encoder - decoder with pretrained BERT , but it has had mixed success at best ( Clinchant et al . , 2019 ; Zhu et al . , 2020 ) .
 Abandoning this approach , Zhang et al .
 ( 2020 ) simply use BERT as a supplier of context - aware embeddings to their own encoder - decoder model .
 Similarly , Guo et al .
 ( 2020 ) stack adapter layers on top of two frozen BERT models to use them as the encoder and decoder of a non - autoregressive MT 2We suspect that the poor performance resulted in part from their excessively simple decoder , a single - layer LSTM .
-BERT[CLS][author][NA]![CLS][author][NA]!Figure 3 : ZAR as argument selection .
+BERT[CLS][author][NA]𝒕𝒊𝑡![CLS][author][NA]𝒕𝒊𝑡!Figure 3 : ZAR as argument selection .
 model .
 However , these methods can not be adopted for our purpose because we want BERT itself to learn from MT .
 Imamura and Sumita ( 2019 ) manage to maintain the straightforward approach by adopting a twostage training procedure :
-In the rst stage , only the decoder is updated with the encoder frozen , while in the second stage , the entire model is updated .
+In the ﬁrst stage , only the decoder is updated with the encoder frozen , while in the second stage , the entire model is updated .
 Although they offer some insights , it remains unclear how best to exploit BERT when MT is an intermediate task , not the target task .
 3 Proposed Method We adopt a ZAR model of Ueda et al .
-( 2020 ) , which adds a thin layer on top of BERT during ne - tuning to solve ZAR and related tasks ( Section 3.1 ) .
-Instead of directly moving from MLM pretraining to ne - tuning on ZAR , we inject MT as an intermediate task ( Section 3.2 ) .
+( 2020 ) , which adds a thin layer on top of BERT during ﬁne - tuning to solve ZAR and related tasks ( Section 3.1 ) .
+Instead of directly moving from MLM pretraining to ﬁne - tuning on ZAR , we inject MT as an intermediate task ( Section 3.2 ) .
 In addition , we introduce the MLM training objective during the intermediate training ( Section 3.3 ) .
-19233.1 BERT - based Model for ZAR ZAR as argument selection As illustrated in Figure 3 , the basic idea behind BERT - based ZAR is that given the powerful neural encoder , the joint task of omission detection and antecedent identication can be formalized as argument selection ( Shibata and Kurohashi , 2018 ; Kurita et al . , 2018 ; Ueda et al . , 2020 ) .
+19233.1 BERT - based Model for ZAR ZAR as argument selection As illustrated in Figure 3 , the basic idea behind BERT - based ZAR is that given the powerful neural encoder , the joint task of omission detection and antecedent identiﬁcation can be formalized as argument selection ( Shibata and Kurohashi , 2018 ; Kurita et al . , 2018 ; Ueda et al . , 2020 ) .
 Omission detection concerns whether a given predicate has an argument for a given case ( relation ) .
 If not , the model must point to the special token [ NULL ] .
 Otherwise the model must identify the antecedent of the zero pronoun by pointing either to a token in the given text or to a special token reserved for exophora .
@@ -104,7 +104,7 @@ In practice , the input length limitation of BERT forces us to implement a slidi
 Also note that in this formulation , ZAR is naturally subsumed into verbal predicate analysis ( VPA ) , which also covers instances where the predicate and the argument have a dependency relation and only the case marker is absent .
 Formally , the probability of the token tjbeing the argument of the predicate tifor casecis : P(tjjti;c )
 = exp(sc(tj;ti))P j0exp(sc(tj0;ti))(1 ) sc(tj;ti )
-= v|tanh(Wctj+Ucti)(2 ) where tiis the context - aware embedding of tiprovided by BERT , WcandUcare case - specic weight matrices , and vis a weight vector shared among cases .
+= v|tanh(Wctj+Ucti)(2 ) where tiis the context - aware embedding of tiprovided by BERT , WcandUcare case - speciﬁc weight matrices , and vis a weight vector shared among cases .
 We output tjwith the highest probability .
 For each predicate , we repeat this for the nominative ( NOM ) , accusative ( ACC ) , and dative ( DAT ) cases , and another nominative case for the double nominative construction ( NOM2 ) .
 Input representations We append some special tokens at the end of the input sequence :
@@ -115,28 +115,28 @@ If a predicate or argument candidate is split into two or more subwords , the in
 Multi - task learning Following Ueda et al .
 ( 2020 ) , we use a single model to simultaneously perform verbal predicate analysis ( VPA ) , nominal predicate analysis ( NPA ) , bridging anaphora resolution ( BAR ) , and coreference resolution ( CR ) .
 NPA is a variant of VPA in which verb - like nouns serve as predicates taking arguments .
-BAR is a special kind of anaphora resolution in which the antecedent lls a semantic gap of the anaphor ( e.g. , " price " takes something priced as its argument ) .
-CR identies the antecedent and anaphor that refer to the same real - world entity , with the special token [ NA ] reserved for nouns without coreferent mentions .
+BAR is a special kind of anaphora resolution in which the antecedent ﬁlls a semantic gap of the anaphor ( e.g. , " price " takes something priced as its argument ) .
+CR identiﬁes the antecedent and anaphor that refer to the same real - world entity , with the special token [ NA ] reserved for nouns without coreferent mentions .
 All of the four tasks can be formalized as argument selection as in Eq .
 ( 1 ) .
-By sharing the BERT encoder , these interrelated tasks have an inuence on each other during training .
-In addition , case - specic weights are shared between VPA and NPA while separate weights are used for BAR and CR .
+By sharing the BERT encoder , these interrelated tasks have an inﬂuence on each other during training .
+In addition , case - speciﬁc weights are shared between VPA and NPA while separate weights are used for BAR and CR .
 During training , we compute the losses equally for the four tasks .
-3.2 MT as an Intermediate Task Our main proposal is to use MT as an intermediate task prior to ne - tuning on ZAR .
+3.2 MT as an Intermediate Task Our main proposal is to use MT as an intermediate task prior to ﬁne - tuning on ZAR .
 Following Imamura and Sumita ( 2019 ) and Clinchant et al .
 ( 2019 ) , we use a pretrained BERT to initialize the encoder part of the Transformer - based encoderdecoder model while the decoder is randomly initialized .
-After the intermediate training on MT , we extract the encoder and move on to ne - tuning on ZAR and related tasks ( Figure 2 ) .
-Specically , we test the following two procedures for intermediate training : One - stage optimization The entire model is updated throughout the training .
-Two - stage optimization In the rst stage
+After the intermediate training on MT , we extract the encoder and move on to ﬁne - tuning on ZAR and related tasks ( Figure 2 ) .
+Speciﬁcally , we test the following two procedures for intermediate training : One - stage optimization The entire model is updated throughout the training .
+Two - stage optimization In the ﬁrst stage
 , the encoder is frozen and only the decoder is updated .
 In the second stage , the entire model is updated ( Imamura and Sumita , 2019 ) .
 3.3 Incorporating MLM into MT As discussed in Section 2.2 , MT as an intermediate task reportedly harms target - task performance , probably because MT forces the model to forget what it has learned from MLM pretraining ( catastrophic forgetting ) .
 To overcome this problem , we incorporate the MLM training objective into MT , as suggested by Pruksachatkun et al .
 ( 2020 ) .
-Specically , we mask some input tokens on the encoder
+Speciﬁcally , we mask some input tokens on the encoder
 1924Web News # of sentences 16,038 11,276 # of zeros 30,852 27,062 Table 1 : The numbers of sentences and zero anaphors in each corpus .
 side and force the model to recover the original tokens , as depicted in the center of Figure 2 .
-Our masking strategy is the same as BERTs ( Devlin et al . , 2019 ):
+Our masking strategy is the same as BERT ’s ( Devlin et al . , 2019 ):
 We choose 15 % of the tokens at random and 80 % of them are replaced with [ MASK ] , 10 % of them with a random token , and the rest are unchanged .
 The corresponding losses are added to the MT loss function .
 4 Experiments 4.1 Datasets ZAR
@@ -156,17 +156,17 @@ Japanese sentences were split into words using the morphological analyzer MeCab 
 We used Subword - NMT ( Sennrich et al . , 2016 ) for Japanese and SentencePiece ( Kudo and Richardson , 2018 ) for English .
 We used separate vocabularies for Japanese and English , with the vocabulary sizes of around 32,000 and 16,000 , respectively .
 4.2 Model Settings BERT We employed a Japanese BERT model with BPE segmentation distributed by NICT.6
-It had the same architecture as Googles BERTBase ( Devlin et al . , 2019 ): 12 layers , 768 hidden units , and 12 attention heads .
+It had the same architecture as Google ’s BERTBase ( Devlin et al . , 2019 ): 12 layers , 768 hidden units , and 12 attention heads .
 It was trained on the full text of Japanese Wikipedia for approximately 1 million steps .
 MT We used the Transformer encoder - decoder architecture ( Vaswani et al . , 2017 ) .
 The encoder was initialized with BERT while the decoder was a randomly initialized six - layer Transformer .
-The numbers of hidden units and heads were set to be the same as BERTs ( i.e. , 768 units and 12 attention heads ) .
+The numbers of hidden units and heads were set to be the same as BERT ’s ( i.e. , 768 units and 12 attention heads ) .
 We adopted Adam ( Kingma and Ba , 2017 ) as the optimizer .
 We set the total number of epochs to 50 .
-In two - stage optimization , the encoder was frozen during the rst 15 epochs , then the entire model was updated for the remaining 35 epochs .
+In two - stage optimization , the encoder was frozen during the ﬁrst 15 epochs , then the entire model was updated for the remaining 35 epochs .
 We set a mini - batch size to about 500 .
 The details of hyper - parameters are given in Appendix A. ZAR For a fair comparison with Ueda et al .
-( 2020 ) , we used almost the same conguration as theirs .
+( 2020 ) , we used almost the same conﬁguration as theirs .
 We dealt with all subtypes of ZAR : intra - sentential anaphora , inter - sentential anaphora , and exophora .
 For exophora , we targeted [ author ] , [ reader ] , and [ unspecified person ] .
 We set the maximum sequence length to 128.7All documents from the Web met this limitation .
@@ -200,19 +200,18 @@ The gains were consistent across anaphora categories .
 Although + MLM somehow beat the baseline , it was outperformed by most models trained on MT , ruling out the possibility that the gains were solely attributed to extra data .
 We can 8Not a strict comparison since Kurita et al .
 ( 2018 ) ignored inter - sentential anaphora .
-9We refer to errata posted on the rst authors website : https://nobu-g.github.io/pub/COLING2020
-_ errata.pdfconclude that Japanese ZAR benets from parallel texts through neural transfer learning .
+9We refer to errata posted on the ﬁrst author ’s website : https://nobu-g.github.io/pub/COLING2020 _ errata.pdfconclude that Japanese ZAR beneﬁts from parallel texts through neural transfer learning .
 Two - stage optimization showed mixed results .
 It worked for the Web but did not for the News .
 What is worse , its combination with MLM led to performance degeneration on both datasets .
 MLM achieved superior performance as it worked well in all settings .
 The gains were larger with one - stage optimization than with two - stage optimization ( 1.4 vs. 0.3 on the Web ) .
 4.4 Translation of Zero Pronouns The experimental results demonstrate that MT helps ZAR , but why does it work ?
-Unfortunately , conventional evaluation metrics for MT ( e.g. , BLEU ) reveal little about the models ability to handle zero anaphora .
+Unfortunately , conventional evaluation metrics for MT ( e.g. , BLEU ) reveal little about the model ’s ability to handle zero anaphora .
 To address this problem , Shimazu et al .
 ( 2020 ) and
 Nagata and Morishita ( 2020 ) constructed Japanese - English parallel datasets that were designed to automatically evaluate MT models with regard to the translation of Japanese zero pronouns ( ZPT ) .
-We used Shimazu et al.s dataset for its larger data size.10 To facilitate automatic evaluation of ZPT , this dataset paired a correct English sentence with an incorrect one .
+We used Shimazu et al . ’s dataset for its larger data size.10 To facilitate automatic evaluation of ZPT , this dataset paired a correct English sentence with an incorrect one .
 All we had to do was to calculate the ratio of instances for which the model assigned higher translation scores to the correct candidates .
 The only difference between the two sentences involved the translation of a Japanese zero pronoun .
 To choose the correct one , the MT model must sometimes refer to preceding sentences .
@@ -222,7 +221,7 @@ In addition , this dataset recorded d , the sentencelevel distance between the z
 The number of instances with d= 0 was 218 while the number of remaining instances was 506 .
 We regarded the former as the instances of intra - sentential anaphora and the latter as the instances of inter - sentential anaphora .
 We chose the model with the best performance ( i.e. , one - stage optimization with MLM ) .
-For each checkpoint we collected during intermediate training , we ( 1 ) measured the ZPT accuracy and ( 2 ) netuned it to obtain the F1 score for ZAR .
+For each checkpoint we collected during intermediate training , we ( 1 ) measured the ZPT accuracy and ( 2 ) ﬁnetuned it to obtain the F1 score for ZAR .
 As before , 10In this datasets , Japanese texts were translated from English broadcast conversations .
 Despite the multifold domain mismatch ( i.e. , spoken and translationese ) , to our knowledge , this was the best dataset available for our purpose .
 1926MethodsWeb all intra inter exophora Ueda et al .
@@ -240,11 +239,11 @@ MethodsNews all intra inter exophora Ueda et al .
 Boldfaced scores indicate the best results in the corresponding categories .
 One - stage optimization with the MLM objective performed the best on all categories but exophora .
 Web News intra
-- sentential anaphora 0.758 0.763 inter - sentential anaphora 0.871 0.879 Table 5 : Pearsons correlation coefcient between ZPT accuracies and ZAR F1 scores .
+- sentential anaphora 0.758 0.763 inter - sentential anaphora 0.871 0.879 Table 5 : Pearson ’s correlation coefﬁcient between ZPT accuracies and ZAR F1 scores .
 scores were averaged over 3 different seeds .
-Through the course of intermediate training , we observed almost steady increase in ZPT accuracies and ZAR F1 scores until around the 30th epoch ( the four gures in Appendix D ) .
+Through the course of intermediate training , we observed almost steady increase in ZPT accuracies and ZAR F1 scores until around the 30th epoch ( the four ﬁgures in Appendix D ) .
 Table 5 shows the strong positive correlations between the two performance measures , especially the very strong correlation for inter - sentential anaphora .
-These results were in line with our speculation that the performance gains in ZAR stemmed from the models increased ability to translate zero pronouns .
+These results were in line with our speculation that the performance gains in ZAR stemmed from the model ’s increased ability to translate zero pronouns .
 4.5 Why Is MLM so Effective ?
 The MLM objective during intermediate training on MT is shown to be very effective , but why ?
 Pruksachatkun et al .
@@ -266,64 +265,61 @@ The fact that the contribution of the loss function was larger than that of toke
 Figure 4 gives two examples .
 It is no great surprise that the translation quality was not satisfactory because we did not fully optimize the model for it .
 In the exmple of Figure 4(a ) , MT seems to have helped ZAR .
-The omitted nominative argument of    ( is ) was correctly translated as   the school , and the model successfully identied its antecedent   ( school ) while the baseline failed .
+The omitted nominative argument of “ あり ” ( is ) was correctly translated as “ the school ” , and the model successfully identiﬁed its antecedent “ 学校 ” ( school ) while the baseline failed .
 Figure 4(b ) illustrates a limitation of the proposed approach .
-The omitted nominative argument of the predicate ,    ( be ) , points to    ( Sadakichi , the father of Jutaro ) .
-Although the model correctly translated the zero pronoun as   He , it failed in ZAR .
-This is probably because not only ( Sadakichi ) but also    ( Ryoma ) and   ( Jutaro ) can be referred to as He .
+The omitted nominative argument of the predicate , “ で ” ( be ) , points to “ 定吉 ” ( Sadakichi , the father of Jutaro ) .
+Although the model correctly translated the zero pronoun as “ He ” , it failed in ZAR .
+This is probably because not only “ 定吉(Sadakichi ) ”
+but also “ 龍馬 ” ( Ryoma ) and “ 重太郎 ” ( Jutaro ) can be referred to as “ He ” .
 When disambiguation is not required to generate an overt pronoun , MT is not very helpful .
-4.7 Note on Other Pretrained Models Due to space limitation , we have limited our focus to BERT , but for the sake of future practitioners , we would like to briey note that we extensively tested BART ( Lewis et al . , 2020 ) and its variants before switching to BERT .
+4.7 Note on Other Pretrained Models Due to space limitation , we have limited our focus to BERT , but for the sake of future practitioners , we would like to brieﬂy note that we extensively tested BART ( Lewis et al . , 2020 ) and its variants before switching to BERT .
 Unlike BERT , BART is an encoder - decoder model pretrained on a monolingual corpus ( original ) or a non - parallel multilingual corpus ( mBART ) ( Liu et al . , 2020 ) .
 Because MT requires the encoder - decoder architecture , maintaining the model architecture between pretraining and intermediate training looked promising to us .
-We specically tested ( 1 ) the ofcially distributed mBART model , ( 2 ) a BART model we pretrained on Japanese Wikipedia , and ( 3 ) an mBART model we pretrained on Japanese and English texts .
-During ne - tuning , we added the ZAR argument selection layer on top of either the encoder or the decoder .
+We speciﬁcally tested ( 1 ) the ofﬁcially distributed mBART model , ( 2 ) a BART model we pretrained on Japanese Wikipedia , and ( 3 ) an mBART model we pretrained on Japanese and English texts .
+During ﬁne - tuning , we added the ZAR argument selection layer on top of either the encoder or the decoder .
 Unfortunately , gains from MT intermediate training were marginal for these models .
 A more serious problem was that they came close to but rarely outperformed the strong BERT baseline .
-We gave up identifying the cause of poorer performance because it was extremely hard to apply comparable experimental conditions to large pretrained models.5 Conclusion In this paper , we proposed to exploit parallel texts for Japanese zero anaphora resolution ( ZAR ) by inserting machine translation ( MT ) as an intermediate task between masked language model ( MLM ) pretraining and ne - tuning on ZAR .
+We gave up identifying the cause of poorer performance because it was extremely hard to apply comparable experimental conditions to large pretrained models.5 Conclusion In this paper , we proposed to exploit parallel texts for Japanese zero anaphora resolution ( ZAR ) by inserting machine translation ( MT ) as an intermediate task between masked language model ( MLM ) pretraining and ﬁne - tuning on ZAR .
 Although previous studies reported negative results on the use of MT as an intermediate task , we demonstrated that it did work for Japanese ZAR .
-Our analysis suggests that the intermediate training on MT simultaneously improved the models ability to translate Japanese zero pronouns and the ZAR performance .
+Our analysis suggests that the intermediate training on MT simultaneously improved the model ’s ability to translate Japanese zero pronouns and the ZAR performance .
 We bridged the gap between BERT - based ZAR and the encoder - decoder architecture for MT by initializing the encoder part of the MT model with a pretrained BERT .
 Previous studies focusing on MT reported mixed results on this approach , but again , we demonstrated its considerable positive impact on ZAR .
 We found that incorporating the MLM objective into the intermediate training was particularly effective .
 Our experimental results were consistent with the speculation that MLM mitigated catastrophic forgetting during intermediate training .
-With neural transfer learning , we successfully revived the old idea that Japanese ZAR can benet from parallel texts ( Nakaiwa , 1999 ) .
-Thanks to the astonishing exibility of neural networks , we would probably be able to connect ZAR to other tasks through transfer learning .
+With neural transfer learning , we successfully revived the old idea that Japanese ZAR can beneﬁt from parallel texts ( Nakaiwa , 1999 ) .
+Thanks to the astonishing ﬂexibility of neural networks , we would probably be able to connect ZAR to other tasks through transfer learning .
 Acknowledgments We thank the Yomiuri Shimbun for providing Japanese - English parallel texts .
-We are grateful for Nobuhiro Ueda help in setting up the baseline model .
+We are grateful for Nobuhiro Ueda ’ help in setting up the baseline model .
 We thank the anonymous reviewers for their insightful comments .
 References Stephane Clinchant , Kweon Woo Jung , and Vassilina Nikoulina .
 2019 .
 On the use of BERT for neural machine translation .
-In Proceedings of the 3rd Workshop on Neural Generation and Translation , pages 108117 , Hong Kong . Association for Computational Linguistics .
+In Proceedings of the 3rd Workshop on Neural Generation and Translation , pages 108–117 , Hong Kong . Association for Computational Linguistics .
 Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019 .
 BERT : Pre - training of deep bidirectional transformers for language understanding .
 In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language
 1928 OURSBASELINE(b )   
-Edo = DATswordplay training = DATcome .
-PSTRyoma = TOP!-NOM        gym = GENRyoma , who came to the Edo period [ UNK ] 1603 - 1867
-[ UNK ] to learn swords , entered a training school run by Sakakichi .
+江戸に剣術修行に来た龍馬は、定吉の道場に入門する。Edo = DATswordplay training = DATcome .
+PSTRyoma = TOP道場の経営は息子の重太郎に任せている。𝜙!-NOM        龍馬や佐那の成長をじっと見守る心優しい父親でもある。gym = GENRyoma , who came to the Edo period [ UNK ] 1603 - 1867 [ UNK ] to learn swords , entered a training school run by Sakakichi .
 He is left to his son , Shigeta .
-Heisa gentle father who watches the growth of Ryomaand Sana .[NULL](a )    !
--NOM    samerugby!-NOM1.5km
-= GENdistance = DATbe . GERonlyTwenty - two students ofOsaka Korean pro - Pyongyang Korean high school students watched the final at Kintetsu National HighSchool 's HanazonoStadium on Sunday .Although
-the school isonly about five kilometers away from the stadium , it was unable to participate in the tournament because it was treated as a special - needs school.miscellaneousschooltreatment = GENtournament = DATenter = can .
+Heisa gentle father who watches the growth of Ryomaand Sana .[NULL](a )   
+第七十四回全国高校ラグビーフットボール大会準決勝の五日、近鉄花園ラグビー場のスタンドでは大阪朝鮮高級学校ラグビー部員二十五人が青いウインドブレーカー姿で観戦した。𝜙!-NOM    同ラグビー場からわずか一・五キロの至近距離にありながら、samerugby𝜙!-NOM1.5km = GENdistance = DATbe . GERonlyTwenty - two students ofOsaka Korean pro - Pyongyang Korean high school students watched the final at Kintetsu National HighSchool 's HanazonoStadium on Sunday .Although
+the school isonly about five kilometers away from the stadium , 「 各種学校」扱いのため大会に出場できなかったが、今年ようやく花園への夢が実現した。it was unable to participate in the tournament because it was treated as a special - needs school.miscellaneousschooltreatment = GENtournament = DATenter = can .
 NEG.PSTbecause.ofORD 74 CLFrugbynationalhigh.schoolfootballtournamentsemi final = GEN5dayKintetsu Hanazonorugby field = GENstands = LOC = TOPOsakaKoreahigh25 CLF = NOMbluewind breakerrugbyclub.memberappearance = INSwatch = do .
 PST GOLDfield = ABLbutbutthis.yearfinallyHanazono = DAT = GENdream = NOMrealize = do .
-PST !
--NOMSadakichi
-= GENgym = DATenter .
+PST 𝜙!-NOMSadakichi = GENgym = DATenter .
 NPSToperation = TOPson = GENJutaro = DATdelegate - GER = be .
 NPSTRyoma = andSana = GENgrowth = ACCsteadilywatch . NPSTheartkindfatherbe .
 GERalsobe . NPSTproximateschoolFigure 4 : Two examples of ZAR and MT .
 Green , blue , and orange dotted lines represent the output of the baseline model , that of ours , and the gold standard , respectively .
 English sentences are generated by the corresponding MT ( encoder - decoder ) model .
 ( a ) The example in which MT apparently helped ZAR .
-The nominative zero pronoun of    ( is ) was correctly translated as   the school .
-The model also succeeded in identifying its antecedent     ( school ) .
+The nominative zero pronoun of “ あり ” ( is ) was correctly translated as “ the school ” .
+The model also succeeded in identifying its antecedent “ 学 校 ” ( school ) .
 ( b ) The example in which MT was not helpful .
-The model successfully translated the nominative zero pronoun of the underlined predicate ,    ( be ) , as   He .
-It misidentied its antecedent , however .
-Technologies , Volume 1 ( Long and Short Papers ) , pages 41714186 , Minneapolis , Minnesota .
+The model successfully translated the nominative zero pronoun of the underlined predicate , “ で ” ( be ) , as “ He ” .
+It misidentiﬁed its antecedent , however .
+Technologies , Volume 1 ( Long and Short Papers ) , pages 4171–4186 , Minneapolis , Minnesota .
 Association for Computational Linguistics .
 Tomomasa Furukawa , Toshiaki Nakazawa , Tomohide Shibata , Daisuke Kawahara , and Sadao Kuroahshi . 2017 .
 Automatic construction of a pseudoannotatedzero anaphora corpus using a bilingual corpus .
@@ -331,35 +327,35 @@ In Proceedings of the Twenty - third Annual Meeting of the Association for Natur
 ( in Japanese ) .
 Junliang Guo , Zhirui Zhang , Linli Xu , Hao - Ran Wei , Boxing Chen , and Enhong Chen . 2020 .
 Incorporating BERT into parallel sequence decoding with adapters .
-In Advances in Neural Information Processing Systems , volume 33 , pages 1084310854 .
+In Advances in Neural Information Processing Systems , volume 33 , pages 10843–10854 .
 Curran Associates , Inc.
 Masatsugu Hangyo , Daisuke Kawahara , and Sadao Kurohashi .
 2012 .
 Building a diverse document leads corpus annotated with semantic relations .
-In Proceedings of the 26th Pacic Asia Conference on Language , Information , and Computation , pages 535 544 , Bali , Indonesia .
+In Proceedings of the 26th Paciﬁc Asia Conference on Language , Information , and Computation , pages 535 – 544 , Bali , Indonesia .
 Faculty of Computer Science , Universitas Indonesia .
 Ryu Iida , Mamoru Komachi , Naoya Inoue , Kentaro Inui , and Yuji Matsumoto . 2017 .
 NAIST text corpus :
 Annotating predicate- argument and coreference relations in Japanese .
-In Nancy Ide and James Puste - jovsky , editors , Handbook of Linguistic Annotation , pages 11771196 .
+In Nancy Ide and James Puste - jovsky , editors , Handbook of Linguistic Annotation , pages 1177–1196 .
 Springer , Dordrecht .
 Ryu Iida , Kentaro Torisawa , Jong - Hoon Oh , Canasai Kruengkrai , and Julien Kloetzer .
 2016 .
 Intrasentential subject zero anaphora resolution using multi - column convolutional neural network .
-In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing , pages 1244 1254 , Austin , Texas .
+In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing , pages 1244 – 1254 , Austin , Texas .
 Association for Computational Linguistics .
 Kenji Imamura and Eiichiro Sumita .
 2019 .
 Recycling a pre - trained BERT encoder for neural machine translation .
-In Proceedings of the 3rd Workshop on Neural Generation and Translation , pages 2331 , Hong Kong . Association for Computational Linguistics .
-Daisuke Kawahara , Sadao Kurohashi , and Kiti Hasida .
+In Proceedings of the 3rd Workshop on Neural Generation and Translation , pages 23–31 , Hong Kong . Association for Computational Linguistics .
+Daisuke Kawahara , Sadao Kurohashi , and Kôiti Hasida .
 2002 .
 Construction of a Japanese relevance - tagged corpus .
-In Proceedings of the Third International Conference on Language Resources and Evaluation ( LREC02 ) , Las Palmas , Canary Islands - Spain .
+In Proceedings of the Third International Conference on Language Resources and Evaluation ( LREC’02 ) , Las Palmas , Canary Islands - Spain .
 European Language Resources Association ( ELRA ) .
 Youngtae Kim , Dongyul Ra , and Soojong Lim . 2021 .
 Zero - anaphora resolution in Korean based on deep language representation model : BERT .
-ETRI Journal , 43(2):299312 .
+ETRI Journal , 43(2):299–312 .
 1929Diederik P. Kingma and Jimmy Ba . 2017 .
 Adam : A method for stochastic optimization .
 arXiv:1412.6980 .
@@ -370,35 +366,35 @@ arXiv:2104.07425 .
 Ryuto Konno , Yuichiroh Matsubayashi , Shun Kiyono , Hiroki Ouchi , Ryo Takahashi , and Kentaro Inui .
 2020 .
 An empirical study of contextual data augmentation for Japanese zero anaphora resolution .
-In Proceedings of the 28th International Conference on Computational Linguistics , pages 49564968 , Barcelona , Spain ( Online ) .
+In Proceedings of the 28th International Conference on Computational Linguistics , pages 4956–4968 , Barcelona , Spain ( Online ) .
 International Committee on Computational Linguistics .
 Taku Kudo and John Richardson .
 2018 .
 SentencePiece : A simple and language independent subword tokenizer and detokenizer for neural text processing .
-In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing : System Demonstrations , pages 6671 , Brussels , Belgium .
+In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing : System Demonstrations , pages 66–71 , Brussels , Belgium .
 Association for Computational Linguistics .
 Taku Kudo , Kaoru Yamamoto , and Yuji Matsumoto .
 2004 .
-Applying conditional random elds to Japanese morphological analysis .
-In Proceedings of the 2004 Conference on Empirical Methods in Natural Language Processing , pages 230237 , Barcelona , Spain .
+Applying conditional random ﬁelds to Japanese morphological analysis .
+In Proceedings of the 2004 Conference on Empirical Methods in Natural Language Processing , pages 230–237 , Barcelona , Spain .
 Association for Computational Linguistics .
 Shuhei Kurita , Daisuke Kawahara , and Sadao Kurohashi .
 2018 .
 Neural adversarial training for semisupervised Japanese predicate - argument structure analysis .
-In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 474484 , Melbourne , Australia . Association for Computational Linguistics .
+In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 474–484 , Melbourne , Australia . Association for Computational Linguistics .
 Mike Lewis , Yinhan Liu , Naman Goyal , Marjan Ghazvininejad , Abdelrahman Mohamed , Omer Levy , Veselin Stoyanov , and Luke Zettlemoyer .
 2020 .
 BART :
 Denoising sequence - to - sequence pretraining for natural language generation , translation , and comprehension .
-In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 78717880 , Online .
+In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 7871–7880 , Online .
 Association for Computational Linguistics .
 Ting Liu , Yiming Cui , Qingyu Yin , Wei - Nan Zhang , Shijin Wang , and Guoping Hu . 2017 .
 Generating and exploiting large - scale pseudo training data for zero pronoun resolution .
-In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 102111 , Vancouver , Canada . Association for Computational Linguistics .
+In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 102–111 , Vancouver , Canada . Association for Computational Linguistics .
 Yinhan Liu , Jiatao Gu , Naman Goyal , Xian Li , Sergey Edunov , Marjan Ghazvininejad , Mike Lewis , and Luke Zettlemoyer .
 2020 .
 Multilingual denoisingpre - training for neural machine translation .
-Transactions of the Association for Computational Linguistics , 8:726742 .
+Transactions of the Association for Computational Linguistics , 8:726–742 .
 Kojiro Nabeshima and Michael N. Brooks .
 2020 .
 Techniques of English - Japanese translation .
@@ -407,93 +403,95 @@ Kurosio Publishers .
 Masaaki Nagata and Makoto Morishita .
 2020 .
 A test set for discourse translation from Japanese to English .
-In Proceedings of the 12th Language Resources and Evaluation Conference , pages 3704 3709 , Marseille , France .
+In Proceedings of the 12th Language Resources and Evaluation Conference , pages 3704 – 3709 , Marseille , France .
 European Language Resources Association .
 Hiromi Nakaiwa .
 1999 .
 Automatic extraction of rules for anaphora resolution of Japanese zero pronouns in Japanese - English machine translation from aligned sentence pairs .
-Machine Translation , 14(14):247 279 .
+Machine Translation , 14(14):247 – 279 .
 Hiroki Ouchi , Hiroyuki Shindo , and Yuji Matsumoto . 2017 .
 Neural modeling of multi - predicate interactions for Japanese predicate argument structure analysis .
-In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 15911600 , Vancouver , Canada . Association for Computational Linguistics .
+In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 1591–1600 , Vancouver , Canada .
+Association for Computational Linguistics .
 Arum Park , Seunghee Lim , and Munpyo Hong . 2015 .
 Zero object resolution in Korean .
-In Proceedings of the 29th Pacic Asia Conference on Language , Information and Computation , pages 439448 , Shanghai , China .
+In Proceedings of the 29th Paciﬁc Asia Conference on Language , Information and Computation , pages 439–448 , Shanghai , China .
 Matthew Peters , Mark Neumann , Mohit Iyyer , Matt Gardner , Christopher Clark , Kenton Lee , and Luke Zettlemoyer .
 2018 .
 Deep contextualized word representations .
-In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long Papers ) , pages 22272237 , New Orleans , Louisiana . Association for Computational Linguistics .
-Jason Phang , Thibault Fvry , and Samuel R. Bowman .
+In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long Papers ) , pages 2227–2237 , New Orleans , Louisiana .
+Association for Computational Linguistics .
+Jason Phang , Thibault Févry , and Samuel R. Bowman .
 2018 .
 Sentence encoders on STILTs : Supplementary training on intermediate labeled - data tasks .
 arXiv:1811.01088 .
 Yada Pruksachatkun , Jason Phang , Haokun Liu , Phu Mon Htut , Xiaoyi Zhang , Richard Yuanzhe Pang , Clara Vania , Katharina Kann , and Samuel R. Bowman . 2020 .
 Intermediate - task transfer learning with pretrained language models : When and why does it work ?
-In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 52315247 , Online .
+In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 5231–5247 , Online .
 Association for Computational Linguistics .
 Ryohei Sasano , Daisuke Kawahara , and Sadao Kurohashi . 2008 .
 A fully - lexicalized probabilistic model for Japanese zero anaphora resolution .
-In Proceedings of the 22nd International Conference on Computational Linguistics ( Coling 2008 ) , pages 769 776 , Manchester , UK .
+In Proceedings of the 22nd International Conference on Computational Linguistics ( Coling 2008 ) , pages 769 – 776 , Manchester , UK .
 Coling 2008 Organizing Committee .
 1930Ryohei Sasano and Sadao Kurohashi . 2011 .
 A discriminative approach to Japanese zero anaphora resolution with large - scale lexicalized case frames .
-In Proceedings of 5th International Joint Conference on Natural Language Processing , pages 758766 , Chiang Mai , Thailand .
+In Proceedings of 5th International Joint Conference on Natural Language Processing , pages 758–766 , Chiang Mai , Thailand .
 Asian Federation of Natural Language Processing .
 Rico Sennrich , Barry Haddow , and Alexandra Birch . 2016 .
 Neural machine translation of rare words with subword units .
-In Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 1715 1725 , Berlin , Germany . Association for Computational Linguistics .
+In Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 1715 – 1725 , Berlin , Germany . Association for Computational Linguistics .
 Tomohide Shibata and Sadao Kurohashi .
 2018 .
 Entitycentric joint modeling of Japanese coreference resolution and predicate argument structure analysis .
-In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 579589 , Melbourne , Australia . Association for Computational Linguistics .
+In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 579–589 , Melbourne , Australia . Association for Computational Linguistics .
 Sho Shimazu , Sho Takase , Toshiaki Nakazawa , and Naoaki Okazaki .
 2020 .
 Evaluation dataset for zero pronoun in Japanese to English translation .
-In Proceedings of the 12th Language Resources and Evaluation Conference , pages 36303634 , Marseille , France .
+In Proceedings of the 12th Language Resources and Evaluation Conference , pages 3630–3634 , Marseille , France .
 European Language Resources Association .
 Linfeng Song , Kun Xu , Yue Zhang , Jianshu Chen , and Dong Yu . 2020 .
 ZPR2 : Joint zero pronoun recovery and resolution using multi - task learning and BERT .
-In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 54295434 , Online .
+In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 5429–5434 , Online .
 Association for Computational Linguistics .
 Nobuhiro Ueda , Daisuke Kawahara , and Sadao Kurohashi . 2020 .
 BERT - based cohesion analysis of Japanese texts .
-In Proceedings of the 28th International Conference on Computational Linguistics , pages 13231333 , Barcelona , Spain ( Online ) .
+In Proceedings of the 28th International Conference on Computational Linguistics , pages 1323–1333 , Barcelona , Spain ( Online ) .
 International Committee on Computational Linguistics .
-Ashish Vaswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N Gomez , ukasz Kaiser , and Illia Polosukhin . 2017 .
+Ashish Vaswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N Gomez , Łukasz Kaiser , and Illia Polosukhin . 2017 .
 Attention is all you need .
 In Advances in Neural Information Processing Systems , volume 30 .
 Curran Associates , Inc.
 Tu Vu , Tong Wang , Tsendsuren Munkhdalai , Alessandro Sordoni , Adam Trischler , Andrew MattarellaMicke , Subhransu Maji , and Mohit Iyyer .
 2020 .
 Exploring and predicting transferability across NLP tasks .
-In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing ( EMNLP ) , pages 78827926 , Online .
+In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing ( EMNLP ) , pages 7882–7926 , Online .
 Association for Computational Linguistics .
 Alex Wang , Jan Hula , Patrick Xia , Raghavendra Pappagari , R. Thomas McCoy , Roma Patel , Najoung Kim , Ian Tenney , Yinghui Huang , Katherin Yu , Shuning Jin , Berlin Chen , Benjamin Van Durme , Edouard Grave , Ellie Pavlick , and Samuel R. Bowman . 2019a .
 Can you tell me how to get past sesame street ?
 sentence - level pretraining beyond language modeling .
-In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 44654476 , Florence , Italy . Association for Computational Linguistics .
+In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 4465–4476 , Florence , Italy . Association for Computational Linguistics .
 Longyue Wang , Zhaopeng Tu , Xing Wang , and Shuming Shi . 2019b .
 One model to learn both : Zero pronoun prediction and translation .
-In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLP - IJCNLP ) , pages 921930 , Hong Kong , China . Association for Computational Linguistics .
+In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLP - IJCNLP ) , pages 921–930 , Hong Kong , China . Association for Computational Linguistics .
 Longyue Wang , Zhaopeng Tu , Andy Way , and Qun Liu .
 2018 .
 Learning to jointly translate and predict dropped pronouns with a shared reconstruction mechanism .
-In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 29973002 , Brussels , Belgium . Association for Computational Linguistics .
+In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 2997–3002 , Brussels , Belgium . Association for Computational Linguistics .
 Longyue Wang , Zhaopeng Tu , Xiaojun Zhang , Hang Li , Andy Way , and Qun Liu . 2016 .
 A novel approach to dropped pronoun translation .
-In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 983993 , San Diego , California . Association for Computational Linguistics .
+In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 983–993 , San Diego , California . Association for Computational Linguistics .
 Souta Yamashiro , Hitoshi Nishikawa , and Takenobu Tokunaga .
 2018 .
 Neural Japanese zero anaphora resolution using smoothed large - scale case frames with word embedding .
-In Proceedings of the 32nd Pacic Asia Conference on Language , Information and Computation , Hong Kong . Association for Computational Linguistics .
+In Proceedings of the 32nd Paciﬁc Asia Conference on Language , Information and Computation , Hong Kong . Association for Computational Linguistics .
 Qingyu Yin , Yu Zhang , Weinan Zhang , and Ting Liu . 2017 .
 Chinese zero pronoun resolution with deep memory network .
-In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing , pages 13091318 , Copenhagen , Denmark .
-Association for Computational Linguistics .
+In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing , pages 1309–1318 , Copenhagen , Denmark . Association for Computational Linguistics .
 Jia - Rui Zhang , Hongzheng Li , Shumin Shi , Heyan Huang , Yue Hu , and Xiangpeng Wei .
 2020 .
 Dynamic attention aggregation with bert for neural machine translation .
-In IJCNN , pages 18 . IEEE .
+In IJCNN , pages 1–8 .
+IEEE .
 Jinhua Zhu , Yingce Xia , Lijun Wu , Di He , Tao Qin , Wengang Zhou , Houqiang Li , and Tieyan Liu . 2020 .
 Incorporating BERT into neural machine translation .
 InInternational Conference on Learning Representations .
