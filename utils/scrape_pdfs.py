@@ -21,7 +21,7 @@ test_urls, train_urls = urls[:num_test_files], urls[num_test_files:],
 for url in test_urls:
     filename = url.split('/')[-1]
     print(filename)
-    filepath = Path('scraped_test_pdfs/{}'.format(filename))
+    filepath = Path('scraped_pdfs/test/{}'.format(filename))
 
     if os.path.exists(filepath):
         print('exists, skipping')
@@ -33,7 +33,7 @@ for url in test_urls:
 for url in train_urls:
     filename = url.split('/')[-1]
     print(filename)
-    filepath = Path('scraped_train_pdfs/{}'.format(filename))
+    filepath = Path('scraped_pdfs/train/{}'.format(filename))
 
     if os.path.exists(filepath):
         print('exists, skipping')

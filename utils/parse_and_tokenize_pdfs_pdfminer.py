@@ -5,7 +5,7 @@ import re
 from pdfminer.high_level import extract_text
 from PyPDF2 import PdfReader
 
-pdfs_folder = 'scraped_test_pdfs/'
+pdfs_folder = 'scraped_pdfs/test/'
 text_folder = 'tokenized_texts/test/'
 
 filenames = os.listdir(pdfs_folder)

@@ -4,7 +4,7 @@ import json
 import spacy
 from tqdm import tqdm
 
-parsed_text_folder = 'parsed_test_pdfs/'
+parsed_text_folder = 'parsed_pdfs/test/'
 output_folder = 'scipdf_tokenized/test/'
 filenames = os.listdir(parsed_text_folder)
 nlp = spacy.load("en_core_web_sm")

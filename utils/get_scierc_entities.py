@@ -2,7 +2,7 @@ import json
 import os
 
 named_entities = {}
-directory_path = 'scierc_data/'
+directory_path = 'external_data/scierc_data/'
 path_to_entity_files = 'entity_corpus/'
 
 filenames = os.listdir(directory_path)

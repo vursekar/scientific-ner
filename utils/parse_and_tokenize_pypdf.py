@@ -3,7 +3,7 @@ from PyPDF2 import PdfReader
 import spacy
 import re
 
-pdfs_folder = 'scraped_train_pdfs/'
+pdfs_folder = 'scraped_pdfs/train/'
 text_folder = 'tokenized_texts/train/'
 
 filenames = os.listdir(pdfs_folder)
