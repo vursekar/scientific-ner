@@ -1,0 +1,262 @@
+Proceedings of the Second Workshop on Machine Reading for Question Answering , pages 98–104 Hong Kong , China , November 4 , 2019 .
+c  2019 Association for Computational Linguistics98Machine Comprehension Improves Domain - Speciﬁc Japanese Predicate - Argument Structure Analysis Norio Takahashi Tomohide ShibataDaisuke Kawahara Sadao Kurohashi Graduate School of Informatics , Kyoto University Yoshida - honmachi , Sakyo - ku , Kyoto , 606 - 8501 , Japan fntakahashi , shibata , dk , kuro g@nlp.ist.i.kyoto-u.ac.jp Abstract To improve the accuracy of predicateargument structure ( PAS ) analysis , large - scale training data and knowledge for PAS analysis are indispensable .
+We focus on a speciﬁc domain , speciﬁcally Japanese blogs on driving , and construct two wide - coverage datasets as a form of QA using crowdsourcing : a PAS - QA dataset and a reading comprehension QA ( RC - QA ) dataset .
+We train a machine comprehension ( MC ) model based on these datasets to perform PAS analysis .
+Our experiments show that a stepwise training method is the most effective , which pre - trains an MC model based on the RC - QA dataset to acquire domain knowledge and then ﬁne - tunes based on the PAS - QA dataset .
+1 Introduction To understand the meaning of a sentence or a text , it is essential to analyze relations between a predicate and its arguments .
+Such analysis is called semantic role labeling ( SRL ) or predicate - argument structure ( PAS ) analysis .
+For English , the accuracy of SRL has reached approximately 80%90 % ( Ouchi et al . , 2018 ; He et al . , 2018 ; Strubell et al . , 2018 ; Tan et al . , 2018 ) .
+However , there are many omissions of arguments in Japanese , and the accuracy of Japanese PAS analysis on omitted arguments is still around 50%-60 % ( Shibata et al . , 2016 ; Shibata and Kurohashi , 2018 ; Kurita et al . , 2018 ; Ouchi et al . , 2017 ) .
+A reason for such low accuracy is the shortage of gold datasets and knowledge about PAS analysis , which require a prohibitive cost of creation ( Iida et al . , 2007 ; Kawahara et al . , 2002 ) .
+From the viewpoint of text understanding , machine comprehension ( MC ) has been actively studied in recent years .
+In MC studies , QA datasets consisting of triplets of a document , a question and The current afﬁliation is Yahoo Japan Corporation.its answer are constructed , and an MC model is trained using these datasets ( e.g. , Rajpurkar et al .
+( 2016 ) and Trischler et al .
+( 2017 ) )
+.
+MC has made remarkable progress in the last couple of years , and MC models have even exceeded human accuracy in some datasets ( Devlin et al . , 2019 ) .
+However , MC accuracy is not necessarily high for documents that contain anaphoric phenomena and those that need external knowledge or inference ( Mihaylov et al . , 2018 ; Yang et al . , 2018 ) .
+In this paper , we propose a Japanese PAS analysis method based on the MC framework for a speciﬁc domain .
+In particular , we focus on a challenging task of ﬁnding an antecedent of a zero pronoun within PAS analysis .
+We construct a widecoverage QA dataset for PAS analysis ( PAS - QA ) in the domain and feed it to an MC model to perform PAS analysis .
+We also construct a QA dataset for reading comprehension ( RC - QA ) in the same domain and jointly use the two datasets in the MC model to improve PAS analysis .
+We consider the domain of blogs on driving because of the following two reasons .
+Firstly , we can construct high - quality QA datasets in a short time using crowdsourcing .
+Crowdworkers can interpret driving blog articles based on the trafﬁc commonsense shared by the society .
+Secondly , if computers can understand driving situations correctly by extracting driving behavior from blogs , it is possible to predict danger and warn drivers to achieve safer transportation .
+Our contributions are summarized as follows .
+We propose an MC - based PAS analysis model and show its superiority to a state - ofthe - art neural model .
+We construct PAS - QA and RC - QA datasets in the driving domain using crowdsourcing .
+We improve Japanese PAS analysis by combining the PAS - QA and RC - QA datasets .
+992 Related Work 2.1 QA Dataset Construction FitzGerald et al .
+( 2018 ) and Michael et al .
+( 2018 )
+constructed QA - SRL Bank 2.0 and QAMRs using crowdsourcing , respectively .
+They asked crowdworkers to generate question - answer pairs that represent a PAS .
+These datasets are similar to our PAS - QA dataset , but different in that we focus on omitted arguments and automatically generate questions ( see Section 3.1 ) .
+Many RC - QA datasets have been constructed in recent years .
+For example , Rajpurkar et al .
+( 2016 ) constructed SQuAD 1.1 , which contains 100 K crowdsourced questions and answer spans in a Wikipedia article .
+Rajpurkar et
+al .
+( 2018 ) updated SQuAD 1.1 to 2.0 by adding unanswerable questions .
+Some RC - QA datasets have been built in a speciﬁc domain ( Welbl et al . , 2017 ; Suster and Daelemans , 2018 ; Pampari et al . , 2018 ) .
+2.2 Machine Comprehension Models Many MC models based on neural networks have been proposed to solve RC - QA datasets .
+For example , Devlin et al .
+( 2019 ) proposed an MC model using a language representation model , BERT , which achieved a high - ranked accuracy on the SQuAD 1.1 leaderboard as of September 30 , 2019 .
+As a previous study of transfer learning of MC models to other tasks , Pan et al .
+( 2018 )
+pre - trained an MC model using an RC - QA dataset and transfered the pre - trained knowledge to sequence - tosequence models .
+They used SQuAD 1.1 as the RC - QA dataset and experimented on translation and summarization .
+While they used different models for pre - training and ﬁne - tuning , we use the same MC model by constructing PAS - QA and RC - QA datasets in the same QA form .
+3 QA Dataset Construction We construct PAS - QA and RC - QA datasets in the driving domain .
+Both the QA datasets consist of triplets of a document , a question and its answer as in existing RC - QA datasets .
+We employ crowdsourcing to create large - scale datasets in a short time .
+Figure 1and Figure 2show examples of our PAS - QA and RC - QA datasets .
+3.1 PAS - QA Dataset We construct a PAS - QA dataset in which a question asks an omitted argument for a predicate .
+We /g1566 / g39 / g82 / g70 / g88 / g80 / g72 / g81 / g87 / g29 /g2958は右 ⾞ 線に移動した 。 /g11 / g44 / g80 / g82 / g89 / g72 / g71 / g3 / g87 / g82 / g3 / g87 / g75 / g72 / g3 / g85 / g76 / g74 / g75 / g87 / g3 / g79 / g68 / g81 / g72 / g17 / g12 / g3 / g3 /g11 / g791 / g2315 / g12 / g3 / g2434 / g2421 / g2401 / g2449 / g2459 / g1588 / g2385 ⾒ た / g1563 /g11 / g11 / g791 / g16 / g49 / g50 / g48 / g12 / g3 /g86 / g68 / g90 / g87 / g75 / g72 / g3 / g85 / g72 / g68 / g85 / g89 / g76 / g72 / g90 / g3 / g80 / g76 / g85 / g85 / g82 / g85 / g17 / g12 /g1566 / g52 / g88 / g72 / g86 / g87 / g76 / g82 / g81 / g3 / g29 / g3 /g110 ⾒
+た / g124の主語は何か︖ /g11 / g58 / g75 / g68 / g87 / g3 / g76 / g86 / g3 / g87 / g75 / g72 / g3 / g86 / g88 / g69 / g77 / g72 / g70 / g87 / g3 / g82 / g73 / g3 / g110 /g86 / g68 / g90 / g124 / g34 / g12 /g1566 / g36 / g81 / g86 / g90 / g72 / g85 / g3 / g29 /g2958 /g11 / g44 / g12Figure 1 : An example of PAS - QA dataset .
+/g1566 /g39 / g82 / g70 / g88 / g80 / g72 / g81 / g87 / g3 / g29 /g2958の ⾞ の前を /g2434 / g2390 / g2401 / g2346 / g2365 / g2334 / g2315 / g2338 / g2334 / g2788 / g3012 /g2747 / g2315 / g3026 / g2338 / g2341 / g2307 / g2334 / g1563 /g11 / g36 / g3 / g83 / g82 / g79 / g76 / g70 / g72 / g3 / g82 / g73 / g73 / g76 / g70 / g72 / g85 / g3 / g86 / g87 / g85 / g68 / g71 / g71 / g79 / g76 / g81 / g74 / g3 /g75 / g76 / g86 / g3 / g69 / g76 / g78 / g72 /g90 / g68 / g86 / g3 / g85 / g88 / g81 / g81 / g76 / g81 / g74 / g3 / g76 / g81 / g3 / g73 / g85 / g82 / g81 / g87 / g3 / g82 / g73 / g3 / g80 / g92 / g3 / g70 / g68 / g85 / g17 / g12 /g1566 / g52 / g88 / g72 / g86 / g87 / g76 / g82 / g81 / g3 / g29 / g3 /g2788 / g3012 / g2747は何に乗っていた︖ /g11 / g58 / g75 / g68 / g87 / g3 / g90 / g68 / g86 / g3 / g87 / g75 / g72 / g3 / g83 / g82 / g79 / g76 / g70 / g72 / g3 / g82 / g73 / g73 / g76 / g70 / g72 / g85 / g3 / g85 / g76 / g71 / g76 / g81 / g74 / g34 / g12 /g1566 / g36 / g81 / g86 / g90 / g72 / g85 / g3 / g29 /g2434 / g2390 / g2401 /g11 / g75 / g76 / g86 / g3 / g69 / g76 / g78 / g72 / g12 Figure 2 : An example of RC - QA dataset .
+focus on the gacase ( nominative ) , the wocase ( accusative ) , and the nicase ( dative ) , which are targeted in the Japanese PAS analysis literature ( Shibata et al . , 2016 ; Shibata and Kurohashi , 2018 ; Kurita et al . , 2018 ; Ouchi et al . , 2017 ) .
+As a source corpus , we use blog articles included in the Driving Experience Corpus ( Iwai et al . ,2019 ) .
+We ﬁrst detect a predicate that has an omitted argument of either of the target three cases by applying the existing PAS analyzer KNP1to the corpus .
+KNP tends to overgenerate such predicates , but most erroneous ones are ﬁltered out by the following crowdsourcing step .
+We extract the sentence that contains the predicate and preceding three sentences as a document .
+Then , we automatically generate a question using the following template for nominative .
+ʦड़ޠʧͷओޠ͸Կ͔ʁ ( What is the subject of [ predicate ] ? )
+All the question templates of PAS - QA datasets are shown in Table 1 .
+We ask crowdworkers to choose one from answer choices , which consist of nouns extracted from the document and special symbols , 1http://nlp.ist.i.kyoto-u.ac.jp/EN/index.php?KNP
+100Case Question Nominativeʦड़ޠʧͷओޠ͸Կ͔ʁ ( What is the subject of [ predicate ] ? )
+AccusativeʓʓΛʦड़ޠʧ ɺͷʓʓʹೖΔ΋ͷ͸Կ͔ʁ ( What is the accusative of [ predicate ] ? )
+Dativeʓʓʹʦड़ޠʧ ɺͷʓʓʹೖΔ΋ͷ͸Կ͔ʁ ( What is the dative of [ predicate ] ? )
+Table 1 : Question templates of PAS - QA datasets .
+“ author , ” “ other , ” and “ not sure . ”
+The details of this procedure are described in the appendix .
+We generated questions from 2,146 blog articles .
+We asked ﬁve crowdworkers per question using Yahoo ! crowdsourcing2 .
+We adopted triplets with three or more votes if they are not “ not sure . ”
+For accusative and dative PAS - QA questions , we adopted triplets if they are “ other . ”
+In this case , there is not any antecedent of a zero pronoun in a document , and the answer is “ NULL . ”
+For nominative PAS - QA questions , we did not adopt triplets if they are “ other ” because a nominative always exists as a noun in a document or “ author . ”
+In addition , because “ author ” is not explicitly expressed in the document , we add a sentence “ ஶऀ ͸ҎԼͷจষΛॻ͖·ͨ͠ɻ ” ( The author wrote the following document . ) to the beginning of the document to deal with “ author ” in MC models .
+We record the answers as spans in a document or NULL .
+We randomly extracted 100 questions for each case from the PAS - QA dataset and judged whether we can answer them .
+As a result , 97 % nominative , 87 % accusative and 68 % dative questions were answerable .
+For accusative and dative , we checked all the questions and chose answerable ones .
+Finally , we created 12,468 nominative , 3,151 accusative and 1,069 dative triplets including 476 accusative and 126 dative questions whose answers are NULL .
+It took approximately 32 hours and approximately 210,000 JPY to create this dataset .
+3.2 RC - QA Dataset We construct a driving - domain RC - QA dataset in the same way as SQuAD 1.1 .
+We extract a document from the Driving Experience Corpus and ask three crowdworkers to write questions and their answers about the document .
+After that , we ask another ﬁve crowdworkers to answer a question to validate its answerability and adopt questions with three or more same answers .
+2https://crowdsourcing.yahoo.co.jp/Nominative Accusative Dative Other # Questions 41 28 8 123 Ratio 20.5 % 14.0 % 4.0 % 61.5 % Ratio ( Omission ) ( 5.0 % ) ( 2.5 % ) ( 0.5 % ) ʵ
+Table 2 : Classiﬁcation of questions in the RC - QA dataset .
+Training method Dataset MC - single PAS - QA Joint trainingMC - merged PAS - QA + RC - QA MC - stepwise RC - QA ! PAS - QA Table 3 : Three training methods for PAS analysis .
+As a result , we obtained 20,007 RC - QA triplets from 5,146 blog articles .
+It took approximately 60 hours and approximately 180,000 JPY to create this dataset .
+We randomly extracted 200 questions from the RC - QA dataset and judged the question types .
+The result is shown in Table 2 .
+A question was classiﬁed according to whether it is a question asking for any argument of nominative , accusative or dative , and if applicable , whether it is an omission or not .
+As shown in Table 2 , the RC - QA dataset contains nearly 40 % of questions asking arguments of nominative , accusative and dative , and a few questions asking for omitted arguments , which are similar to the PAS - QA dataset .
+There are various other questions asking for arguments other than nominative , accusative and dative , and questions using why and how .
+4 PAS Analysis Based on a Machine Comprehension Model We analyze PAS based on the MC model on our constructed PAS - QA dataset .
+Each question in the PAS - QA dataset asks an omitted argument and has an answer that is expressed as a span in the given document or NULL .
+Because the PAS - QA dataset has the same structure as existing MC datasets including NULL , such as SQuAD 2.0 , we can employ an existing state - of - the - art MC model that answers a span in the document or NULL .
+We refer to the method of MC training based only on the PAS - QA dataset as MC - single .
+We also propose two joint training methods that use both the PAS - QA and RC - QA datasets : MCmerged andMC - stepwise , as described in Table3 .
+The purpose of these joint training methods is to verify whether domain knowledge can be learned from the RC - QA dataset and whether it is
+101ɹɹɹ Train Development Test Nominative 11,359 544 565 Accusative 2,756 199 196 Dative 967 50 52 Table 4 : Split of the PAS - QA dataset .
+effective in improving the accuracy of PAS analysis .
+In MC - merged , the PAS - QA and RC - QA datasets are just merged and used for training .
+In MC - stepwise , the RC - QA dataset is used for pretraining , and this pre - trained model is ﬁne - tuned using the PAS - QA dataset .
+5 Experiments We conduct PAS analysis experiments of our MCsingle / merged / stepwise methods using the PASQA and RC - QA datasets .
+We also compare our methods with the neural network - based PAS analysis model ( Shibata and Kurohashi , 2018 ) ( hereafter , NN - PAS ) , which achieved the state - of - theart accuracy on Japanese PAS analysis .
+5.1 Experimental Settings We adopt BERT ( Devlin et al . , 2019 ) as an MC model .
+We split the triplets in the PAS - QA dataset as shown in Table 4 .
+All sentences in these datasets are preprocessed using the Japanese morphological analyzer , JUMAN++3 .
+We trained a Japanese pre - trained BERT model using Japanese Wikipedia , which consists of approximately 18 million sentences .
+The input sentences were segmented into words by JUMAN++ , and words were broken into subwords by applying BPE ( Sennrich et al . , 2016 ) .
+The parameters of BERT are the same as English BERT BASE .
+The number of epochs for the pre - training was 30 .
+The state - of - the - art baseline PAS analyzer , NN - PAS , was trained using the existing PAS dataset , KWDLC4(Kyoto University Web Document Leads Corpus ) , as described in Shibata and Kurohashi ( 2018 ) .
+We also trained an NN - PAS model using the PAS - QA dataset in addition to KWDLC ( hereafter , NN - PAS′ ) .
+For this training , the PAS - QA dataset was converted to the same format as KWDLC , where questions are deleted , and only answers are used .
+The PAS - QA test data is used to compare the baseline methods with the proposed methods .
+As 3http://nlp.ist.i.kyoto-u.ac.jp/EN/index.php?JUMAN++ 4http://nlp.ist.i.kyoto-u.ac.jp/EN/index.php?KWDLCTraining method PAS RC NOM ACC DAT NN - PAS - - 0.39 0.38 0.29 NN - PAS′ ✓ - 0.74 0.45 0.32 MC - single ✓ - 0.76 0.52 0.37 MC - merged ✓ ✓ 0.76 0.52 0.43 MC - stepwise ✓ ✓ 0.76 0.53 0.51 Table 5 : PAS - QA test results of MC models and NNPAS models .
+“ PAS ” and “ RC ” denote the use of the PAS - QA and RC - QA datasets , respectively .
+“ NOM ” , “ ACC ” and “ DAT ” denote the EM scores of nominative , accusative and dative , respectively .
+an evaluation measure , EM ( Exact Match ) is used for all the MC models .
+EM is deﬁned as ( the number of questions in which the system answer matches the gold answer in the dataset ) / ( the number of questions in the entire dataset ) .
+For each experimental condition , training and testing were conducted ﬁve times , and the average scores were calculated .
+5.2 Results and Discussion Table 5lists evalution results of the NN - PAS models and the MC - single / merged / stepwise models .
+First , NN - PAS′signiﬁcantly outperformed NNPAS , and thus the construction of the domainspeciﬁc PAS - QA dataset was effective in domain adaptation of the NN - PAS model .
+Furthermore , our proposed MC- * models outperfomed NN - PAS′. For the joint training models , MCstepwise was better than MC - single for the accusative and dative cases .
+MC - merged was inferior to MC - stepwise .
+We compared the results of MC - single and MCstepwise .
+In examples shown in Figures 3 and 4 , only the outputs of MC - stepwise were correct .
+We found some cases that MC - stepwise successfully captured knowledge in the driving domain .
+In the example shown in Figure 4 , the correspondence between “ ࡔΛ ্͕Δ ” ( climb up the slope ) and “ ࡔΛ ӽ͑Δ ” ( going up the slope ) can be recognized .
+MC - merged ’s answer “ ࡔಓ ” ( the hill road ) , which has a coreference relation with “ ࡔ ( ” the slope ) , looked correct although “ ࡔ ( ” the slope ) was the only answer from crowdsourcing .
+Supplying multiple answers considering coreference relations is our future work .
+From these results , we think that it is important to use an RC - QA dataset to acquire domain knowledge , and suggest that it is better to construct both PAS - QA and RCQA datasets to develop a PAS analyzer for a new
+102 /g1566 / g39 / g82 / g70 / g88 / g80 / g72 / g81 / g87︓ 彼、「 ⾞ を返す時ガソリンを満タンにするのか、だいぶ /g3026 / g2338 / g2334 / g2314 / g2376 / g2776 / g2345 / g2318 / g2345 / g2338 / g2334 / g2345 / g2304 / g1615 /g11 / g43 / g72 / g3 / g86 / g68 / g76 / g71 / g15 / g3 / g110 / g58 / g75 / g72 / g81 / g3 / g90 / g72 / g3 / g85 / g72 / g87 / g88 / g85 / g81 / g3 / g87 / g75 / g76 / g86 / g3 / g70 / g68 / g85 / g15 / g3 / g90 / g72 / g3 / g75 / g68 / g89 / g72 / g3 / g87 / g82 / g3 / g73 / g76 / g79 / g79 / g3 / g88 / g83 /g3 /g90 / g76 / g87 / g75 / g3 / g74 / g68 / g86 / g82 / g79 / g76 / g81 / g72 / g17 / g3 / g58 / g72 / g3 / g85 / g68 / g81 / g3 / g68 / g3 / g79 / g82 / g87 /g86 / g82 / g3 / g90 / g72 / g3 / g85 / g68 / g81 / g3 / g82 / g88 / g87 / g3 / g82 / g73 / g3 / g76 / g87 / g17 / g124 / g12 /g2506 / g2861 / g2491 / g1562 / g1614 / g4459 / g2540 / g2798 / g2307 / g2314 / g2376 / g3059 / g2634 / g2350 / g2429 / g2455 / g1588 / g2426 / g2459 / g2461 / g2342 / g3026 / g2380 / g2309 / g2331 / g1615 /g11 / g55 / g75 / g72 / g3 / g83 / g68 / g86 / g86 / g72 / g81 / g74 / g72 / g85 / g3 / g86 / g68 / g76 / g71 / g15 / g3 / g110 / g37 / g72 / g70 / g68 / g88 / g86 / g72 / g3 / g44 / g87 / g3 / g76 / g86 / g3 / g68 / g3 / g90 / g68 / g86 / g87 / g72 / g3 / g87 / g82 / g3 /g70 / g82 / g81 / g86 / g88 / g80 / g72 / g3 / g74 / g68 / g86 / g82 / g79 / g76 / g81 / g72 / g15 / g3 / g79 / g72 / g87 / g10 / g86 / g3 / g85 / g88 / g81 / g3 / g71 / g82 / g90 / g81 / g75 / g76 / g79 / g79 / g3 / g90 / g76 / g87 / g75 / g3 / g87 / g75 / g72 / g3 / g74 / g72 / g68 / g85 / g3 /g76 / g81 / g3 /g81 / g72 / g88 / g87 / g85 / g68 / g79 / g17 / g124 / g12 皆それは良いと、賛同して ⻑ い坂をニュートラルで下り始 めました、直線の ⻑ い坂道でした 。 /g11 / g40 / g89 / g72 / g85 / g92 / g82 / g81 / g72 / g3 / g68 / g74 / g85 / g72 / g72 / g71 / g3 / g87 / g75 / g68 / g87 / g3 / g76 / g87 / g3 / g90 / g68 / g86 / g3 / g74 / g82 / g82 / g71 / g3 / g76 / g71 / g72 / g68 / g15 / g3 / g68 / g81 / g71 / g3 / g86 / g87 / g68 / g85 / g87 / g72 / g71 /g3 / g87 / g82 / g3 /g74 / g82 / g3 / g71 / g82 / g90 / g81 / g3 / g68 / g3 / g79 / g82 / g81 / g74 / g3 / g71 / g82 / g90 / g81 / g75 / g76 / g79 / g79 / g15 / g3 / g90 / g75 / g76 / g70 / g75 / g3 / g90 / g68 / g86 / g3 / g86 / g87 / g85 / g68 / g76 / g74 / g75 / g87 / g17 / g12 ・・・と彼は下りにガソリンは要らないと、エンジンを切 /g2377 / g4342 / g2385 / g3063 / g2307 / g2341 / g3750 / g2346 / g1616 ⾒ せました /g1617 / g1563 /g11 / g43 / g72 / g3 / g86 / g68 / g76 / g71 / g3 / g87 / g75 / g68 / g87 / g3 / g90 / g72 / g3 / g71 / g76 / g71 / g3 / g81 / g82 / g87 / g3 / g81 / g72 / g72 / g71 / g3 / g74 / g68 / g86 / g82 / g79 / g76 / g81 / g72 / g3 / g87 / g82 / g3 / g74 / g82 / g3 / g71 / g82 / g90 / g81 / g15 / g3 /g87 / g88 / g85 / g81 / g72 / g71 / g3 / g82 / g73 / g73 / g3 / g87 / g75 / g72 / g3 / g72 / g81 / g74 / g76 / g81 / g72 / g15 / g3 / g88 / g81 / g79 / g82 / g70 / g78 / g72 / g71 / g3 / g87 / g75 / g72 / g3 / g78 / g72 / g92 / g3 / g68 / g81 / g71 / g3 / g110 /g86 / g75 / g82 / g90 / g72 / g71 /g124 / g3 / g76 / g87 / g3 /g87 / g82 / g3 / g72 / g89 / g72 / g85 / g92 / g82 / g81 / g72 / g17 / g12 /g1566 / g52 / g88 / g72 / g86 / g87 / g76 / g82 / g81︓ /g1587 / g1587 / g2385 / g1616 ⾒ せました /g1617 / g1562の〇〇に ⼊ るものは何か︖ /g11 / g58 / g75 / g68 / g87 / g3 / g76 / g86 / g3 / g87 / g75 / g72 / g3 / g68 / g70 / g70 / g88 / g86 / g68 / g87 / g76 / g89 / g72 / g3 / g82 / g73 / g3 / g110 /g86 / g75 / g82 / g90 / g72 / g71 /g124 / g34 / g12 /g1566 / g36 / g81 / g86 / g90 / g72 / g85 / g3 / g29 /g38 / g82 / g85 / g85 / g72 / g70 / g87 / g3 / g68 / g81 / g86 / g90 / g72 / g85 /g29 / g3 /g4342 /g11 / g87 / g75 / g72 / g3 / g78 / g72 / g92 / g12 /g48 / g38 / g16 / g86 / g76 / g81 / g74 / g79 / g72 / g3 / g3 / g3 / g3 / g3 / g3 / g3 ︓/g3059 / g2634 /g11 / g71 / g82 / g90 / g81 / g75 / g76 / g79 / g79 / g12 /g48 / g38 / g16 / g80 / g72 / g85 / g74 / g72 / g71 / g3 / g3 / g3 / g3 / g3 / g3 /g29 ⾞ /g11 / g87 / g75 / g76 / g86 /g70 / g68 / g85 / g12 /g48 / g38 / g16 / g86 / g87 / g72 / g83 / g90 / g76 / g86 / g72 / g3 / g3 / g3 / g3 / g3 / g3 / g3 / g3 / g3 / g29 /g4342 /g11 / g87 / g75 / g72 / g3 / g78 / g72 / g92 / g12Figure 3 : An example that is correctly answered by MC - stepwise .
+domain .
+6 Conclusion We constructed driving - domain PAS - QA and RCQA datasets using crowdsourcing5 .
+We also proposed an MC - based PAS analysis method .
+In particular , the stepwise training method based on BERT was the most effective , which outperformed the previous state - of - the - art NN - PAS model .
+In the future , we will pre - train an MC model based on datasets other than the RC - QA dataset to acquire domain knowledge .
+References Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019 .
+BERT : pre - training of deep bidirectional transformers for language understanding .
+In NAACL - HLT2019 , pages 4171–4186 .
+Nicholas FitzGerald , Julian Michael , Luheng He , and Luke Zettlemoyer .
+2018 .
+Large - scale QA - SRL parsing .
+In ACL2018 , pages 2051–2060 .
+Shexia He , Zuchao Li , Hai Zhao , and Hongxiao Bai . 2018 .
+Syntax for semantic role labeling , to be , or not to be .
+In ACL2018 , pages 2061–2071 .
+5These datasets are available at http://nlp.ist.i.kyoto-u.ac.jp/EN/ index.php?Driving%20domain%20QA%20datasets /g1566 /g39 / g82 / g70 / g88 / g80 / g72 / g81 / g87 / g3 / g29 /g3901 / g3207 / g2385 / g2326 / g2345 / g2315 / g2376 / g2590 / g2492 / g2307 / g2385 / g2507 / g2379 / g2697 / g2326 / g3059 / g2634 / g2346 / g3515 / g2367 / g1563 /g11 / g44 /g80 / g82 / g87 / g76 / g89 / g68 / g87 / g72 / g3 / g80 / g92 / g86 / g72 / g79 / g73 / g3 / g68 / g74 / g68 / g76 / g81 / g3 / g90 / g75 / g76 / g79 / g72 / g3 / g69 / g72 / g81 / g71 / g76 / g81 / g74 / g3 / g68 / g81 / g71 / g3 / g86 / g87 / g85 / g72 / g87 / g70 / g75 / g76 / g81 / g74 /g15 / g3 /g68 / g81 / g71 /g70 / g75 / g68 / g79 / g79 / g72 / g81 / g74 / g72 / g3 / g87 / g75 / g72 / g3 / g75 / g76 / g79 / g79 / g3 / g85 / g82 / g68 / g71 / g17 / g12 /g3059 / g2385 / g3053 / g2311 / g2334 / g2376 / g2434 / g2390 / g2401 / g2763 / g2315 / g2305 / g2378 / g1563 /g11 / g55 / g75 / g72 / g85 / g72 / g3 / g76 / g86 / g3 / g68 / g3 / g80 / g82 / g87 / g82 / g85 / g69 / g76 / g78 / g72 / g3 / g86 / g75 / g82 / g83 / g3 / g90 / g75 / g72 / g81 / g3 / g74 / g82 / g76 / g81 / g74 / g3 / g88 / g83 / g3 / g87 / g75 / g72 / g3 / g86 / g79 / g82 / g83 / g72 / g17 /g12 /g2776 / g2326 / g1616 /g2481 / g2338 / g2334 / g2335 / g2320 / g2342 /g1617 / g2324 / g2338 / g2316 / g2365 / g2342 / g2604 / g2307 / g2341 / g2307 / g2334 / g4072 / g2315 / g2534 / g2365 / g2342 / g2608 /g2481 / g2346 / g4017 / g2316 / g2482 / g2328 / g1563 /g11 / g45 / g88 / g86 / g87 / g3 / g110 /g70 / g79 / g76 / g80 / g69 / g76 / g81 / g74 / g3 / g88 / g83 /g124 / g3 / g68 / g3 / g69 / g76 / g87 / g15 / g3 / g86 / g90 / g72 / g68 / g87 / g3 / g87 / g75 / g68 / g87 / g3 / g86 / g87 / g82 / g83 / g83 / g72 / g71 / g3 / g88 / g81 / g87 / g76 / g79 / g3 / g68 / g3 /g90 / g75 / g76 / g79 / g72 / g3 / g68 / g74 / g82 / g3 / g74 / g88 / g86 / g75 / g72 / g86 / g3 / g82 / g88 / g87 / g3 / g80 / g82 / g85 / g72 / g3 / g87 / g75 / g68 / g81 / g3 / g69 / g72 / g73 / g82 / g85 / g72 / g17 / g12 /g1566 / g52 / g88 / g72 / g86 / g87 / g76 / g82 / g81 / g3 / g29 /g1587 / g1587 / g2385 / g1616 /g2481 / g2338 / g2334 / g2335 / g2320 / g2342 /g1617 / g1562の〇〇に ⼊ るものは何か︖ /g11 / g58 / g75 / g68 / g87 /g76 / g86 / g3 / g87 / g75 / g72 / g3 / g68 / g70 / g70 / g88 / g86 / g68 / g87 / g76 / g89 / g72 / g3 / g82 / g73 / g3 / g110 /g70 / g79 / g76 / g80 / g69 / g3 / g88 / g83 /g124 / g34 / g12 /g1566 / g36 / g81 / g86 / g90 / g72 / g85 / g3 / g29 /g38 / g82 / g85 / g85 / g72 / g70 / g87 / g3 / g68 / g81 / g86 / g90 / g72 / g85 /g29 / g3 /g3059 /g11 / g87 / g75 / g72 / g3 / g86 / g79 / g82 / g83 / g72 / g12 /g48 / g38 / g16 / g86 / g76 / g81 / g74 / g79 / g72 / g3 / g3 / g3 / g3 / g3 / g3 / g3 ︓/g4072 /g11 / g86 / g90 / g72 / g68 / g87 / g12 /g48 / g38 / g16 / g80 / g72 / g85 / g74 / g72 / g71 / g3 / g3 / g3 / g3 / g3 / g3 /g29 /g3059 / g2634 /g11 / g87 / g75 / g72 / g3 / g75 / g76 / g79 / g79 / g3 / g85 / g82 / g68 / g71 / g12 /g48 / g38 / g16 / g86 / g87 / g72 / g83 / g90 / g76 / g86 / g72 / g3 / g3 / g3 / g3 / g3 / g3 / g3 / g3 / g3 / g29 /g3059 /g11 / g87 / g75 / g72 / g3 / g86 / g79 / g82 / g83 / g72 / g12Figure 4 : An example that is correctly answered by MC - stepwise .
+Ryu Iida , Mamoru Komachi , Kentaro Inui , and Yuji Matsumoto .
+2007 .
+Annotating a Japanese text corpus with predicate - argument and coreference relations .
+In ACL2007 , pages 132–139 .
+Ritsuko Iwai , Daisuke Kawahara , Takatsune Kumada , and Sadao Kurohashi .
+2018 .
+Annotating a driving experience corpus with behavior and subjectivity .
+In PACLIC 32 , pages 222–231 .
+Ritsuko Iwai , Takatsune Kumada , Norio Takahashi , Daisuke Kawahara , and Sadao Kurohashi .
+2019 .
+Development of driving - related dictionary that includes psychological expressions .
+In Proceedings of the 25th Annual Meeting of Natural Language Processing ( in Japanese ) , pages 1201–1204 .
+Daisuke Kawahara , Sadao Kurohashi , and K ˆoiti Hasida .
+2002 .
+Construction of a Japanese relevancetagged corpus .
+In LREC2002 , pages 2008–2013 .
+Shuhei Kurita , Daisuke Kawahara , and Sadao Kurohashi .
+2018 .
+Neural adversarial training for semisupervised Japanese predicate - argument structure analysis .
+In ACL2018 , pages 474–484 .
+Julian Michael , Gabriel Stanovsky , Luheng He , Ido Dagan , and Luke Zettlemoyer .
+2018 .
+Crowdsourcing question - answer meaning representations .
+In NAACL2018 , pages 560–568 .
+Todor Mihaylov , Peter Clark , Tushar Khot , and Ashish Sabharwal .
+2018 .
+Can a suit of armor conduct electricity ?
+A new dataset for open book question answering .
+In EMNLP2018 , pages 2381–2391 .
+Hiroki Ouchi , Hiroyuki Shindo , and Yuji Matsumoto . 2017 .
+Neural modeling of multi - predicate interactions for Japanese predicate argument structure analysis .
+In ACL2017 , pages 1591–1600 .
+Hiroki Ouchi , Hiroyuki Shindo , and Yuji Matsumoto .
+2018 .
+A span selection model for semantic role labeling .
+In EMNLP2018 , pages 1630–1642 .
+103Anusri Pampari , Preethi Raghavan , Jennifer J. Liang , and Jian Peng .
+2018 .
+emrQA :
+A large corpus for question answering on electronic medical records .
+InEMNLP2018 , pages 2357–2368 .
+Boyuan Pan , Yazheng Yang , Hao Li , Zhou Zhao , Yueting Zhuang , Deng Cai , and Xiaofei He .
+2018 .
+MacNet : Transferring knowledge from machine comprehension to Sequence - to - Sequence models .
+In NeurIPS2018 , pages 6095–6105 .
+Pranav Rajpurkar , Robin Jia , and Percy Liang .
+2018 .
+Know what you do n’t know : Unanswerable questions for SQuAD .
+In ACL2018 , pages 784–789 .
+Pranav Rajpurkar , Jian Zhang , Konstantin Lopyrev , and Percy Liang .
+2016 .
+SQuAD : 100 , 000 + questions for machine comprehension of text .
+In EMNLP2016 , pages 2383–2392 .
+Rico Sennrich , Barry Haddow , and Alexandra Birch . 2016 .
+Neural machine translation of rare words with subword units .
+In ACL2016 , pages 1715–1725 .
+Tomohide Shibata , Daisuke Kawahara , and Sadao Kurohashi . 2016 .
+Neural network - based model for Japanese predicate argument structure analysis .
+In ACL2016 , pages 1235–1244 .
+Tomohide Shibata and Sadao Kurohashi .
+2018 .
+Entitycentric joint modeling of Japanese coreference resolution and predicate argument structure analysis .
+In ACL2018 , pages 579–589 .
+Emma Strubell , Patrick Verga , Daniel Andor , David Weiss , and Andrew McCallum .
+2018 .
+Linguistically - informed self - attention for semantic role labeling .
+In EMNLP2018 , pages 5027–5038 .
+Simon Suster and Walter Daelemans .
+2018 .
+CliCR : a dataset of clinical case reports for machine reading comprehension .
+In NAACL2018 , pages 1551–1563 .
+Zhixing Tan , Mingxuan Wang , Jun Xie , Yidong Chen , and Xiaodong Shi . 2018 .
+Deep semantic role labeling with self - attention .
+In AAAI2018 , pages 4929 – 4936 .
+Adam Trischler , Tong Wang , Xingdi Yuan , Justin Harris , Alessandro Sordoni , Philip Bachman , and Kaheer Suleman . 2017 .
+NewsQA : A machine comprehension dataset .
+In ACL2017 , pages 191–200 .
+Johannes Welbl , Nelson F. Liu , and Matt Gardner . 2017 .
+Crowdsourcing multiple choice science questions .
+In EMNLP2017 , pages 94–106 .
+Zhilin Yang , Peng Qi , Saizheng Zhang , Yoshua Bengio , William W. Cohen , Ruslan Salakhutdinov , and Christopher D. Manning .
+2018 .
+HotpotQA : A dataset for diverse , explainable multi - hop question answering .
+In EMNLP2018 , pages 2369–2380.A Details of PAS - QA Dataset Construction We construct the PAS - QA dataset asking for omitted nominative arguments using the following procedure : 1.We extract four consecutive sentences that satisfy the following conditions from the Driving Experience Corpus constructed by Iwai et al .
+( 2019 )
+.
+The Driving Experience extracting CRF tool ( Iwai et al . , 2018 ) judges that three or more sentences out of four sentences are driving experience .
+Each sentence contains at least one PAS .
+The PAS analyzer , KNP , judges that there is a PAS whose nominative argument is omitted in the fourth sentence .
+Sentences include at least one “ Driving Characteristic Word ” ( Iwai et al . , 2019 ) .
+2.We automatically make crowdsourcing tasks using an extracted document and a PAS whose nominative argument is omitted ( See Figure 5and Figure 6 ) .
+Each task consists of a document , a question and answer choices .
+Answer choices consist of nouns extracted from the document and special symbols , “ author , ” “ other , ” and “ not sure . ”
+For nominative PAS - QA questions , the special symbol “ author ” can often be an answer , but it is not explicitly expressed in the document .
+So we add it to the choices .
+We add “ other ” so that it can be selected when there is an appropriate answer besides the choices .
+We add “ not sure ” so that workers can select it if they can not ﬁnd an answer .
+We add more explanations to crowdsourcing answer screen ( See Figure 5and Figure 6 ) .
+3.Using crowdsourcing , we ask ﬁve crowdworkers per question to select one or more appropriate answers from the choices .
+We asked ﬁve crowdworkers per question using Yahoo !
+crowdsourcing .
+We adopted triplets with three or more votes if they are not “ not sure . ”
+If they are “ other , ” we handled them as described in the main paper .
+We ﬁnally record the answers as spans in a document or NULL .
+104 Figure 5 : PAS - QA dataset answer screen .
+Figure 6 : PAS - QA dataset answer screen ( English translation version ) .

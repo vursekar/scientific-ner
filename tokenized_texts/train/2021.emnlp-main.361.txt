@@ -1,263 +1,381 @@
-Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing , pages 4406–4416 November 7–11 , 2021 .
-c  2021 Association for Computational Linguistics4406Solving Aspect Category Sentiment Analysis as a Text Generation Task Jian Liu1 , Zhiyang Teng2;3 , Leyang Cui2;3 , Hanmeng Liu2;3 ,
-Yue Zhang2;3
-1School of Computer Science , Fudan University 2School of Engineering , Westlake University 3Institute of Advanced Technology , Westlake Institute for Advanced Study jianliu17@fudan.edu.cn , { tengzhiyang , cuileyang , liuhanmeng , zhangyue}@westlake.edu.cn Abstract Aspect category sentiment analysis has attracted increasing research attention .
+Solving Aspect Category Sentiment Analysis as a Text Generation Task
+Jian Liu1 , Zhiyang Teng2,3 , Leyang Cui2,3 , Hanmeng Liu2,3 , Yue Zhang2,3 1School of Computer Science , Fudan University 2School of Engineering , Westlake University 3Institute of Advanced Technology , Westlake Institute for Advanced Study jianliu17@fudan.edu.cn , { tengzhiyang , cuileyang , liuhanmeng , zhangyue}@westlake.edu.cn
+Abstract
+Aspect category sentiment analysis has attracted increasing research attention .
 The dominant methods make use of pre - trained language models by learning effective aspect category - speciﬁc representations , and adding speciﬁc output layers to its pre - trained representation .
 We consider a more direct way of making use of pre - trained language models , by casting the ACSA tasks into natural language generation tasks , using natural language sentences to represent the output .
 Our method allows more direct use of pre - trained knowledge in seq2seq language models by directly following the task setting during pre - training .
 Experiments on several benchmarks show that our method gives the best reported results , having large advantages in few - shot and zero - shot settings .
-1 Introduction Aspect - based sentiment analysis ( ABSA ) is a ﬁnegrained sentiment analysis task that includes a number of subtasks , two of which are aspect category sentiment analysis ( ACSA ) and aspect category detection ( ACD ) .
+1
+Introduction
+Aspect - based sentiment analysis ( ABSA ) is a ﬁnegrained sentiment analysis task that includes a number of subtasks , two of which are aspect category sentiment analysis ( ACSA ) and aspect category detection ( ACD ) .
 Figure 1 shows an example , where the input is “ The restaurant was expensive , but the menu was great ” .
-ACD detects the aspect categories , such as price andfood , and ACSA predicts the sentiment polarities toward each aspect category .
+ACD detects the aspect categories , such as price and food , and ACSA predicts the sentiment polarities toward each aspect category .
 In this work , we focus on these two tasks as well as the joint task that combines both .
-Previous studies have investigated various methods that treat ACSA and ACD as classiﬁcation tasks , learning aspect - speciﬁc sentence representations ( Wang et al . , 2016 ; Ruder et al . , 2016 ) .
-Recently , pre - trained language models ( PLM ) have shown their effectiveness to this end ( Jiang et al . , 2019 ) .
-The main idea is to make use of pre - trained models such as BERT ( Devlin et al . , 2019a ) for representing an aspect - speciﬁc form of the input ( e.g. , by concatenating the aspect category to the end of The restaurant was expensive , but the menu was great < price , food > < price : negative >    <
-food : positive > ACSAACDFigure 1 : Example of aspect category detection ( ACD ) and aspect category sentiment analysis ( ACSA ) .
+Previous studies have investigated various methods that treat ACSA and ACD as classiﬁcation tasks , learning aspect - speciﬁc sentence representations ( Wang et al , 2016 ; Ruder et al , 2016 ) .
+Recently , pre - trained language models ( PLM ) have shown their effectiveness to this end ( Jiang et al , 2019 ) .
+The main idea is to make use of pre - trained models such as BERT ( Devlin et al , 2019a ) for representing an aspect - speciﬁc form of the input ( e.g. , by concatenating the aspect category to the end of
+Figure 1 : Example of aspect category detection ( ACD ) and aspect category sentiment analysis ( ACSA ) .
 the input sentence ( Figure 3(a ) ) ) , which provides useful semantic features for ACSA and ACD classiﬁers .
-Such methods have given highly competitive results ( Sun et al . , 2019 ; Li et
-al . , 2020b ) .
-The above classiﬁcation models beneﬁt from contextualized representations , which contain knowledge learned by pre - training over large data ( Lin et al . , 2019 ) .
+Such methods have given highly competitive results ( Sun et al , 2019 ; Li et al , 2020b ) .
+The above classiﬁcation models beneﬁt from contextualized representations , which contain knowledge learned by pre - training over large data ( Lin et al , 2019 ) .
 However , their use of pre - trained knowledge can be viewed as indirect due to at least two reasons .
 First , the classiﬁcation task is performed by using a neural network on top of pretrained representation , with separate network parameters .
 Second , the integration of aspect category makes the aspect - speciﬁc input representation not exactly a natural language sentence , which differs from the pre - training setting .
 Intuitively , more pre - trained knowledge could be leveraged by connecting pre - training and ACSA at the task level , rather than only at the representation level .
 We investigate the above potentials by casting the sentiment classiﬁcation tasks into language modelling tasks .
 In particular , as shown in Figure 2 , both ACSA and ACD are transformed into sequence - to - sequence ( seq2seq ) tasks , where the encoder takes the input sentence and the decoder generates a natural language sentence .
-For ACD , the output follows a template stating whether the speciﬁc aspect is discussed ( e.g. , “ The hcategory _ typeicategory is discussed ” ) ; for ACSA , the sentiment polarity of a speciﬁc aspect is stated ( e.g. , “ The sentiment polarity of hgiven _ categoryiishpolarity _ typei ” ) .
-The setting corresponds closely to the denoising auto-
-4407 The r estaurant was too expensive The sentiment polarity of price is positive      ( scoring : 0.1 )  
-The sentiment polarity of price is neutral       ( scoring : 0.2 )  
-The sentiment polarity of price is negative     ( scoring : 0.7 ) Aspect category sentiment analysis The price category is discussed            ( scoring : 0.9 )   
-The price category is not discussed      ( scoring : 0.1)Aspect category detectionFigure 2 : ACSA as a generation task .
-encoder training scheme of BART ( Lewis et al . , 2020 ) , which we use as the pre - trained model .
-Compared with classiﬁcation - based methods , our method does not include more network parameters , and thus can potentially generalize better to new domains ( Brown et al . , 2020 ;
-Gao et al . , 2020 ) .
-Given a new domain with completely unseen aspect categories and sentiment labels , our method can be applied without changing output layer structure .
-In addition to classiﬁcation - based methods , we take masked language models ( MLM ) as a baseline also , for which a natural counterpart of our method is a mask - reﬁlling task .
-As shown in Figure 3(b ) , different from our method , the output template is concatenated to the input , with the keyword being masked for prediction .
-This MLM task corresponds closely to BERT ( Devlin et al . , 2019a ) pre - training .
-In comparison to this MLM method , a generation method can better learn the correlation between the input and output template as two related sequences , which has been demonstrated by the strong performance of BART for abstractive text summarization ( Lewis et al . , 2020 ) .
-Experimental results on three standard benchmarks datasets show that both generation and MLM methods outperform classiﬁcation methods using the same pre - trained language models .
-Finally , generation methods give stronger performances than MLM methods , outperforming the previous stateof - the - art methods by a large margin .
-In addition , using the generation method , we show that jointly performing ACSA and ACD leads to better results than the traditional pipeline .
-To our knowledge , we are the ﬁrst to employ a generative pre - trained language model to address an ACSA / ACD problem .
-We release our code at https://github . com / lgw863 / ACSA - generation .2
-Related Work Aspect Category Sentiment Analysis Wang et al .
-( 2016 ) propose an attention - based LSTM network , which can concentrate on different parts of a sentence when different aspect categories are taken as input .
-Ruder et al .
-( 2016 ) model the interdependencies of sentences in a text with a hierarchical bidirectional LSTM .
+For ACD , the output follows a template stating whether the speciﬁc aspect is discussed ( e.g. , “ The ( cid:104)category_type(cid:105 ) category is discussed ” ) ; for ACSA , the sentiment polarity of a speciﬁc aspect is stated ( e.g. , “ The sentiment polarity of ( cid:104)given_category(cid:105 ) is ( cid:104)polarity_type(cid:105 ) ” ) .
+The setting corresponds closely to the denoising autoProceedingsofthe2021ConferenceonEmpiricalMethodsinNaturalLanguageProcessing , pages4406–4416November7–11,2021.c(cid:13)2021AssociationforComputationalLinguistics4406The restaurant was expensive , but the menu was great < price , food > <
+price : negative >    <
+food : positive > ACSAACD  2 Related Work
+Aspect Category Sentiment Analysis Wang et al ( 2016 ) propose an attention - based LSTM network , which can concentrate on different parts of a sentence when different aspect categories are taken as input .
+Ruder et al ( 2016 ) model the interdependencies of sentences in a text with a hierarchical bidirectional LSTM .
 Yin et
-al .
-( 2017 ) model the task as a machine comprehension problem by constructing pseudo question - answer pairs .
+al ( 2017 ) model the task as a machine comprehension problem by constructing pseudo question - answer pairs .
 Xue and Li ( 2018 ) extract sentiment features with CNN and selectively output aspect category related features with gating mechanisms .
-Xing et
-al .
-( 2019 ) , Liang et al .
-( 2019 ) and Zhu et al .
-( 2019 ) incorporate aspect category information into sentence encoders in the context modeling stage .
-Sun et al .
-( 2019 ) construct auxiliary sentences from the aspect categories and convert ACSA to a sentence - pair classiﬁcation task .
-Li et al .
-( 2020b ) predict the sentiment of an aspect category mentioned in a sentence by aggregating the sentiments of the words indicating the aspect category in the sentence .
+Xing et al ( 2019 ) , Liang et al ( 2019 ) and Zhu et al ( 2019 ) incorporate aspect category information into sentence encoders in the context modeling stage .
+Sun et al ( 2019 ) construct auxiliary sentences from the aspect categories and convert ACSA to a sentence - pair classiﬁcation task .
+Li et al ( 2020b ) predict the sentiment of an aspect category mentioned in a sentence by aggregating the sentiments of the words indicating the aspect category in the sentence .
 Several joint models were proposed to avoid error propagation , which perform ACD and ACSA jointly .
-Schmitt et al .
-( 2018 ) propose two joint models : end - to - end LSTM and end - to - end CNN , which produce all the aspect categories and their corresponding sentiment polarities at once .
-Hu et
-al .
-( 2019 ) propose constrained attention networks ( CAN ) to constrain the attention weight allocation .
-Wang et al .
-( 2019 ) propose the aspect - level sentiment capsules model ( AS - Capsules ) , which utilizes the correlation between aspect category and sentiment through shared components .
-Li et
-al .
-( 2020a ) propose a novel joint model which contains a shared sentiment prediction layer .
+Schmitt et al ( 2018 ) propose two joint models : end - to - end LSTM and end - to - end CNN , which produce all the aspect categories and their corresponding sentiment polarities at once .
+Hu et al ( 2019 ) propose constrained attention networks ( CAN ) to constrain the attention weight allocation .
+Wang et al ( 2019 ) propose the aspect - level sentiment capsules model ( AS - Capsules ) , which utilizes the correlation between aspect category and sentiment through shared components .
+Li et al ( 2020a ) propose a novel joint model which contains a shared sentiment prediction layer .
 All the models above are classiﬁcation methods , which use a separate output network to give the output label .
 In contrast , we investigate natural language generation methods by directly following the pre - training process of language models .
 Masked Language Model Methods There is a line of work using the masked language model ( MLM ) for natural language understanding tasks .
 The basic idea is to leverage information from pre - trained models by deﬁning speciﬁc sentence prompt in a language modelling task .
-Brown et
-al .
-( 2020 ) use prompt for few - shot learning in text classiﬁcation tasks .
+Brown et al ( 2020 ) use prompt for few - shot learning in text classiﬁcation tasks .
 Schick and Schütze ( 2020 ) rephrase inputs as cloze questions for text classiﬁcation .
-Schick et
-al . ( 2020 ) and Gao et al .
-( 2020 )
-4408 Pre - trained Encoder Themenuwasgreat</s > Pre - trained Decoderlabel < s > < /s > food Themenuwasgreat</s >
-< s > < /s > food(a ) BART classiﬁcation .
-The menu was great .
-The sentiment polarity of food   is [ MASK ] .
-MLM    headpositive    neutral    negative Input sentence Template ( b ) Masked language model(MLM ) .
-Encoder x1 x 2 x 3 x 4 x 5Decoder t0 t 1 t 2 t 3 t 4 Thesentiment polarity of price < s > is Therestaurant was tooexpensivet 5 t 6t1 t 2 t 3 t 4 t 5 t 6 t 7sentiment polarity of price positiveis The ( c ) BART generation .
+Schick et al ( 2020 ) and Gao et al ( 2020 )
+Figure 2 : ACSA as a generation task .
+encoder training scheme of BART ( Lewis et al , 2020 ) , which we use as the pre - trained model .
+Compared with classiﬁcation - based methods , our method does not include more network parameters , and thus can potentially generalize better to new domains ( Brown et al , 2020 ; Gao et al , 2020 ) .
+Given a new domain with completely unseen aspect categories and sentiment labels , our method can be applied without changing output layer structure .
+In addition to classiﬁcation - based methods , we take masked language models ( MLM ) as a baseline also , for which a natural counterpart of our method is a mask - reﬁlling task .
+As shown in Figure 3(b ) , different from our method , the output template is concatenated to the input , with the keyword being masked for prediction .
+This MLM task corresponds closely to BERT ( Devlin et al , 2019a ) pre - training .
+In comparison to this MLM method , a generation method can better learn the correlation between the input and output template as two related sequences , which has been demonstrated by the strong performance of BART for abstractive text summarization ( Lewis et al , 2020 ) .
+Experimental results on three standard benchmarks datasets show that both generation and MLM methods outperform classiﬁcation methods using the same pre - trained language models .
+Finally , generation methods give stronger performances than MLM methods , outperforming the previous stateof - the - art methods by a large margin .
+In addition , using the generation method , we show that jointly performing ACSA and ACD leads to better results than the traditional pipeline .
+To our knowledge , we are the ﬁrst to employ a generative pre - trained language model to address an ACSA / ACD problem .
+We release our code at https://github . com / lgw863 / ACSA - generation .
+4407The restaurant was too expensiveThe sentiment polarity of price is positive      ( scoring : 0.1 ) The sentiment polarity of price is neutral       ( scoring : 0.2 ) The sentiment polarity of price is negative     ( scoring : 0.7)Aspect category sentiment analysis
+The price category is discussed            ( scoring : 0.9 )  
+The price category is not discussed      ( scoring : 0.1)Aspect category detection  ( a ) BART classiﬁcation .
+( b ) Masked language model(MLM ) .
+( c ) BART generation .
 Figure 3 : A comparison of aspect category sentiment analysis methods .
 extend Schick and Schütze ( 2020 ) by automatically generating label words and templates , respectively .
-Petroni et al .
-( 2019 ) extract relation between entities from BERT by constructing cloze - style templates .
+Petroni et al ( 2019 ) extract relation between entities from BERT by constructing cloze - style templates .
 We are the ﬁrst to apply such methods to ACSA , taking it as a baseline .
 Different from these template - based models , our ﬁnal model uses BART for text generation , which better models the correlations between the input sentence and the output sentence compared with BERT .
-Generation Methods
-There has been work casting NLP problems as sequence generation tasks ( Vinyals et al . , 2015 ; Ma et al . , 2017 ; Stanovsky and Dagan , 2018 ;
-Raffel et al . , 2020 ) , where the output is a sequence of tokens rather than a natural language sentence .
+Generation Methods There has been work casting NLP problems as sequence generation tasks ( Vinyals et al , 2015 ;
+Ma et al , 2017 ; Stanovsky and Dagan , 2018 ; Raffel et al , 2020 ) , where the output is a sequence of tokens rather than a natural language sentence .
 Daza and Frank ( 2018 ) treat semantic role labelling as a sequence - to - sequence process .
-Li et
-al .
-( 2019 ) solve the entity - relation extraction task as a multi - turn question answering generation method .
+Li et al ( 2019 ) solve the entity - relation extraction task as a multi - turn question answering generation method .
 Our work is similar in casting an NLP task as a generation task .
 Different from the above methods , our goal is to make the most of pre - trained knowledge in BART for ACSA .
-3 Methods Formally for ACD , the input is a sentence X= fx1 ; : : : ; x ng = x1 : n , where xidenotes the i - th word .
+3 Methods
+Formally for ACD , the input is a sentence X = { x1 , . . .
+, xn } = x1 : n , where xi denotes the i - th word .
 For ACSA , a set of pre - identiﬁed aspect categories are also given .
-We introduce relevant pre - trained language models in 3.1 , classiﬁcation methods in Section 3.2 , MLM methods in Section 3.3 , and our generation method in Section 3.4.3.1 Pre - trained language Models We take BERT ( Devlin et al . , 2019a ) and BART ( Lewis et al . , 2020 ) as the pre - trained language models .
-Both are built on the Transformer ( Vaswani et al . , 2017 ) architecture .
-BERT ( Devlin et al . , 2019a ) is an encoder stack of Transformer for masked text ﬁlling , where a model uses the context words to predict masked words .
-BART ( Lewis et al . , 2020 ) is a denoising auto - encoder seq2seq model pre - training for natural language generation .
+We introduce relevant pre - trained language models in 3.1 , classiﬁcation methods in Section 3.2 , MLM methods in Section 3.3 , and our generation method in Section 3.4 .
+3.1 Pre - trained language Models
+We take BERT ( Devlin et al , 2019a ) and BART ( Lewis et al , 2020 ) as the pre - trained language models .
+Both are built on the Transformer ( Vaswani et al , 2017 ) architecture .
+BERT ( Devlin et al , 2019a ) is an encoder stack of Transformer for masked text ﬁlling , where a model uses the context words to predict masked words .
+BART ( Lewis et al , 2020 ) is a denoising auto - encoder seq2seq model pre - training for natural language generation .
 Its training applies document corruption such as randomly deleting tokens from the input and corrupting text with an arbitrary noising function .
 BART is trained to reconstruct the original text .
-3.2 The Classiﬁcation Method We use a multi - layer perceptrons network as the classiﬁer model , which takes a representation vector as input .
+3.2 The Classiﬁcation Method
+We use a multi - layer perceptrons network as the classiﬁer model , which takes a representation vector as input .
 Both BERT and BART are considered as the encoders .
 BERT Classiﬁcation BERT adopts “ [ CLS ] input sentence
 [ SEP ] given_category
 [ SEP ] ” as input .
 The ﬁnal hidden state corresponding to “ [ CLS ] ” is used as the representation for classiﬁcation .
-BART Classiﬁcation BART adopts “ hSiinput sentenceh = Sigiven_categoryh = Si ” as input and predicts the sentiment polarity of the sentence towards the given category .
+BART Classiﬁcation BART adopts “ ( cid:104)S(cid:105 ) input sentence ( cid:104)/S(cid:105 ) given_category ( cid:104)/S(cid:105 ) ”
+as input and predicts the sentiment polarity of the sentence towards the given category .
 The same input is fed into the encoder and decoder ( see Figure 3(a ) ) .
-Formally , suppose that the query category is a , x0 = hSi , xn+1 = h = Si , xn+2 = a , xn+3 = h = Si , then the input to BART is x0 : n+3= hSix1 ; : : : ; x nh = Siah = Si .
-The output hidden vec-
-4409tors obtained by the BART encoder ( ENCODER ) and BART decoder ( D ECODER ) are : henc = ENCODER ( x0 : n+3 ) h0 : : : hn+3
-= DECODER ( henc;x0 : n+3 )
-The output vector hn+3is then taken as the representation vector for classiﬁcation .
-3.3
-The MLM Method Masked language models ( MLM ) ( Devlin et al . , 2019a ) complete a given prompt by ﬁlling missing tokens .
+Formally , suppose that the query category is a , x0 = ( cid:104)S(cid:105 ) ,
+xn+1 = ( cid:104)/S(cid:105 ) ,
+xn+2 = a , xn+3 = ( cid:104)/S(cid:105 ) , then the input to BART is x0 : n+3 = ( cid:104)S(cid:105 ) x1 , . . .
+, xn
+( cid:104)/S(cid:105 ) a ( cid:104)/S(cid:105 ) .
+The output hidden vec4408Pre - trainedEncoderThemenuwasgreat</s > Pre - trainedDecoderlabel < s></s > foodThemenuwasgreat</s><s></s > foodThe menu was great .
+The sentiment polarity of food is [ MASK ] .
+MLM headpositive neutral negativeInput sentenceTemplateEncoderx1x2x3x4x5Decodert0t1t2t3t4Thesentimentpolarityofprice < s > isTherestaurantwastooexpensivet5t6t1t2t3t4t5t6t7sentimentpolarityofpricepositiveisThe  tors obtained by the BART encoder ( ENCODER ) and BART decoder ( DECODER ) are : henc = ENCODER(x0 : n+3 ) h0 . . .
+hn+3
+= DECODER(henc ; x0 : n+3 )
+The output vector hn+3 is then taken as the representation vector for classiﬁcation .
+Inference
+3.4.2 For ACSA , we ﬁrst enumerate all possible polarities for the given category of the sentence X and ﬁll them in the prepared templates , and then use the ﬁne - tuned pre - trained generative language model to assign a score for each template Tai , pk = { t1 , . . .
+, tm } , formulated as :
+3.3 The MLM Method
+Masked language models ( MLM ) ( Devlin et al , 2019a ) complete a given prompt by ﬁlling missing tokens .
 We refer to the template including a given category and MASK token together as a prompt .
 For sentiment analysis tasks , BERT MLM adopts the input sentence and the prompt as the model input and predicts the sentiment polarity label word towards the given category .
 For BART MLM , the same input is fed into the encoder and decoder , and the highest decoder prediction from label words of the MASK token is the predicted polarity label(see Figure 3(b ) ) .
 We use the same template in the MLM method and generation method , following the template creation method in section 3.4.1 .
-3.4 The Generation Method We take both ACSA and ACD as language model ranking problems under a seq2seq framework ( see Figure 3(c ) ) .
-The target sequence Tai;pk(Tai )
-= ft1 ; : : : ; t mgis a template ﬁlled by the given category aiand the polarity type pk .
+3.4 The Generation Method
+We take both ACSA and ACD as language model ranking problems under a seq2seq framework ( see Figure 3(c ) ) .
+The target sequence Tai , pk ( Tai ) = { t1 , . . .
+, tm } is a template ﬁlled by the given category ai and the polarity type pk .
 We ﬁrst introduce how to create templates in Section 3.4.1 , and then show the inference and training details in Section 3.4.2 and Section 3.4.3 , respectively .
-3.4.1 Template Creation For ACSA , we manually create templates containing one slot for the given _ category and another slot for the polarity _ type label .
-We set a category word set A = fa1 ; : : : ; ajCjg , jCjis the category type size ( e.g. , ai=“price ” ) and polarity type word set P = fp1 ; : : : ; pjLjg , jLjis the polarity type size ( e.g. , pk=“positive ” ) , and use words to deﬁne templates Tai;pk(e.g .
-“ The sentiment polarity of price is positive ” ) .
-The template T is “ The sentiment polarity of haiiishpki ” .
-For a given category ai , we can obtain a list of templates Tai=
-[ Tai;p1 ; : : : ; Tai;pjLj ] .
-For ACD , we use aito create a sentiment templateT+ aifor an existing aspect category , and a none - category template T  ai .
-T+is “ Thehaiicategory is discussed " andT is “ Thehaiicategory is not discussed " .3.4.2
-Inference For ACSA , we ﬁrst enumerate all possible polarities for the given category of the sentence Xand ﬁll them in the prepared templates , and then use the ﬁne - tuned pre - trained generative language model to assign a score for each template Tai;pk = ft1 ; : : : ; t mg , formulated as : f(Tai;pk ) = mX c=1logP(tcjt1 : c 1;X ) ( 1 ) We calculate a score f(Tai;pk)for each possible polarity by employing the pre - trained generative language model ( i.e. , BART ) to score the templates , and then choose the polarity of category aiwith the largest score .
-For ACD , we ﬁrst create templates T+ aiandT  ai for all possible categories of the sentence X , and then use the ﬁne - tuned pre - trained generative language model to assign a score for each template Tai = ft1 ; : : : ; t mg , in a similar way as Equation 1 .
-Also , we decide whether the aicategory is discussed or not in the input sentence according to the higher score between T+ aiandT  ai .
-3.4.3 Training For ACSA , suppose that the polarity type of aiispk .
-We ﬁll the given category aiand the polarity type pkinto template Tto create a gold target output Tai;pk .
-Similarly for ACD , if the category of aiis discussed , the gold target T+ aiis obtained by ﬁlling aiintoT+ , and otherwise is T  ai .
-For ACSA , we use all gold polarities in the training set to construct ( X;T)pairs .
-For ACD , we use all gold categories in the training set to construct ( X;T+)pairs , and additionally create negative samples ( X;T )by sampling all none existing categories in the input .
-Finally , we obtain f(X;T)g = f(X;T+)[(X;T )g Given a sequence pair ( X;T ) , we feed the input X = x1 : nto the BART encoder , obtaining hidden representations of the sentence : henc = ENCODER ( x1 : n ) ( 2 ) At the cth step of the decoder , hencand previous output tokens t1 : c 1are then as inputs , yielding a representation using attention ( Vaswani et al . , 2017 )
-hdec c = DECODER ( henc ; t1 : c 1 ) ( 3 ) The conditional probability of the word tcis deﬁned as : P(tcjt1 : c 1;X ) =
-SOFTMAX ( hdec cWlm+blm);(4 ) where Wlm2RdhjVjandblm2RjVj , jVjrepresents the vocab size of pre - trained BART .
+3.4.1 Template Creation For ACSA , we manually create templates containing one slot for the given_category and another slot for the polarity_type label .
+We set a category word set A = { a1 , . . . , a|C| } , |C| is the category type size ( e.g. , ai=“price ” ) and polarity type word set P = { p1 , . . .
+, p|L| } , |L| is the polarity type size ( e.g. , pk=“positive ” ) , and use words to deﬁne templates Tai , pk ( e.g. “ The sentiment polarity of price is positive ” ) .
+The template T is “ The sentiment polarity of ( cid:104)ai(cid:105 ) is ( cid:104)pk(cid:105 ) ” .
+For a given category ai , we can obtain a list of templates Tai =
+[ Tai , p1 , .
+. .
+, Tai , p|L| ] .
+For ACD , we use ai to create a sentiment template T+ ai for an existing aspect category , and a none - category template T− ai .
+T+ is “ The ( cid:104)ai(cid:105 ) category is discussed " and T− is “ The ( cid:104)ai(cid:105 ) category is not discussed " .
+m ( cid:88 )
+c=1
+f ( Tai , pk )
+=
+log P ( tc|t1 : c−1 , X )
+( 1 )
+We calculate a score f ( Tai , pk ) for each possible polarity by employing the pre - trained generative language model ( i.e. , BART ) to score the templates , and then choose the polarity of category ai with the largest score .
+For ACD , we ﬁrst create templates T+
+ai and T− ai for all possible categories of the sentence X , and then use the ﬁne - tuned pre - trained generative language model to assign a score for each template
+Tai = { t1 , . . .
+, tm } , in a similar way as Equation 1 .
+Also , we decide whether the ai category is discussed or not in the input sentence according to the higher score between T+
+ai and T− ai .
+3.4.3 Training For ACSA , suppose that the polarity type of ai is pk .
+We ﬁll the given category ai and the polarity type pk into template T to create a gold target output Tai , pk .
+Similarly for ACD , if the category of ai is discussed , the gold target T+ ai is obtained by ﬁlling ai into T+ , and otherwise is T− ai .
+For ACSA , we use all gold polarities in the training set to construct ( X , T ) pairs .
+For ACD , we use all gold categories in the training set to construct ( X , T+ ) pairs , and additionally create negative samples ( X , T− ) by sampling all none existing categories in the input .
+Finally , we obtain { ( X , T ) } = { ( X , T+ ) ∪ ( X , T− ) }
+Given a sequence pair ( X , T ) , we feed the input X = x1 : n to the BART encoder , obtaining hidden representations of the sentence :
+henc = ENCODER(x1 : n ) ( 2 ) At the c th step of the decoder , henc and previous output tokens t1 : c−1 are then as inputs , yielding a representation using attention ( Vaswani et al , 2017 )
+c = DECODER(henc , t1 : c−1 ) hdec
+( 3 )
+The conditional probability of the word tc is
+deﬁned as :
+P ( tc|t1 : c−1 , X ) = SOFTMAX(hdec
+c Wlm + blm ) ,
+( 4 )
+where Wlm ∈ Rdh×|V| and blm ∈ R|V| , |V| represents the vocab size of pre - trained BART .
 The
-4410cross - entropy between the decoder ’s output and the original template is used as the loss function : L= mX c=1logP(tcjt1;c 1;X ) ( 5 ) 4 Experiments We choose the SemEval-2014 restaurant review ( Rest14 ) ( Pontiki et al . , 2014a ) , a variant of Rest14 ( Rest14 - hard ) ( Xue and Li , 2018 ) and the multiaspect multi - sentiment ( MAMS ) ( Jiang et al . , 2019 ) datasets for sentence - level sentiment , the TripAdvisor ( Wang et al . , 2010 ) and BeerAdvocate ( McAuley et al . , 2012 ; Lei et al . , 2016 ) datasets for document - level sentiment .
-Standard splits of training / development / testing sets are adopted following previous work Tay et al .
-( 2018 ) , the details of which are shown in Appendix A.
-We use the pre - trained BERT - base1and BARTbase2models for task ﬁne - tuning .
+4409  cross
+- entropy between the decoder ’s output and the original template is used as the loss function :
+L = −
+log P ( tc|t1,c−1 , X )
+( 5 )
+m ( cid:88 )
+c=1
+4 Experiments
+We choose the SemEval-2014 restaurant review ( Rest14 ) ( Pontiki et al , 2014a ) , a variant of Rest14 ( Rest14 - hard ) ( Xue and Li , 2018 ) and the multiaspect multi - sentiment ( MAMS ) ( Jiang et al , 2019 ) datasets for sentence - level sentiment , the TripAdvisor ( Wang et al , 2010 ) and BeerAdvocate ( McAuley et al , 2012 ; Lei et al , 2016 ) datasets for document - level sentiment .
+Standard splits of training / development / testing sets are adopted following previous work Tay et al ( 2018 ) , the details of which are shown in Appendix A.
+We use the pre - trained BERT - base1 and BARTbase2 models for task ﬁne - tuning .
 We select the ﬁne - tuning learning rate from { 4e-5 , 2e-5 , and 1e5 } and batch size from { 8 , 16 , 24 } for different models .
 The dropout probability is 0.1 .
 The best model conﬁguration is selected according to the highest performance on the development set .
-The details of settings are shown in Appendix A. 4.1 Baseline Methods We compare our generation method with classiﬁcation and MLM baselines ( Figure 3 ) using the same encoder .
-In particular , BART generation ( i.e. , Figure 3(c ) ) is compared with BART classiﬁcation ( Figure 3(a ) ) and BART MLM ( Figure 3(b ) ) , as well as BERT classiﬁcation andBERT MLM .
+The details of settings are shown in Appendix A.
+4.1 Baseline Methods
+We compare our generation method with classiﬁcation and MLM baselines ( Figure 3 ) using the same encoder .
+In particular , BART generation ( i.e. , Figure 3(c ) ) is compared with BART classiﬁcation ( Figure 3(a ) ) and BART MLM ( Figure 3(b ) ) , as well as BERT classiﬁcation and BERT MLM .
 In addition , our method is also compared with other models in the literature as follows .
 For sentence - level ACSA , we also compare our method with the following state - of - the - art methods in the literature .
 ( 1 ) non - BERT models : GCAE ( Xue and Li , 2018 ) ,
-As - capsule ( Wang et al . , 2019 ) and CapsNet ( Jiang et al . , 2019 ) ; ( 2 ) BERT ( Devlin et al . , 2019b ) based models : BERT - pair - QA - B ( Sun et al . , 2019 ) , CapsNet - BERT ( Jiang et al . , 2019 ) and AC - MIMLLN - BERT ( Li et al . , 2020b ) .
+As - capsule ( Wang et al , 2019 ) and CapsNet ( Jiang et al , 2019 ) ; ( 2 ) BERT ( Devlin et al , 2019b ) based models : BERT - pair - QA - B ( Sun et al , 2019 ) , CapsNet - BERT ( Jiang et al , 2019 ) and AC - MIMLLN - BERT ( Li et al , 2020b ) .
 For document - level ACSA , we compare our method with the following methods .
-( 1 ) non - BERT models : LSTM ( Tang et al . , 2015 ) , HAN ( Yang et al . , 2016 ) and MR ( machine comprehension pat1https://github.com/google-research/
-bert 2https://huggingface.co/facebook/ bart - base / tree / mainACSA Template T
-Dev accuracy The sentiment polarity of aiispk 83.78
-The sentiment is pkforai 83.44 Theaicategory has a pklabel 82.31 Table 1 : ACSA results using different templates .
-ai indicates given category , pkindicates polarity type .
-ACD Template T+/T Dev F1 Theaicategory is discussed Theaicategory is not discussed93.13
-The sentence discusses the aicategory The sentence discusses no aicategory92.67 It is about the aicategory It is not about the aicategory92.44 Table 2 : ACD results using different templates .
-aiindicates category type .
+( 1 ) non - BERT models : LSTM ( Tang et al , 2015 ) , HAN ( Yang et al , 2016 ) and MR ( machine comprehension pat1https://github.com/google-research/
+bert
+2https://huggingface.co/facebook/
+bart - base / tree / main
+ACSA Template T
+Dev accuracy
+The sentiment polarity of ai is pk
+The sentiment is pk for ai The ai category has a pk label
+83.78 83.44 82.31
+Table 1 : ACSA results using different templates .
+ai indicates given category , pk indicates polarity type .
+ACD Template T+/T−
+Dev F1
+The ai category is discussed The ai category is not discussed
+The sentence discusses the ai category The sentence discusses no ai category
+It is about the ai category It is not about the ai category
+93.13
+92.67
+92.44
+Table 2 : ACD results using different templates .
+ai indicates category type .
 tern )
-( Yin et al . , 2017 ) ; ( 2 ) BERT ( Devlin et al . , 2019b ) based model : BERT classiﬁcation .
+( Yin et al , 2017 ) ; ( 2 ) BERT ( Devlin et al , 2019b ) based model : BERT classiﬁcation .
 For ACD , we compare our method with the following methods .
-( 1 ) non - BERT models : XRCE ( Brun et al . , 2014 ) , NRC - Canada ( Kiritchenko et
-al . , 2014 ) ; ( 2 ) BERT ( Devlin et al . , 2019b ) based models : BERT classiﬁcation , BERT - pair - NLI - B ( Sun et al . , 2019 ) , CNE - net ( Dai et al . , 2020 ) .
-4.2 Development Experiments Different templates can be used for expressing the same meaning .
-For instance , “ The sentiment polarity of hgiven _ categoryiis positive ” can also be expressed by “ The sentiment is positive forhgiven _ categoryi ” .
+( 1 ) non - BERT models : XRCE ( Brun et al , 2014 ) , NRC - Canada ( Kiritchenko et
+al , 2014 ) ; ( 2 ) BERT ( Devlin et al , 2019b ) based models : BERT classiﬁcation , BERT - pair - NLI - B ( Sun et al , 2019 ) , CNE - net ( Dai et al , 2020 ) .
+4.2 Development Experiments
+Different templates can be used for expressing For instance , “ The senthe same meaning .
+timent polarity of ( cid:104)given_category(cid:105 ) is positive ” can also be expressed by “ The sentiment is positive for ( cid:104)given_category(cid:105 ) ” .
 For ACSA , we investigate the impact of manual templates using the MAMS development set .
 Table 1 shows the impact of different choice of templates .
-For instance , “ Thehgiven _ categoryi category has ahpolarity _ typeilabel ” and “ The sentiment polarity of hgiven _ categoryiis hpolarity _ typei ” give 82.31 % and 83.78 % accuracy , respectively , indicating that the template has inﬂuence on the ﬁnal performance .
-This is consistent with ﬁnds of Gao et al .
-( 2020 ) for the fewshot task .
-Based on the development results , we use the top performing template “ The sentiment polarity ofhgiven _ categoryiishpolarity _ typei ” in our ACSA experiments .
+For instance , “ The ( cid:104)given_category(cid:105 ) category has a ( cid:104)polarity_type(cid:105 ) label ” and “ The sentiment polarity of ( cid:104)given_category(cid:105 ) is ( cid:104)polarity_type(cid:105 ) ” give 82.31 % and 83.78 % accuracy , respectively , indicating that the template has inﬂuence on the ﬁnal performance .
+This is consistent with ﬁnds of Gao et al ( 2020 ) for the fewshot task .
+Based on the development results , we use the top performing template “ The sentiment polarity of ( cid:104)given_category(cid:105 ) is ( cid:104)polarity_type(cid:105 ) ” in our ACSA experiments .
 For ACD , we investigate the impact of templates using the Rest14 development set .
 Table 2 shows the performance impact of different templates .
-We use the top performing template “ The hcategory _ typeicategory is discussed ” as templateT+and “ Thehcategory _ typeicategory is not discussed ” as template T in our ACD experiments .
-4411Category Model Rest14 Rest14 - hard MAMS Classiﬁcation w/o PLMGCAE ( Xue and Li , 2018 ) 81.336(0.883 ) 54.717(4.920 ) 72.098y As - capsule ( Wang et al . , 2019 ) 82.179(0.414 ) 60.755(2.773 ) 75.116(0.473 )
-CapsNet ( Jiang et al . , 2019 ) 81.172(0.631 ) 53.962(0.924 ) 73.986y AC - MIMLLN ( Li et al . , 2020b ) 81.603(0.715 ) 65.283(2.264 ) 76.427(0.704 )
-Classiﬁcation w PLMBERT classiﬁcation 87.482(0.906 ) 67.547(5.894 ) 78.292y BART classiﬁcation 88.289(0.943 ) 68.698(3.407 ) 78.761(0.752 )
-BERT - pair - QA - B ( Sun et al . , 2019 ) 87.523(1.175 ) 69.433(4.368 ) 79.134(0.973 )
-CapsNet - BERT ( Jiang et al . , 2019 ) 86.557(0.943 ) 51.321(1.412 ) 79.461y AC - MIMLLN - BERT ( Li et al . , 2020b ) 89.250(0.720 ) 74.717(3.290 ) 81.198(0.606 )
-Masked language modelBERT MLM 88.446(0.825 ) 69.021(2.753 ) 79.019(0.935 ) BART MLM 88.667(0.768 ) 69.585(2.529 ) 79.243(0.854 )
-Generation BART generation 90.545(0.315)77.358(2.160)83.130(0.478)
-Table 3 : Results of the sentence - level ACSA in terms of accuracy ( % , mean (std)).yrefers to Jiang
-et al .
-( 2019 ) .
-* means the result is signiﬁcant at p < 0:01using paired t - test comparing to BART MLM andBART classiﬁcation .
-Model TripAdvisor BeerAdvocate LSTM 44.02 34.78 HAN 44.68 36.03 MR 46.56 38.06 BERT classiﬁcation 47.03 39.85 BART classiﬁcation 47.45 40.44 BERT MLM 48.03 40.58 BART MLM 48.36 40.72 BART generation 49.5141.42 Table 4 : Results of the document - level ACSA in terms of accuracy ( % ) .
-* means the result is signiﬁcant at p < 0:01using paired t - test comparing to BART MLM andBART classiﬁcation .
-4.3 ACSA Experiments The results of sentence - level ACSA are shown in Table 3 .
-We can see that , ﬁrst , the performance of BERT MLM andBART MLM is better than BERT classiﬁcation andBART classiﬁcation , respectively .
+We use the top performing template “ The ( cid:104)category_type(cid:105 ) category is discussed ” as template T+ and “ The ( cid:104)category_type(cid:105 ) category is not discussed ” as template T− in our ACD experiments .
+4410  Category
+Model
+Rest14
+Rest14 - hard
+MAMS
+Classiﬁcation w/o PLM
+GCAE ( Xue and Li , 2018 )
+As - capsule ( Wang et al , 2019 ) CapsNet ( Jiang et al , 2019 )
+AC - MIMLLN ( Li et al , 2020b )
+Classiﬁcation w PLM
+BERT classiﬁcation BART classiﬁcation BERT - pair - QA - B ( Sun et al , 2019 )
+CapsNet - BERT ( Jiang et al , 2019 )
+AC - MIMLLN - BERT ( Li et al , 2020b )
+Masked language model
+BERT MLM BART MLM
+Generation
+BART generation
+81.336(±0.883 ) 82.179(±0.414 ) 81.172(±0.631 ) 81.603(±0.715 )
+87.482(±0.906 ) 88.289(±0.943 ) 87.523(±1.175 ) 86.557(±0.943 ) 89.250(±0.720 )
+54.717(±4.920 ) 60.755(±2.773 ) 53.962(±0.924 ) 65.283(±2.264 )
+67.547(±5.894 ) 68.698(±3.407 ) 69.433(±4.368 ) 51.321(±1.412 ) 74.717(±3.290 )
+72.098† 75.116(±0.473 ) 73.986† 76.427(±0.704 )
+78.292† 78.761(±0.752 ) 79.134(±0.973 ) 79.461† 81.198(±0.606 )
+88.446(±0.825 ) 88.667(±0.768 ) 90.545(±0.315)∗
+69.021(±2.753 ) 69.585(±2.529 ) 77.358(±2.160)∗
+79.019(±0.935 ) 79.243(±0.854 )
+83.130(±0.478)∗
+Table 3 : Results of the sentence - level ACSA in terms of accuracy ( % , mean±(std ) ) .
+† refers to Jiang et al ( 2019 ) .
+* means the result is signiﬁcant at p < 0.01 using paired t - test comparing to BART MLM and BART classiﬁcation .
+TripAdvisor
+BeerAdvocate
+Model
+P
+R
+F1
+Model
+LSTM HAN MR
+BERT classiﬁcation BART classiﬁcation
+BERT MLM BART MLM
+BART generation
+44.02 44.68 46.56
+47.03 47.45
+48.03 48.36 49.51∗
+34.78 36.03 38.06
+39.85 40.44
+40.58 40.72 41.42∗
+XRCE NRC - Canada
+BERT classiﬁcation BERT - pair - NLI - B CNE - net
+BART classiﬁcation BART MLM BART generation
+83.23 91.04
+92.78 93.57 93.76
+93.01 93.44 95.18
+81.37 86.24
+89.07 90.83 90.83
+89.92 89.83 90.54
+82.29 88.58
+90.89 92.18 92.27
+91.44 91.60 92.80
+Table 4 : Results of the document - level ACSA in terms of accuracy ( % ) .
+* means the result is signiﬁcant at p < 0.01 using paired t - test comparing to BART MLM and BART classiﬁcation .
+Table 5 : Rest14 results : Aspect Category Detection .
+We use the results reported in XRCE ( Brun et al , 2014 ) , NRC - Canada ( Kiritchenko et al , 2014 ) , BERT - pairNLI - B ( Sun et al , 2019 ) and CNE - net ( Dai et al , 2020 ) .
+4.3 ACSA Experiments
+The results of sentence - level ACSA are shown in Table 3 .
+We can see that , ﬁrst , the performance of BERT MLM and BART MLM is better than BERT classiﬁcation and BART classiﬁcation , respectively .
 In particular , BERT MLM gives a strong baseline , outperforming all non - BERT and BERT classiﬁcation baselines .
-This shows that making use of pre - training at the tasklevel can achieve better results than that at the representation level .
-Also , the BART MLM andclassiﬁcation models perform better than the corresponding BERT models .
+This shows that making use of pre - training at the task level can achieve better results than that at the representation level .
+Also , the BART MLM and classiﬁcation models perform better than the corresponding BERT models .
 Second , BART generation outperforms all baselines on all three datasets , which indicates that our model can better detect multiple sentiment polarities in one sentence toward different aspect categories .
 Third , BART generation performs signiﬁcantly better than BART MLM , giving absolutely 3.89 % stronger accuracy on MAMS , demonstrating the effectiveness of the generation method .
-This shows the strength of BART pre - training for generating semantically related content , which was also reﬂected by the strong performance of BART on abstractive sum - Model P R F1 XRCE 83.23 81.37 82.29 NRC - Canada 91.04 86.24 88.58 BERT classiﬁcation 92.78 89.07 90.89 BERT - pair - NLI - B 93.57 90.83 92.18
-CNE - net 93.76 90.83 92.27 BART classiﬁcation 93.01 89.92 91.44 BART MLM 93.44 89.83 91.60 BART generation 95.18 90.54 92.80 Table 5 : Rest14 results : Aspect Category Detection .
-We use the results reported in XRCE ( Brun et al . , 2014 ) , NRC - Canada ( Kiritchenko et al . , 2014 ) , BERT - pairNLI - B ( Sun et al . , 2019 ) and CNE - net ( Dai et al . , 2020 ) .
-marization ( Lewis et al . , 2020 ) .
+This shows the strength of BART pre - training for generating semantically related content , which was also reﬂected by the strong performance of BART on abstractive summarization ( Lewis et al , 2020 ) .
 In contrast , the MLM method concatenates the input and output into one sequence , and thus fails to model their correlation in encoder - decoder pre - trainng .
 The performances of our model on documentlevel ACSA are shown in Table 4 .
-Compared with LSTM , HAN and MR , BERT classiﬁcationandBART classiﬁcation outperform all baselines , which shows the effectiveness of pre - training .
-BERT MLM andBART MLM surpass BERT classiﬁcation andBART classiﬁcation , respectively .
+Compared with LSTM , HAN and MR , BERT classiﬁcation and BART classiﬁcation outperform all baselines , which shows the effectiveness of pre - training .
+BERT MLM and BART MLM surpass BERT classiﬁcation and BART classiﬁcation , respectively .
 Our BART generation model achieves improvements of 1.15 % and 0.70 % over BART MLM on TripAdvisor and BeerAdvocate , respectively , demonstrating that the generation method can more effectively make use of BART for ACSA .
-4.4 ACD Experiments Results on the Rest14 ACD subtask are presented in Table 5 .
-Following Pontiki et al .
-( 2014b ) , we use Micro - F1 for evaluating .
+4.4 ACD Experiments
+Results on the Rest14 ACD subtask are presented in Table 5 .
+Following Pontiki et al ( 2014b ) , we use Micro - F1 for evaluating .
 Again BART generation achieves better results than BART classiﬁcation and BART MLM .
 Our model outperforms all baselines
-4412ModelRest14 MAMS P R F1 P R F1 Pipeline BART generation 82.03 76.46 79.15 77.04 71.92 74.39 Joint BERT classiﬁcation 77.75 76.07 76.90 74.14 71.92 73.01 Joint BART classiﬁcation 81.92
-73.59 77.53 74.59 74.13 74.36 Joint BART MLM 81.88 76.73 79.22 75.32 75.07 75.19 Joint BART generation 82.76 81.91 82.33 77.18 76.58 76.88 Table 6 : Performance on combination setting .
+4411  Model
+Rest14
+MAMS
+P
+R
+F1
+P
+R
+F1
+Pipeline BART generation
+82.03
+76.46
+79.15
+77.04
+71.92
+74.39
+Joint BERT classiﬁcation Joint BART classiﬁcation Joint BART MLM Joint BART generation
+77.75 81.92 81.88 82.76
+76.07 73.59 76.73 81.91
+76.90 77.53 79.22 82.33
+74.14 74.59 75.32 77.18
+71.92 74.13 75.07 76.58
+73.01 74.36 75.19 76.88
+Table 6 : Performance on combination setting .
 Figure 4 : Few - shot ACSA performance on different test sets .
-Model P R F1 BERT classiﬁcation 90.50 86.68 88.50 BART classiﬁcation 90.67 88.34 89.49 BART MLM 90.57 88.86 89.71 BART generation 90.71 90.16 90.43 Table 7 : MAMS results : Aspect Category Detection .
+Model
+P
+R
+F1
+Model
+R → M M → R
+BERT classiﬁcation BART classiﬁcation BART MLM BART generation
+90.50 90.67 90.57 90.71
+86.68 88.34 88.86 90.16
+88.50 89.49 89.71 90.43
+BERT classiﬁcation BART classiﬁcation BART MLM BART generation
+43.38 46.61 47.86 49.84
+62.28 68.55 70.64 72.46
+Table 7 : MAMS results : Aspect Category Detection .
 on precision and F-1 score .
 In particular , a more than 95 % precision score is achieved , which shows that our model can effectively exclude the aspect categories not mentioned in the input .
 We also investigate the performance on the MAMS dataset , which consists of at least two unique aspect categories with different sentiment polarities in each input sentence .
-Table 7 shows thatBART generation outperforms all baselines , indicating better ability of our model to detect multiple aspect categories in one sentence .
+Table 7 shows that BART generation outperforms all baselines , indicating better ability of our model to detect multiple aspect categories in one sentence .
 4.5 A Joint Model
 The generation method allows us to build a straightforward joint model by extending the ﬁrst template in Table 1 , using “ The sentiment polarity of < given_category > is none ” as a template for nonexisting aspect categories .
 The results on Rest-14 and MAMS are presented in Table 6 .
 We ﬁnd that joint BART generation achieves better results on this task with improvements over pipeline BART generation .
 Joint BART generation outperforms all baselines on precision , recall and F-1 score , which shows the advantage of joint learning .
-Model R!M M!R BERT classiﬁcation 43.38 62.28 BART classiﬁcation 46.61 68.55 BART MLM 47.86 70.64 BART generation 49.84 72.46 Table 8 : Zero - Shot results : ACSA .
-R !
-M indicates training on Rest14 and testing on MAMS .
-M !
-R indicates training on MAMS and testing on Rest14 .
-4.6 Few - Shot and Zero - Shot Learning We evaluate the model performance on ACSA where only a small amount of labelled data is available for training , simulating the low - resource data scenarios by randomly sampling training instances from a large training set .
+Table 8 : Zero - Shot results : ACSA .
+R → M indicates training on Rest14 and testing on MAMS .
+M → R indicates training on MAMS and testing on Rest14 .
+4.6 Few - Shot and Zero - Shot Learning
+We evaluate the model performance on ACSA where only a small amount of labelled data is available for training , simulating the low - resource data scenarios by randomly sampling training instances from a large training set .
 In particular , we use different numbers of instances for training , randomly sampling a ﬁxed number of instances per category type ( 10 , 20 , 50 , 100 , 200 , 500 instances per category type for Rest14 and MAMS ) .
-The results are shown in Figure 4 , where the methods of BERT classiﬁcation , BART classiﬁcation andBART MLM are also compared .
-It can be seen that on all the datasets , our model outperforms BERT classiﬁcation , BART classiﬁcationandBART MLM , especially when the number of training instances is small .
+The results are shown in Figure 4 , where the methods of BERT classiﬁcation , BART classiﬁcation and BART MLM are also compared .
+It can be seen that on all the datasets , our model outperforms BERT classiﬁcation , BART classiﬁcation and BART MLM , especially when the number of training instances is small .
 For example , when there are only 10 training instances , our model gives accuracy scores of 82.01 % on Rest14 , as compared to 38.57 % by BERT classiﬁcation and 50.16 % by BART classiﬁcation .
 When the number of instances grows as large as 500 , our model gives 2.24 % and 2.65 % better accuracies than BART MLM on Rest14 and MAMS , respectively .
 One
-4413 Figure 5 : Comparison of accuracy with different category frequency on MAMS .
+4412  Figure 5 : Comparison of accuracy with different category frequency on MAMS .
 possible reason is that our method makes more use of direct sentiment knowledge in the pre - trained language model by directly adopting the original structure of BART mentioned earlier .
 In contrast , classiﬁcation methods can not achieve this due to transferring the sentiment bias indirectly .
 The results of our zero - shot learning experiments are in Table 8 .
 In all cases , our method outperforms all the baselines .
 In particular , the model trained on MAMS has a better performance on Rest14 than the reverse zero - shot setting , which proves that the MAMS dataset has a higher challenge .
-5 Analysis 5.1 Inﬂuence of Category Frequency Aspect categories can be implicit and do not necessarily occur as terms in the given sentence .
+5 Analysis
+5.1
+Inﬂuence of Category Frequency
+Aspect categories can be implicit and do not necessarily occur as terms in the given sentence .
 To explore the correlation between ACSA accuracy and the occurrence frequency of a given category , we split the eight categories in the MAMS test set into four subsets based on the occurrence frequency .
 The category ( i.e. , miscellaneous ) that never occurs in the given sentence is put into the zero frequency subset , the 15 % least frequent ( i.e. , ambience , staff ) are put into low frequency subset , the 30 % most frequent ( i.e. , menu , service ) are put into high frequency subset , and the remaining ( i.e. , price , food , place ) are put into mid frequency subset .
 Figure 5 shows the accuracy of BART classiﬁcation and our model against the frequency .
@@ -265,226 +383,34 @@ As the category occurrence frequency decreases , the relative gap of accuracy be
 In the zero frequency , our method gives absolutely 8.03 % stronger accuracy than BART classiﬁcation .
 This demonstrates that our method is more robust in summarizing the sentiment polarity of abstract or rare categories .
 Even if there are no explicit category terms in the sentence , the generation method can give the implicit category opinion of the whole sentence according to the context .
-Service was fine and the food deliver ed in r easonable time given the cr owd , but for the price I was disappointed .
-< miscellaneous : neutral >    <
-incorrect output : negative >
-The kids r eally enjoyed their food and the value on the kids menu is good .
-< menu : neutral >    <
-incorrect output : positive >
-The decor could be a bit better , and if ther e was a small bar the overall atmospher e would be a bit mor e inviting .
-< place :
-negative >    <
-incorrect output : neutral > ( a ) ( b ) ( c)Figure 6 : Examples of BART classiﬁcation .
+Figure 6 : Examples of BART classiﬁcation .
 ( a ) is an instance with category do not occur as term in sentence .
 ( b ) represents that our method is not affected by the surrounding interference information .
 ( c ) needs conditional reasoning for analysis .
 Our method can obtain correct sentiment polarity .
-5.2 Case Study Figure 6 shows typical examples from the test set which can not be inferred by the BART classiﬁcation model .
+5.2 Case Study
+Figure 6 shows typical examples from the test set which can not be inferred by the BART classiﬁcation model .
 In sentence ( a ) , the given category miscellaneous does not occur as a term in the given sentence .
 Our method can synthesize different sentiment polarities with different aspects to obtain correct polarity .
 In sentence ( b ) , “ the value on the kids menu is good ” , good modiﬁes the value , rather than the given category menu .
 Our method gives the correct polarity , not being affected by the surrounding other aspect sentiments .
 The last instance ( c ) has conditional reasoning which is difﬁcult for BART classiﬁcation .
-In contrast , BART generationgives the correct label by correctly recognizing the negativity in “ if there was ... would be a bit more inviting ” .
-This is likely because our method makes use of pre - trained knowledge to infer the inter - sentential correlations between the input and the output sequences , which the BART classiﬁcationmodel failed to achieve due to the indirect use of BART in the additional classiﬁcation network .
-6 Conclusion We investigated a generation method for aspect category detection ( ACD ) and aspect category sentiment analysis ( ACSA ) , which can make better use of BART ’s advantages in making semantic level summaries to the input by not introducing additional model parameters .
+In contrast , BART generation gives the correct label by correctly recognizing the negativity in “ if there was ... would be a bit more inviting ” .
+This is likely because our method makes use of pre - trained knowledge to infer the inter - sentential correlations between the input and the output sequences , which the BART classiﬁcation model failed to achieve due to the indirect use of BART in the additional classiﬁcation network .
+6 Conclusion
+We investigated a generation method for aspect category detection ( ACD ) and aspect category sentiment analysis ( ACSA ) , which can make better use of BART ’s advantages in making semantic level summaries to the input by not introducing additional model parameters .
 Experiments show that our proposed method obtains superior performance over the baseline models for both sentence - level and document - level aspect sentiment analysis .
 In contrast to the traditional sentiment classiﬁcation methods , our method is also more powerful on zero - shot and few - shot tasks .
-4414Acknowledgements Zhiyang Teng is the corresponding author .
+4413Service was fine and the food delivered in reasonable timegiven the crowd , but for the price I was disappointed . <
+miscellaneous : neutral >    <
+incorrect output : negative >
+The kids really enjoyed their food and the value on thekids menu is good .
+< menu : neutral >    <
+incorrect output : positive >
+The decor could be a bit better , and if there was a smallbar the overall atmosphere would be a bit more inviting .
+< place :
+negative >    <
+incorrect output : neutral > ( a)(b)(c )  Acknowledgements
+Zhiyang Teng is the corresponding author .
 We would like to thank the anonymous reviewers for their insightful comments .
 We gratefully acknowledge funding from the National Natural Science Foundation of China ( NSFC No.61976180 ) .
-References Tom B. Brown , Benjamin Mann , Nick Ryder , Melanie Subbiah , Jared Kaplan , Prafulla Dhariwal , Arvind Neelakantan , Pranav Shyam , Girish Sastry , Amanda Askell , Sandhini Agarwal , Ariel Herbert - V oss , Gretchen Krueger , Tom Henighan , Rewon Child , Aditya Ramesh , Daniel M. Ziegler , Jeffrey Wu , Clemens Winter , Christopher Hesse , Mark Chen , Eric Sigler , Mateusz Litwin , Scott Gray , Benjamin Chess , Jack Clark , Christopher Berner , Sam McCandlish , Alec Radford , Ilya Sutskever , and Dario Amodei .
-2020 .
-Language models are few - shot learners .
-Caroline Brun , Diana Nicoleta Popa , and Claude Roux .
-2014 .
-XRCE : hybrid classiﬁcation for aspect - based sentiment analysis .
-In Proceedings of the 8th International Workshop on Semantic Evaluation , SemEval@COLING 2014 , Dublin , Ireland , August 2324 , 2014 , pages 838–842 .
-The Association for Computer Linguistics .
-Jiajun Cheng , Shenglin Zhao , Jiani Zhang , Irwin King , Xin Zhang , and Hui Wang . 2017 .
-Aspect - level sentiment classiﬁcation with heat ( hierarchical attention ) network .
-In Proceedings of the 2017 ACM on Conference on Information and Knowledge Management , pages 97–106 .
-Zehui Dai , Cheng Peng , Huajie Chen , and Yadong Ding .
-2020 .
-A multi - task incremental learning framework with category name embedding for aspect - category sentiment analysis .
-In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing , EMNLP 2020 , Online , November 16 - 20 , 2020 , pages 6955–6965 .
-Association for Computational Linguistics .
-Angel Daza and A. Frank .
-2018 .
-A sequence - tosequence model for semantic role labeling .
-In Rep4NLP@ACL .
-Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019a .
-BERT : Pre - training of deep bidirectional transformers for language understanding .
-In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long and Short Papers ) , pages 4171–4186 , Minneapolis , Minnesota .
-Association for Computational Linguistics .
-Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019b .
-Bert : Pre - training ofdeep bidirectional transformers for language understanding .
-In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long and Short Papers ) , pages 4171–4186 .
-Tianyu Gao , Adam Fisch , and Danqi Chen .
-2020 .
-Making pre - trained language models better few - shot learners .
-Mengting Hu , Shiwan Zhao , Li Zhang , Keke Cai , Zhong Su , Renhong Cheng , and Xiaowei Shen . 2019 .
-Can : Constrained attention networks for multi - aspect sentiment analysis .
-In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLP - IJCNLP ) , pages 4593–4602 .
-Qingnan Jiang , Lei Chen , Ruifeng Xu , Xiang Ao , and Min Yang .
-2019 .
-A challenge dataset and effective models for aspect - based sentiment analysis .
-In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLP - IJCNLP ) , pages 6281–6286 .
-Svetlana Kiritchenko , Xiaodan Zhu , Colin Cherry , and Saif Mohammad . 2014 .
-Nrc - canada-2014 : Detecting aspects and sentiment in customer reviews .
-InProceedings of the 8th International Workshop on Semantic Evaluation , SemEval@COLING 2014 , Dublin , Ireland , August 23 - 24 , 2014 , pages 437–442 .
-The Association for Computer Linguistics .
-Tao Lei , Regina Barzilay , and Tommi S. Jaakkola .
-2016 .
-Rationalizing neural predictions .
-In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing , EMNLP 2016 , Austin , Texas , USA , November 1 - 4 , 2016 , pages 107 – 117 .
-The Association for Computational Linguistics .
-Mike Lewis , Yinhan Liu , Naman Goyal , Marjan Ghazvininejad , Abdelrahman Mohamed , Omer Levy , Veselin Stoyanov , and Luke Zettlemoyer .
-2020 .
-BART :
-Denoising sequence - to - sequence pretraining for natural language generation , translation , and comprehension .
-In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 7871–7880 , Online .
-Association for Computational Linguistics .
-Xiaoya Li , Fan Yin , Zijun Sun , Xiayu Li , Arianna Yuan , Duo Chai , Mingxin Zhou , and Jiwei Li .
-2019 .
-Entity - relation extraction as multi - turn question answering .
-In Proceedings of the 57th Conference of the Association for Computational Linguistics , ACL 2019 , Florence , Italy , July 28- August 2 , 2019 , Volume 1 : Long Papers , pages 1340–1350 .
-Association for Computational Linguistics .
-Yuncong Li , Zhe Yang , Cunxiang Yin , Xu Pan , Lunan Cui , Qiang Huang , and Ting Wei . 2020a .
-A joint model for aspect - category sentiment analysis with
-4415shared sentiment prediction layer .
-In Proceedings of the 19th Chinese National Conference on Computational Linguistics , pages 1112–1121 , Haikou , China .
-Chinese Information Processing Society of China .
-Yuncong Li , Cunxiang Yin , Sheng - hua Zhong , and Xu Pan . 2020b .
-Multi - instance multi - label learning networks for aspect - category sentiment analysis .
-In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing , EMNLP 2020 , Online , November 16 - 20 , 2020 , pages 3550 – 3560 .
-Association for Computational Linguistics .
-Yunlong Liang , Fandong Meng , Jinchao Zhang , Jinan Xu , Yufeng Chen , and Jie Zhou .
-2019 .
-A novel aspect - guided deep transition model for aspect based sentiment analysis .
-In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLP - IJCNLP ) , pages 5572–5584 .
-Yongjie Lin , Yi Chern Tan , and Robert Frank .
-2019 .
-Open sesame : Getting inside BERT ’s linguistic knowledge .
-In Proceedings of the 2019 ACL Workshop BlackboxNLP : Analyzing and Interpreting Neural Networks for NLP , pages 241–253 , Florence , Italy .
-Association for Computational Linguistics .
-Chunpeng Ma , L. Liu , Akihiro Tamura , T. Zhao , and E. Sumita . 2017 .
-Deterministic attention for sequence - to - sequence constituent parsing .
-In AAAI .
-Julian J. McAuley , Jure Leskovec , and Dan Jurafsky .
-2012 .
-Learning attitudes and attributes from multiaspect reviews .
-CoRR , abs/1210.3926 .
-Fabio Petroni , Tim Rocktäschel , Sebastian Riedel , Patrick Lewis , Anton Bakhtin , Yuxiang Wu , and Alexander Miller .
-2019 .
-Language models as knowledge bases ?
-In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLPIJCNLP ) , pages 2463–2473 , Hong Kong , China .
-Association for Computational Linguistics .
-Maria Pontiki , Dimitris Galanis , John Pavlopoulos , Harris Papageorgiou , Ion Androutsopoulos , and Suresh Manandhar .
-2014a .
-SemEval-2014 task 4 : Aspect based sentiment analysis .
-In Proceedings of the 8th International Workshop on Semantic Evaluation ( SemEval 2014 ) , pages 27–35 , Dublin , Ireland .
-Association for Computational Linguistics .
-Maria Pontiki , Dimitris Galanis , John Pavlopoulos , Harris Papageorgiou , Ion Androutsopoulos , and Suresh Manandhar .
-2014b .
-Semeval-2014 task 4 : Aspect based sentiment analysis .
-In Proceedings of the 8th International Workshop on Semantic Evaluation , SemEval@COLING 2014 , Dublin , Ireland , August 23 - 24 , 2014 , pages 27–35 .
-The Association for Computer Linguistics .
-Colin Raffel , Noam Shazeer , Adam Roberts , Katherine Lee , Sharan Narang , Michael Matena , Yanqi Zhou , Wei Li , and Peter J. Liu . 2020 .
-Exploring the limits of transfer learning with a uniﬁed text - to - text transformer .
-J. Mach .
-Learn .
-Res . , 21:140:1–140:67 .
-Sebastian Ruder , Parsa Ghaffari , and John G Breslin .
-2016 .
-A hierarchical model of reviews for aspectbased sentiment analysis .
-In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing , pages 999–1005 .
-Timo Schick , Helmut Schmid , and Hinrich Schütze . 2020 .
-Automatically identifying words that can serve as labels for few - shot text classiﬁcation .
-In Proceedings of the 28th International Conference on Computational Linguistics , pages 5569–5578 , Barcelona , Spain ( Online ) .
-International Committee on Computational Linguistics .
-Timo Schick and Hinrich Schütze . 2020 .
-Exploiting cloze questions for few shot text classiﬁcation and natural language inference .
-Martin Schmitt , Simon Steinheber , Konrad Schreiber , and Benjamin Roth . 2018 .
-Joint aspect and polarity classiﬁcation for aspect - based sentiment analysis with end - to - end neural networks .
-In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 1109–1114 .
-Gabriel Stanovsky and Ido Dagan .
-2018 .
-Semantics as a foreign language .
-In EMNLP .
-Chi Sun , Luyao Huang , and Xipeng Qiu . 2019 .
-Utilizing bert for aspect - based sentiment analysis via constructing auxiliary sentence .
-In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long and Short Papers ) , pages 380–385 .
-Duyu Tang , Bing Qin , and Ting Liu . 2015 .
-Document modeling with gated recurrent neural network for sentiment classiﬁcation .
-In Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing , EMNLP 2015 , Lisbon , Portugal , September 17 - 21 , 2015 , pages 1422–1432 .
-The Association for Computational Linguistics .
-Yi Tay , Luu Anh Tuan , and Siu Cheung Hui .
-2018 .
-Learning to attend via word - aspect associative fusion for aspect - based sentiment analysis .
-In ThirtySecond AAAI Conference on Artiﬁcial Intelligence .
-Ashish Vaswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N Gomez , Ł ukasz Kaiser , and Illia Polosukhin . 2017 .
-Attention is all you need .
-In Advances in Neural Information Processing Systems , volume 30 , pages 5998–6008 .
-Curran Associates , Inc.
-Oriol Vinyals , Lukasz Kaiser , Terry Koo , Slav Petrov , Ilya Sutskever , and Geoffrey E. Hinton . 2015 .
-Grammar as a foreign language .
-In NIPS .
-4416Hongning Wang , Yue Lu , and Chengxiang Zhai .
-2010 .
-Latent aspect rating analysis on review text data : a rating regression approach .
-In Proceedings of the 16th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining , Washington , DC , USA , July 25 - 28 , 2010 , pages 783–792 .
-ACM .
-Yequan Wang , Minlie Huang , Xiaoyan Zhu , and Li Zhao .
-2016 .
-Attention - based lstm for aspectlevel sentiment classiﬁcation .
-In Proceedings of the 2016 conference on empirical methods in natural language processing , pages 606–615 .
-Yequan Wang , Aixin Sun , Minlie Huang , and Xiaoyan Zhu . 2019 .
-Aspect - level sentiment analysis using ascapsules .
-In The World Wide Web Conference , pages 2033–2044 .
-Bowen Xing , Lejian Liao , Dandan Song , Jingang Wang , Fuzheng Zhang , Zhongyuan Wang , and Heyan Huang .
-2019 .
-Earlier attention ?
-aspectaware lstm for aspect sentiment analysis .
-arXiv preprint arXiv:1905.07719 .
-Wei Xue and Tao Li .
-2018 .
-Aspect based sentiment analysis with gated convolutional networks .
-In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 2514–2523 .
-Zichao Yang , Diyi Yang , Chris Dyer , Xiaodong He , Alexander J. Smola , and Eduard H. Hovy .
-2016 .
-Hierarchical attention networks for document classiﬁcation .
-In NAACL HLT 2016 , The 2016 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , San Diego California , USA , June 1217 , 2016 , pages 1480–1489 .
-Yichun Yin , Yangqiu Song , and Ming Zhang . 2017 .
-Document - level multi - aspect sentiment classiﬁcation as machine comprehension .
-In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing , EMNLP 2017 , Copenhagen , Denmark , September 9 - 11 , 2017 , pages 2044–2054 .
-Peisong Zhu , Zhuang Chen , Haojie Zheng , and Tieyun Qian .
-2019 .
-Aspect aware learning for aspect category sentiment analysis .
-ACM Trans .
-Knowl .
-Discov .
-Data , 13(6 ) .
-A Datasets A.1 Sentence - Level Datasets Rest14 ( Pontiki et al . , 2014a )
-Following previous work ( Cheng et al . , 2017 ; Tay et al . , 2018 ; Hu et al . , 2019 ) , we remove samples with conﬂict polarities .
-Since there is no ofﬁcial development set for Rest14 , we use the split offered by Tay et al .
-( 2018).Dataset Pos .
-Neg .
-Neu .
-Rest14Train 1855 733 430 Dev 324 106 70 Test 657 222 94 Rest14 - hard Test 21 20 12 MAMS - ACSATrain 1929 2084 3077
-Dev 241 259 388 Test 245 263 393 Table 9 : Statistics of the sentence - level datasets .
-Dataset # docs # words / doc words / sent TripAdvisor 29,391 251.7 18.0 BeerAdvocate 51,020 144.5 12.1 Table 10 : Statistics of the document - level datasets .
-The rating scale of TripAdvisor dataset is 1 - 5 .
-The rating scale of BeerAdvocate dataset is 1 - 10 .
-Rest14 - hard Following Xue and Li ( 2018 ) , we construct Rest14 - hard , where the training set and development set are the same as Rest14 ’s , while test set is constructed from the test set of Rest14 .
-The test set of Rest14 - hard only includes sentences containing at least two aspect categories with different sentiment polarities .
-MAMS Jiang et
-al .
-( 2019 )
-Since the test set of Rest14 - hard is small , we also adopt the MultiAspect Multi - Sentiment dataset for Aspect Category Sentiment Analysis ( denoted by MAMS ) .
-All sentences in MAMS contain multiple aspect categories with different sentiment polarities .
-A.2 Document - Level Datasets TripAdvisor ( Wang et al . , 2010 ) and BeerAdvocate ( McAuley et al . , 2012 ; Lei et al . , 2016 ) contain seven aspects ( value , room , location , cleanliness , check in / front desk , service , and business service ) and four aspects ( feel , look , smell , and taste ) respectively .
-We randomly split them into training , development , and testing sets with 80/10/10 % .
-Statistics of these three sentence - level datasets are given in Table 9 and two document - level datasets are described in Table 10 .
-B Settings Each method is trained for 30 epochs , during which the model with the best performance on the validation set is saved .
-We also apply early stopping in training , which means that the training will stop if the performance on validation set does not improve in 5 epochs .

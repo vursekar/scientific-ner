@@ -1,0 +1,276 @@
+Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing , pages 2886–2892 Copenhagen , Denmark , September 7–11 , 2017 .
+c  2017 Association for Computational Linguistics Deep Multi - Task Learning for Aspect Term Extraction with Memory Interaction∗ Xin Li andWai Lam Key Laboratory on High Conﬁdence Software Technologies ( Sub - Lab , CUHK ) , Ministry of Education , and Department of Systems Engineering and Engineering Management
+The Chinese University of Hong Kong , Hong Kong { lixin , wlam}@se.cuhk.edu.hk
+Abstract We propose a novel LSTM - based deep multi - task learning framework for aspect term extraction from user review sentences .
+Two LSTMs equipped with extended memories and neural memory operations are designed for jointly handling the extraction tasks of aspects and opinions via memory interactions .
+Sentimental sentence constraint is also added for more accurate prediction via another LSTM .
+Experiment results over two benchmark datasets demonstrate the effectiveness of our framework .
+1 Introduction The aspect - based sentiment analysis ( ABSA ) task is to identify opinions expressed towards speciﬁc entities such as laptop or attributes of entities such asprice ( Liu , 2012a ) .
+This task involves three subtasks : Aspect Term Extraction ( ATE ) , Aspect Polarity Detection and Aspect Category Detection .
+As a fundamental subtask in ABSA , the goal of the ATE task is to identify opinionated aspect expressions .
+One of most important characteristics is that opinion words can provide indicative clues for aspect detection since opinion words should co - occur with aspect words .
+Most publicly available datasets contain the gold standard annotations for opinionated aspects , but the ground truth of the corresponding opinion words is not commonly provided .
+Some works tackling the ATE task ignore the consideration of opinion words and just focus on aspect term modeling and learning ( Jin ∗The work described in this paper is substantially supported by a grant from the Research Grant Council of the Hong Kong Special Administrative Region , China ( Project Code : 14203414 ) .
+We thank Lidong Bing and Piji Li for their helpful comments on this draft and the anonymous reviewers for their valuable feedback.et al . , 2009 ; Jakob and Gurevych , 2010 ; Toh and Wang , 2014 ; Chernyshevich , 2014 ; Manek et al . , 2017 ; San Vicente et al . , 2015 ; Liu et al . , 2015 ; Poria et al . , 2016 ; Toh and Su , 2016 ; Yin et al . , 2016 ) .
+They fail to leverage opinion information which is supposed to be useful clues .
+Some works tackling the ATE task consider opinion information ( Hu and Liu , 2004a , b ; Popescu and Etzioni , 2005 ; Zhuang et al . , 2006 ; Qiu et al . , 2011 ; Liu et al . , 2012b , 2013a , b , 2014 ) in an unsupervised or partially supervised manner .
+Qiu et al .
+( 2011 ) proposed Double Propagation ( DP ) to collectively extract aspect terms and opinion words based on information propagation over a dependency graph .
+One drawback is that it heavily relies on the dependency parser , which is prone to generate mistakes when applying on informal online reviews .
+Liu et al .
+( 2014 ) modeled relation between aspects and opinions by constructing a bipartite heterogenous graph .
+It can not perform well without a high - quality phrase chunker and POS tagger reducing its ﬂexibility .
+As unsupervised or partially supervised frameworks can not take the full advantages of aspect annotations commonly found in the training data , the above methods lead to deﬁciency in leveraging the data .
+Recently , Wang et al .
+( 2016 ) considered relation between opinion words and aspect words in a supervised model named RNCRF .
+However , RNCRF tends to suffer from parsing errors since the structure of the recursive network hinges on the dependency parse tree .
+CMLA ( Wang et al . , 2017a ) used a multilayer neural model where each layer consists of aspect attention and opinion attention .
+However CMLA merely employs standard GRU without extended memories .
+We propose MIN ( Memory Interaction Network ) , a novel LSTM - based deep multi - task learning framework for the ATE task .
+Two LSTMs with extended memory are designed for handling2886
+the extraction tasks of aspects and opinions .
+The aspect - opinion relationship is established based on neural memory interactions between aspect extraction and opinion extraction where the global indicator score of opinion terms and local positional relevance between aspects and opinions are considered .
+To ensure that aspects are from sentimental sentences , MIN employs a third LSTM for sentimental sentence classiﬁcation facilitating more accurate aspect term extraction .
+Experiment results over two benchmark datasets show that our framework achieves superior performance .
+2 Model 2.1 Overview Let an input review sentence with Tword tokens and the corresponding distributed representations bew = { w1, ... ,w T}andx
+= { x1, ... ,x T}respectively .
+The ATE task is treated as a sequence labeling task with BIO tagging scheme and the set of aspect tags for the word wtisyA t∈{B , I , O } , whereB , I , O represent beginning of , inside and outside of the aspect span respectively .
+Commonly found training data contains gold annotations for aspect terms and opinionated sentences , but the gold standard of opinion words are usually not available .
+In our multi - task learning framework , three tasks are involved : ( 1 ) aspect term extraction ( ATE ) , ( 2 ) opinion word extraction and ( 3 ) sentimental sentence classiﬁcation .
+We design a taskspeciﬁc LSTM , namely , A - LSTM , O - LSTM and S - LSTM , for tackling each of the above tasks respectively .
+The ﬁrst component of our proposed framework consists of A - LSTM and O - LSTM where we equip LSTMs with extended operational memories and some operations are deﬁned over the memories for task - level memory interactions .
+The second component is to determine if a review sentence is sentimental .
+This is achieved by employing a vanilla LSTM , namely , S - LSTM .
+2.2 Model Description The ﬁrst component of our framework MIN is composed of A - LSTM and O - LSTM .
+Both LSTMs have extended memories for task - level memory interactions .
+A - LSTM involves a large aspect memory HA t∈Rnm×dimA hand an opinion summary vector mO t∈RdimO
+hwhereHA tcontainsnmpieces of aspect hidden states of dimensiondimA handmO tis distilled from HO t.
+As forO - LSTM , similarly , an opinion memory HO t∈ Rnm×dimO hand an aspect - speciﬁc summary vector mA t∈RdimA hare included .
+We use the aspect term annotations in the training data for training A - LSTM .
+As there is no ground truth available for opinion words in the training data , sentiment lexicon and highprecision dependency rules are introduced to ﬁnd potential opinion words .
+Commonly used opinion words can be found in some general sentiment lexicons .
+To ﬁnd opinion words , not in sentiment lexicons , in a sentence , we build a small rule set R composed of dependency relations with high conﬁdence , e.g. , amod , nsubj , and determine if wt directly depends on the gold aspect word through the dependencies in R. If so , wtwill be treated as a potential opinion word .
+Then such opinion words are used as training data for O - LSTM .
+In the memory - enhanced A - LSTM and OLSTM , we manually design three kinds of operations : ( 1 ) READ to selectnmpieces of aspect ( opinion ) hidden states from the past memories and build HA t(HO t ) ; ( 2 ) DIGEST to distill an aspect ( opinion)-speciﬁc summary mA t(mO t ) fromHA t(HO t ) where inﬂuences of opinion terms and relative positions of inputs are considered ; ( 3 ) INTERACT to perform interaction between ALSTM and O - LSTM using the task speciﬁc summaries ( i.e. , mA tandmO t ) .
+Consider the work ﬂow of A - LSTM for aspect term extraction .
+Since opinion words and aspect terms should co - occur , the goal of A - LSTM participating in memory interactions is to acquire opinion summaries from O - LSTM ( i.e. , mO t ) for better aspect prediction .
+First of all , MIN will READnmpieces of opinion memories which are most related to wtfrom O - LSTM .
+Syntax structure could be used but syntactic parsers are not effective for processing short informal review sentences .
+Therefore , MIN selects memory segments temporally related to wt .
+Precisely , the opinion memory at the time step tisHO t=
+[ hO t−1; ...
+;hO t−nm]wherehO t−iis the ( t−i)-th hidden state from O - LSTM .
+Since the linear context contains most of the parent nodes and the child nodes ofwton the dependency parse tree , treating the corresponding memory segments as relevant segments to wtis reasonable .
+Then MIN will DIGEST the collected opinion memoriesHO tin the A - LSTM .
+As different memory segments are not of equal importance for the2887
+current decision and the same segment in different memories ( i.e. , different HO t ) also makes a difference , MIN leverages two kind of weights to summarize the collected content .
+The ﬁrst weight is the indicator score of being opinion terms denoted asvI∈Rnm , which is used to measure how much opinion information the word wt−i ( i= 1, .. ,n m ) holds .
+We adopt Euclidean distance between distributed representations of wt−i and opinion words .
+It is obvious that computing the distance between xt−iand each opinion word is expensive .
+Thus , we run an off - the - shelf clustering algorithm over opinion words in the training set and then use the produced nccentroids to estimate the indicator score vI iofwt−ibeing an opinion word :
+vI i = nc / summationdisplay j=11 ||xt−i−cj||2(1 ) wherext−iis the distributed representation of wt−iandcjis the centroid vector representation ofj - th cluster .
+This weighting scheme ensures thatwt−iis assigned a high score as long as xt−i is close to a particular centroid .
+The aspect decision ofwtis also affected by relative position betweenwt−iandwt .
+Thus , MIN employs the second weight vPto explicitly model their positional relevance and the initial weight for the i - th segmentvP iis calculated as below : vP i = nm−i+ 1 / summationtextnm k=1k(2 ) wherenmis the number of hidden state in HO t.
+This position - aware weight enables that the closer the wordwt−iis to the current input , the more the corresponding memory segment will contribute to the current decision .
+To better capture the local positional relevance , we make the initialized vPas learnable parameters .
+Combining the above two weights helps to utilize each active memory segment according to the importance for prediction andmO t , the summary of HO tis generated : mO t= ( HO t)/latticetop(vI⊙vP ||vI||2 ) ( 3 ) where⊙denotes element - wise multiplication and
+||∗|| 2is
+Euclidean norm of vectors .
+From Equation 3,mO tis dominated by the associated memory segment of wt−ithat obtains the high combined weights .
+In the last operation INTERACT , A - LSTM communicates with O - LSTM by acquiring mO t from O - LSTM and incorporating the summary into the memory update .
+The update process is as follows : iA t = σ(WA ixt+UA i[HA t[1 ] : mO t ] )
++ bA i ) fA t = σ(WA fxt+UA f[HA t[1 ] : mO t ] )
++ bA f ) ˆcA t = tanh(WA cxt+UA c[HA t[1 ] : mO t ] )
++ bA c ) oA t = σ(WA oxt+UA o[HA t[1 ] : mO t ] )
++ bA o ) cA t = iA t⊙ˆcA t+cA t−1⊙fA t hA t = tanh(cA t)⊙oA t(4 )
+whereWA ∗,UA ∗andbA ∗are weight parameters of the A - LSTM and σis the sigmoid activation function .
+[: ] denotes vector concatenation operation.mO tcan be seen as the summary of the opinion indicator in the left context of wtand HA t[1]is the most immediate hidden memory of A - LSTM .
+MIN blends the opinion summary from O - LSTM with the memory from A - LSTM .
+The co - occurrence relation between aspects and opinion words is modeled by such “ memory fusion ” strategy .
+Since opinion words can appear on both sides ofwt , memory segments corresponding to the right context ( i.e. , “ future ” memory ) should be included .
+Hence , we conduct bi - directional training for A - LSTM .
+The work ﬂow of memory interaction and the update process of the internal memories in OLSTM are kept same with those in A - LSTM except the DIGEST operation .
+Speciﬁcally , we set mA t , the task - speciﬁc summary of A - LSTM , as hA t.
+The second component of MIN is a generic LSTM called S - LSTM for discriminating sentimental sentences and non - sentimental sentences .
+The design and the process of the memory update in this component are similar to that in Jozefowicz et al .
+( 2015 )
+.
+In sentences not conveying any sentimental meanings , some words like food , service tend to be misclassiﬁed as aspect terms since they are commonly used in user reviews .
+To avoid this kind of error , we add a constraint that an aspect term should come from sentimental sentence .
+Speciﬁcally , S - LSTM learns the sentimental representationhS
+Tof the sentence
+and then feeds it in aspect prediction as a soft constraint : P(yA t|xt )
+= softmax ( WA fc([hA t : hS T ] ) ) ( 5 ) whereWA fcdenotes the weight matrix of the fullyconnected softmax layer.2888
+On the whole , our proposed MIN framework has three LSTMs and each of them is differentiable .
+Thus , our MIN framework can be efﬁciently trained with gradient descent .
+For ALSTM and O - LSTM , we use the token - level cross - entropy error between the predicted distributionP(yT t|xt)and the gold standard distribution P(yT , g t|xt)as the loss function ( T ∈{A , O } ):
+Loss ( T ) = −1 N∗TN / summationdisplay i=1T / summationdisplay t=1P(YT , g i , t|Xi , t)⊙ log[P(YT
+i , t|Xi , t)](6 )
+For S - LSTM , sentence - level cross entropy error are employed to calculate the corresponding loss : Loss ( S ) = −1 NN / summationdisplay i=1P(YS , g i|Xi)⊙log[P(YS i|Xi ) ] ( 7 ) Then , losses from different LSTMs are combined to form the training objective of the MIN framework : J(θ )
+= Loss ( A ) + Loss ( O )
++ Loss ( S)(8 ) .
+# TRAIN/#TEST Sentences # TRAIN/#TEST Aspects D1 3045/800 2358/654 D2 2000/676 1743/622 Table 1 : Statistics of datasets .
+3 Experiment 3.1 Dataset We conduct experiments on two benchmark datasets from SemEval ABSA challenge ( Pontiki et al . , 2014 , 2016 ) as shown in Table 1 . D1(SemEval 2014 ) contains reviews from the laptop domain andD2(SemEval 2016 ) contains reviews from the restaurant domain .
+In these datasets , aspect terms have been labeled and sentences containing at least one golden truth aspect are regarded as sentimental sentences .
+As gold standard annotations for opinion words are not provided , we select words with strong subjectivity from MPQA1as potential opinion words .
+Apart from the common opinion words in the sentiment lexicon , we also treat words , which directly depend on gold standard aspect terms through highprecision dependency rules , as opinion words .
+1http://mpqa.cs.pitt.edu/3.2 Experiment Design To evaluate the proposed MIN framework , we perform comparison with the following two groups of methods : ( 1)CRF based methods : •CRF : Conditional Random Fields with basic feature templates2and word embeddings .
+•Semi - CRF : First - order semi - Markov conditional random ﬁelds ( Sarawagi et al . , 2004 ) and the feature template in Cuong et al .
+( 2014 ) is adopted .
+•IHS RD ( Chernyshevich , 2014 ) , NLANGP ( Toh and Su , 2016 ): Best systems in ATE subtask in SemEval ABSA challenges ( Pontiki et al . , 2014 , 2016 ) .
+•DLIREC ( Toh and Wang , 2014 ) , AUEB ( Xenos et al . , 2016 ): Top - ranked CRF - based systems in ATE subtask in SemEval ABSA challenges ( Pontiki et al . , 2014 , 2016 ) .
+•WDEmb ( Yin et al . , 2016 ): Enhanced CRF with word embeddings , linear context embeddings and dependency path embeddings .
+( 2)Neural Network based methods •LSTM : Vanilla bi - directional LSTM with pre - trained word embeddings3 .
+•RNCRF ( Wang et al . , 2016 ): Dependency Tree based Recursive Neural Network with CRF extractor4 .
+For datasets in the restaurant domain , we train word embeddings of dimension 200 with word2vec ( Mikolov et al . , 2013 ) on Yelp reviews5 .
+For those in laptop domain , we use pre - trained glove .
+840B.300d6 .
+2http://sklearn-crfsuite.readthedocs.io/en/latest/ 3As we use our own implementation of LSTM , the reported results are different from those in ( Liu et al . , 2015 ) 4Speciﬁcally , we list the result of RNCRF over D1without opinion annotations for fair comparison .
+As no result is provided for RNCRF - no - opinion over D2 , we report the corresponding performance of the full model .
+See their following works ( Wang et al . , 2017a , b ) .
+Also , CMLA ( Wang et al . , 2017a ) reports better results than RNCRF but we do not compare with it .
+The reason is that CMLA introduces the gold standard opinion labels in the training data while such labels are not available for our experiments 5https://www.yelp.com/dataset challenge 6https://nlp.stanford.edu/projects/glove/2889
+D1D2 CRF 74.01 % 69.56 % Semi - CRF 68.75 % 66.35 % IHS RD 74.55 % DLIREC 73.78 % NLANGP - 72.34 % AUEB - 70.44 % WDEmb 75.16 % LSTM 75.25 % 71.26 % RNCRF 77.26 % 69.74 % Our Work 77.58 % 73.44 % Table 2 : Experiment results The hyper - parameters are selected via ten - fold cross validation .
+The dimension of hidden representations are 100 , 20 , 40 for A - LSTM , O - LSTM and S - LSTM respectively .
+The dropout rate for O - LSTM and S - LSTM is 0.4 .
+The size of the aspect ( opinion ) memory nmis 4 .
+The batch size is set to 32 .
+As for initialization of network parameters , we adopt the strategy that the initial weights are sampled from the uniform distribution ( Glorot and Bengio , 2010 ) .
+We employ ADAM ( Kingma and Ba , 2014 ) as optimizer and the default settings of ADAM are used .
+To better reveal the capability of the proposed MIN , we train 5 models with the same group of hyper - parameters and report the average F1score over the testing set .
+3.3 Results and Analysis Table 2 depicts experiment results .
+Compared to the best systems in SemEval challenge , MIN achieves 3.0 % and 1.1 % absolute gains on D1and D2respectively .
+Besides , our MIN outperforms WDEmb , a strong CRF - based system beneﬁting from several kinds of useful word embeddings , by 2.1 % on D1 .
+With memory interactions and consideration of sentimental sentence , our MIN boosts the performance of vanilla bi - directional LSTM ( +2.0 % and +1.7 % respectively ) .
+It validates the effectiveness of the manually designed memory operations and the proposed memory interaction mechanism .
+MIN also outperforms the state - of - the - art RNCRF on each dataset suggesting that memory interactions can be an alternative strategy instead of syntactic parsing .
+To further study the impact of each element in MIN , we conduct ablation experiments .
+As shown in Table 3 , removing bi - directionality decreases the extraction performances ( -2.0 % and -1.0 % ) .
+The softsentimental constraint proves to be useful since MIN is 1.5 % and 1.0 % superior than the framework without S - LSTM on D1andD2respectively .
+O - LSTM brings in the largest performance gains onD2compared with ablated framework ( i.e. , MIN without O - LSTM ) , verifying our postulation that aspect - opinion “ interaction ” is more effective than only considering aspect terms .
+We also observe that the contribution of O - LSTM is less signiﬁcant than that of bi - directionality on D1 ( +1.6 % vs +2.0 % ) .
+This is reasonable since using opinion words as adjective modiﬁers placed after the aspects is common in English .
+D1D2 MIN without bi - directionality 75.59 % 71.87 % MIN without S - LSTM 76.04 % 72.55 % MIN without O - LSTM 75.97 % 71.80 % MIN 77.58 % 73.44 % Table 3 : Ablation experiment results .
+4 Conclusions We propose Memory Interaction Network ( MIN ) , a multi - task learning framework , to detect aspect terms from the online user reviews .
+Compared with previous studies , our MIN has following features : •Co - occurrence pattern between aspects and opinions is captured via memory interactions , where the neural memory operations are designed to summarize task - level information and perform interactions .
+•A novel LSTM unit with extended memories is developed for memory interactions .
+References Maryna Chernyshevich .
+2014 .
+Ihs r&d belarus : Crossdomain extraction of product features using crf .
+In Proceedings of the 8th International Workshop on Semantic Evaluation ( SemEval 2014 ) , pages 309 – 313 .
+Nguyen Viet Cuong , Nan Ye , Wee Sun Lee , and Hai Leong Chieu .
+2014 .
+Conditional random ﬁeld with high - order dependencies for sequence labeling and segmentation .
+Journal of Machine Learning Research , 15(1):981–1009 .
+Xavier Glorot and Yoshua Bengio .
+2010 .
+Understanding the difﬁculty of training deep feedforward neural networks .
+In Proceedings of AISTATS , pages 249 – 256.2890
+Minqing Hu and Bing Liu . 2004a .
+Mining and summarizing customer reviews .
+In Proceedings of KDD , pages 168–177 .
+Minqing Hu and Bing Liu . 2004b .
+Mining opinion features in customer reviews .
+In Proceedings of AAAI , pages 755–760 .
+Niklas Jakob and Iryna Gurevych . 2010 .
+Extracting opinion targets in a single and cross - domain setting with conditional random ﬁelds .
+In Proceedings of EMNLP , pages 1035–1045 .
+Wei Jin , Hung Hay Ho , and Rohini K Srihari .
+2009 .
+A novel lexicalized hmm - based learning framework for web opinion mining .
+In Proceedings of ICML , pages 465–472 .
+Rafal Jozefowicz , Wojciech Zaremba , and Ilya Sutskever . 2015 .
+An empirical exploration of recurrent network architectures .
+In Proceedings of ICML , pages 2342–2350 .
+Diederik Kingma and Jimmy Ba . 2014 .
+Adam : A method for stochastic optimization .
+In Proceedings of ICLR .
+Bing Liu .
+2012a .
+Sentiment analysis and opinion mining .
+Synthesis lectures on human language technologies , 5(1):1–167 .
+Kang Liu , Heng Li Xu , Yang Liu , and Jun Zhao .
+2013a .
+Opinion target extraction using partially - supervised word alignment model .
+In Proceedings of IJCAI , pages 2134–2140 .
+Kang Liu , Liheng Xu , and Jun Zhao .
+2012b .
+Opinion target extraction using word - based translation model .
+In Proceedings of EMNLP / CoNLL , pages 1346–1356 .
+Kang Liu , Liheng Xu , and Jun Zhao .
+2013b .
+Syntactic patterns versus word alignment : Extracting opinion targets from online reviews .
+In Proceedings of ACL , pages 1754–1763 .
+Association for Computational Linguistics .
+Kang Liu , Liheng Xu , and Jun Zhao .
+2014 .
+Extracting opinion targets and opinion words from online reviews with graph co - ranking .
+In Proceedings of ACL , pages 314–324 .
+Association for Computational Linguistics .
+Pengfei Liu , Shaﬁq Joty , and Helen Meng . 2015 .
+Finegrained opinion mining with recurrent neural networks and word embeddings .
+In Proceedings of EMNLP , pages 1433–1443 .
+Asha S Manek , P Deepa Shenoy , M Chandra Mohan , and KR Venugopal . 2017 .
+Aspect term extraction for sentiment analysis in large movie reviews using gini index feature selection method and svm classiﬁer .
+World Wide Web Journal , 20(2):135–154.Tomas Mikolov , Ilya Sutskever , Kai Chen , Greg S Corrado , and Jeff Dean .
+2013 .
+Distributed representations of words and phrases and their compositionality .
+In Proceedings of NIPS , pages 3111–3119 .
+Maria Pontiki , Dimitris Galanis , Haris Papageorgiou , Ion Androutsopoulos , Suresh Manandhar , Mohammad AL - Smadi , Mahmoud Al - Ayyoub , Yanyan Zhao , Bing Qin , Orphee De Clercq , Veronique Hoste , Marianna Apidianaki , Xavier Tannier , Natalia Loukachevitch , Evgeniy Kotelnikov , N ´ uria
+Bel , Salud Mar ´ ıa Jim ´ enez - Zafra , and G ¨uls ¸en Eryi ˘git .
+2016 .
+Semeval-2016 task 5 : Aspect based sentiment analysis .
+In Proceedings of the 10th International Workshop on Semantic Evaluation ( SemEval-2016 ) , pages 19–30 .
+Maria Pontiki , Dimitris Galanis , John Pavlopoulos , Harris Papageorgiou , Ion Androutsopoulos , and Suresh Manandhar .
+2014 .
+Semeval-2014 task 4 : Aspect based sentiment analysis .
+In Proceedings of the 8th International Workshop on Semantic Evaluation ( SemEval 2014 ) , pages 27–35 .
+Ana - Maria Popescu and Oren Etzioni .
+2005 .
+Extracting product features and opinions from reviews .
+In Proceedings of EMNLP , pages 339–346 .
+Soujanya Poria , Erik Cambria , and Alexander Gelbukh . 2016 .
+Aspect extraction for opinion mining with a deep convolutional neural network .
+Knowledge - Based Systems , 108:42–49 .
+Guang Qiu , Bing Liu , Jiajun Bu , and Chun Chen .
+2011 .
+Opinion word expansion and target extraction through double propagation .
+Computational Linguistics , 37(1):9–27 .
+I˜naki
+San Vicente , Xabier Saralegi , and Rodrigo Agerri .
+2015 .
+Elixa : A modular and ﬂexible absa platform .
+In Proceedings of the 9th International Workshop on Semantic Evaluation ( SemEval 2015 ) , pages 748–752 .
+Sunita Sarawagi , William W Cohen , et al . 2004 .
+Semimarkov conditional random ﬁelds for information extraction .
+In Proceedings of NIPS , pages 1185 – 1192 .
+Zhiqiang Toh and Jian Su . 2016 .
+Nlangp at semeval2016 task 5 : Improving aspect based sentiment analysis using neural network features .
+In Proceedings of the 10th International Workshop on Semantic Evaluation ( SemEval-2016 ) , pages 282–288 .
+Zhiqiang Toh and Wenting Wang .
+2014 .
+Dlirec : Aspect term extraction and term polarity classiﬁcation system .
+In Proceedings of the 8th International Workshop on Semantic Evaluation ( SemEval 2014 ) , pages 235–240 .
+Wenya Wang , Sinno Jialin Pan , and Daniel Dahlmeier . 2017b .
+Multi - task coupled attentions for categoryspeciﬁc aspect and opinion terms co
+-
+extraction .
+arXiv preprint arXiv:1702.01776 .2891
+Wenya Wang , Sinno Jialin Pan , Daniel Dahlmeier , and Xiaokui Xiao . 2016 .
+Recursive neural conditional random ﬁelds for aspect - based sentiment analysis .
+InProceedings of EMNLP , pages 616–626 .
+Association for Computational Linguistics .
+Wenya Wang , Sinno Jialin Pan , Daniel Dahlmeier , and Xiaokui Xiao . 2017a .
+Coupled multi - layer attentions for co - extraction of aspect and opinion terms .
+InProceedings of AAAI , pages 3316–3322 .
+Dionysios Xenos , Panagiotis Theodorakakos , John Pavlopoulos , Prodromos Malakasiotis , and Ion Androutsopoulos . 2016 .
+Aueb - absa at semeval-2016 task 5 : Ensembles of classiﬁers and embeddings for aspect based sentiment analysis .
+In Proceedings of the 10th International Workshop on Semantic Evaluation ( SemEval-2016 ) , pages 312–317 .
+Yichun Yin , Furu Wei , Li Dong , Kaimeng Xu , Ming Zhang , and Ming Zhou .
+2016 .
+Unsupervised word and dependency path embeddings for aspect term extraction .
+In Proceedings of IJCAI , pages 2979 – 2985 .
+Li Zhuang , Feng Jing , and Xiao - Yan Zhu . 2006 .
+Movie review mining and summarization .
+In Proceedings of CIKM , pages 43–50.2892

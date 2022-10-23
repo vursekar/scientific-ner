@@ -1,0 +1,58 @@
+NAACL HLT 2016
+The 2016 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies Proceedings of the Workshop on Human - Computer Question Answering June 16 , 2016
+c / circlecopyrt2016 The Association for Computational Linguistics Order copies of this and other ACL proceedings from : Association for Computational Linguistics ( ACL ) 209 N. Eighth Street Stroudsburg , PA 18360 USA Tel : +1 - 570 - 476 - 8006 Fax : +1 - 570 - 476 - 0860 acl@aclweb.org ISBN 978 - 1 - 941643 - 96 - 9ii
+Preface Welcome to the ﬁrst Workshop on Human - Computer Question Answering ( HCQA ) !
+Question answering is a central task in natural language processing ( NLP ) .
+Unlike other NLP tasks , it also is easy for non - experts to understand when question answering systems perform well ( or fail ) .
+The goal of this workshop is to bring the community together to discuss the state of the art of question answering and interactively compete with top human trivia masters .
+This workshop highlights question answering on the real - world task of quiz bowl , a trivia game in which competitors are asked to identify entities such as battles , novels , and scientiﬁc terms .
+In quiz bowl , a moderator reads a paragraph - long question to two teams , and players are permitted to interrupt the moderator ( or “ buzz in ” ) with a guess if they feel conﬁdent .
+This setting is especially interesting because acquiring more features ( clues ) comes with an added cost ( the other team may buzz in before you ) .
+While computerized question answering systems have previously had success against humans , this workshop will be the ﬁrst to pit different systems against each other and then have that winner face off against a top human team .
+Question answering is a task interesting to both academia and industry .
+This workshop brings people from both sides to discuss recent progress in QA .
+We will have a presentation from the IBM Watson team talking about their new Watson Discovery Advisor and the challenges of QA in the industrial setting .
+Peter Clark will talk about new types of question answering problems that he and his team are solving at the Allen Institute for AI .
+We also have Zhengdong Lu , Jason Weston , and Richard Socher talking about recent neural network approaches to QA .
+This year we have nine papers covering a variety of approaches to QA , including neural networks , crowdsourcing , knowledge graph search , and paraphrasing .
+Besides common QA tasks such as machine comprehension , ( open - domain ) factoid QA , we are also excited to see new topics on error analysis of QA systems by crowdsourcing and alignment between text description and paintings for art questions .
+At the end of the workshop , we will have a dual computer - human tournament to test entrants ’ question answering systems against each other and against the top human trivia masters .
+Enjoy the match !
+Finally , we invite you to enjoy this volume and we are looking forward to seeing you in San Diego !
+Mohit Iyyer , He He , Jordan Boyd - Graber and Hal Daumé IIIiii
+Organizers : Mohit Iyyer , University of Maryland , College Park He
+He , University of Maryland , College Park Jordan Boyd - Graber , University of Colorado , Boulder Hal Daumé III , University of Maryland , College Park Program Committee : Mohit Bansal , Toyota Technological Institute at Chicago Kevin Gimpel , Toyota Technological Institute at Chicago Edward Grefenstette , Google DeepMind Sanda Harabagiu , University of Texas at Dallas Mandar Joshi , University of Washington Karthik Narasimhan , Massachusetts Institute of Technology Arvind Neelakantan , University of Massachusetts , Amherst Mrinmaya Sachan , Carnegie Mellon University Tomek Strzalkowski , SUNY Albany Richard Socher , Salesforce Christina Unger , Bielefeld University Yi Yang , Georgia Institute of Technology Wen - Tau Yih , Microsoft Research Luke Zettlemoyer , University of Washington Invited Speakers : Ray Mooney , University of Texas at Austin Jason Weston , Facebook AI Research Peter Clark , Allen Institute for AI Zhengdong Lu , Noah ’s Ark Lab , Huawei Technologies Richard Socher , Salesforce Eunsol Choi , University of Washingtonv
+Table of Contents Watson Discovery Advisor : Question - answering in an industrial setting Charley Beller , Graham Katz , Allen Ginsberg , Chris Phipps , Sean Bethard , Paul Chase , Elinna Shek and Kristen Summers . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+1
+Crowdsourcing for ( almost ) Real - time Question Answering Denis Savenkov , Scott Weitzner and Eugene Agichtein . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+8 Attention - Based Convolutional Neural Network for Machine Comprehension Wenpeng Yin , Sebastian Ebert and Hinrich Schütze . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+15 Open - domain Factoid Question Answering via Knowledge Graph Search Ahmad Aghaebrahimian . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+22
+Neural Enquirer : Learning to Query Tables in Natural Language Pengcheng Yin , Zhengdong Lu , Hang Li and kao Ben . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+29
+Neural Generative Question Answering Jun Yin , Xin Jiang , Zhengdong Lu , Lifeng Shang , Hang Li and Xiaoming Li . .
+. .
+. .
+. .
+. .
+. .
+. .
+. .
+36 " A Distorted Skull Lies in the Bottom Center ... "
+Identifying Paintings from Text Descriptions Anupam Guha , Mohit Iyyer and Jordan Boyd - Graber . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+43
+Using Confusion Graphs to Understand Classiﬁer Error Davis Yoshida and Jordan Boyd - Graber . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+48 Paraphrase for Open Question Answering : New Dataset and Methods Ying Xu , Pascual Martínez - Gómez , Yusuke Miyao and Randy Goebel . . . . . . . . . . . . . . . . . . . . . .
+53 vii
+Conference Program Thursday , June 16 , 2016 9:00–9:15
+Welcome Invited Talks
+I 9:15–9:50 Invited Talk by Ray Mooney 9:50–10:25 Invited Talk by Jason Weston 10:25–10:40 Coffee Break Talks by Authors of Accepted Papers 10:40 - 11:00 Watson Discovery Advisor : Question - answering in an industrial setting Charley Beller , Graham Katz , Allen Ginsberg , Chris Phipps , Sean Bethard , Paul Chase , Elinna Shek and Kristen Summers 11:00–11:20
+Crowdsourcing for ( almost ) Real - time Question Answering Denis Savenkov , Scott Weitzner and Eugene Agichtein 11:20–11:40 Attention - Based Convolutional Neural Network for Machine Comprehension Wenpeng Yin , Sebastian Ebert and Hinrich Schütze 11:40–12:00 Invited Talk by Eunsol Choi 12:00–1:15 Lunch ix
+Thursday , June 16 , 2016 ( continued ) Invited Talks II 13:15–13:50
+Invited Talk by Peter Clark 13:50–14:25 Invited Talk by Zhengdong Lu
+14:25–15:00 Invited Talk by Richard Socher Poster Session 15:00–15:15 Coffee Break 15:15–16:00 Open - domain Factoid Question Answering via Knowledge Graph Search Ahmad Aghaebrahimian
+15:15–16:00 Neural Enquirer : Learning to Query Tables in Natural Language Pengcheng Yin , Zhengdong Lu , Hang Li and kao Ben 15:15–16:00 Neural Generative Question Answering Jun Yin , Xin Jiang , Zhengdong Lu , Lifeng Shang , Hang Li and Xiaoming Li
+15:15–16:00 " A Distorted Skull Lies in the Bottom Center ... "
+Identifying Paintings from Text Descriptions Anupam Guha , Mohit Iyyer and Jordan Boyd - Graber 15:15–16:00
+Using Confusion Graphs to Understand Classiﬁer Error Davis Yoshida and Jordan Boyd - Graber 15:15–16:00 Paraphrase for Open Question Answering : New Dataset and Methods Ying Xu , Pascual Martínez - Gómez , Yusuke Miyao and Randy Goebel x
+Thursday , June 16 , 2016 ( continued ) Exhibition Match 16:00–17:15 Best Shared Task System vs. Human Quiz Bowl Team xi

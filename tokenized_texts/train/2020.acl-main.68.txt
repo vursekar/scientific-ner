@@ -1,32 +1,35 @@
-Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 742–751 July 5 - 10 , 2020 .
-c  2020 Association for Computational Linguistics742Rigid Formats Controlled Text Generation Piji
-Li Haisong Zhang Xiaojiang Liu Shuming Shi Tencent AI Lab , Shenzhen , China fpijili , hansonzhang , kieranliu , shumingshi g@tencent.com
-Abstract Neural text generation has made tremendous progress in various tasks .
+Rigid Formats Controlled Text Generation
+Piji Li Haisong Zhang Xiaojiang Liu Shuming Shi Tencent AI Lab , Shenzhen , China { pijili,hansonzhang,kieranliu,shumingshi}@tencent.com
+Abstract
+Neural text generation has made tremendous progress in various tasks .
 One common characteristic of most of the tasks is that the texts are not restricted to some rigid formats when generating .
 However , we may confront some special text paradigms such as Lyrics ( assume the music score is given ) , Sonnet , SongCi ( classical Chinese poetry of the Song dynasty ) , etc .
-The typical characteristics of these texts are in three folds : ( 1 ) They must comply fully with the rigid predeﬁned formats .
-( 2 ) They must obey some rhyming schemes .
-( 3 ) Although they are restricted to some formats , the sentence integrity must be guaranteed .
+The typical characteristics of these texts are in three folds : ( 1 ) They must comply fully ( 2 ) They with the rigid predeﬁned formats .
+( 3 ) Almust obey some rhyming schemes .
+though they are restricted to some formats , the sentence integrity must be guaranteed .
 To the best of our knowledge , text generation based on the predeﬁned rigid formats has not been well investigated .
 Therefore , we propose a simple and elegant framework named SongNet to tackle this problem .
 The backbone of the framework is a Transformer - based auto - regressive language model .
 Sets of symbols are tailor - designed to improve the modeling performance especially on format , rhyme , and sentence integrity .
 We improve the attention mechanism to impel the model to capture some future information on the format .
 A pre - training and ﬁne - tuning framework is designed to further improve the generation quality .
-Extensive experiments conducted on two collected corpora demonstrate that our proposed framework generates signiﬁcantly better results in terms of both automatic metrics and the human evaluation.1 1 Introduction Recent years have seen the tremendous progress in the area of natural language generation especially beneﬁting by the neural network models such as Recurrent Neural Networks ( RNN ) or Convolutional Neural Networks ( CNN ) based sequence - tosequence ( seq2seq ) frameworks ( Bahdanau et al . , 1Code : http://github.com/lipiji/SongNet 橔ࠉލיଆͫㅓㅫޗڐП澞ީٝ௰㨡ࣞਘ㗘ͫ޾ੋ௎չ஧澞 ۞ ޗ਴жަͫ ▲ Ѡ৩吷 ⽔ 澞ன੊ۨ䀲䬦ҁظͫՑ߄௚ݻײ澞
-Let me not to the marriage of true minds
-Admit impediments , love is not love Which alters when it alteration finds Or bends with the remover to remove .  
-Lyrics SongCi SonnetFigure 1 : Examples of text with rigid formats .
+Extensive experiments conducted on two collected corpora demonstrate that our proposed framework generates signiﬁcantly better results in terms of both automatic metrics and the human evaluation.1
+1
+Introduction
+Recent years have seen the tremendous progress in the area of natural language generation especially beneﬁting by the neural network models such as Recurrent Neural Networks ( RNN ) or Convolutional Neural Networks ( CNN ) based sequence - tosequence ( seq2seq ) frameworks ( Bahdanau et al ,
+1Code : http://github.com/lipiji/SongNet
+Figure 1 : Examples of text with rigid formats .
 In lyrics , the syllables of the lyric words must align with the tones of the notation .
 In SongCi and Sonnet , there are strict rhyming schemes and the rhyming words are labeled in red color and italic font .
-2014 ; Gehring et al . , 2017 ) , Transformer and its variants ( Vaswani et al . , 2017 ; Dai et al . , 2019 ) , pre - trained auto - regressive language models such as XLNet ( Yang et al . , 2019 ) and GPT2 ( Radford et al . , 2019 ) , etc .
-Performance has been improved signiﬁcantly in lots of tasks such as machine translation ( Bahdanau et al . , 2014 ; Vaswani et
-al . , 2017 ) , dialogue systems ( Vinyals and Le , 2015 ; Shang et al . , 2015 ; Li , 2020 ) , text summarization ( Rush et al . , 2015 ; Li et al . , 2017 ; See et al . , 2017 ) , story telling ( Fan et al . , 2018 ; See et al . , 2019 ) ,
-poetry writing ( Zhang and Lapata , 2014 ; Lau et al . , 2018 ; Liao et al . , 2019 ) , etc .
+2014 ;
+Gehring et al , 2017 ) , Transformer and its variants ( Vaswani et al , 2017 ; Dai et al , 2019 ) , pre - trained auto - regressive language models such as XLNet ( Yang et al , 2019 ) and GPT2 ( Radford et
+al , 2019 ) , etc .
+Performance has been improved signiﬁcantly in lots of tasks such as machine translation ( Bahdanau et al , 2014 ; Vaswani et al , 2017 ) , dialogue systems ( Vinyals and Le , 2015 ; Shang et al , 2015 ; Li , 2020 ) , text summarization ( Rush et al , 2015 ; Li et al , 2017 ; See et al , 2017 ) , story telling ( Fan et al , 2018 ; See et al , 2019 ) , poetry writing ( Zhang and Lapata , 2014 ; Lau et al , 2018 ; Liao et al , 2019 ) , etc .
 Generally , most of the above mentioned tasks can be regarded as free text generation , which means that no constraints on the format and structure , say the number of words and rhyming rules .
 Note that tasks of dialogue generation and story telling are almost in an open - ending generation style as long as the generated content is relevant with the conditional input text .
 Although there are
-743formats constraints on the poetry text , the proposed models just treat the formats as kind of latent information and let the model capture this feature implicitly during training ( Liao et al . , 2019 ) .
+Proceedingsofthe58thAnnualMeetingoftheAssociationforComputationalLinguistics , pages742–751July5 - 10,2020.c(cid:13)2020AssociationforComputationalLinguistics742(cid:27220)(cid:1497)(cid:1933)(cid:2057)(cid:2822)(cid:875)(cid:12627)(cid:12651)(cid:1680)(cid:1943)(cid:1055)(cid:28574)(cid:1629)(cid:1961)(cid:3056)(cid:14881)(cid:2270)(cid:2584)(cid:13784)(cid:875)(cid:1982)(cid:2635)(cid:3022)(cid:1401)(cid:2983)(cid:28574)(cid:1943)(cid:1758)(cid:2612)(cid:1078)(cid:1958)(cid:875)(cid:9650)(cid:1120)(cid:2537)(cid:21559)(cid:12116)(cid:28574)(cid:2985)(cid:2634)(cid:1768)(cid:16434)(cid:19238)(cid:1153)(cid:1592)(cid:875)(cid:1361)(cid:1988)(cid:3034)(cid:1522)(cid:1915)(cid:28574)Let me not to the marriage of true mindsAdmit impediments , love is not loveWhich alters when it alteration findsOr bends with the remover to remove .
+LyricsSongCiSonnet  formats constraints on the poetry text , the proposed models just treat the formats as kind of latent information and let the model capture this feature implicitly during training ( Liao et al , 2019 ) .
 The model trained on the ﬁve - character quatrain corpus can not generate seven - character verses .
 Moreover , it is impossible to trigger these models to generate satisfying results according to arbitrary new deﬁned formats .
 In practice we will confront some special text paradigms such as Lyrics ( assume the music score is given ) , Sonnet ( say Shakespeare ’s Sonnets ( Shakespeare , 2000 ) ) , SongCi ( a kind of Ci .
@@ -44,234 +47,366 @@ In the example , the rhyming words in scheme “ ABAB ” are “ minds ” , �
 ( 3 ) Even though the format is rigid , the sentence integrity must always be guaranteed .
 Incomplete sentence such as “ love is not the ” is inappropriate .
 To the best of our knowledge , text generation based on the predeﬁned rigid formats constraints has not been well investigated yet .
-In this work , 2http://en.wikipedia.org/wiki/Ci ( poetry ) 3http://en.wikipedia.org/wiki/Shakespeare%27s sonnetswe propose a simple and elegant framework named SongNet to address this challenging problem .
+In this work ,
+we propose a simple and elegant framework named SongNet to address this challenging problem .
 The backbone of the framework is a Transformer - based auto - regressive language model .
 Considering the three folds characteristics mentioned above , we introduce sets of tailor - designed indicating symbols to improve the modeling performance , especially for the robustness of the format , rhyme , as well as sentence integrity .
 We improve the attention mechanism to impel the model to capture the future information on the format to further enhance sentence integrity .
-Inspired by BERT ( Devlin et al . , 2019 ) and GPT ( Radford et al . , 2018 , 2019 ) , a pretraining and ﬁne - tuning framework is designed to further improve the generation quality .
+Inspired by BERT ( Devlin et al , 2019 ) and GPT ( Radford et al , 2018 , 2019 ) , a pretraining and ﬁne - tuning framework is designed to further improve the generation quality .
 To verify the performance of our framework , we collect two corpora , SongCi and Sonnet , in Chinese and English respectively .
 Extensive experiments on the collected datasets demonstrate that our proposed framework can generate satisfying results in terms of both the tailor - designed automatic metrics including format accuracy , rhyming accuracy , sentence integrity , as well as the human evaluation results on relevance , ﬂuency , and style .
-In summary , our contributions are as follows : We propose to tackle a new challenging task : rigid formats controlled text generation .
+In summary , our contributions are as follows : • We propose to tackle a new challenging task : rigid formats controlled text generation .
 A pre - training and ﬁne - tuning framework named SongNet is designed to address the problem .
-Sets of symbols are tailor - designed to improve the modeling performance .
+• Sets of symbols are tailor - designed to improve the modeling performance .
 We improve the attention mechanism to impel the model to capture the future information to further enhance the sentence integrity .
-To verify the performance of our framework SongNet , we collect two corpora , SongCi and Sonnet , in Chinese and English respectively .
+• To verify the performance of our framework SongNet , we collect two corpora , SongCi and Sonnet , in Chinese and English respectively .
 We design several automatic evaluation metrics and human evaluation metrics to conduct the performance evaluation .
-Extensive experiments conducted on two collected corpora demonstrate that our proposed framework generates signiﬁcantly better results given arbitrary formats , including the cold - start formats or even the formats newly deﬁned by ourselves .
+• Extensive experiments conducted on two collected corpora demonstrate that our proposed framework generates signiﬁcantly better results given arbitrary formats , including the cold - start formats or even the formats newly deﬁned by ourselves .
 2 Task Deﬁnition
+2http://en.wikipedia.org/wiki/Ci ( poetry ) 3http://en.wikipedia.org/wiki/Shakespeare%27s sonnets
 The task of rigid formats controlled text generation is deﬁned as follows :
-744 love is not love , < /s > bends with remove < /s > < bos > InputToken EmbeddingsFormat & Rhyme EmbeddingsSegment
-EmbeddingsGlobal Position Embeddings Intra Position Embeddings 瀖瀖 .瀖瀖瀖瀖
-۳୪୭୴ୣ ۳୧ୱ۳୬୭୲۳୪୭୴ୣ
-۳ǡ۳ழȀୱவ۳ୠୣ୬ୢୱ
-۳୵୧୲୦ ۳ ୰ ୣ୫ ۳Ǥ۳ழȀୱவ ۳ழୠ୭ୱவ۳௖బ۳௖బ۳௖బ۳௖మ۳௖భ۳௖బ۳ழȀୱவ۳ழȀୱவ۳ழȀୱவ ۳௖బ۳௖మ۳௖భ۳ழȀୱவ۳ழȀୱவ۳ழȀୱவ ۳ழୣ୭ୱவ۳ழୣ୭ୱவ۳ழୣ୭ୱவ ۳௣ర۳௣య۳௣మ۳௣భ۳௣బ ۳௣ల۳௣ఱ۳௣భ۳௣బ۳௦బ۳௦బ۳௦బ۳௦బ۳௦బ۳௦భ۳௦భ۳௦భ۳௦భ۳௚బ۳௚భ۳௚మ۳௚య۳௚ర۳௚ఱ۳௚ల۳௚ళ۳௚భభ۳௚భమ۳௚భయ۳௚భరlove is not love , < /s > bends with remove < /s >
-< eos > Output 瀖 .
-濁濕濧濟濙濘澔濁濩濠濨濝澡澼濙濕濘澔澵濨濨濙濢濨濝濣濢 澻濠濣濖濕濠澔濁濩濠濨濝澡澼濙濕濘澔澵濨濨濙濢濨濝濣濢Figure 2 : The framework of our proposed model .
-Input : a rigid format C2C : C = fc0c1c2c3 ; c0c1c2c3c4c5 : g ( 1 ) whereCis the set of all possible formats .
-Note that we can deﬁne arbitrary new formats not restricted to the ones pre - deﬁned in the corpus , thus jCj!1 .
-Format token cidenotes a place - holder symbol of Cwhich need to be translated into a real word token .
-Format Ccontains 10words plus two extra punctuation characters “ , ” and “ . ”
-Output : a natural language sentence Y2Y which tally with the deﬁned format C : Y = loveisnotlove ; bendswiththeremovertoremove : where the example sentences are extracted from the Shakespeare ’s Sonnets ( Shakespeare , 2000 ) .
-From the resultYwe can observe that the count of words is 10 which is consistent with the format C. The punctuation characters “ , ” and “ . ” are also correct .
+743  Figure 2 : The framework of our proposed model .
+Input : a rigid format C ∈ C :
+3 Framework Description
+C = { c0 c1 c2 c3 , c0 c1 c2 c3 c4 c5 . }
+( 1 )
+3.1 Overview
+where C is the set of all possible formats .
+Note that we can deﬁne arbitrary new formats not restricted to the ones pre - deﬁned in the corpus , thus |C| → ∞. Format token ci denotes a place - holder symbol of C which need to be translated into a real word token .
+Format C contains 10 words plus two extra punctuation characters “ , ” and “ . ”
+Output : a natural language sentence Y ∈ Y which tally with the deﬁned format C :
+Y = love is not love ,
+bends with the remover to remove .
+where the example sentences are extracted from the Shakespeare ’s Sonnets ( Shakespeare , 2000 ) .
+From the result Y we can observe that the count of words is 10 which is consistent with the format C. The punctuation characters “ , ” and “ . ” are also correct .
 Thus , we claim that it is a 100 % format accuracy result .
-Also , since the two clause sentences are complete , we can get a good sentence integrity score .
-IfCis deﬁned on the literary genres of SongCi or Sonnet which have rhyming constraints , the rhyming performance should be evaluated as well .
-Recall thatCcan be arbitrary and ﬂexible , thus we can rebuild a new format C0based on the generated result Yby masking partial content , say C0 = fc0c1c2love ; c 0c1c2c3c4remove : g , then we may obtain better results by re - generating based onC0 .
+Also , since the two clause sentences are complete , we can get a good sentence integrity If C is deﬁned on the literary genres of score .
+SongCi or Sonnet which have rhyming constraints , the rhyming performance should be evaluated as well .
+Recall that C can be arbitrary and ﬂexible , thus we can rebuild a new format C(cid:48 ) based on the generated result Y by masking partial content , say C(cid:48 ) = { c0 c1 c2 love , c0 c1 c2 c3 c4 remove . } , then we may obtain better results by re - generating based on C(cid:48 ) .
 We name this operation as polishing .
-Finally , the target of this problem is to ﬁnd a mapping function Gto conduct the rigid formats controlled text generation : Y = G(C ) ( 2)3 Framework Description 3.1 Overview As shown in Figure 2 , the backbone of our framework is a Transformer - based auto - regressive language model .
+Finally , the target of this problem is to ﬁnd a mapping function G to conduct the rigid formats controlled text generation :
+Y = G(C )
+( 2 )
+As shown in Figure 2 , the backbone of our framework is a Transformer - based auto - regressive language model .
 The input can be the whole token sequences of samples from SongCi or Sonnet .
 We tailor - design several sets of indicating symbols to enhance the performance in terms of accuracy on format , rhyme , and sentence integrity .
-Speciﬁcally , symbols C = fcigare introduced for format and rhyming modeling ; Intra - position symbols P = fpigare designed to represent the local positions of the tokens within each sentence aiming to improve the rhyming performance and the sentence integrity .
-Segment symbols S = fsigare employed to identify the sentence border to further improve the sentence quality .
+Speciﬁcally , symbols C = { ci } are introduced for format and rhyming modeling ; Intra - position symbols P = { pi } are designed to represent the local positions of the tokens within each sentence aiming to improve the rhyming performance and the sentence integrity .
+Segment symbols S = { si } are employed to identify the sentence border to further improve the sentence quality .
 Attention mechanism is improved to impel the model to capture the future format information such as the sentence ending markers .
-Similar to BERT ( Devlin et al . , 2019 ) and GPT ( Radford et al . , 2018 , 2019 ) , pre - training and ﬁne - tuning paradigm is utilized to boost the performance of the original models .
-3.2 Details We use two sentences ( as shown in Figure 1 ) “ love is not love , ... , bends with the remover to remove ” extracted from the Shakespeare ’s Sonnets ( Shakespeare , 2000 ) as examples to describe the details of our framework SongNet .
-Since our basic model is a Transformer - based auto - regressive language model , during training , the input is “ hbosilove is not love , h = si ... , bends with the remover to remove.h = si ” , and the corresponding output is a left - shifting version of the input ( tokenized , and
+Similar to BERT ( Devlin et al , 2019 ) and GPT ( Radford et al , 2018 , 2019 ) , pre - training and ﬁne - tuning paradigm is utilized to boost the performance of the original models .
+3.2 Details
+We use two sentences ( as shown in Figure 1 ) “ love is not love , ... , bends with the remover to remove ” extracted from the Shakespeare ’s Sonnets ( Shakespeare , 2000 ) as examples to describe the details of our framework SongNet .
+Since our basic model is a Transformer - based auto - regressive language model , during training , the input is “ ( cid:104)bos(cid:105 ) love is not love , ( cid:104)/s(cid:105 ) ... ,
+bends with the remover to remove .
+( cid:104)/s(cid:105 ) ” , and the corresponding output is a left - shifting version of the input ( tokenized , and
 we
-745ignore “ ... ” for convenience and clarity ): love is not love ; h = si bends with the remover to remove : h = si heosi whereh = sidenotes the clause or sentence separator , andheosiis the ending marker of the whole sequence .
+744loveisnotlove,</s > bendswithremove</s><bos > InputTokenEmbeddingsFormat & RhymeEmbeddingsSegmentEmbeddingsGlobal PositionEmbeddingsIntra PositionEmbeddings(cid:28694)(cid:28694).(cid:28694)(cid:28694)(cid:28694)(cid:28694)(cid:1779)(cid:2922)(cid:2925)(cid:2932)(cid:2915)(cid:1779)(cid:2919)(cid:2929)(cid:1779)(cid:2924)(cid:2925)(cid:2930)(cid:1779)(cid:2922)(cid:2925)(cid:2932)(cid:2915)(cid:1779)(cid:481)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:2912)(cid:2915)(cid:2924)(cid:2914)(cid:2929)(cid:1779)(cid:2933)(cid:2919)(cid:2930)(cid:2918)(cid:1779)(cid:2928)(cid:2915)(cid:2923)(cid:1779)(cid:484)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:2912)(cid:2925)(cid:2929)(cid:2997)(cid:1779)(cid:3030)(cid:3116)(cid:1779)(cid:3030)(cid:3116)(cid:1779)(cid:3030)(cid:3116)(cid:1779)(cid:3030)(cid:3118)(cid:1779)(cid:3030)(cid:3117)(cid:1779)(cid:3030)(cid:3116)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:3030)(cid:3116)(cid:1779)(cid:3030)(cid:3118)(cid:1779)(cid:3030)(cid:3117)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:512)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:2915)(cid:2925)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:2915)(cid:2925)(cid:2929)(cid:2997)(cid:1779)(cid:2996)(cid:2915)(cid:2925)(cid:2929)(cid:2997)(cid:1779)(cid:3043)(cid:3120)(cid:1779)(cid:3043)(cid:3119)(cid:1779)(cid:3043)(cid:3118)(cid:1779)(cid:3043)(cid:3117)(cid:1779)(cid:3043)(cid:3116)(cid:1779)(cid:3043)(cid:3122)(cid:1779)(cid:3043)(cid:3121)(cid:1779)(cid:3043)(cid:3117)(cid:1779)(cid:3043)(cid:3116)(cid:1779)(cid:3046)(cid:3116)(cid:1779)(cid:3046)(cid:3116)(cid:1779)(cid:3046)(cid:3116)(cid:1779)(cid:3046)(cid:3116)(cid:1779)(cid:3046)(cid:3116)(cid:1779)(cid:3046)(cid:3117)(cid:1779)(cid:3046)(cid:3117)(cid:1779)(cid:3046)(cid:3117)(cid:1779)(cid:3046)(cid:3117)(cid:1779)(cid:3034)(cid:3116)(cid:1779)(cid:3034)(cid:3117)(cid:1779)(cid:3034)(cid:3118)(cid:1779)(cid:3034)(cid:3119)(cid:1779)(cid:3034)(cid:3120)(cid:1779)(cid:3034)(cid:3121)(cid:1779)(cid:3034)(cid:3122)(cid:1779)(cid:3034)(cid:3123)(cid:1779)(cid:3034)(cid:3117)(cid:3117)(cid:1779)(cid:3034)(cid:3117)(cid:3118)(cid:1779)(cid:3034)(cid:3117)(cid:3119)(cid:1779)(cid:3034)(cid:3117)(cid:3120)loveisnotlove,</s > bendswithremove</s><eos > Output(cid:28694).(cid:28609)(cid:28629)(cid:28647)(cid:28639)(cid:28633)(cid:28632)(cid:28564)(cid:28609)(cid:28649)(cid:28640)(cid:28648)(cid:28637)(cid:28577)(cid:28604)(cid:28633)(cid:28629)(cid:28632)(cid:28564)(cid:28597)(cid:28648)(cid:28648)(cid:28633)(cid:28642)(cid:28648)(cid:28637)(cid:28643)(cid:28642)(cid:28603)(cid:28640)(cid:28643)(cid:28630)(cid:28629)(cid:28640)(cid:28564)(cid:28609)(cid:28649)(cid:28640)(cid:28648)(cid:28637)(cid:28577)(cid:28604)(cid:28633)(cid:28629)(cid:28632)(cid:28564)(cid:28597)(cid:28648)(cid:28648)(cid:28633)(cid:28642)(cid:28648)(cid:28637)(cid:28643)(cid:28642 )  ignore “ ... ” for convenience and clarity ):
+love is not love , ( cid:104)/s(cid:105 ) bends with the remover to remove .
+( cid:104)/s(cid:105 ) ( cid:104)eos(cid:105 )
+where ( cid:104)/s(cid:105 ) denotes the clause or sentence separator , and ( cid:104)eos(cid:105 ) is the ending marker of the whole sequence .
 The target of our framework is to conduct the formats controlled text generation .
 Therefore , the indicating symbols for format and rhyme as well as the sentence integrity are designed based on the target output sequence .
-Format and Rhyme Symbols : C = fc0;c0;c0;c2;c1;h = si c0;c0;c0;c0;c0;c2;c1;h = si;heosig(3 ) where we usefc0gto represent the general tokens ; fc1gdepict the punctuation characters ; fc2grepresent the rhyming tokens “ love ” and “ remove ” .
-h = si andheosiare kept .
-Intra - Position Symbols : P = fp4;p3;p2;p1;p0;h = si p6;p5;p4;p3;p2;p1;p0;h = si;heosig(4 ) fpigdenote the local positions of tokens within the same clause or sentence .
+Format and Rhyme Symbols :
+( 3 )
+( 4 )
+C = { c0 , c0 , c0 , c2 , c1 , ( cid:104)/s(cid:105 )
+c0 , c0 , c0 , c0 , c0 , c2 , c1 , ( cid:104)/s(cid:105 ) , ( cid:104)eos(cid:105 ) }
+where we use { c0 } to represent the general tokens ; { c1 } depict the punctuation characters ; { c2 } represent the rhyming tokens “ love ” and “ remove ” .
+( cid:104)/s(cid:105 ) and ( cid:104)eos(cid:105 ) are kept .
+Intra - Position Symbols :
+P = { p4 , p3 , p2 , p1 , p0 , ( cid:104)/s(cid:105 )
+p6 , p5 , p4 , p3 , p2 , p1 , p0 , ( cid:104)/s(cid:105 ) , ( cid:104)eos(cid:105 ) }
+{ pi } denote the local positions of tokens within the same clause or sentence .
 Note that we align the position symbol indices in a descending order .
 The aim is to improve the sentence integrity by impelling the symbols capture the sentence dynamic information , precisely , the sense to end a sequence .
-For example , fp0gusually denote punctuation characters , thus fp1gshould be the ending words of sentences .
-Segment Symbols : S = fs0;s0;s0;s0;s0;h = si s1;s1;s1;s1;s1;s1;s1;h = si;heosig(5 ) wheresiis the symbol index for
-sentence i.
+For example , { p0 } usually denote punctuation characters , thus { p1 } should be the ending words of sentences .
+Segment Symbols :
+S = { s0 , s0 , s0 , s0 , s0 , ( cid:104)/s(cid:105 )
+s1 , s1 , s1 , s1 , s1 , s1 , s1 , ( cid:104)/s(cid:105 ) , ( cid:104)eos(cid:105 ) }
+( 5 )
+where si is the symbol index for sentence i.
 The purpose is to enhance the interactions between different sentences in different positions by deﬁning the sentence index features .
 During training , all the symbols as well as the input tokens are fed into the transformer - based language model .
-Contrast to Transformer ( Vaswani et al . , 2017 ) , BERT ( Devlin et al . , 2019 ) , and GPT2 ( Radford et al . , 2019 ) , we modify the traditional attention strategies slightly to ﬁt our problem .
-Speciﬁcally , for the input , we ﬁrst obtain the representations by summing all the embeddings of the input tokens and symbols , as shown in the red solid box of Figure 2 : H0 t = Ewt+Ect+Ept+Est+Egt(6)where 0is the layer index and tis the state index .
-Eis the embedding vector for input .wt is the real token at position t.c , p , andsare three pre - deﬁned symbols .
-gis the global position index same as position symbols used in Transformer ( Vaswani et al . , 2017 ) .
-Moreover , the state at time tneed to know some future information to grasp the global sequence dynamic information .
+Contrast to Transformer ( Vaswani et al , 2017 ) , BERT ( Devlin et al , 2019 ) , and GPT2 ( Radford et
+al , 2019 ) , we modify the traditional attention strategies slightly to ﬁt our problem .
+Speciﬁcally , for the input , we ﬁrst obtain the representations by summing all the embeddings of the input tokens and symbols , as shown in the red solid box of Figure 2 :
+H0
+t = Ewt
++ Ect +
+Ept + Est + Egt
+( 6 )
+where 0 is the layer index and t is the state index .
+E∗ is the embedding vector for input ∗. wt is the real token at position t. c , p , and s are three pre - deﬁned symbols .
+g is the global position index same as position symbols used in Transformer ( Vaswani et al , 2017 ) .
+Moreover , the state at time t need to know some future information to grasp the global sequence dynamic information .
 For example , the model may want to know if it should close the decoding progress by generating the last word and a punctuation character to end the sentence .
-To represent the global dynamic information , we introduce another variable F0by only summing the pre - deﬁned symbols as shown in the blue dash box of Figure 2 : F0 t = Ect+Ept+Est ( 7 ) After processing the input , two blocks of attention mechanisms are introduced to conduct the feature learning procedure .
+To represent the global dynamic information , we introduce another variable F0 by only summing the pre - deﬁned symbols as shown in the blue dash box of Figure 2 :
+F0
+t = Ect + Ept + Est
+( 7 )
+After processing the input , two blocks of attention mechanisms are introduced to conduct the feature learning procedure .
 The ﬁrst block is a masking multi - head self - attention component , and the second block is named global multi - head attention .
-Masking Multi - Head Self - Attention : C1 t = LN  FFN(C1 t ) + C1 t C1 t = LN  SLF - ATT(Q0 t;K0 t;V0 t ) + H0 t Q0 = H0WQ K0;V0 = H0WK;H0WV ( 8) where SLF - ATT(),LN( ) , and FFN( ) represent self - attention mechanism , layer normalization , and feed - forward network respectively .
-Note that we only use the states whose indices tas the attention context .
-After obtaining C1 tfrom Equation ( 8) , we feed it into the second attention block to capture the global dynamic information from F0 .
-Global Multi - Head Attention : H1 t = LN  FFN(H1 t ) + H1 t H1 t = LN  GLOBAL -ATT(Q1
-t;K1;V1 )
-+ C1 t Q1 = C1WQ K1;V1 = F0WK;F0WV ( 9 ) We can observe that all the context information fromF0are considered .
-This is the reason why we name it as “ global attention ” and why the input real token information Ewtis NOT considered .
+Masking Multi - Head Self - Attention :
+( cid:1 )
+t = LN ( cid:0)FFN(C1 t ) + C1 t t = LN ( cid:0)SLF - ATT(Q0 t , K0
+C1 C1 Q0 = H0WQ
+K0 , V0 = H0WK , H0WV
+≤t , V0
+≤t )
++
+H0 t
+( cid:1 )
+where SLF - ATT ( · ) , LN ( · ) , and FFN ( · ) represent self - attention mechanism , layer normalization , and feed - forward network respectively .
+Note that we only use the states whose indices ≤ t as the attention context .
+After obtaining C1
+t from Equation ( 8) , we feed it into the second attention block to capture the global dynamic information from F0 .
+Global Multi - Head Attention : t = LN ( cid:0)FFN(H1 ( cid:1 ) t )
++ H1 t t = LN ( cid:0)GLOBAL - ATT(Q1 t , K1 , V1 ) + C1 t
+( cid:1 )
+H1 H1 Q1
+= C1WQ
+K1 , V1 = F0WK , F0WV
+( 8)
+( 9 )
+We can observe that all the context information from F0 are considered .
+This is the reason why we name it as “ global attention ” and why the input real token information Ewt is NOT considered .
 Then
-746the calculation of the uniﬁed ﬁrst model layer is ﬁnished .
-We can iteratively apply these two attention blocks on the whole Lmodel layers until obtain the ﬁnal representations HL .
-Note that His renewed layerly , however the global variable F0is ﬁxed .
-Finally , the training objective is to minimize the negative log - likelihood over the whole sequence : Lnll= nX t=1logP(ytjy < t ) ( 10 ) 3.3 Pre - training and Fine - tuning Although our framework can be trained purely on the training dataset of the target corpus , usually the scale of the corpus is limited .
+745  the calculation of the uniﬁed ﬁrst model layer is ﬁnished .
+We can iteratively apply these two attention blocks on the whole L model layers until obtain the ﬁnal representations HL .
+Note that H is renewed layerly , however the global variable F0 is ﬁxed .
+Finally , the training objective is to minimize the negative log - likelihood over the whole sequence :
+Lnll = −
+log P ( yt|y < t )
+( 10 )
+n ( cid:88 )
+t=1
+4 Experimental Setup
+4.1 Settings
+The parameter size of our model are ﬁxed in both the pre - training stage and the ﬁne - tuning stage .
+The number of layers L = 12 , and hidden size is 768 .
+We employ 12 heads in both the masking multihead self - attention block and the global attention block .
+Adam ( Kingma and Ba , 2014 ) optimization method with Noam learning - rate decay strategy and 10,000 warmup steps is employed to conduct the pre - training .
+3.3 Pre - training and Fine - tuning
+4.2 Datasets
+Although our framework can be trained purely on the training dataset of the target corpus , usually the scale of the corpus is limited .
 For example , there are only about 150 samples in the corpus of Shakespeare ’s Sonnets ( Shakespeare , 2000 ) .
 Therefore , we also design a pre - training and ﬁne - tuning framework to further improve the generation quality .
 Recall that in the task deﬁnition in Section 2 , we claim that our model owns the ability of reﬁning and polishing .
-To achieve this goal , we adjust the masking strategy used in BERT ( Devlin et al . , 2019 ) to our framework according to our deﬁnitions .
+To achieve this goal , we adjust the masking strategy used in BERT ( Devlin et al , 2019 ) to our framework according to our deﬁnitions .
 Speciﬁcally , we randomly ( say 20 % ) select partial of the original content and keep them not changed when building the format symbols
 C.
-For example , we will get a new symbol set C0for
-the example sentences : C0 = fc0 ; c0 ; c0 ; love ; c 1;h = si bends ; c 0 ; c0 ; c0 ; c0 ; remove ; c 1;h = si;heosig where “ love ” , “ bends ” and “ remove ” are kept in the formatC0 .
+For example , we will get a new symbol set C(cid:48 ) for the example sentences :
+C ( cid:48 ) = { c0 , c0 , c0 , love , c1 , ( cid:104)/s(cid:105 )
+bends , c0 , c0 , c0 , c0 , remove , c1 , ( cid:104)/s(cid:105 ) , ( cid:104)eos(cid:105 ) }
+where “ love ” , “ bends ” and “ remove ” are kept in the format C(cid:48 ) .
 After the pre - training stage , we can conduct the ﬁne - tuning procedure directly on the target corpus without adjusting any model structure .
-3.4 Generation We can assign any format and rhyming symbols C to control the generation .
-Given C , we will obtain PandSautomatically .
-And the model can conduct generation starting from the special token hbosiiteratively until meet the ending marker heosi .
-Both beam - search algorithm ( Koehn , 2004 ) and truncated top - k sampling ( Fan et al . , 2018 ; Radford et
-al . , 2019 ) method are utilized to conduct the decoding.4 Experimental Setup 4.1 Settings The parameter size of our model are ﬁxed in both the pre - training stage and the ﬁne - tuning stage .
-The number of layers L= 12 , and hidden size is 768 .
-We employ 12 heads in both the masking multihead self - attention block and the global attention block .
-Adam ( Kingma and Ba , 2014 ) optimization method with Noam learning - rate decay strategy and 10,000 warmup steps is employed to conduct the pre - training .
-4.2 Datasets We conduct all the experiments on two collected corpus with different literary genres : SongCi and Sonnet , in Chinese and English respectively .
+3.4 Generation
+We can assign any format and rhyming symbols C to control the generation .
+Given C , we will obtain P and S automatically .
+And the model can conduct generation starting from the special token ( cid:104)bos(cid:105 ) iteratively until meet the ending marker ( cid:104)eos(cid:105 ) .
+Both beam - search algorithm ( Koehn , 2004 ) and truncated top - k sampling ( Fan et al , 2018 ; Radford et al , 2019 ) method are utilized to conduct the decoding .
+We conduct all the experiments on two collected corpus with different literary genres : SongCi and Sonnet , in Chinese and English respectively .
 The statistic number are shown in Table 3 .
 We can see that Sonnet is in small size since we only utilize the samples from the Shakespeare ’s Sonnets ( Shakespeare , 2000 ) .
 Since SongCi and Sonnet are in different languages , thus we conduct the pre - training procedure on two large scale corpus in the corresponding languages respectively .
 For Chinese , we collect Chinese Wikipedia ( 1700 M Characters ) and a merged Chinese News ( 9200 M Characters ) corpus from the Internet .
 We did not conduct the word segmenting operations on the Chinese datasets , which means that we just use the characters to build the vocabulary , and the size is 27681 .
-For English , same as BERT , we employ English Wikipedia ( 2400 M words ) and BooksCorpus ( 980 M words )
-( Zhu et al . , 2015 ) to conduct the pre - training .
-We did not use BPE operation ( Sennrich et al . , 2015 ) on this corpus considering the format controlling purpose .
+For English , same as BERT , we employ English Wikipedia ( 2400 M words ) and BooksCorpus ( 980 M words ) ( Zhu et al , 2015 ) to conduct the pre - training .
+We did not use BPE operation ( Sennrich et al , 2015 ) on this corpus considering the format controlling purpose .
 We keep the most frequent 50,000 words to build the vocabulary .
-4.3 Evaluation Metrics Besides PPL andDistinct ( Li et al . , 2016 ) , we also tailor - design several metrics for our task to conduct the evaluation for format , rhyme , and sentence integrity .
-Format Assume that there are msentences deﬁned in the format C = fCs 1;Cs 2;:::;Cs mg , and the generated results YcontainsnsentencesY= fYs 1;Ys 2;:::;Ys ng .
-Without loss of generality , we alignCandYfrom the beginning , and calculate the format quality according to the following rules : ( 1 ) the length difference jjCs ij jYs ijj ; ( 2 ) the punctuation characters must be same .
-For SongCi , we let= 0 and rule ( 2 ) must be conforming .
-747ModelPPL # Diversity ( Distinct ) " VAL TEST MA - D-1 M I - D-1 MA - D-2 M I - D-2 S2S 19.61 20.43 75.35 2.48 98.35 36.23 GPT2 148.11 104.99 - - - GPT2 w/ Fine - tuning 18.25 17.00 73.87 2.57 96.07 33.92 SongNet ( only Pre - training ) 24.41 16.23 74.84 4.59 95.09 54.98 SongNet ( only Fine - tuning ) 12.75 14.73 75.96 2.69 97.59 37.26 SongNet 11.56 12.64 75.04 2.66 97.29 36.78 ModelFormat " Rhyme"Integrity#MA - F1 M I - F1 MA - F1 M I - F1 S2S 44.32 38.16 53.80 52.27 8.302.06 GPT2 w/ Fine - tuning 35.70 35.20 53.48 52.50 45.9220.12 SongNet ( only Pre - training ) 29.12 29.46 53.77 53.13 30.9814.06
-SongNet ( only Fine - tuning ) 99.81 99.83 79.23 78.63 2.140.10
-SongNet 99.88 99.89 73.21 72.59 1.770.16 Table 1 : Automatic evaluation results on SongCi ModelPPL # Diversity ( Distinct ) " VAL TEST MA - D-1 M I - D-1 MA - D-2 M I - D-2 GPT2 w/ Fine - tuning 31.47 31.03 73.87 2.57 96.07 33.92 SongNet ( only Pre - training ) 28.56 28.07 49.92 25.14 85.35 65.70 SongNet ( only Fine - tuning ) 34.62 34.53 42.31 4.96 90.76 47.26 SongNet 27.46 27.63 43.01 10.43 80.06 56.14 ModelFormat " Rhyme"Integrity#MA - F1 M I - F1 MA - F1 M I - F1 GPT2 w/ Fine - tuning 2.03 1.91 5.20 6.24 15.773.63
-SongNet ( only Pre - training ) 99.99 99.99 3.93 4.01 15.282.04 SongNet ( only Fine - tuning ) 99.25 99.99 7.50 7.41 18.862.59 SongNet 98.73 98.73 11.46 11.41 11.863.01 Table 2 : Automatic evaluation results on Sonnet Corpus # Train # Dev # Test # V ocab SongCi 19,244 847 962 5310 Sonnet 100 27 27 2801 Table 3 : Statistics of the datasets SongCi and Sonnet .
-For Sonnet , we relax the condition where we let = 1 and ignore rule ( 2 ) .
-Assume that the number of format - correct sentences is n0 , then we can obtain Precision p = n0 = n , Recallr = n0 = m , and F1 - measure .
+4.3 Evaluation Metrics
+Besides PPL and Distinct ( Li et al , 2016 ) , we also tailor - design several metrics for our task to conduct the evaluation for format , rhyme , and sentence integrity .
+Format Assume that there are m sentences deﬁned in the format C = { Cs m } , and the generated results Y contains n sentences Y = { Y s n } .
+Without loss of generality , we align C and Y from the beginning , and calculate the format quality according to the following rules : ( 1 ) the length difference ||Cs
+i || ≤ δ ; ( 2 ) the punctuation characters must be same .
+For SongCi , we let δ = 0 and rule ( 2 ) must be conforming .
+2 , ... , Y s
+i | − |Y s
+2 , ... , Cs
+1 , Y s
+1 , Cs
+746  Model
+S2S GPT2 GPT2 w/ Fine - tuning SongNet ( only Pre - training ) SongNet ( only Fine - tuning )
+SongNet
+Model
+S2S GPT2 w/ Fine - tuning SongNet ( only Pre - training ) SongNet ( only Fine - tuning )
+SongNet
+PPL↓
+Diversity ( Distinct ) ↑
+VAL 19.61 148.11 18.25 24.41 12.75 11.56
+TEST MA - D-1 MI - D-1 MA - D-2 MI - D-2 2.48 20.43 104.99 2.57 17.00 4.59 16.23 2.69 14.73 12.64 2.66 Rhyme↑ Format↑
+75.35 73.87 74.84 75.96 75.04
+98.35 96.07 95.09 97.59 97.29
+36.23 33.92 54.98 37.26 36.78
+MA - F1 MI - F1 MA - F1 MI - F1 52.27 44.32 52.50 35.70 53.13 29.12 78.63 99.81 99.88 72.59
+53.80 53.48 53.77 79.23 73.21
+38.16 35.20 29.46 99.83 99.89
+Integrity↓
+8.30±2.06 45.92±20.12 30.98±14.06 2.14±0.10 1.77±0.16
+Table 1 : Automatic evaluation results on SongCi
+Model
+GPT2 w/ Fine - tuning SongNet ( only Pre - training ) SongNet ( only Fine - tuning )
+SongNet
+Model
+GPT2 w/ Fine - tuning SongNet ( only Pre - training ) SongNet ( only Fine - tuning )
+SongNet
+PPL↓
+Diversity ( Distinct ) ↑
+VAL 31.47 28.56 34.62 27.46
+TEST MA - D-1 MI - D-1 MA - D-2 MI - D-2 31.03 28.07 34.53 27.63 Format↑
+2.57 25.14 4.96 10.43 Rhyme↑
+33.92 65.70 47.26 56.14
+96.07 85.35 90.76 80.06
+73.87 49.92 42.31 43.01
+MA - F1 MI - F1 MA - F1 MI - F1 6.24 4.01 7.41 11.41
+5.20 3.93 7.50 11.46
+1.91 99.99 99.99 98.73
+2.03 99.99 99.25 98.73
+Integrity↓
+15.77±3.63 15.28±2.04 18.86±2.59 11.86±3.01
+Table 2 : Automatic evaluation results on Sonnet
+Corpus SongCi Sonnet
+# Train 19,244 100
+# Dev 847 27
+# Test 962 27
+# Vocab 5310 2801
+Table 3 : Statistics of the datasets SongCi and Sonnet .
+For Sonnet , we relax the condition where we let δ = 1 and ignore rule ( 2 ) .
+Assume that the number of format - correct sentences is n(cid:48 ) , then we can obtain Precision p = n(cid:48)/n , Recall r = n(cid:48)/m , and F1 - measure .
 We report both the Macro - F1 and Micro - F1 in the results tables .
 Rhyme For SongCi , usually , there is only one group of rhyming words in one sample .
-As the example shown in Table 1 , the pronunciation of the red rhyming words are “ zhu ” , “ y ¨u ” , “ du ” , and “ gu ” respectively , and the rhyming phoneme is “ u ” .
-For the generated samples , we ﬁrst use the toolpinyin4to get the pronunciations ( PinYin ) of the words in the rhyming positions , and then conduct the evaluation .
+As the example shown in Table 1 , the pronunciation of the red rhyming words are “ zhu ” , “ y¨u ” , “ du ” , and “ gu ” respectively , and the rhyming phoneme is “ u ” .
+For the generated samples , we ﬁrst use the tool
+pinyin4 to get the pronunciations ( PinYin ) of the words in the rhyming positions , and then conduct the evaluation .
 For Shakespeare ’s Sonnets corpus , the rhyming rule is clear “ ABAB CDCD EFEF GG ” and there are 7 groups of rhyming tokens .
-For the generated samples , we employ the CMU Pronouncing Dictionary5(Speech@CMU , 1998 ) to obtain the phonemes of the words in the rhyming positions .
+For the generated samples , we employ the CMU Pronouncing Dictionary5 ( Speech@CMU , 1998 ) to obtain the phonemes of the words in the rhyming positions .
 For example , the phonemes for word “ asleep ” and “ steep ” are [ ’ AH0 ’ , ’S ’ , ’ L ’ , ’ IY1 ’ , ’ P ’ ] and [ ’S ’ , ’ T ’ , ’ IY1 ’ , ’ P ’ ] respectively .
 And then we can conduct the evaluation by counting the overlapping units from both the original words and the extracted phonemes group by group .
 We report the Macro - F1 and Micro - F1 numbers in the results tables as well .
-Integrity Since the format in our task is strict and 4http://github.com/mozillazg/python-pinyin 5http://www.speech.cs.cmu.edu/cgi-bin/cmudict
-748ModelPPL # Diversity ( Distinct ) " VAL TEST MA - D-1 M I - D-1 MA - D-2 M I - D-2 SongNet 12.75 14.73 75.96 2.69 97.59 37.26 SongNet - GRU 16.52 20.49 74.73 1.77 98.30 28.98 SongNet w/o C 13.51 15.38 75.42 2.48 97.36 34.85 SongNet w/o P 14.16 17.16 73.73 2.56 97.52 34.82
-SongNet w/ inverse - P 13.40 15.13 74.95 2.54 97.76 35.65 SongNet w/o S 13.23 15.44 75.38 2.74 97.31 37.50 ModelFormat " Rhyme"Integrity#MA - F1 M I - F1 MA - F1 M I - F1 SongNet 99.81 99.83 79.23 78.63 2.140.10
-SongNet - GRU 98.99 98.99 52.13 50.93 3.281.67 SongNet w/o C 84.73 85.39 78.59 78.24 1.770.53 SongNet w/o P 99.61 99.59 67.85 67.29 3.330.18
-SongNet w/ inverse - P 99.68 99.69 65.89 65.43 2.240.21 SongNet w/o S 99.84 99.86 80.43 80.13 1.990.10 Table 4 : Ablation analysis on SongCi rigid
-, thus the number of words to be predicted is also pre - deﬁned .
+Integrity Since the format in our task is strict and
+4http://github.com/mozillazg/python-pinyin 5http://www.speech.cs.cmu.edu/cgi-bin/cmudict
+747  Model
+SongNet SongNet - GRU SongNet w/o C SongNet w/o P
+SongNet w/ inverse - P SongNet w/o S
+Model
+SongNet SongNet - GRU SongNet w/o C SongNet w/o P
+SongNet w/ inverse - P SongNet w/o S
+PPL↓
+Diversity ( Distinct ) ↑
+VAL 12.75 16.52 13.51 14.16 13.40 13.23
+TEST MA - D-1 MI - D-1 MA - D-2 MI - D-2 14.73 20.49 15.38 17.16 15.13 15.44 Format↑
+2.69 1.77 2.48 2.56 2.54 2.74 Rhyme↑
+97.59 98.30 97.36 97.52 97.76 97.31
+75.96 74.73 75.42 73.73 74.95 75.38
+37.26 28.98 34.85 34.82 35.65 37.50
+MA - F1 MI - F1 MA - F1 MI - F1 78.63 99.81 50.93 98.99 78.24 84.73 67.29 99.61 65.43 99.68 80.13 99.84
+99.83 98.99 85.39 99.59 99.69 99.86
+79.23 52.13 78.59 67.85 65.89 80.43
+Integrity↓
+2.14±0.10 3.28±1.67 1.77±0.53 3.33±0.18 2.24±0.21 1.99±0.10
+Table 4 : Ablation analysis on SongCi
+rigid , thus the number of words to be predicted is also pre - deﬁned .
 Our model must organize the language using the limited positions , thus sentence integrity may become a serious issue .
 For example , the integrity of “ love is not love .
-h = si ” is much better than“love is not the .
-h = si ” .
-To conduct the evaluation of sentence integrity , we design a straightforward method by calculating the prediction probability of the punctuation characters beforeh = sigiven the preﬁx tokens : Integrity = 2 1 jYjjYjP i=1log(P(yi puncjyi 0;yi 1;:::;yi < punc ) )
-( 11 ) whereYis the generated sequence of sentences .
+( cid:104)/s(cid:105 ) ” is much better than“love is not the .
+( cid:104)/s(cid:105 ) ” .
+To conduct the evaluation of sentence integrity , we design a straightforward method by calculating the prediction probability of the punctuation characters before ( cid:104)/s(cid:105 ) given the preﬁx tokens :
+Integrity = 2
+− 1 |Y |
+|Y | ( cid:80 ) i=1
+log(P ( yi
+punc|yi
+0,yi
+1,
+... ,yi
+< punc ) )
+( 11 ) where Y is the generated sequence of sentences .
 Smaller integrity metric value indicates higher sentence quality .
-To achieve this goal , we conduct pre - trainings for two GPT2 ( Radford et al . , 2019 ) models on the large scale Chinese corpus and English corpus respectively .
+To achieve this goal , we conduct pre - trainings for two GPT2 ( Radford et al , 2019 ) models on the large scale Chinese corpus and English corpus respectively .
 Then we utilize the GPT2 models to conduct the evaluation for sentence integrity .
 Human Evaluations For SongCi , we sampled 50 samples for 25 CiPais .
 For Sonnet , the whole 27 samples in the test set are selected for human evaluation .
 We recruit three helpers to score the Relevance , Fluency , and Style .
 The rating criteria are as follows : Relevance : +2 : all the sentences are relevant to the same topic ; +1 : partial sentences are relevant ; 0 : not relevant at all .
-Fluency : +2 : ﬂuent;+1 : readable but with some grammar mistakes ; 0 : unreadable .
-Style : +2 : match with SongCi orSonnet genres ; +1 : partially match ; 0 : mismatch .
-4.4 Comparison Methods S2SSequence - to - sequence framework with attention mechanism ( Bahdanau et al . , 2014 ) .
-We regard the format and rhyme symbols Cas the input sequence , and the target as the output sequence .
+Fluency : +2 : ﬂuent ; +1 : readable but with some grammar mistakes ; 0 : unreadable .
+Style : +2 : match with SongCi or
+Sonnet genres ; +1 : partially match ; 0 : mismatch .
+4.4 Comparison Methods
+S2S Sequence - to - sequence framework with attention mechanism ( Bahdanau et al , 2014 ) .
+We regard the format and rhyme symbols C as the input sequence , and the target as the output sequence .
 GPT2
 We ﬁne - tune the GPT2 models ( the pretraining versions are used for sentence integrity evaluation ) on SongCi and Sonnet respectively .
 SongNet Out proposed framework with both the per - training and ﬁne - tuning stages .
 We also conduct ablation analysis to verify the performance of the deﬁned symbols as well as the variants of model structures .
-SongNet ( only pre - tuning )
-Without the ﬁnetuning stage .
-SongNet ( only ﬁne - tuning )
-Without the pretraining stage .
-SongNet - GRU Employ GRU ( Cho et al . , 2014 ) to replace Transformer as the core structure .
-SongNet w/o C Remove the format and rhyme symbols C. SongNet w/o P Remove the intra - position symbolsP. SongNet w/o S Remove the sentence segment symbolsS. SongNet
-w/ inverse - P Arrange the intraposition indices in ascending order instead of the descending order .
-749 Figure 3 : Parameter tuning of kon the metrics of Rhyme , Integrity , and Micro - Dist-2 .
-Model Cases of Generated Results SongNet - SongCi CiPai : Zhe Gu Tian , Format : 7 . 7 . 7 , 7 . 3 , 3 . 7 . 7 , 7 .
-≖㚜㨱䜳㔤⫑㱄(qian)ȼᴛ柍᳿昍㔤䆸㖕(nuan)ȼ㱶㟟旵ᵰ㖖梘㪊(can)漓昱枖㘩㲇䶡㯩㷠(man)ȼ㔤ᴌ䪠(guan)漓ᶹṔ廛(yuan)ȼ㭞 ⠳ 㓦 㓤㴄㶩ḳ(ban)ȼ㨱⃬㡻ᴉ㑯坋ᵥ漓≳ᴹ㞥橁㓟壄ḳ(ban)ȼ CiPai : Bu Suan Zi , Format : 5 , 5 . 7 , 5 . 5 , 5 . 7 , 5 .
-㒯㘇 ㈁ ⴗ㓋漓㖖剈嗨⃃㡙(chu)ȼ ⠛ ≉揵㹡≀ᶋ攐漓䐺ⵔ㽮冰 ⌏ (tu)ȼṔ ⠃ 䨚⟯㪊漓㕒䦖柍旧(yu)ȼ䇫媷⫑㞄ḳ ⬎ 樞漓梘 ☧ 䣊≂㛰(zhu)ȼ
-CiPai : Self - Defined , Format : 3 , 3 , 5 . 3 , 3 , 5 . 7 , 7 . 仟 ⮨ ᴬ漓㱀㬳 ⠕ 漓K㘈 ⬎ ⟵ ⠨ (tian)ȼ僩昛㴄漓䇫㒖冲漓嬀㑡⵵柝ᷘ(xian)ȼ ⠛ ᵄ⃈䐞᳿㗱 　 漓㘇 ⢁ 冰⹰ḻ冰 ★ (yuan)ȼ CiPai : Self - Defined , Format : 9 . 9 . 9 . 9 .
-旧㰑淃㯈䮻䮻 ䷅ ṛ⫑(han)ȼ岉㬳塾㙤㓵冁僩㴄擱(xian)ȼ㩋䨐᳿㙮摾␰悈悑擳(jian)ȼ㔤⊺ᴌ ✩ ⫺㞥 ䷔ 儌 ⭰ (shan)ȼ SongNet - Sonnet how do you hold such a thing like this , \ when my eyes are so not black ?
-\
-but how can i show myself , so strange , \ that all this black is white ?
-where am i to hide this from my eyes , \ from this white mine eyes   all fals , \ where is the good fortune , in me , \ that hath no exc use , no excuse ?
-what is that which can mask the true love \ and for whom is this   true love more ?
-\ the one , which shall save the poor my eye , \ from the false truth of my judgment ?
-what lies , for when you are not that , \ no one in this and that   can see me lies !
+• SongNet ( only pre - tuning ) Without the ﬁne• SongNet ( only ﬁne - tuning )
+Without the pretuning stage .
+training stage .
+• SongNet - GRU Employ GRU ( Cho et al , 2014 ) to replace Transformer as the core structure .
+• SongNet w/o C Remove the format and
+rhyme symbols C.
+• SongNet w/o P Remove the intra - position
+• SongNet w/o S Remove the sentence segment
+symbols P .
+symbols S. • SongNet w/
+inverse - P Arrange the intraposition indices in ascending order instead of the descending order .
+748  Figure 3 : Parameter tuning of k on the metrics of Rhyme , Integrity , and Micro - Dist-2 .
 Table 5 : Cases of the generated results for SongCi and Sonnet respectively .
 For SongCi , the number in Format ( e.g. , 3,5,7 ) denotes the number of tokens in one sentence .
 The rhyming words are labeled in red color and italic font following is the Pinyin .
 ( Since cases are provided to conﬁrm the format consistency , thus we did not conduct translation for the Chinese samples .
 Translation for Chinese poetry is also a challenging task . )
-Model Cases of Generated Results Given the Formats with Partial Content SongNet - SongCi CiPai : Bu Suan Zi , Format : 5 , 5 . 7 , 5 . 5 , 5 . 7 , 5 .
-Format C 漡
+Table 6 : Cases of the generated results given the formats with partial pre - deﬁned content .
+Format token “ ” needs to be translated to real word token .
+5 Results and Discussions
+5.1 Results
+Please note that we mainly employ top - k sampling method ( Fan et al , 2018 ; Radford et al , 2019 ) to conduct the generation , and we let k = 32 here .
+The parameter tuning of k is described in Section 5.3 .
+Table 1 and Table 2 depict the experimental results of SongNet as well as the baseline methods S2S and GPT2 on corpus SongCi and Sonnet respectively .
+It is obvious that our pre - training and ﬁne - tuning framework SongNet obtain the best performance on most of the automatic metrics .
+Especially on the metric of Format accuracy , SongNet can even obtain a 98%+ value which means that our framework can conduct the generation rigidly matching with the pre - deﬁned formats .
+On the metric of PPL , Rhyme accuracy , and sentence integrity , SongNet alo performs signiﬁcantly better in a large gap than the baseline methods such as S2S and GPT2 as well as the model variants only with the pre - training or ﬁne - tuning stage .
+Another observation is that some of the results on corpus Sonnet are not as good as the results
+749ModelCases of Generated ResultsSongNet - SongCiCiPai : ZheGu Tian , Format : 7.7 . 7 , 7 . 3 , 3 . 7 . 7 , 7.(cid:8790)(cid:13980)(cid:14897)(cid:18227)(cid:13604)(cid:10961)(cid:15428)(qian)(cid:572)(cid:7451)(cid:26573)(cid:7423)(cid:26125)(cid:13604)(cid:16824)(cid:13717)(nuan)(cid:572)(cid:15478)(cid:14303)(cid:26101)(cid:7536)(cid:13718)(cid:26776)(cid:14986)(can)(cid:28435)(cid:26161)(cid:26518)(cid:13865)(cid:15495)(cid:19873)(cid:15337)(cid:15840)(man)(cid:572)(cid:13604)(cid:7436)(cid:19104)(guan)(cid:28435)(cid:7609)(cid:7764)(cid:24283)(yuan)(cid:572)(cid:15198)(cid:10291)(cid:13542)(cid:13540)(cid:15620)(cid:15785)(cid:7731)(ban)(cid:572)(cid:14897)(cid:8428)(cid:14459)(cid:7433)(cid:13423)(cid:22347)(cid:7525)(cid:28435)(cid:8819)(cid:7481)(cid:14245)(cid:27201)(cid:13535)(cid:22724)(cid:7731)(ban)(cid:572)CiPai : Bu SuanZi , Format : 5 , 5 . 7 , 5 . 5 , 5 . 7 , 5.(cid:13487)(cid:13831)(cid:12801)(cid:11543)(cid:13515)(cid:28435)(cid:13718)(cid:21064)(cid:21992)(cid:8387)(cid:14425)(chu)(cid:572)(cid:10267)(cid:8777)(cid:25589)(cid:15969)(cid:8768)(cid:7563)(cid:25872)(cid:28435)(cid:17466)(cid:11604)(cid:16238)(cid:20912)(cid:8975)(tu)(cid:572)(cid:7764)(cid:10243)(cid:18970)(cid:10223)(cid:14986)(cid:28435)(cid:13650)(cid:18838)(cid:26573)(cid:26087)(yu)(cid:572)(cid:16875)(cid:23223)(cid:10961)(cid:14212)(cid:7731)(cid:11022)(cid:27166)(cid:28435)(cid:26776)(cid:9767)(cid:18634)(cid:8770)(cid:14064)(zhu)(cid:572)CiPai : Self - Defined , Format : 3 , 3 , 5 . 3 , 3 , 5 . 7 , 7.(cid:20191)(cid:11176)(cid:7468)(cid:28435)(cid:15424)(cid:15155)(cid:10261)(cid:28435)(cid:8490)(cid:13832)(cid:11022)(cid:10229)(cid:10280)(tian)(cid:572)(cid:20713)(cid:26139)(cid:15620)(cid:28435)(cid:16875)(cid:13462)(cid:20914)(cid:28435)(cid:23296)(cid:13409)(cid:11637)(cid:26589)(cid:7640)(xian)(cid:572)(cid:10267)(cid:7492)(cid:8392)(cid:17438)(cid:7423)(cid:13809)(cid:12288)(cid:28435)(cid:13831)(cid:10369)(cid:20912)(cid:11888)(cid:7739)(cid:20912)(cid:9733)(yuan)(cid:572)CiPai : Self - Defined , Format : 9 . 9 . 9 . 9.(cid:26087)(cid:15377)(cid:28099)(cid:15304)(cid:19387)(cid:19387)(cid:19909)(cid:7771)(cid:10961)(han)(cid:572)(cid:23689)(cid:15155)(cid:22654)(cid:13924)(cid:13557)(cid:20865)(cid:20713)(cid:15620)(cid:25841)(xian)(cid:572)(cid:14923)(cid:18960)(cid:7423)(cid:13934)(cid:25726)(cid:9264)(cid:24712)(cid:24721)(cid:25843)(jian)(cid:572)(cid:13604)(cid:8890)(cid:7436)(cid:10025)(cid:11002)(cid:14245)(cid:19924)(cid:20748)(cid:11120)(shan)(cid:572)SongNet - Sonnethow do you hold such a thing like this , \when my eyes are so not black ?
+\but how can ishow myself , so strange , \that all this black is white?where am ito hide this from my eyes , \from this white mine eyes all fals , \where is the good fortune , in me , \that hath no excuse , no excuse?what is that which can mask the true love \and for whom is this true love more ?
+\the one , which shall save the poor my eye , \from the false truth of my judgment?what lies , for when you are not that , \no one in this and that can see me lies!ModelCases of Generated Results Given the Formats with Partial ContentSongNet - SongCiCiPai : Bu SuanZi , Format : 5 , 5 . 7 , 5 . 5 , 5 . 7 , 5.Format C(cid:28449 ) _
 _ _
 _
-_
-_
-漓 _ _
-_
-_ ℯȼ
+_ ( cid:28435 ) _
 _ _
-_ _
-_
-_
-_
-漓 _ _
-_
-_
-Ỏȼ _ _
-_
-_
-_
-漓 _ _
-_ ㆤȼ _ _
-_ _
-_
-_
-_
-漓 _ _
-_
-_
-䨐ȼ ( 1)柍㖕効⟯凥漓⋇㔮⵳㓵 ℯȼ摾䄰㛲共ᴈ ℅ 惋漓 ⠙ ⬐ ᴹ㔤 Ỏȼ⁰ ⬐ ⵳㓵冁漓⿮ ⺖ 冰㓵 ㆤȼᶈḻ恳 ⺃ ⁤ⷚ㙤漓㩤㩤斎㔤 䨐ȼ ( 2)㔤㙤㔤⋇⊺漓冰⹰⃟㯡 ℯȼ擧 ⠕ ䷾ 㙧㛲匦㰑漓㶩㝤ᶹᶹ Ỏȼ擧 ⠕ ᴛ柍楫漓ḻ㓦㓵梘 ㆤȼṅ ⼩ 㝂㙍㕙㓵亝漓₶匼㓟ᶹ 䨐ȼ Format C 漡_旧 _ _
-_
-漓 _ _
-_
-_ ℯȼ
+_ ( cid:8495)(cid:572 ) _
 _ _
 _ _
 _
+_ ( cid:28435 ) _
+_ _
+_ ( cid:7886)(cid:572 ) _
+_ _
 _
-₯ 漓 _ _
+_ ( cid:28435 ) _
 _
+_ ( cid:12708)(cid:572 ) _
+_ _
+_ _
 _
-Ỏȼ _ _
+_ ( cid:28435 ) _
+_ _
+_ ( cid:18960)(cid:572)(1)(cid:26573)(cid:13717)(cid:21177)(cid:10223)(cid:20965)(cid:28435)(cid:8903)(cid:13614)(cid:11635)(cid:13557)(cid:8495)(cid:572)(cid:25726)(cid:16688)(cid:14066)(cid:20849)(cid:7432)(cid:8453)(cid:24779)(cid:28435)(cid:10265)(cid:11024)(cid:7481)(cid:13604)(cid:7886)(cid:572)(cid:8304)(cid:11024)(cid:11635)(cid:13557)(cid:20865)(cid:28435)(cid:12270)(cid:11926)(cid:20912)(cid:13557)(cid:12708)(cid:572)(cid:7560)(cid:7739)(cid:24691)(cid:11907)(cid:8292)(cid:11738)(cid:13924)(cid:28435)(cid:14948)(cid:14948)(cid:25998)(cid:13604)(cid:18960)(cid:572)(2)(cid:13604)(cid:13924)(cid:13604)(cid:8903)(cid:8890)(cid:28435)(cid:20912)(cid:11888)(cid:8415)(cid:15329)(cid:8495)(cid:572)(cid:25831)(cid:10261)(cid:19966)(cid:13927)(cid:14066)(cid:21286)(cid:15377)(cid:28435)(cid:15785)(cid:14180)(cid:7609)(cid:7609)(cid:7886)(cid:572)(cid:25831)(cid:10261)(cid:7451)(cid:26573)(cid:26987)(cid:28435)(cid:7739)(cid:13542)(cid:13557)(cid:26776)(cid:12708)(cid:572)(cid:7749)(cid:12073)(cid:14146)(cid:13901)(cid:13657)(cid:13557)(cid:20125)(cid:28435)(cid:8374)(cid:21308)(cid:13535)(cid:7609)(cid:18960)(cid:572)Format C(cid:28449)_(cid:26087 ) _
 _
-_ 㔤漓 _
-_ 㔤_ㆤȼ
-_
-_
-⭰ 冰 _ _
-_
-漓 _ _
-_
-_ 䨐ȼ ( 1)㔤旧䞦廝匤漓㛲㖖擧⳶ ℯȼ⪪㪾㩤庆崎⫑ ₯ 漓䕽⦙䐞㔤 Ỏȼ㩢㓤㿗㕳 㔤漓冰旽㔤柍ㆤȼ᳿㾸 ⭰ 冰悈䘻㔍漓≉Ἑ攐⵱ 䨐ȼ ( 2)早旧⸃幺㖕漓㒯㲧 ䷾ 㯡 ℯȼ㡻ᴉ⫸晡㵾仟 ₯ 漓᳿ ⠛ 柍冰 Ỏȼ㕒㓤㿗摾 㔤漓䙠屶㔤⪴ㆤȼ㚔䑓 ⭰ 冰匼⋵⟯漓ᴌ㔮㞥橁
-䨐ȼ SongNet - Sonnet _ _
+_ ( cid:28435 ) _
+_ _
+_ ( cid:8495)(cid:572 ) _
+_ _
+_ _
+_ ( cid:8367)(cid:28435 ) _
+_ _
+_ ( cid:7886)(cid:572 ) _
+_ _
+_ ( cid:13604)(cid:28435 ) _
+_ ( cid:13604)_(cid:12708)(cid:572 ) _
+_ ( cid:11120)(cid:20912 ) _ _
+_ ( cid:28435 ) _
+_ _
+_ ( cid:18960)(cid:572)(1)(cid:13604)(cid:26087)(cid:18342)(cid:24285)(cid:21284)(cid:28435)(cid:14066)(cid:13718)(cid:25831)(cid:11510)(cid:8495)(cid:572)(cid:10922)(cid:15038)(cid:14948)(cid:24198)(cid:23822)(cid:10961)(cid:8367)(cid:28435)(cid:17789)(cid:10649)(cid:17438)(cid:13604)(cid:7886)(cid:572)(cid:14946)(cid:13540)(cid:16343)(cid:13683)(cid:13604)(cid:28435)(cid:20912)(cid:26109)(cid:13604)(cid:26573)(cid:12708)(cid:572)(cid:7423)(cid:16312)(cid:11120)(cid:20912)(cid:24712)(cid:17979)(cid:13581)(cid:28435)(cid:8777)(cid:7961)(cid:25872)(cid:11633)(cid:18960)(cid:572)(2)(cid:26089)(cid:26087)(cid:11779)(cid:24186)(cid:13717)(cid:28435)(cid:13487)(cid:15527)(cid:19966)(cid:15329)(cid:8495)(cid:572)(cid:14459)(cid:7433)(cid:11000)(cid:26209)(cid:15742)(cid:20191)(cid:8367)(cid:28435)(cid:7423)(cid:10267)(cid:26573)(cid:20912)(cid:7886)(cid:572)(cid:13650)(cid:13540)(cid:16343)(cid:25726)(cid:13604)(cid:28435)(cid:18016)(cid:23670)(cid:13604)(cid:10932)(cid:12708)(cid:572)(cid:13972)(cid:17491)(cid:11120)(cid:20912)(cid:21308)(cid:8949)(cid:10223)(cid:28435)(cid:7436)(cid:13614)(cid:14245)(cid:27201)(cid:18960)(cid:572)SongNet - Sonnet _ _
 _
 _
 with _ hearts , _ _
@@ -323,144 +458,44 @@ _ _
 _
 all _ _
 _
-me .though all thy love with thy hearts , thou still are lacking of my dead ;   if thy love love is lost to your love and parts ,   and yet mine own heart can be buried .  
-so many are ill or in tear , hath not this time that we will make their eye , for that which lies not well hath now appear , no longer nor the world that holds thee lie !  
-for if it would be buried in my live ,   or by the earth ofmine was gone ,   then my own parts as my body and mine give , may not be so far beyond thine alone : so far   as thee and this world view find thee , then mine life be far enough from allthee and no me .  
-Table 6 : Cases of the generated results given the formats with partial pre - deﬁned content .
-Format token “ ” needs to be translated to real word token .
-5 Results and Discussions 5.1 Results Please note that we mainly employ top- ksampling method ( Fan et al . , 2018 ; Radford et al . , 2019 ) to conduct the generation , and we let k= 32 here .
-The parameter tuning of kis described in Section 5.3 .
-Table 1 and Table 2 depict the experimental results of SongNet as well as the baseline methods S2S and GPT2 on corpus SongCi and Sonnet respectively .
-It is obvious that our pre - training and ﬁne - tuning framework SongNet obtain the best per - formance on most of the automatic metrics .
-Especially on the metric of Format accuracy , SongNet can even obtain a 98%+ value which means that our framework can conduct the generation rigidly matching with the pre - deﬁned formats .
-On the metric of PPL , Rhyme accuracy , and sentence integrity , SongNet also performs signiﬁcantly better in a large gap than the baseline methods such as S2S and GPT2 as well as the model variants only with the pre - training or ﬁne - tuning stage .
-Another observation is that some of the results on corpus Sonnet are not as good as the results
-750Model Relevance Fluency Style SongNet - SongCi 1.36 1.45 2.00 SongNet - Sonnet 0.58 0.42 0.83 Table 7 : Human evaluation results .
+me .though all thy love withthy hearts , thou still are lackingof my dead ; if thy love loveis lost to your love and parts ,   and yet mine own heart can be buried .
+so manyare ill or in tear , hathnot this time that we will make their eye , for that which lies not well hath nowappear , no longer nor the world that holds theelie !
+for if it would be buriedin my live ,   or by the earth ofmine was gone , then my own partsas my body and mine give , may not be so far beyond thinealone : so far as thee and this world viewfind thee , then mine life be far enough from allthee and no me . 
+Model SongNet - SongCi SongNet - Sonnet
+Relevance 1.36 0.58
+Fluency 1.45 0.42
+Style 2.00 0.83
+5.5 Case Analysis
+Table 7 : Human evaluation results .
 on SongCi .
 The main reason is that Sonnet only contains 100 samples in the training set as shown in Table 3 .
 Therefore , the model can not capture sufﬁcient useful features especially for the rhyming issue .
-5.2 Ablation Analysis We conduct ablation study on corpus SongCi and the experimental results are depicted in Table 4 .
+5.2 Ablation Analysis
+We conduct ablation study on corpus SongCi and the experimental results are depicted in Table 4 .
 It should note that all the models are purely trained on SongCi corpus without any pre - training stages .
-From the results we can conclude that the introduced symbols C , P , andSindeed play crucial roles in improving the overall performance especially on the metrics of format , rhyme , and sentence integrity .
+From the results we can conclude that the introduced symbols C , P , and S indeed play crucial roles in improving the overall performance especially on the metrics of format , rhyme , and sentence integrity .
 Even though some of the components can not improve the performance simultaneously on all the metrics , the combination of them can obtain the best performance .
-5.3 Parameter Tuning Since we employ top- ksampling as our main decoding strategy , thus we design several experiments to conduct the parameter tuning on k.
+5.3 Parameter Tuning
+Since we employ top - k sampling as our main decoding strategy , thus we design several experiments to conduct the parameter tuning on k.
 We let k to be 1 , 5 , 10 , 20 , 50 , 500 respectively .
 We also provide the beam - search ( beam=5 ) results for comparing and reference .
 The parameter tuning results are depicted in Figure 3 .
-From the results we can observe that large kcan increase the diversity of the results signiﬁcantly .
+From the results we can observe that large k can increase the diversity of the results signiﬁcantly .
 But the Rhyme accuracy and the sentence integrity will drop simultaneously .
-Therefore , in the experiments we let k= 32 to obtain a trade - off between the diversity and the general quality .
-5.4 Human Evaluation For human evaluation , we just conduct the judging on the results generated by our ﬁnal model SongNet .
+Therefore , in the experiments we let k = 32 to obtain a trade - off between the diversity and the general quality .
+5.4 Human Evaluation
+For human evaluation , we just conduct the judging on the results generated by our ﬁnal model SongNet .
 From the result we can observe that the results on corpus SongCi is much better than the ones on corpus Sonnet , which is because the corpus scale is different .
-And the the small scale also lead to dramatically dropping on all the metrics.5.5 Case Analysis Table 5 depicts several generated cases for SongCi and Sonnet respectively .
+And the the small scale also lead to dramatically dropping on all the metrics .
+Table 5 depicts several generated cases for SongCi and Sonnet respectively .
 For SongCi , the formats ( CiPai ) are all cold - start samples which are not in the training set or even newly deﬁned .
-Our model can still generate high quality results on the aspects offormat , rhyme as well as integrity .
+Our model can still generate high quality results on the aspects of format , rhyme as well as integrity .
 However , for corpus Sonnet , even though the model can generate 14 lines text , the quality is not as good as SongCi due to the insufﬁcient training - set ( only 100 samples ) .
 We will address this interesting and challenging few - shot issue in the future .
-In addition , we mentioned that our model has the ability of reﬁning and polishing given the format Cwhich contains some ﬁxed text information .
+In addition , we mentioned that our model has the ability of reﬁning and polishing given the format C which contains some ﬁxed text information .
 The examples of the generated results under this setting are shown in Table 6 , which show that our model SongNet can generate satisfying results especially on SongCi .
-6 Conclusion We propose to tackle a challenging task called rigid formats controlled text generation .
+6 Conclusion
+We propose to tackle a challenging task called rigid formats controlled text generation .
 A pre - training and ﬁne - tuning framework SongNet is designed to address the problem .
 Sets of symbols are tailordesigned to improve the modeling performance for format , rhyme , and sentence integrity .
 Extensive experiments conducted on two collected corpora demonstrate that our framework generates significantly better results in terms of both automatic metrics and human evaluations given arbitrary cold start formats .
-References Dzmitry Bahdanau , Kyunghyun Cho , and Yoshua Bengio .
-2014 .
-Neural machine translation by jointly learning to align and translate .
-arXiv preprint arXiv:1409.0473 .
-Kyunghyun Cho , Bart van Merrienboer , Caglar Gulcehre , Dzmitry Bahdanau , Fethi Bougares , Holger Schwenk , and Yoshua Bengio .
-2014 .
-Learning phrase representations using rnn encoder – decoder for statistical machine translation .
-In Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing ( EMNLP ) , pages 1724 – 1734 .
-Zihang Dai , Zhilin Yang , Yiming Yang , William W Cohen , Jaime Carbonell , Quoc V Le , and Ruslan Salakhutdinov .
-2019 .
-Transformer - xl : Attentive language models beyond a ﬁxed - length context .
-arXiv preprint arXiv:1901.02860 .
-751Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019 .
-Bert : Pre - training of deep bidirectional transformers for language understanding .
-In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long and Short Papers ) , pages 4171–4186 .
-Angela Fan , Mike Lewis , and Yann Dauphin .
-2018 .
-Hierarchical neural story generation .
-In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 889–898 .
-Jonas Gehring , Michael Auli , David Grangier , Denis Yarats , and Yann N Dauphin . 2017 .
-Convolutional sequence to sequence learning .
-In Proceedings of the 34th International Conference on Machine Learning - Volume 70 , pages 1243–1252 .
-JMLR .
-org .
-Diederik P Kingma and Jimmy Ba . 2014 .
-Adam : A method for stochastic optimization .
-arXiv preprint arXiv:1412.6980 .
-Philipp Koehn .
-2004 .
-Pharaoh : a beam search decoder for phrase - based statistical machine translation models .
-In Conference of the Association for Machine Translation in the Americas , pages 115 – 124 .
-Springer .
-Jey Han Lau , Trevor Cohn , Timothy Baldwin , Julian Brooke , and Adam Hammond .
-2018 .
-Deep - speare : A joint neural model of poetic language , meter and rhyme .
-arXiv preprint arXiv:1807.03491 .
-Jiwei Li , Michel Galley , Chris Brockett , Jianfeng Gao , and Bill Dolan .
-2016 .
-A diversity - promoting objective function for neural conversation models .
-In Proceedings of the 2016 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 110–119 .
-Piji Li .
-2020 .
-An empirical investigation of pre - trained transformer language models for open - domain dialogue generation .
-arXiv preprint arXiv:2003.04195 .
-Piji Li , Wai Lam , Lidong Bing , and Zihao Wang .
-2017 .
-Deep recurrent generative decoder for abstractive text summarization .
-In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing , pages 2091–2100 .
-Yi Liao , Yasheng Wang , Qun Liu , and Xin Jiang .
-2019 .
-Gpt - based generation for classical chinese poetry .
-arXiv preprint arXiv:1907.00151 .
-Alec Radford , Karthik Narasimhan , Tim Salimans , and Ilya Sutskever . 2018 .
-Improving language understanding with unsupervised learning .
-Technical report , Technical report , OpenAI .
-Alec Radford , Jeffrey Wu , Rewon Child , David Luan , Dario Amodei , and Ilya Sutskever . 2019 .
-Language models are unsupervised multitask learners .
-OpenAI Blog , 1(8).Alexander M Rush , Sumit Chopra , and Jason Weston .
-2015 .
-A neural attention model for abstractive sentence summarization .
-In Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing , pages 379–389 .
-Abigail See , Peter J Liu , and Christopher D Manning .
-2017 .
-Get to the point : Summarization with pointergenerator networks .
-In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , pages 1073 – 1083 .
-Abigail See , Aneesh Pappu , Rohun Saxena , Akhila Yerukola , and Christopher D Manning .
-2019 .
-Do massively pretrained language models make better storytellers ?
-arXiv preprint arXiv:1909.10705 .
-Rico Sennrich , Barry Haddow , and Alexandra Birch . 2015 .
-Neural machine translation of rare words with subword units .
-arXiv preprint arXiv:1508.07909 .
-William Shakespeare .
-2000 .
-Shakespeare ’s sonnets .
-Yale University Press .
-Lifeng Shang , Zhengdong Lu , and Hang Li . 2015 .
-Neural responding machine for short - text conversation .
-InProceedings of the 53rd Annual Meeting of the Association for Computational Linguistics and the 7th International Joint Conference on Natural Language Processing ( Volume 1 : Long Papers ) , pages 1577–1586 . Speech@CMU .
-1998 .
-Carnegie - mellon university pronouncing dictionary for american english .
-Version 0.7b .
-Available at [ http://www.speech.cs.cmu.edu/cgi-bin/cmudict ] .
-Ashish Vaswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N Gomez , Łukasz Kaiser , and Illia Polosukhin . 2017 .
-Attention is all you need .
-In Advances in neural information processing systems , pages 5998–6008 .
-Oriol Vinyals and Quoc Le . 2015 .
-A neural conversational model .
-arXiv preprint arXiv:1506.05869 .
-Zhilin Yang , Zihang Dai , Yiming Yang , Jaime Carbonell , Ruslan Salakhutdinov , and Quoc V Le . 2019 .
-Xlnet :
-Generalized autoregressive pretraining for language understanding .
-arXiv preprint arXiv:1906.08237 .
-Xingxing Zhang and Mirella Lapata .
-2014 .
-Chinese poetry generation with recurrent neural networks .
-In Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing ( EMNLP ) , pages 670–680 .
-Yukun Zhu , Ryan Kiros , Rich Zemel , Ruslan Salakhutdinov , Raquel Urtasun , Antonio Torralba , and Sanja Fidler .
-2015 .
-Aligning books and movies : Towards story - like visual explanations by watching movies and reading books .
-In Proceedings of the IEEE international conference on computer vision , pages 19 – 27 .

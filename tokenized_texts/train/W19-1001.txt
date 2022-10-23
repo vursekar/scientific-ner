@@ -1,31 +1,41 @@
-Proceedings of the IWCS 2019 Workshop on Computing Semantics with Types , Frames and Related Structures , pages 1–9 Gothenburg , Sweden , May 24 , 2019 .
-c  2019 Association for Computational Linguistics1Underspeciﬁcation and interpretive parallelism in Dependent Type Semantics Yusuke Kubota National Institute for Japanese Language and Linguistics kubota@ninjal.ac.jpKoji Mineshima Ochanomizu University mineshima.koji@ocha.ac.jp Robert Levine Ohio State University levine.1@osu.eduDaisuke Bekki Ochanomizu University bekki@is.ocha.ac.jp Abstract The scope parallelism in the Geach sentence ( Every boy loves , and every girl detests , some saxophonist ) and the related parallel interpretation requirement in pronominal binding is a pervasive phenomenon found across different types of coordination and ellipsis phenomena .
+Underspeciﬁcation and interpretive parallelism in Dependent Type Semantics
+Yusuke Kubota National Institute for Japanese Language and Linguistics kubota@ninjal.ac.jp
+Koji Mineshima Ochanomizu University mineshima.koji@ocha.ac.jp
+Robert Levine Ohio State University levine.1@osu.edu
+Daisuke Bekki Ochanomizu University bekki@is.ocha.ac.jp
+Abstract
+The scope parallelism in the Geach sentence ( Every boy loves , and every girl detests , some saxophonist ) and the related parallel interpretation requirement in pronominal binding is a pervasive phenomenon found across different types of coordination and ellipsis phenomena .
 Previous accounts all resort to additional constraints of some sort that restrict the otherwise ﬂexible syntax - semantics interface to avoid overgeneration .
 In this paper , we propose a novel approach to this long - standing problem .
 We show that , by taking a proof - theoretic perspective on natural language semantics and by viewing the ambiguity resolution for pronouns and indeﬁnites as underspeciﬁcation resolution that invokes extra proof search , a conceptually natural solution emerges for the problem of interpretive parallelism .
 The analysis is cast in Dependent Type Semantics , with Hybrid Type - Logical Categorial Grammar as the syntax - semantics interface backbone .
 For empirical illustration , we show how the proposed approach correctly accounts for the classical Geach paradigm and its pronominal variant .
-1 Introduction : interpretive parallelism in coordination and ellipsis One of the long - standing problems in the analysis of coordination and ellipsis is the strong parallelism requirement imposed on the interpretations of the ‘ shared ’ linguistic expression .
+1 Introduction : interpretive parallelism in coordination and ellipsis
+One of the long - standing problems in the analysis of coordination and ellipsis is the strong parallelism requirement imposed on the interpretations of the ‘ shared ’ linguistic expression .
 For example , Geach ( 1972 ) famously noticed that , in the following type of examples involving right - node raising ( RNR ) , the object indeﬁnite that is shared in the two conjuncts can either scope below the subject quantiﬁer in each conjunct or scope over the entire coordination , but that mixed scope readings , in which the object indeﬁnite scopes above the subject quantiﬁer in one conjunct but not in the other , are unavailable .
 ( 1 ) Every boy loves , and every girl detests , some saxophonist .
-( 8>9 ^ 8>9=9>8 ^ 9>8 ) Jacobson ( 1999 ) notes that this interpretive parallelism extends to the pronominal variable binding in examples such as the following ( on reading 2 , John is a salient male individual in the discourse ): ( 2 ) Every Englishman admires , and every American loves , his mother .
+( ∀ > ∃ ∧ ∀ >
+∃ / ∃ > ∀ ∧ ∃ > ∀ )
+Jacobson ( 1999 ) notes that this interpretive parallelism extends to the pronominal variable binding in examples such as the following ( on reading 2 , John is a salient male individual in the discourse ):
+( 2 ) Every Englishman admires , and every American loves , his mother .
 reading 1 : ‘ Every Englishman admires his own mother , and every American loves his own mother . ’ reading 2 : ‘ Every Englishman admires John ’s mother , and every American loves John ’s mother . ’
 In general , pronouns can either be free or bound by a quantiﬁer .
 Thus , there are four logically possible interpretations for ( 2 ) ( bound / free in ﬁrst / second conjunct ) .
 And all these interpretations are indeed available in the non - RNR counterpart of ( 2 ) ( Every Englishman admires his mother and every American loves his mother ) .
 However , only two of these readings are attested for ( 2 ) , as indicated above .
 The parallel interpretation requirement is not limited to coordination but extends to ellipsis phenomena .
-For example , Hirschb ¨uhler ( 1982 ) notes that VP ellipsis imposes parallelism requirement for the scope of the quantiﬁer inside the ‘ elided ’ material , in a way essentially parallel to the RNR sentences :
-2(3 ) An American ﬂag was hanging in front of every window .
+For example , Hirschb¨uhler ( 1982 ) notes that VP ellipsis imposes parallelism requirement for the scope of the quantiﬁer inside the ‘ elided ’ material , in a way essentially parallel to the RNR sentences :
+ProceedingsoftheIWCS2019WorkshoponComputingSemanticswithTypes , FramesandRelatedStructures , pages1–9Gothenburg , Sweden , May24,2019.c(cid:13)2019AssociationforComputationalLinguistics1  ( 3 ) An American ﬂag was hanging in front of every window .
 A Canadian ﬂag was , too .
-Like the RNR example in ( 1 ) , there are only the 8>9 ^ 8>9and9>8 ^ 9>8parallel scope readings for this sentence .
+Like the RNR example in ( 1 ) , there are only the ∀ > ∃ ∧ ∀ > ∃ and ∃ > ∀ ∧ ∃ > ∀ parallel scope readings for this sentence .
 Mixed scope readings in which the universal scopes over the indeﬁnite in the antecedent but not in the ellipsis site ( or vice versa ) are unavailable .
-Just as the RNR parallelism for quantiﬁer scope in ( 1 ) is mirrored in the anaphora case in ( 2 ) , the scopal parallelism in the VP ellipsis data in ( 3 ) has an exact analogue in the anaphora example in ( 4 ) .
+Just as the RNR parallelism for quantiﬁer scope in ( 1 ) is mirrored in the anaphora case in ( 2 ) , the
+scopal parallelism in the VP ellipsis data in ( 3 ) has an exact analogue in the anaphora example in ( 4 ) .
 ( 4 ) Every Englishman admires his mother , and every American does as well .
 As in ( 2 ) , the admiration relation holds either between every Englishman and every American male and his own respective mother or between every Englishman and every American male and the mother of some speciﬁc male individual in the antecedent context , with no mixed reading possible .
 The parallelism patterns in ( 1 ) and ( 2 ) recur in the case of Stripping ( see Puthawala ( 2018 ) for a recent formal analysis of Stripping , as well as a discussion of important properties of this construction ) .
-( 5 ) a.
-Every boy admires a saxophonist , and every girl too .
+( 5 )
+a. Every boy admires a saxophonist , and every girl too .
 b.
 Every Englishman admires his mother , and every American as well .
 These examples exhibit only the parallel interpretations ( analogous to the relevant readings for the RNR and VP ellipsis examples given above ) for the quantiﬁer or pronoun contained in the elided material .
@@ -34,211 +44,388 @@ Fox 2000 ; Asudeh and Crouch 2002 ; Steedman 2012 ) , but no uniform analysis cu
 The present paper attempts to make a ﬁrst step in such a uniﬁed analysis by focusing on the binding and scope data in RNR ( i.e. the Geach paradigm ) .
 The key claim of our proposal is that interpretive parallelism is a consequence of the underspeciﬁcation involved in the interpretation of pronouns and indeﬁnites ( in this sense , it is similar in spirit to Steedman ’s ( 2012 ) approach ) .
 All the examples above have one property in common : the shared material contains an expression ( pronoun / quantiﬁer ) that exhibits interpretive variability .
-Our proposal in a nutshell is that interpretive parallelism falls out from the way underspeciﬁcation resolution happens in sentences that have this property , due to interactions of the following conceptually natural assumptions : ( i ) interpretive variability is resolved by underspeciﬁcation resolution , formalized as type - checking ( ii ) for ‘ shared ’ material , the syntax - semantics mapping requires the duplication of resource at some point in the mapping from the surface string to the ﬁnal , fully resolved translation ( iii ) the formal language for the underspeciﬁed semantic representation imposes a certain restriction on the way multiple copies of an ( originally ) underspeciﬁed term are interpreted The third condition can be thought to arise from the requirement to keep the mechanism simple for ensuring proper identity of underspeciﬁed terms with respect to their interpretive possibilities .
+Our proposal in a nutshell is that interpretive parallelism falls out from the way underspeciﬁcation resolution happens in sentences that have this property , due to interactions of the following conceptually natural assumptions :
+( i ) interpretive variability is resolved by underspeciﬁcation resolution , formalized as type - checking ( ii ) for ‘ shared ’ material , the syntax - semantics mapping requires the duplication of resource at some
+point in the mapping from the surface string to the ﬁnal , fully resolved translation
+( iii ) the formal language for the underspeciﬁed semantic representation imposes a certain restriction on
+the way multiple copies of an ( originally ) underspeciﬁed term are interpreted
+The third condition can be thought to arise from the requirement to keep the mechanism simple for ensuring proper identity of underspeciﬁed terms with respect to their interpretive possibilities .
 We show below that these simple assumptions sufﬁce to ensure the right range of interpretations to be assigned to the examples discussed above , by taking the case of RNR as an example .
 We formulate our analysis in Dependent Type Semantics ( DTS ; Bekki 2014 ; Bekki and Mineshima 2017 ) , by proposing a novel treatment of indeﬁnites involving underspeciﬁcation .
 The proof - theoretic perspective of DTS provides a particularly natural setup to embody the assumptions outlined in ( i)–(iii ) above .
 For the sake of explicitness , we adopt Hybrid Type - Logical Categorial Grammar ( Hybrid TLCG ; Kubota and Levine 2012 , 2015 ) for the syntax - semantics interface in spelling out the analyses of speciﬁc linguistic examples .
 The choice of Hybrid TLCG for syntax is not essential , but we believe that it helps illuminate the general nature of our solution , which is compatible with any suitably general theory of compositional semantics .
-3A : t[x : A]i .... B : t ( x : A)!B : tF;iA : t[x : A]i .... B : t ( x : A)B : tF;i[x : A]i .... m : B x : m : ( x : A)!BI;im : A n : B[m = x ] ( m;n ) : ( x : A)BI f : ( x : A)!B a : A f(a ) : B[a = x]Ec : ( x : A)B 1(c ) : AEc : ( x : A)B 2(c ) :
-B[1(c)=x]E Figure 1 : Inference rules : formation rules ( F;F ) , introduction rules ( I;I ) , elimination rules ( E;E ) 2 Anaphora and scope via underspeciﬁcation in DTS Dependent Type Theory ( Martin - L ¨of 1984 ) is an extension of simply typed -calculus .
+2  [ x : A]i ....
+[ x : A]i ....
+[ x : A]i ....
+A : t B : t ( x : A ) → B : t
+ΠF , i
+A : t B : t ( x : A ) × B : t
+ΣF , i
+m : B λx.m : ( x : A ) → B
+ΠI , i
+m : A n : B[m / x ] ( m , n ) : ( x : A ) × B
+ΣI
+f : ( x : A ) → B a : A f ( a ) : B[a / x ]
+ΠE
+c : ( x : A ) × B π1(c ) :
+A
+ΣE
+c : ( x : A ) × B π2(c ) : B[π1(c)/x ]
+ΣE
+Figure 1 : Inference rules : formation rules ( ΠF , ΣF ) , introduction rules ( ΠI , ΣI ) , elimination rules ( ΠE , ΣE )
+2 Anaphora and scope via underspeciﬁcation in DTS
+Dependent Type Theory ( Martin - L¨of 1984 ) is an extension of simply typed λ - calculus .
 Dependent Type Semantics ( DTS ) is a proof - theoretic compositional dynamic semantics based on Dependent Type Theory .
 This framework allows us to use types depending on terms and to represent propositions ( corresponding to semantic representations of sentences ) as types .
-For instance , run(x)is a type depending on a termx .
-Under the Curry - Howard correspondence ( propositions - as - types principle ) , the type run(x ) can be regarded as the proposition that xruns .
-If a term uhas this type , we write u : run(x ) , expressing thatuis a proof of the proposition that run(x ) .
-Such a term uis called a proof term and plays a key role in representing the dynamic notion of contexts for resolving anaphora in DTS .
-Anaphora resolution via underspeciﬁcation In the following analysis , we mainly use two constructions , -types and -types .
--type , written ( x : A)B , is a generalization of product type AB.
-A term of type ( x : A)Bis a pair ( m;n)such thatmhas typeAandnhas typeB[m = x].1The projection functions1and2are deﬁned so that 1(m;n )
-= mand2(m;n )
-= n.-types can be used to represent existential quantiﬁcation .
-For instance , A man entered is given the translation ( 6 ) in DTS.2 ( 6 ) ( u : ( x : e)man(x))enter ( 1(u ) )
-Hereuis a proof term of ( x : e)man(x ) , which is a pair of xhaving type e(entity ) and a proof that xis a man .
-Thus , its ﬁrst component ( the entity x ) can be picked up by the projection 1(u ) .
-The entire translation means that there is an entity xsuch thatxis a man and xenters .
-For notational simplicity , we often abbreviate -type of the form ( x : e)A(x)asA , thus we write ( 6 ) as ( u : man)enter ( 1(u ) ) .
--type , ( x : A)!Bin our notation , is a generalization of function type A!B. A term of type ( x : A)!Bis a function fsuch that for any term mof typeA , f(m)is of typeB[m = x].-type is used to represent universal quantiﬁcation .
+For instance , run(x ) is a type depending on a term x.
+Under the Curry - Howard correspondence ( propositions - as - types principle ) , the type run(x ) can be regarded as the proposition that x runs .
+If a term u has this type , we write u : run(x ) , expressing that u is a proof of the proposition that run(x ) .
+Such a term u is called a proof term and plays a key role in representing the dynamic notion of contexts for resolving anaphora in DTS .
+( u : ( x : e ) × man(x ) ) × enter(π1(u ) )
+Anaphora resolution via underspeciﬁcation In the following analysis , we mainly use two constructions , Σ - types and Π - types .
+Σ - type , written ( x : A ) × B , is a generalization of product type A × B. A term of type ( x : A ) × B is a pair ( m , n ) such that m has type A and n has type B[m / x].1
+The projection functions π1 and π2 are deﬁned so that π1(m , n ) = m and π2(m , n ) = n. Σ - types can be used to represent existential quantiﬁcation .
+For instance , A man entered is given the translation ( 6 ) in DTS.2 ( 6 ) Here u is a proof term of ( x : e ) × man(x ) , which is a pair of x having type e ( entity ) and a proof that x is a man .
+Thus , its ﬁrst component ( the entity x ) can be picked up by the projection π1(u ) .
+The entire translation means that there is an entity x such that x is a man and x enters .
+For notational simplicity , we often abbreviate Σ - type of the form ( x : e)×A(x ) as A∗ , thus we write ( 6 ) as ( u : man∗)×enter(π1(u ) ) .
+Π - type , ( x : A ) → B in our notation , is a generalization of function type A → B. A term of type ( x : A ) → B is a function f such that for any term m of type A , f ( m ) is of type B[m / x ] .
+Π - type is used to represent universal quantiﬁcation .
 Thus , Every man entered is given the translation in ( 7 ) .
-( 7 ) ( u : man)!enter ( 1(u ) )
-Note that when the variable xdoes not occur free in B,(x : A)Band(x : A)!Bcan be written ABandA!B , respectively .
-We illustrate how anaphora resolution works in DTS by the example A man entered and he smiled , which is given the following translation as an initial underspeciﬁed representation .
-( 8) ( v : ( u : man)enter ( 1(u)))smile ( @1e ) In DTS , a pronoun is analyzed as an underspeciﬁed term @ , possibly annotated with its type A , which we write @A. We assume that in the initial underspeciﬁed representation , each occurrence of underspeciﬁed term@is assigned a mutually distinct index .
-In the above example , the pronoun hecorresponds to @1e .
-This underspeciﬁed term searches for its antecedent of type ein the context represented as a proof term .
+( 7 ) Note that when the variable x does not occur free in B , ( x : A ) × B and ( x : A ) → B can be written A × B and A → B , respectively .
+( u : man∗ ) → enter(π1(u ) )
+We illustrate how anaphora resolution works in DTS by the example A man entered and he smiled ,
+( v : ( u : man∗ ) × enter(π1(u ) ) ) × smile(@1e )
+which is given the following translation as an initial underspeciﬁed representation .
+( 8) In DTS , a pronoun is analyzed as an underspeciﬁed term @ , possibly annotated with its type A , which we write @A. We assume that in the initial underspeciﬁed representation , each occurrence of underspeciﬁed term @ is assigned a mutually distinct index .
+In the above example , the pronoun he corresponds to @1e .
+This underspeciﬁed term searches for its antecedent of type e in the context represented as a proof term .
 The initial step to resolve anaphora is type checking , which is a process to ensure that a given expression is a type ( i.e. a well - formed proposition ) .
-This amounts to proving that it has type type , abbreviated ast .
+This amounts to proving that it has type type , abbreviated as t.
 The formation rules ( see Figure 1 ) tell us when a given expression has type t.
 In the case of ( 6 ) , the goal is to prove that the representation in ( 6 ) has type t.
 In this case , no underspeciﬁed term appears , thus using the inference rules in Figure 1 , we have the following closed derivation .
-1Here and henceforth , B[t = x]means the substitution of a term tfor free occurrences of the variable xin the termB. 2We will provide an alternative analysis of indeﬁnites later in this section .
-4(9)[x : e]1 man(x ) : tman : e!t ( x : e)man(x ) : tF;1[u : ( x : e)man(x)]2 1(u ) : eE enter ( 1(u ) ) : tenter : e!t ( u : ( x : e)man(x))enter ( 1(u ) ) :
-tF;2 Here we assume that type assignments ( signatures ) such as e : tandenter : e!tare in the initial context and can be used as an axiom .
+1Here and henceforth , B[t / x ] means the substitution of a term t for free occurrences of the variable x in the term B. 2We will provide an alternative analysis of indeﬁnites later in this section .
+3  [ x : e]1 man(x ) : t ( x : e ) × man(x ) : t
+man : e → t
+ΣF , 1
+[ u : ( x : e ) × man(x)]2 π1(u ) : e enter(π1(u ) ) :
+t
+( 9 )
+ΣE
+enter : e → t
+ΣF , 2
+( u : ( x : e ) × man(x ) ) × enter(π1(u ) ) : t
+Here we assume that type assignments ( signatures ) such as e : t and enter : e → t are in the initial context and can be used as an axiom .
 To simplify derivations , we usually omit axioms and use the name of the predicate applied ( possibly with its type ) as a rule label .
-If an initial representation contains an underspeciﬁed term @ , the process of type checking tells us in what context the antecedent of the @-term can be found .
-For this purpose , we use the following rule : ( 10)A : tAtrue @iA : A@ We use a judgement of the form Atrue to mean that there exists a term of type A ; in other words , type Ais inhabited .
+If an initial representation contains an underspeciﬁed term @ , the process of type checking tells us in
+what context the antecedent of the @-term can be found .
+For this purpose , we use the following rule :
+( 10 )
+A : t A true @iA : A
+@
+We use a judgement of the form A true to mean that there exists a term of type A ; in other words , type A is inhabited .
 Using this rule , the type checking for ( 8) gives an open derivation as follows .
-( 11) .... (9 ) ( u : man)enter ( 1(u ) ) : te : tAxe true @1e : e@ smile ( @1e ) : tsmile ( v : ( u : man)enter ( 1(u)))smile ( @1e ) : tF;1 Here the derivation starts from the open premise e true .
+( 11 )
+e : t Ax e true ....
+( 9 ) @1e : e ( u : man∗ ) × enter(π1(u ) ) :
+t smile(@1e ) : t ( v : ( u : man∗ ) × enter(π1(u ) ) )
+× smile(@1e ) : t
+@
+smile
+ΣF , 1
+Here the derivation starts from the open premise e true .
 Once we prove e true and ﬁnd a witness for @i , it becomes a closed derivation .
 To formalize this idea , we use the following rule for @-elimination .
-( 12 ) @-elimination : LetAbe a term in which no @-term occurs .
-Then the derivation on the left can be transformed into the derivation on the right : ....
-A : t .... D2 u : A Atrue @iA : A@ .... D1
-.... D2 u : A .... D1[u=@iA ] This rule allows us to replace the underspeciﬁed term @iAwith its witness uin the entire derivation .
+( 12 ) @-elimination : Let A be a term in which no @-term occurs .
+Then the derivation on the left can
+be transformed into the derivation on the right :
+.... D2
+u : A A true
+....
+A : t
+@iA : A ....
+D1
+@
+( cid:32 )
+.... D2 u :
+A .... D1[u/@iA ]
+This rule allows us to replace the underspeciﬁed term @iA with its witness u in the entire derivation .
 To ﬁnd a witness for an underspeciﬁed term @ , we need to do proof search in a given local context .
-In the case of ( 11 ) , the application of Frule at the ﬁnal step allows us to use a proof term for the left - side proposition , ( u : man)enter ( 1(u ) ) , to ﬁnd a witness for @1e .
-It can be easily seen that one such witness is1(1(v ) ) ; in this case , we say @1eisbound to1(1(v)).3Thus we have a closed derivation on the left below and it can be transformed to the derivation on the right by @-elimination .
-.... ( 9 ) ( u : man)enter ( 1(u ) ) : te : tAx[v : ( u : man)enter ( 1(u))]1 1(v ) : manE 1(1(v ) ) :
-eE e true @1e : e@ smile ( @1e ) : tsmile ( v : ( u : man)enter ( 1(u)))smile ( @1e ) :
-tF;1 .... ( 9 ) ( u : man)enter ( 1(u ) ) : t[v : ( u : man)enter ( 1(u))]1 1(v ) : man 1(1(v ) ) : eE smile ( 1(1(u ) ) ) : tsmile ( v : ( u : man)enter ( 1(u)))smile ( 1(1(u ) ) ) :
-tF;1 The ﬁnal representation can be read off from the bottom line of the derivation on the right .
-( 13 ) ( v : ( u : man)enter ( 1(u)))smile ( 1(1(v ) ) )
-This is equivalent to saying that there is an entity xsuch that it satisﬁes man(x),enter
-( x ) , and smile ( x ) .
+In the case of ( 11 ) , the application of ΣF rule at the ﬁnal step allows us to use a proof term for the left - side proposition , ( u : man∗ ) × enter(π1(u ) ) , to ﬁnd a witness for @1e .
+It can be easily seen that one such witness is π1(π1(v ) ) ; in this case , we say @1e is bound to π1(π1(v)).3
+Thus we have a closed derivation on the left below and it can be transformed to the derivation on the right by @-elimination .
+[ v : ( u : man∗ ) × enter(π1(u))]1 π1(v ) : man∗ π1(π1(v ) ) : e e true
+ΣE
+e : t Ax
+ΣE
+.... ( 9 ) @1e : e ( u : man∗ ) × enter(π1(u ) ) :
+t smile(@1e ) : t ( v : ( u : man∗ ) × enter(π1(u ) ) )
+× smile(@1e ) : t
+@
+smile
+ΣF , 1
+( cid:32 )
+[ v : ( u : man∗ ) × enter(π1(u))]1 π1(v ) : man∗ .... ( 9 ) π1(π1(v ) ) : e ( u : man∗ ) × enter(π1(u ) ) : t smile(π1(π1(u ) ) ) : t ( v : ( u : man∗ ) × enter(π1(u ) ) ) × smile(π1(π1(u ) ) ) :
+t
+smile
+ΣE
+ΣF , 1
+The ﬁnal representation can be read off from the bottom line of the derivation on the right .
+( 13 )
+( v : ( u : man∗ ) × enter(π1(u ) ) ) × smile(π1(π1(v ) ) )
+This is equivalent to saying that there is an entity x such that it satisﬁes man(x ) , enter(x ) , and smile(x ) .
 Our analysis naturally accounts for the bound reading of ( 14a ) , whose translation is given in ( 14b ) .
-( 14 ) a.
-Every Englishman thinks he is a genius .
-b.(u : eng)!think ( genius ( @1e))(1(u ) )
-The derivation on the left shows the type checking with proof search to ﬁnd a witness for @1ein ( 14b ) .
+( 14 )
+a. Every Englishman thinks he is a genius .
+b. ( u : eng∗ ) → think(genius(@1e))(π1(u ) )
+The derivation on the left shows the type checking with proof search to ﬁnd a witness for @1e in ( 14b ) .
 3If the initial context ( called global context ) contains other possible antecedents , they give rise to different readings .
-5(15)[u : eng]1 1(u ) : e e true @1e : e@ genius ( @1e ) : tgenius[u : eng]1 1(u ) : e think ( genius ( @1e))(1(u ) ) : tthink : t!e!t ( u : eng)!think ( genius ( @1e))(1(u ) ) :
-tF;1
-[ u : eng]1 1(u ) : e genius ( 1(u ) ) : tgenius[u : eng]1 1(u ) : e think ( genius ( 1(u)))(1(u ) ) : tthink : t!e!t ( u : eng)!think ( genius ( 1(u)))(1(u ) ) :
-tF;1 Here the premise e true follows from the hypothesis u : englicensed by the application of F. Thus @1eis bound to1(u)and the @-term can be eliminated as shown in the derivation on the right .
-This yields the bound reading ( u : eng)!think ( genius ( 1(u)))(1(u))for ( 14a ) , as desired .
+4  [ u : eng∗]1 π1(u ) : e e true @1e : e genius(@1e ) : t
+@
+( 15 )
+genius
+[ u : eng∗]1 π1(u ) : e
+think : t → e → t
+( cid:32 )
+[ u : eng∗]1 π1(u ) : e genius(π1(u ) ) : t
+genius
+[ u : eng∗]1 π1(u ) : e
+think(genius(@1e))(π1(u ) ) :
+t ( u : eng∗ ) → think(genius(@1e))(π1(u ) ) : t
+ΣF , 1
+think(genius(π1(u)))(π1(u ) ) : t ( u : eng∗ ) → think(genius(π1(u)))(π1(u ) ) : t
+ΣF , 1
+think : t → e → t
+Here the premise e true follows from the hypothesis u : eng∗ licensed by the application of ΣF .
+Thus @1e is bound to π1(u ) and the @-term can be eliminated as shown in the derivation on the right .
+This yields the bound reading ( u : eng∗ ) → think(genius(π1(u)))(π1(u ) ) for ( 14a ) , as desired .
 An alternative treatment of indeﬁnites In the classical version of DTS , pronouns and deﬁnites are translated as underspeciﬁed terms , while indeﬁnites are not .
-Here we propose an alternative analysis that translates an indeﬁnite to an underspeciﬁed term of the form # AwhereAis a-type .
-This alternative analysis translates the sentence ( 6a ) as follows ( note that manis an abbreviation for ( x : e)man(x ) ): ( 16 ) enter ( 1(#man ) )
-For underspeciﬁed terms # , we use the following rule.4 ( 17)A : t # A : A # The difference between @iAand#Ais that while @iAsearches for an antecedent of type Ain a given local context via anaphora resolution , # Aintroduces an object of type Avia the following rule for # -elimination : ( 18 ) # -elimination : Let'be a term containing # Aas a subterm , where Ais a type in which no @-term nor # -term occurs .
-Suppose that we have a derivation of the form on the left , where ' : t is the ﬁrst node that has type tand depends on # A : A , i.e. , no other judgement of the form   : t appears inD2 .
-Then the derivation can be transformed into the one on the right: .... D1 A : t # A : A # .... D2 ' : t ....
-D1 A : t[u : A]n .... D2[u=#A ] ' [ u=#A ] : t ( u : A)'[u=#A ] : tF;n By this rule , if there is a branch containing an underspeciﬁed term # A , one can close it by taking the existence of an object of type Aas part of the asserted proposition represented as a -type of the form ( u : A)'[u=#A ] , where'[u=#A]is the expression obtained by replacing the occurrence of # Ain ' byu .
+Here we propose an alternative analysis that translates an indeﬁnite to an underspeciﬁed term of the form # A where A is a Σ - type .
+This alternative analysis translates the sentence ( 6a ) as follows ( note that man∗ is an abbreviation for ( x : e ) × man(x ) ):
+( 16 )
+enter(π1(#man∗ ) )
+For underspeciﬁed terms # , we use the following rule.4
+( 17 )
+A : t # A : A
+#
+The difference between @iA and # A is that while @iA searches for an antecedent of type A in a given local context via anaphora resolution , # A introduces an object of type A via the following rule for # -elimination :
+( 18 ) # -elimination : Let ϕ be a term containing # A as a subterm , where A is a type in which no @-term nor # -term occurs .
+Suppose that we have a derivation of the form on the left , where ϕ : t is the ﬁrst node that has type t and depends on # A : A , i.e. , no other judgement of the form ψ : t appears in D2 .
+Then the derivation can be transformed into the one on the right :
+....
+D1
+A : t # A : A
+.... D2
+ϕ : t
+#
+( cid:32 )
+....
+D1
+[ u : A]n
+....
+D2[u/#A ]
+ϕ[u/#A ] : t A : t ( u : A ) × ϕ[u/#A ] : t
+ΣF , n
+By this rule , if there is a branch containing an underspeciﬁed term # A , one can close it by taking the existence of an object of type A as part of the asserted proposition represented as a Σ - type of the form ( u : A ) × ϕ[u/#A ] , where ϕ[u/#A ] is the expression obtained by replacing the occurrence of # A in ϕ by u.
 In the case of ( 16 ) , the initial derivation shown on the left in ( 19 ) is transformed to the derivation on the right by # -elimination , so we end up with the same representation as ( 6 ) .
-( 19)[x : e]1 man(x ) :
-t man:tF;1 # man:man # 1(#man ) :
-eE enter ( 1(#man ) ) : t
-[ x : e]1 man(x ) : t man:tF;1[u : man]1 1(u ) :
-eE enter ( 1(u ) ) : t ( u : man)enter ( 1(u ) ) :
-tF;1 Thus # -elimination allows us to eliminate a # -term from a type and rewrite it to a -type .
-For notational convenience , we write this transformation as enter ( 1(#man ) )
-# ( u : man)enter ( 1(u ) ) .
+( 19 )
+[ x : e]1 man(x ) : t man∗ : t # man∗ : man∗ # π1(#man∗ ) : e enter(π1(#man∗ ) ) : t
+ΣF , 1
+ΣE
+( cid:32 )
+[ x : e]1 man(x ) : t man∗ : t
+ΣF , 1
+[ u : man∗]1 π1(u ) : e enter(π1(u ) ) :
+t
+ΣE
+( u : man∗ ) × enter(π1(u ) ) : t
+ΣF , 1
+Thus # -elimination allows us to eliminate a # -term from a type and rewrite it to a Σ - type .
+For notational convenience , we write this transformation as enter(π1(#man∗ ) ) ( cid:32 ) # ( u : man∗ ) × enter(π1(u ) ) .
 It should be clear from the above that DTS crucially makes use of underspeciﬁcation in the interpretations of both pronouns and indeﬁnites .
-We make the following two assumptions about the way underspeciﬁed terms are interpreted in the course of semantic composition : 4In this rule , # A : Amust be understood as an open assumption depending on A : t. In the sequent - style natural deduction , such a rule can be formulated more explicitly .
-6(20 ) a. Ban on the duplication of underspeciﬁed terms :
-In a well - formed semantic representation of DTS , an underspeciﬁed @-term with the same index can appear at most once .
-b. Normal form requirement on compositionally derived semantic terms : At each step of semantic composition , the semantic term assigned to the derived linguistic expression is in  -normal form .
+We make the following two assumptions about the way underspeciﬁed terms are interpreted in the course of semantic composition :
+4In this rule , # A : A must be understood as an open assumption depending on A : t.
+In the sequent - style natural deduction ,
+such a rule can be formulated more explicitly .
+5  ( 20 )
+a. Ban on the duplication of underspeciﬁed terms :
+In a well - formed semantic representation
+of DTS , an underspeciﬁed @-term with the same index can appear at most once .
+b. Normal form requirement on compositionally derived semantic terms :
+At each step of semantic composition , the semantic term assigned to the derived linguistic expression is in β - normal form .
 These restrictions can be thought of as embodying a general requirement that underspeciﬁcation resolution is not totally unconstrained but is affected by the form of the sentences in which underspeciﬁed expressions occur .
 As such , these restrictions play key roles in the analysis of scope parallelism in the next section .
-3 Analysis of the binding / scope parallelism With the treatment of anaphora and indeﬁnites introduced above , the interpretive parallelism exempliﬁed by ( 1 ) and ( 2 ) falls out automatically as a consequence of the way underspeciﬁcation is resolved in DTS .
+3 Analysis of the binding / scope parallelism
+With the treatment of anaphora and indeﬁnites introduced above , the interpretive parallelism exempliﬁed by ( 1 ) and ( 2 ) falls out automatically as a consequence of the way underspeciﬁcation is resolved in DTS .
 Unlike previous proposals ( Asudeh and Crouch 2002 ; Steedman 2012 ) , no extra assumption is needed beyond the simple restriction ( 20 ) on underspeciﬁcation resolution introduced in the previous section .
 We start with the pronominal binding case .
-To avoid the issue of possessives ( which is itself a complex problem ) , we illustrate the analysis with the following example involving an embedded clause : ( 21 ) Every Englishman thinks , and every American believes , that he is a genius .
+To avoid the issue of possessives ( which is itself a complex problem ) , we illustrate the analysis with the following example involving an embedded clause :
+( 21 ) Every Englishman thinks , and every American believes , that he is a genius .
 One technical issue that needs to be addressed ﬁrst is how to obtain the bound reading for the pronoun in the RNR’ed position to begin with .
-Note that given the prohibition on the duplication of underspeciﬁed terms in DTS , the simple derivation for ( 21 ) in ( 22 ) can not yield the bound reading for the pronoun.5 ( 22 ) :(every Englishman ) ; A eng ; S(SNP)"'2 ; y ; NP#2thinks ; think ; VP = S0h'1 ; p ; S0i1 = Ethinks'1;think ( p);VP = E'2thinks'1;think ( p)(y);S I2 '2:'2thinks'1 ; y : think ( p)(y ) ; SNP EeveryEnglishmanthinks'1;A eng(y : think ( p)(y ) ) ; S I1 everyEnglishmanthinks ; p : A eng(y : think ( p)(y ) ) ;
-S = S0and ; FGp : ( v : G(p ) ) F(p ) ; ( XnX)=X ... everyAmerican believes ; q : A am(y : believe ( q)(y ) ) ;
-S = S0 = EandeveryAmericanbelieves ; Gp : ( v : G(p ) ) A am(y : believe ( p)(y ) ) ; ( S = S0)n(S = S0 ) nEeveryEnglishmanthinksandeveryAmericanbelieves ; p:(v : A eng(y : think ( p)(y)))A am(y : believe ( p)(y ) ) ; S = S0thathe isa genius ; gen(@1e ) ;
-S0 = EeveryEnglishmanthinksandeveryAmericanbelievesthatheisagenius ; p[(v : A eng(y : think ( p)(y)))A am(y : believe ( p)(y))](gen(@1e ) ) ; S. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-p[(v:(u : eng)!think ( p)(1(u)))((u : am)!believe ( p)(1(u ) ) ) ] ( gen(@1e ) )
-Here , for the pronoun in the RNR’ed S0to be bound by the subject quantiﬁers in each conjunct , the term gen(@1e)ﬁrst needs to be substituted for variable pin each conjunct ( from where the antecedent is syntactically visible , given the deﬁnition of anaphora resolution from section 2 ) , but this is precisely the move that is prohibited by the ‘ no duplication of underspeciﬁed term ’ restriction .
+Note that given the prohibition on the duplication of underspeciﬁed terms in DTS , the simple derivation for ( 21 ) in ( 22 ) can not yield the bound reading for the pronoun.5
+/E
+\E
+that ◦ he ◦ is ◦ a ◦ genius ; gen(@1e ) ; S(cid:48 )
+/E
+( 22 )
+λσ.σ(every ◦
+Englishman ) ; Aeng ; S(cid:22)(S(cid:22)NP )
+( cid:35)2
+( cid:34 ) ϕ2 ; y ; NP
+thinks ; think ; VP / S(cid:48 ) thinks ◦ ϕ1 ; think(p ) ;
+VP
+( cid:104 ) ϕ1 ; p ; S(cid:48 )
+( cid:105)1
+ϕ2 ◦ thinks ◦ ϕ1 ; think(p)(y ) ; S λϕ2.ϕ2 ◦ thinks ◦ ϕ1 ; λy.think(p)(y ) ;
+S(cid:22)NP
+( cid:22)I2
+( cid:22)E
+/E
+/E
+every ◦ Englishman ◦ thinks ◦ ϕ1 ; Aeng(λy.think(p)(y ) ) ;
+S every ◦
+Englishman ◦ thinks ; λp . Aeng(λy.think(p)(y ) ) ; S / S(cid:48 )
+( cid:22)I1
+... every ◦ American ◦
+and ; λF λGλp .
+believes ; λq . Aam(λy .
+believe(q)(y ) ) ;
+( v : G(p ) ) ×F ( p ) ; S / S(cid:48 ) ( X\X)/X and ◦ every ◦ American ◦ believes ; λGλp.(v : G(p ) )
+×Aam(λy.believe(p)(y
+)
+)
+;
+( S / S(cid:48))\(S / S(cid:48 ) )
+every ◦ Englishman ◦ thinks ◦ and ◦ every ◦
+American ◦ believes ; λp.(v : Aeng(λy.think(p)(y ) ) )
+× Aam(λy.believe(p)(y ) )
+; S / S(cid:48 )
+every ◦ Englishman ◦ thinks ◦ and ◦ every ◦
+American ◦ believes ◦ that ◦ he ◦ is ◦ a ◦ genius ; λp[(v : Aeng(λy.think(p)(y ) ) )
+× Aam(λy.believe(p)(y))](gen(@1e ) ) ; S . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+λp[(v : ( u : eng∗ ) → think(p)(π1(u ) ) ) × ( ( u : am∗ )
+→ believe(p)(π1(u)))](gen(@1e ) )
+Here , for the pronoun in the RNR’ed S(cid:48 ) to be bound by the subject quantiﬁers in each conjunct , the term gen(@1e ) ﬁrst needs to be substituted for variable p in each conjunct ( from where the antecedent is syntactically visible , given the deﬁnition of anaphora resolution from section 2 ) , but this is precisely the move that is prohibited by the ‘ no duplication of underspeciﬁed term ’ restriction .
 This means that , in order to obtain the bound reading , we need a slightly more complex syntactic derivation involving ( syntactic ) type - lifting of both the RNR’ed material and the conjuncts .
 The effect in a nutshell is that , via type - lifting , we can ensure enough of the ‘ derivational structure ’ of the sentence to be present in the ( beta - unreduced ) semantic translation to identify the ‘ possible binder ’ of the pronoun before all the material is actually composed in the ( surface ) syntax .
 The derivation for the bound pronoun reading for ( 21 ) thus goes as in ( 23 ) .
-5We adopt the abbreviationA eng = defP:[(u : eng)!P(1(u ) ) ] , etc .
+5We adopt the abbreviation Aeng = def λP.[(u : eng∗ ) → P ( π1(u ) ) ] , etc .
 These abbreviations are unpacked at the end of the derivation ( via the step designated by the dotted line , which is not part of the syntactic derivation ) for clarity of presentation .
-7(23 ) :(everyEnglishman )
-; A eng ; S(SNP)h'3 ; x ; NPi3thinks ; think ; VP = S0['1;P ; ( VP = S0)nVP]1 nEthinks'1;P(think ) ; VP nE'3thinks'1;P(think ) ( x);S I3 '3:'3thinks'1;x : P(think ) ( x);SNP EeveryEnglishmanthinks'1;A eng(x : P(think ) ( x));S
-= I1 everyEnglishmanthinks ; P : A eng(x : P(think ) ( x));S=((VP = S0)nVP ) ...
-everyEnglishmanthinksand everyAmericanbelieves ; P:(v : A eng(x : P(think ) ( x ) ) ) (A am(x : P(believe ) ( x ) ) ) ; S=((VP = S0)nVP)h'5 ; x ; NPi5['4;R ; VP = S0]4thatheisagenius ; gen(@1e);S0 = E'4thatheisagenius ; R(gen(@1e));VP nE'5'4thatheisagenius ; R(gen(@1e))(x);S I5 ' 4thatheisagenius ; x : R(gen(@1e))(x);VP I4 thatheisagenius ; Rx : R(gen(@1e))(x);(VP = S0)nVP = EeveryEnglishmanthinksandeveryAmericanbelievesthatheisagenius ; P[(v : A eng(x : P(think ) ( x)))(A am(x : P(believe ) ( x)))](Rx : R(gen(@1e))(x ) ) ; S. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-P[(v:(u : eng)!P(think ) ( 1(u)))((u : am)!P(believe ) ( 1(u)))](Rx : R(gen(@1e))(x ) )
-Type checking for the semantic representation involves a branch to check the type of Rx : R(gen(@1e))(x ) , which is shown on the left below .
-Here the assumption e true follows from the hypothesis x : eand thus by @-elimination we can replace @1ewithxthroughout the derivation .
-( 24)[x : e]2 e true @1e : e@ gen(@1e ) : t[x : e]2 R(gen(@1e))(x ) : t[R : t!e!t]1 x : R(gen(@1e))(x ) :
-e!tI;2 Rx : R(gen(@1e))(x ) : ( t!e!t)!e!tI;1 [ x : e]2 gen(x ) : t[x : e]2 R(gen(x))(x ) : t[R : t!e!t]1 x : R(gen(x))(x ) : e!tI;2 Rx : R(gen(x))(x ) : ( t!e!t)!e!tI;1 Note crucially that here the underspeciﬁcation for the pronoun term @1eis resolved before the meaning contribution of the RNR’ed S0which contains it as a subterm is copies into each conjunct via  -reduction .
-The underspeciﬁed term identiﬁes the ( -bound ) subject xof the upstairs clause as its antecedent .
-After @-elimination and  -reduction , we obtain the ﬁnal translation in ( 25 ) , which corresponds to the parallel bound reading for the sentence .
-( 25)P[(v:(u : eng)!P(think ) ( 1(u)))((u : am)!P(believe ) ( 1(u)))](Rx : R(gen(x))(x ) )
-  ( ( u : eng)!think ( gen(1(u)))(1(u))))((u : am)!believe ( gen(1(u)))(1(u ) ) ) )
+6  ( 23 )
+( cid:104 ) ϕ3 ;
+( cid:105)3
+x ; NP
+thinks ; think ; VP / S(cid:48 )
+[ ϕ1 ; P ; ( VP / S(cid:48))\VP]1
+thinks ◦ ϕ1 ; P(think ) ;
+VP
+\E
+λσ.σ(every ◦ Englishman ) ; Aeng ; S(cid:22)(S(cid:22)NP )
+ϕ3 ◦ thinks ◦ ϕ1 ; P(think)(x ) ; S λϕ3.ϕ3 ◦ thinks ◦ ϕ1 ; λx . P(think)(x ) ;
+S(cid:22)NP
+every ◦ Englishman ◦ thinks ◦ ϕ1 ; Aeng(λx . P(think)(x ) ) ;
+S every ◦
+Englishman ◦ thinks ; λP.Aeng(λx . P(think)(x ) ) ;
+S/((VP / S(cid:48))\VP )
+\E
+( cid:22)I3 ( cid:22)E
+/I1
+... every ◦ Englishman ◦ thinks ◦ and ◦
+every ◦ American ◦ believes ; λP.(v : Aeng(λx . P(think)(x ) ) )
+×(Aam(λx . P(believe)(x ) ) ) ;
+S/((VP / S(cid:48))\VP )
+( cid:104 ) ϕ5 ;
+( cid:105)5
+x ; NP
+[ ϕ4 ; R ; VP / S(cid:48)]4
+that ◦ he ◦ is ◦ a ◦ genius ; gen(@1e ) ; S(cid:48 )
+ϕ4 ◦ that ◦ he ◦ is ◦ a ◦ genius ; R(gen(@1e ) ) ;
+VP
+/E
+ϕ5 ◦ ϕ4
+◦ that ◦ he ◦ is ◦ a ◦ genius ; R(gen(@1e))(x ) ; S ϕ4 ◦ that ◦ he ◦ is ◦ a ◦ genius ; λx . R(gen(@1e))(x ) ; VP that ◦ he ◦ is ◦ a ◦ genius ; λRλx . R(gen(@1e))(x ) ; ( VP / S(cid:48))\VP
+( cid:22)I5
+\E
+( cid:22)I4
+/E
+every ◦ Englishman ◦ thinks ◦ and ◦ every ◦
+American ◦ believes ◦ that ◦ he ◦ is ◦ a ◦ genius ; λP[(v : Aeng(λx . P(think)(x ) ) )
+× ( Aam(λx . P(believe)(x)))](λRλx . R(gen(@1e))(x ) ) ; S . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+. .
+λP[(v : ( u : eng∗ ) → P(think)(π1(u ) ) ) × ( ( u : am∗ ) → P(believe)(π1(u)))](λRλx . R(gen(@1e))(x ) )
+Type checking for the semantic representation involves a branch to check the type of λRλx . R(gen(@1e))(x ) , which is shown on the left below .
+Here the assumption e true follows from the hypothesis x : e and thus by @-elimination we can replace @1e with x throughout the derivation .
+[ x : e]2 e true @1e : e
+@
+[ x : e]2
+( 24 )
+gen(@1e ) : t
+[ x : e]2 R(gen(@1e))(x ) : t λx . R(gen(@1e))(x ) : e → t λRλx . R(gen(@1e))(x ) : ( t → e → t ) → e → t
+ΠI , 2
+[ R : t → e → t]1
+ΠI , 1
+gen(x ) :
+t
+[ x : e]2 R(gen(x))(x ) : t λx . R(gen(x))(x ) : e → t λRλx . R(gen(x))(x ) : ( t → e → t ) → e → t
+ΠI , 2
+[ R : t → e → t]1
+ΠI , 1
+( cid:32 )
+Note crucially that here the underspeciﬁcation for the pronoun term @1e is resolved before the meaning contribution of the RNR’ed S(cid:48 ) which contains it as a subterm is copies into each conjunct via β - reduction .
+The underspeciﬁed term identiﬁes the ( λ - bound ) subject x of the upstairs clause as its antecedent .
+After @-elimination and β - reduction , we obtain the ﬁnal translation in ( 25 ) , which corresponds to the parallel bound reading for the sentence .
+( 25 ) λP[(v : ( u : eng∗ ) → P(think)(π1(u ) ) ) × ( ( u : am∗ ) → P(believe)(π1(u)))](λRλx . R(gen(x))(x ) ) ( cid:16)β ( ( u : eng∗ ) → think(gen(π1(u)))(π1(u ) ) ) ) × ( ( u : am∗ ) → believe(gen(π1(u)))(π1(u ) ) ) )
 For the parallel free pronoun reading , the simpler derivation in ( 22 ) would sufﬁce .
-Since  -reduction is prohibited before underspeciﬁcation resolution , type checking for the underspeciﬁed term searches for an appropriate antecedent in the global context ( consisting of the previous linguistic discourse and extra - linguistic information ) .
-For concreteness , we assume that the previous utterance was Bobby Fisher is a famous American chess player , and that the judgement bf : eis in the global context .
-The previous sentence thus provides an antecedent and @1ein ( 22 ) is bound to bf .
-By  -reducing the term after anaphora resolution , we obtain ( 26 ) , where the pronoun refers to Bobby Fisher in each conjunct .
-( 26 ) ( ( u : eng)!think ( gen(bf)(1(u))))((u : am)!believe ( gen(bf))(1(u ) ) ) )
+Since β - reduction is prohibited before underspeciﬁcation resolution , type checking for the underspeciﬁed term searches for an appropriate antecedent in the global context ( consisting of the previous linguistic discourse and extra - linguistic information ) .
+For concreteness , we assume that the previous utterance was Bobby Fisher is a famous American chess player , and that the judgement bf : e is in the global context .
+The previous sentence thus provides an antecedent and @1e in ( 22 ) is bound to bf .
+By β - reducing the term after anaphora resolution , we obtain ( 26 ) , where the pronoun refers to Bobby Fisher in each conjunct .
+( ( u : eng∗ ) → think(gen(bf)(π1(u ) ) ) ) × ( ( u : am∗ ) → believe(gen(bf))(π1(u ) ) ) )
+( 26 )
 The quantiﬁer scope case is somewhat different at the level of technical implementations , but at the broader conceptual level , is essentially similar to the pronoun case in that interpretive parallelism falls out from the constraints pertaining to underspeciﬁcation resolution in the derivation of compositional semantics .
 Note ﬁrst that , unlike the case for @-terms , we do n’t need to ensure that the derivationally obtained local context is ‘ large enough ’ to contain the ‘ antecedent ’ .
-Thus , the following simple derivation sufﬁces to yield both the wide - scope and narrow - scope readings for the RNR’ed indeﬁnite : ( 27 ) ... everyboyadmiresandeverygirlhates ; x:(v : A boy(y : admire ( x)(y)))(A girl(y : hate(x)(y ) ) ) ; S = NPsomesaxophonist ; # sax ; NP everyboyadmiresandeverygirlhatessomesaxophonist ; x[(v : A boy(y : admire ( x)(y)))(A girl(y : hate(x)(y ) ) ) ] ( # sax ) ; S. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-x[(v:(u : boy)!admire ( x)(1(u)))((u : girl)!hate(x)(1(u ) ) ) ] ( # sax )
-8Since # -terms do not carry indices , in the case of indeﬁnites , interpretive parallelism follows not from the ban on duplicating indexed underspeciﬁed terms ( whose role was to ensure ‘ construal identity ’ in anaphora resolution ) , but from an interaction of the normal form requirement for derived semantic terms and the locality requirement on underspeciﬁcation resolution encoded in the # -elimination rule ( 18 ) .
+Thus , the following simple derivation sufﬁces to yield both the wide - scope and narrow - scope readings for the RNR’ed indeﬁnite :
+( 27 )
+...
+every ◦ boy ◦ admires ◦ and ◦ every ◦ girl ◦ hates ; λx.(v : Aboy(λy.admire(x)(y ) ) ) × ( Agirl(λy.hate(x)(y ) ) ) ; S / NP
+some ◦ saxophonist ; # sax∗ ; NP every ◦ boy ◦ admires ◦ and ◦ every ◦ girl ◦ hates ◦ some ◦ saxophonist ; λx[(v : Aboy(λy.admire(x)(y ) ) ) × ( Agirl(λy.hate(x)(y)))](#sax∗ ) ; S . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+λx[(v : ( u : boy∗ ) → admire(x)(π1(u ) ) ) × ( ( u : girl∗ ) → hate(x)(π1(u)))](#sax∗ )
+7  Since # -terms do not carry indices , in the case of indeﬁnites , interpretive parallelism follows not from the ban on duplicating indexed underspeciﬁed terms ( whose role was to ensure ‘ construal identity ’ in anaphora resolution ) , but from an interaction of the normal form requirement for derived semantic terms and the locality requirement on underspeciﬁcation resolution encoded in the # -elimination rule ( 18 ) .
 Speciﬁcally , there are two possible ways for resolving underspeciﬁcation for the # -term in the semantic translation for the sentence obtained at the ﬁnal line of ( 27 ) .
-If we resolve underspeciﬁcation before  -reducing the term , we obtain the wide scope reading for the indeﬁnite as in ( 28 ): ( 28)x[(v:(u : boy)!admire ( x)(1(u)))((u : girl)!hate(x)(1(u ) ) ) ] ( # sax )   # ( t : sax)x[(v:(u : boy)!admire ( x)(1(u)))((u : girl)!hate(x)(1(u)))](1(t ) ) ! 
-( t : sax)[(v:(u : boy)!admire ( 1(t))(1(u)))((u : girl)!hate(1(t))(1(u ) ) ) ]
-If , on the other hand , we ﬁrst  -reduce the term and then resolve underspeciﬁcation , the -type that has the existential force associated with the indeﬁnite is introduced in the smallest local context in each conjunct , via ( 18 ) .
+If we resolve underspeciﬁcation before β - reducing the term , we obtain the wide scope reading for the indeﬁnite as in ( 28 ):
+( 28 )
+λx[(v : ( u : boy∗ ) → admire(x)(π1(u ) ) ) × ( ( u : girl∗ ) → hate(x)(π1(u)))](#sax∗ ) ( cid:32 ) # ( t : sax∗ ) × λx[(v
+:
+( u : boy∗ ) → admire(x)(π1(u ) ) ) × ( ( u : girl∗ ) → hate(x)(π1(u)))](π1(t ) ) →β ( t : sax∗ ) ×
+[ ( v : ( u : boy∗ ) → admire(π1(t))(π1(u ) ) ) × ( ( u : girl∗ ) → hate(π1(t))(π1(u ) ) ) ]
+If , on the other hand , we ﬁrst β - reduce the term and then resolve underspeciﬁcation , the Σ - type that has the existential force associated with the indeﬁnite is introduced in the smallest local context in each conjunct , via ( 18 ) .
 In this case , the distributive , narrow scope reading obtains for the sentence .
-( 29)x[(v:(u : boy)!admire ( x)(1(u)))((u : girl)!hate(x)(1(u ) ) ) ] ( # sax ) !  ( v:(u : boy)!admire ( # sax)(1(u)))((u : girl)!hate(#sax)(1(u ) ) )   # ( v:(u : boy)!(t : sax)admire ( 1(t))(1(u)))((u : girl)!(t : sax)hate(1(t))(1(u ) ) )
+( 29 )
+λx[(v : ( u : boy∗ ) → admire(x)(π1(u ) ) ) × ( ( u : girl∗ ) → hate(x)(π1(u)))](#sax∗ ) →β ( v : ( u : boy∗ ) → admire(#sax∗)(π1(u ) ) ) × ( ( u : girl∗ ) → hate(#sax∗)(π1(u ) ) ) ( cid:32 ) # ( v : ( u : boy∗ ) → ( t : sax∗ ) × admire(π1(t))(π1(u ) ) ) × ( ( u : girl∗ ) → ( t : sax∗ ) × hate(π1(t))(π1(u ) ) )
 One may wonder at this point why we impose the normal form requirement on compositionally derived semantic terms .
-To see why this requirement is needed , assume that no  -reduction takes place in the course of the derivataion , and , ( as above ) that once the semantic representation for the whole sentence is obtained , there is no restriction on the order of  -reduction and underspeciﬁcation resolution for # terms .
-The following translation would then be assigned to the sentence , and via the underspeciﬁcation resolution in ( 30 ) , a mixed scope reading would incorrectly be predicted to be available : ( 30)PQx [ ( v : P(x))Q(x)](yA boy(admire ( y)))(zA girl(hate(z ) ) ) ( # sax ) ! 
-( v : A boy(admire ( # sax)))z[A girl(hate(z ) ) ] ( # sax )   # ( v : A boy((t : sax)admire ( 1(t))))((t : sax)z[A girl(hate(z))](1(t ) ) ) ! 
-( v : A boy((t : sax)admire ( 1(t))))((t : sax)A girl(hate(1(t ) ) ) )
+To see why this requirement is needed , assume that no β - reduction takes place in the course of the derivataion , and , ( as above ) that once the semantic representation for the whole sentence is obtained , there is no restriction on the order of β - reduction and underspeciﬁcation resolution for # terms .
+The following translation would then be assigned to the sentence , and via the underspeciﬁcation resolution in ( 30 ) , a mixed scope reading would incorrectly be predicted to be available :
+( 30 )
+λP
+λQλx[(v : P ( x ) ) × Q(x)](λyAboy(admire(y)))(λzAgirl(hate(z)))(#sax∗ )
+→β ( v : Aboy(admire(#sax∗ ) ) ) × λz[Agirl(hate(z))](#sax∗ ) ( cid:32 ) # ( v : Aboy((t : sax∗ ) × admire(π1(t ) ) ) ) × ( ( t : sax∗ ) × λz[Agirl(hate(z))](π1(t ) ) )
+→β ( v : Aboy((t : sax∗ ) × admire(π1(t ) ) ) ) × ( ( t : sax∗ ) × Agirl(hate(π1(t ) ) ) )
 In short , assumption ( 20b ) has the effect of eliminating unnecessary ‘ traces ’ of derivational history to make unavailable intermediate scope positions that do not reﬂect the surface form of the sentence .
 Our proposal treats indeﬁnites as underspeciﬁed terms and universals as true quantiﬁers , and in this respect , resembles the approach by Steedman ( 2012 ) .
 Unlike Steedman ’s approach , which interleaves underspeciﬁcation resolution with CCG syntactic combinatorics , our approach separates semantic underspeciﬁcation resolution from syntax .
-Nonetheless , the similarity between the two is striking , and it is interesting to note that they both predict that mixed readings are available for examples involving indeﬁnites as subjects and a universal quantiﬁer in the RNR’ed position , such as the following : ( 31 ) Some boy loves , and some girl detests , every saxophonist .
+Nonetheless , the similarity between the two is striking , and it is interesting to note that they both predict that mixed readings are available for examples involving indeﬁnites as subjects and a universal quantiﬁer in the RNR’ed position , such as the following :
+( 31 ) Some boy loves , and some girl detests , every saxophonist .
 The judgments are somewhat subtle due to the independent pragmatic preference for parallel readings , but we follow Steedman ( 2012 ) in taking this prediction to be essentially correct .
-One translation that our analysis can assign to ( 31 ) is the following : ( 32)P[(u:(y[P(x : love(x)(y ) ) ] ( # boy)))z[P(x : hate(x)(z ) ) ] ( # girl)](A sax )
-Here ,  -conversion for the -bound variables y , zandPcan take place in any order , and the relative scope between the subject indeﬁnites and the object universal depends on the order of application of  -conversion and underspeciﬁcation resolution for the two terms # boyand#girl .
-94 Conclusion and outlook In this paper , we have proposed an analysis of the interpretive parallelism for anaphora and scope in the so - called Geach sentences involving right - node raising .
+One translation that our analysis can assign to ( 31 ) is the following :
+( 32 ) λP[(u : ( λy[P(λx.love(x)(y))](#boy ) ) )
+× λz[P(λx.hate(x)(z))](#girl)](Asax )
+Here , β - conversion for the λ - bound variables y , z and P can take place in any order , and the relative scope between the subject indeﬁnites and the object universal depends on the order of application of β - conversion and underspeciﬁcation resolution for the two terms # boy and # girl .
+8  4 Conclusion and outlook
+In this paper , we have proposed an analysis of the interpretive parallelism for anaphora and scope in the so - called Geach sentences involving right - node raising .
 In the proposed analysis , the parallel interpretation requirement on pronouns and indeﬁnites in the shared right periphery is a consequence of the way underspeciﬁed terms are interpreted in the underspeciﬁcation language that mediates the compositional semantic representation straightforwardly derived from the syntactic derivation and the fully resolved semantic representation that explicitly encodes all the relevant logical entailment relations .
 The natural next question is whether the present approach can be extended to the ellipsis cases .
 Preliminary results suggest a positive answer to this question , but a detailed analysis is a task for future research .
-Acknowledgments This work was supported by JSPS KAKENHI JP15K16732 , the NINJAL collaborative research project ’ Cross - linguistic Studies of Japanese Prosody and Grammar ’ and the OSU College of the Arts and Sciences
-Larger Grant .
-References Asudeh , A. and R. Crouch ( 2002 ) .
-Derivational parallelism and ellipsis parallelism .
-In L. Mikkelsen and C. Potts ( Eds . ) , WCCFL 21 Proceedings , Somerville , MA , pp .
-1–14 .
-Cascadilla Press .
-Bekki , D. ( 2014 ) .
-Representing anaphora with dependent types .
-In N. Asher and S. Soloviev ( Eds . ) , Logical Aspects of Computational Linguistics 2014 , Heidelberg , pp .
-14–29 .
-Springer .
-Bekki , D. and K. Mineshima ( 2017 ) .
-Context - passing and underspeciﬁcation in Dependent Type Semantics .
-In S. Chatzikyriakidis and Z. Luo ( Eds . ) , Modern Perspectives in Type - Theoretical Semantics , pp .
-11–41 .
-Heidelberg : Springer .
-Fox , D. ( 2000 ) .
-Economy and Semantic Interpretation .
-Cambridge , Mass. : MIT Press .
-Geach , P. T. ( 1972 ) .
-A program for syntax .
-In D. Davidson and G. H. Harman ( Eds . ) , Semantics of Natural Language , pp .
-483–497 .
-Dordrecht : D. Reidel .
-Hirschb ¨uhler , P. ( 1982 ) .
-VP deletion and across - the - board quantiﬁer scope .
-In J. Pustejovsky and P. Sells ( Eds . ) , Proceedings of the Twelfth Annual Meeting of the North Eastern Linguistic Society , pp . 132 – 139 .
-University of Massachusetts at Amherst .
-Jacobson , P. ( 1999 ) .
-Towards a variable - free semantics .
-Linguistics and Philosophy 22 ( 2 ) , 117–184 .
-Kubota , Y . and R. Levine ( 2012 ) .
-Gapping as like - category coordination .
-In D. B ´ echet and A. Dikovsky ( Eds . ) , Logical Aspects of Computational Linguistics 2012 , Heidelberg , pp .
-135–150 .
-Springer .
-Kubota , Y .
-and R. Levine ( 2015 ) .
-Against ellipsis : Arguments for the direct licensing of ‘ non - canonical ’ coordinations .
-Linguistics and Philosophy 38 ( 6 ) , 521–576 .
-Martin - L ¨of , P. ( 1984 ) .
-Intuitionistic Type Theory .
-Bibliopolis .
-Puthawala , D. ( 2018 ) .
-Stripping is n’t so mysterious , or anomalous scope , either .
-In A. Foret , G. Kobele , and S. Pogodalla ( Eds . ) , Formal Grammar 2018 , pp .
-102–120 .
-Steedman , M. ( 2012 ) .
-Taking Scope .
-Cambridge , Mass. : MIT Press .
+This work was supported by JSPS KAKENHI JP15K16732 , the NINJAL collaborative research project ’ Cross - linguistic Studies of Japanese Prosody and Grammar ’ and the OSU College of the Arts and Sciences Larger Grant .
+Acknowledgments

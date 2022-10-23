@@ -1,5 +1,7 @@
-Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 6141–6151 July 5 - 10 , 2020 .
-c  2020 Association for Computational Linguistics6141NeuInfer : Knowledge Inference on N - ary Facts Saiping Guan , Xiaolong Jin , Jiafeng Guo , Yuanzhuo Wang , and Xueqi Cheng School of Computer Science and Technology , University of Chinese Academy of Sciences ; CAS Key Laboratory of Network Data Science and Technology , Institute of Computing Technology , Chinese Academy of Sciences fguansaiping , jinxiaolong , guojiafeng , wangyuanzhuo , cxq g@ict.ac.cn Abstract Knowledge inference on knowledge graph has attracted extensive attention , which aims to ﬁnd out connotative valid facts in knowledge graph and is very helpful for improving the performance of many downstream applications .
+NeuInfer : Knowledge Inference on N - ary Facts
+Saiping Guan , Xiaolong Jin , Jiafeng Guo , Yuanzhuo Wang , and Xueqi Cheng School of Computer Science and Technology , University of Chinese Academy of Sciences ; CAS Key Laboratory of Network Data Science and Technology , Institute of Computing Technology , Chinese Academy of Sciences { guansaiping,jinxiaolong,guojiafeng,wangyuanzhuo,cxq}@ict.ac.cn
+Abstract
+Knowledge inference on knowledge graph has attracted extensive attention , which aims to ﬁnd out connotative valid facts in knowledge graph and is very helpful for improving the performance of many downstream applications .
 However , researchers have mainly poured attention to knowledge inference on binary facts .
 The studies on n - ary facts are relatively scarcer , although they are also ubiquitous in the real world .
 Therefore , this paper addresses knowledge inference on n - ary facts .
@@ -8,170 +10,265 @@ We further propose a neural network model , NeuInfer , for knowledge inference o
 Besides handling the common task to infer an unknown element in a whole fact , NeuInfer can cope with a new type of task , ﬂexible knowledge inference .
 It aims to infer an unknown element in a partial fact consisting of the primary triple coupled with any number of its auxiliary description(s ) .
 Experimental results demonstrate the remarkable superiority of NeuInfer .
-1 Introduction With the introduction of connotative valid facts , knowledge inference on knowledge graph improves the performance of many downstream applications , such as vertical search and question answering ( Dong et al . , 2015 ; Lukovnikov et al . , 2017 ) .
-Existing studies ( Nickel et al . , 2016 ; Wang et al . , 2017 ) mainly focus on knowledge inference on binary facts with two entities connected with a certain binary relation , represented as triples , ( head entity , relation , tail entity ) .
+1
+Introduction
+With the introduction of connotative valid facts , knowledge inference on knowledge graph improves the performance of many downstream applications , such as vertical search and question answering ( Dong et al , 2015 ; Lukovnikov et al , 2017 ) .
+Existing studies ( Nickel et al , 2016 ; Wang et al , 2017 ) mainly focus on knowledge inference on binary facts with two entities connected with a certain binary relation , represented as triples , ( head entity , relation , tail entity ) .
 They attempt to infer the unknown head / tail entity or the unknown relation of a given binary fact .
 However , n - ary facts involving more than two entities are also ubiquitous .
-For example , in Freebase , more than 1=3entities participate in n - ary facts ( Wen et al . , 2016 ) .
-Thefact thatJohnBardeen receivedNobelPrizein Physics in1956 together with WalterHouser Brattain andWilliamShockley1is a typical 5ary fact .
-So far , only a few studies ( Wen et al . , 2016 ; Zhang et al . , 2018 ; Guan et al . , 2019 ) have tried to address knowledge inference on n - ary facts .
+For example , in Freebase , more than 1/3 entities participate in n - ary facts ( Wen et al , 2016 ) .
+The
+fact that John Bardeen received N obel P rize in P hysics in 1956 together with W alter Houser Brattain and W illiam Shockley1 is a typical 5ary fact .
+So far , only a few studies ( Wen et al , 2016 ; Zhang et al , 2018 ; Guan et al , 2019 ) have tried to address knowledge inference on n - ary facts .
 In existing studies for knowledge inference on nary facts , each n - ary fact is represented as a group of peer attributes and attribute values .
 In practice , for each n - ary fact , there is usually a primary triple ( the main focus of the n - ary fact ) , and other attributes along with the corresponding attribute values are its auxiliary descriptions .
-Take the above 5 - ary fact for example , the primary triple is ( JohnBardeen;award -received;Nobel Prize in Physics ) , and other attribute - value pairs includingpoint -in - time : 1956 , together -with : Walter Houser Brattain andtogether -with : WilliamShockley are its auxiliary descriptions .
-Actually , in YAGO ( Suchanek et al . , 2007 ) and Wikidata ( Vrande ˇci´c and Kr ¨otzsch , 2014 ) , a primary triple is identiﬁed for each n - ary fact .
+Take the above 5 - ary fact for example , the primary triple is ( John Bardeen , award - received , N obel P rize in P hysics ) , and other attribute - value pairs including point - in - time : 1956 , together - with : W alter Houser Brattain and together - with : W illiam Shockley are its auxiliary descriptions .
+Actually , in YAGO ( Suchanek et al , 2007 ) and Wikidata ( Vrandeˇci´c and Kr¨otzsch , 2014 ) , a primary triple is identiﬁed for each n - ary fact .
 The above 5 - ary fact is a relatively complete example .
 In the real - world scenario , many n - ary facts appear as only partial ones , each consisting of a primary triple and a subset of its auxiliary description(s ) , due to incomplete knowledge acquisition .
-For example , ( JohnBardeen;award received;NobelPrizeinPhysics ) withpoint in - time : 1956 and it withftogether -with : Walter Houser Brattain ; together -with : WilliamShockley gare two typical partial facts corresponding to the above 5 - ary fact .
+For example , ( John Bardeen , awardreceived , N obel P rize in P hysics ) with pointin - time : 1956 and it with { together - with : together - with : W alter Houser Brattain , W illiam Shockley } are two typical partial facts corresponding to the above 5 - ary fact .
 For differentiation , we call those relatively complete facts as whole ones .
 We noticed that existing studies on n - ary facts infer an unknown element in a welldeﬁned whole fact and have not paid attention to knowledge inference on partial facts .
-Later on , we 1https://www.wikidata.org/wiki/Q949
-6142refer the former as simple knowledge inference , while the latter as ﬂexible knowledge inference .
+Later on ,
+we
+1https://www.wikidata.org/wiki/Q949
+Proceedingsofthe58thAnnualMeetingoftheAssociationforComputationalLinguistics , pages6141–6151July5 - 10,2020.c(cid:13)2020AssociationforComputationalLinguistics6141  refer the former as simple knowledge inference , while the latter as ﬂexible knowledge inference .
 With these considerations in mind , in this paper , by discriminating the information in the same n - ary fact , we propose a neural network model , called NeuInfer , to conduct both simple and ﬂexible knowledge inference on n - ary facts .
-Our speciﬁc contributions are summarized as : •We treat the information in the same n - ary fact discriminatingly and represent each n - ary fact as a primary triple coupled with a set of its auxiliary descriptive attribute - value pair(s ) .
-•We propose a neural network model , NeuInfer , for knowledge inference on n - ary facts .
+Our speciﬁc contributions are summarized as :
+• We treat the information in the same n - ary fact discriminatingly and represent each n - ary fact as a primary triple coupled with a set of its auxiliary descriptive attribute - value pair(s ) .
+• We propose a neural network model , NeuInfer , for knowledge inference on n - ary facts .
 NeuInfer can particularly handle the new type of task , ﬂexible knowledge inference , which infers an unknown element in a partial fact consisting of a primary triple and any number of its auxiliary description(s ) .
-•Experimental results validate the signiﬁcant effectiveness and superiority of NeuInfer .
-2 Related Works 2.1 Knowledge Inference on Binary Facts They can be divided into tensor / matrix based methods , translation based methods , and neural network based ones .
-The quintessential one of tensor / matrix based methods is RESCAL ( Nickel et
-al . , 2011 ) .
+• Experimental results validate the signiﬁcant effectiveness and superiority of NeuInfer .
+2 Related Works
+2.1 Knowledge Inference on Binary Facts
+They can be divided into tensor / matrix based methods , translation based methods , and neural network based ones .
+The quintessential one of tensor / matrix based methods is RESCAL ( Nickel et al , 2011 ) .
 It relates a knowledge graph to a three - way tensor of head entities , relations , and tail entities .
 The learned embeddings of entities and relations via minimizing the reconstruction error of the tensor are used to reconstruct the tensor .
 And binary facts corresponding to entries of large values are treated as valid .
-Similarly , ComplEx ( Trouillon et al . , 2016 ) relates each relation to a matrix of head and tail entities , which is decomposed and learned like RESCAL .
-To improve the embeddings and thus the performance of inference , researchers further introduce the constraints of entities and relations ( Ding et al . , 2018 ; Jain et al . , 2018 ) .
-Translation based methods date back to TransE ( Bordes et al . , 2013 ) .
+Similarly , ComplEx ( Trouillon et al , 2016 ) relates each relation to a matrix of head and tail entities , which is decomposed and learned like RESCAL .
+To improve the embeddings and thus the performance of inference , researchers further introduce the constraints of entities and relations ( Ding et al , 2018 ; Jain et al , 2018 ) .
+Translation based methods date back to TransE ( Bordes et al , 2013 ) .
 It views each valid binary fact as the translation from the head entity to the tail entity via their relation .
 Thus , the score function indicating the validity of the fact is deﬁned based on the similarity between the translation result and the tail entity .
-Then , a ﬂurry of methodsspring up ( Wang et al . , 2014 ; Lin et al . , 2015b ; Ji et al . , 2015 ; Guo et al . , 2015 ; Lin et al . , 2015a ; Xiao et al . , 2016 ; Jia et al . , 2016 ; Tay et al . , 2017 ; Ebisu and Ichise , 2018 ; Chen et al . , 2019 ) .
+Then , a ﬂurry of methods
+spring up ( Wang et al , 2014 ; Lin et al , 2015b ; Ji et al , 2015 ; Guo et al , 2015 ; Lin et al , 2015a ; Xiao et al , 2016 ; Jia et al , 2016 ; Tay et al , 2017 ; Ebisu and Ichise , 2018 ; Chen et al , 2019 ) .
 They modify the above translation assumption or introduce additional information and constraints .
-Among them , TransH ( Wang et al . , 2014 ) translates on relationspeciﬁc hyperplanes .
+Among them , TransH ( Wang et al , 2014 ) translates on relationspeciﬁc hyperplanes .
 Entities are projected into the hyperplanes of relations before translating .
 Neural network based methods model the validity of binary facts or the inference processes .
-For example , ConvKB ( Nguyen et al . , 2018 ) treats each binary fact as a three - column matrix .
+For example , ConvKB ( Nguyen et al , 2018 ) treats each binary fact as a three - column matrix .
 This matrix is fed into a convolution layer , followed by a concatenation layer and a fully - connected layer to generate a validity score .
-Nathani et al .
-( 2019 ) further proposes a generalized graph attention model as the encoder to capture neighborhood features and applies ConvKB as the decoder .
-ConvE ( Dettmers et al . , 2018 ) models entity inference process via 2D convolution over the reshaped then concatenated embedding of the known entity and relation .
-ConvR ( Jiang et al . , 2019 ) further adaptively constructs convolution ﬁlters from relation embedding and applies these ﬁlters across entity embedding to generate convolutional features .
-SENN ( Guan et al . , 2018 ) models the inference processes of head entities , tail entities , and relations via fullyconnected neural networks , and integrates them into a uniﬁed framework .
-2.2 Knowledge Inference on N - ary Facts As aforesaid , only a few studies handle this type of knowledge inference .
-The m - TransH method ( Wen et al . , 2016 ) deﬁnes n - ary relations as the mappings from the attribute sequences to the attribute values .
+Nathani et al ( 2019 ) further proposes a generalized graph attention model as the encoder to capture neighborhood features and applies ConvKB as the decoder .
+ConvE ( Dettmers et al , 2018 ) models entity inference process via 2D convolution over the reshaped then concatenated embedding of the known entity and relation .
+ConvR ( Jiang et al , 2019 ) further adaptively constructs convolution ﬁlters from relation embedding and applies these ﬁlters across entity embedding to generate convolutional features .
+SENN ( Guan et al , 2018 ) models the inference processes of head entities , tail entities , and relations via fullyconnected neural networks , and integrates them into a uniﬁed framework .
+2.2 Knowledge Inference on N - ary Facts
+As aforesaid , only a few studies handle this type of knowledge inference .
+The m - TransH method ( Wen et al , 2016 ) deﬁnes n - ary relations as the mappings from the attribute sequences to the attribute values .
 Each n - ary fact is an instance of the corresponding n - ary relation .
-Then , m - TransH generalizes TransH ( Wang et al . , 2014 ) on binary facts to nary facts via attaching each n - ary relation with a hyperplane .
-RAE ( Zhang et al . , 2018 ) further introduces the likelihood that two attribute values co - participate in a common n - ary fact , and adds the corresponding relatedness loss multiplied by a weight factor to the embedding loss of m - TransH. Speciﬁcally , RAE applies a fully - connected neural network to model the above likelihood .
-Differently , NaLP ( Guan et al . , 2019 ) represents each n - ary fact as a set of attribute - value pairs directly .
+Then , m - TransH generalizes TransH ( Wang et al , 2014 ) on binary facts to nary facts via attaching each n - ary relation with a hyperplane .
+RAE ( Zhang et al , 2018 ) further introduces the likelihood that two attribute values co - participate in a common n - ary fact , and adds the corresponding relatedness loss multiplied by a weight factor to the embedding loss of m - TransH. Speciﬁcally , RAE applies a fully - connected neural network to model the above likelihood .
+Differently , NaLP ( Guan et al , 2019 ) represents each n - ary fact as a set of attribute - value pairs directly .
 Then , convolution is adopted to get the embeddings of the attribute - value pairs , and a fully - connected neural
-6143network is applied to evaluate their relatedness and ﬁnally to obtain the validity score of the input n - ary fact .
+6142  network is applied to evaluate their relatedness and ﬁnally to obtain the validity score of the input n - ary fact .
 In these methods , the information in the same n - ary fact is equal - status .
 Actually , in each n - ary fact , a primary triple can usually be identiﬁed with other information as its auxiliary description(s ) , as exempliﬁed in Section 1 .
 Moreover , these methods are deliberately designed only for the inference on whole facts .
 They have not tackled any distinct inference task .
 In practice , the newly proposed ﬂexible knowledge inference is also prevalent .
-3 Problem Statement 3.1 The Representation of N - ary Facts Different from the studies that deﬁne n - ary relations ﬁrst
-and then represent n - ary facts ( Wen et al . , 2016 ; Zhang et
-al . , 2018 ) , we represent each n - ary fact as a primary triple ( head entity , relation , tail entity ) coupled with a set of its auxiliary description(s ) directly .
-Formally , given an n - ary fact Fct with the primary triple ( h;r;t ) , mattributes and attribute values , its representation is :   ( h;r ; t ) ; f j  a1 : v1 ; j  a2 : v2 ; j   : : : ; j  am : vmg ; where eachai : vi(i= 1;2;:::;m ) is an attributevalue pair , also called an auxiliary description to the primary triple .
-An element of Fct refers to h / r / t / ai / vi;AFct = fa1;a2;:::;a mgisFct ’s attribute set and aimay be the same to aj(i;j= 1;2;:::;m;i6 = j);VFct = fv1;v2;:::;v mgis Fct ’s attribute value set .
-For example , the representation of the 5 - ary fact , mentioned in Section 1 , is :   ( John Bardeen ; award -received ; Nobel Prize in Physics ) ; f j  point -in - time : 1956 ; j  together -with : Walter Houser Brattain ; j  together -with : William Shockley g :
+3 Problem Statement
+3.1 The Representation of N - ary Facts
+Different from the studies that deﬁne n - ary relations ﬁrst and then represent n - ary facts ( Wen et al , 2016 ; Zhang et al , 2018 ) , we represent each n - ary fact as a primary triple ( head entity , relation , tail entity ) coupled with a set of its auxiliary description(s ) directly .
+Formally , given an n - ary fact F ct with the primary triple ( h , r , t ) , m attributes and attribute values , its representation is :
+( cid:0)(h , r , t ) , {
+|−− a1 : v1 , |−− a2 : v2 , |−− . . .
+, |−− am : vm}(cid:1 ) ,
+where each ai : vi ( i = 1 , 2 , . . .
+, m ) is an attributevalue pair , also called an auxiliary description to the primary triple .
+An element of F ct refers to h / r / t / ai / vi ; AF ct = { a1 , a2 , . . .
+, am } is F ct ’s attribute set and ai may be the same to aj ( i , j = 1 , 2 , . . .
+, m , i ( cid:54)= j ) ; VF ct = { v1 , v2 , . . .
+, vm } is F ct ’s attribute value set .
+For example , the representation of the 5 - ary fact ,
+mentioned in Section 1 , is :
+( cid:0)(John Bardeen , award - received , N obel P rize in P hysics ) , { |−− point - in - time : 1956 , |−− together - with : W alter Houser Brattain , |−− together - with : W illiam Shockley}(cid:1 ) .
 Note that , in the real world , there is a type of complicated cases , say , where more than two entities participate in the same n - ary fact with the same primary attribute .
-We follow Wikidata ( Vrande ˇci´c and Kr ¨otzsch , 2014 ) to view the cases from different aspects of different entities .
-Take the case thatJohnBardeen , WalterHouserBrattain , andWilliamShockley receivedNobelPrizein Physics in1956 for example , besides the above 5 - ary fact from the view of John Bardeen , we get other two 5 - ary facts from the views of Walter HouserBrattain2andWilliamShockley3 , respectively :   ( Walter Houser Brattain ; award -received ; Nobel Prize in Physics ) ; f j  point -in - time : 1956 ; j  together -with : John Bardeen ; j  together -with : William Shockley g :   ( William Shockley ; award -received ; Nobel Prize in Physics ) ; f j  point -in - time : 1956 ; j  together -with : Walter Houser Brattain ; j  together -with : John Bardeeng : 3.2 Task Statement In this paper , we handle both the common simple knowledge inference and the newly proposed ﬂexible knowledge inference .
+We follow Wikidata ( Vrandeˇci´c and Kr¨otzsch , 2014 ) to view the cases from different aspects of different entities .
+Take the case that John Bardeen , W alter Houser Brattain ,
+and W illiam Shockley received N obel P rize in P hysics in 1956 for example , besides the above 5 - ary fact from the view of John Bardeen , we get other two 5 - ary facts from the views of W alter Houser Brattain2 and W illiam Shockley3 , respectively :
+( cid:0)(W alter Houser Brattain , award - received , N obel P rize in P hysics ) , { |−− point - in - time : 1956 , |−− together - with : John Bardeen , |−− together - with : W illiam Shockley}(cid:1 ) .
+( cid:0)(W illiam Shockley , award - received , N obel P rize in P hysics ) , { |−− point - in - time : 1956 , |−− together - with : W alter Houser Brattain , |−− together - with : John Bardeen}(cid:1 ) .
+3.2 Task Statement
+In this paper , we handle both the common simple knowledge inference and the newly proposed ﬂexible knowledge inference .
 Before giving their deﬁnitions under our representation form of n - ary facts , let us deﬁne whole fact and partial fact ﬁrst .
 Deﬁnition 1 ( Whole fact and partial fact ) .
-For the factFct , assume its set of auxiliary description(s ) asSd = fai : viji= 1;2;:::;mg .
-Then a partial fact ofFctis : Fct0=  ( h;r;t ) ; S0 d , whereS0 d Sd , i.e. ,S0 dis a subset of Sd .
-And we call Fctthe whole fact to differentiate it from Fct0 .
+For the fact F ct , assume its set of auxiliary description(s ) as Sd = { ai : vi|i = 1 , 2 , . . .
+, m } .
+Then a partial fact of F ct is : F ct(cid:48 ) = ( cid:0)(h , r , t ) , S(cid:48
+) d ⊂ d Sd , i.e. , S(cid:48 ) d is a subset of Sd .
+And we call F ct the whole fact to differentiate it from F ct(cid:48 ) .
+( cid:1 ) ,
+where S(cid:48 )
 Notably , whole fact and partial fact are relative concepts , and a whole fact is a relatively complete fact compared to its partial fact .
 In this paper , partial facts are introduced to imitate a typical openworld setting where different facts of the same type may have different numbers of attribute - value pair(s ) .
-Deﬁnition 2 ( Simple knowledge inference ) .
-It aims to infer an unknown element in a whole fact .
-Deﬁnition 3 ( Flexible knowledge inference ) .
-It aims to infer an unknown element in a partial fact .
-4 The NeuInfer Method 4.1 The Framework of NeuInfer To conduct knowledge inference on n - ary facts , NeuInfer ﬁrst models the validity of the n - ary facts and then casts inference as a classiﬁcation task .
+It Deﬁnition 2 ( Simple knowledge inference ) .
+aims to infer an unknown element in a whole fact .
+It Deﬁnition 3 ( Flexible knowledge inference ) .
+aims to infer an unknown element in a partial fact .
+4 The NeuInfer Method
+4.1 The Framework of NeuInfer
+To conduct knowledge inference on n - ary facts , NeuInfer ﬁrst models the validity of the n - ary facts and then casts inference as a classiﬁcation task .
 2https://www.wikidata.org/wiki/Q184577 3https://www.wikidata.org/wiki/Q163415
-6144 hrt - FCNs … …… …… … … … FCN1Validity score … … hrtav - FCNs 𝑖:1→𝑚FCN2⨁FinalscoreminCompatibilityscore … 𝑖:1→𝑚 … … 𝐚𝐢𝐯𝐢 … … … … … … … … … … … … … … … … … … … … … … … … … … … Concate … 𝐫 … 𝐭𝐡 … Concate𝐽𝑜ℎ𝑛 	 𝐵𝑎𝑟𝑑𝑒𝑒𝑛𝑎𝑤𝑎𝑟𝑑−𝑟𝑒𝑐𝑒𝑖𝑣𝑒𝑑𝑁𝑜𝑏𝑒𝑙 	 𝑃𝑟𝑖𝑧𝑒 	 𝑖𝑛 	 𝑃ℎ𝑦𝑠𝑖𝑐𝑠 𝑝𝑜𝑖𝑛𝑡−𝑖𝑛−𝑡𝑖𝑚𝑒1956𝑡𝑜𝑔𝑒𝑡ℎ𝑒𝑟−𝑤𝑖𝑡ℎ𝑊𝑎𝑙𝑡𝑒𝑟 	 𝐻𝑜𝑢𝑠𝑒𝑟 	 𝐵𝑟𝑎𝑡𝑡𝑎𝑖𝑛𝑡𝑜𝑔𝑒𝑡ℎ𝑒𝑟−𝑤𝑖𝑡ℎ𝑊𝑖𝑙𝑙𝑖𝑎𝑚 	 𝑆ℎ𝑜𝑐𝑘𝑙𝑒𝑦Figure 1 : The framework of the proposed NeuInfer method .
+6143  Figure 1 : The framework of the proposed NeuInfer method .
 4.1.1
-The Motivation of NeuInfer How to estimate whether an n - ary fact is valid or not ?
-Let us look into two typical examples of invalid n - ary facts :   ( John Bardeen ; award -received ; Turing Award ) ; f j  point -in - time : 1956 ; j  together -with :
-Walter Houser Brattain ; j  together -with : William Shockley g :   ( John Bardeen ; award -received ; Nobel Prize in Physics ) ; f j  point -in - time : 1956 ; j  together -with : Walter Houser Brattain ; j  place -of - marriage : New Y ork Cityg :
+The Motivation of NeuInfer
+4.1.2 The Framework of NeuInfer
+How to estimate whether an n - ary fact is valid or not ?
+Let us look into two typical examples of invalid n - ary facts :
+The framework of NeuInfer is illustrated in Figure 1 , with the 5 - ary fact presented in Section 1 as an example .
+( cid:0)(John Bardeen , award - received , T uring Award ) , { |−− point - in - time : 1956 , |−− together - with : W alter Houser Brattain , |−− together - with : W illiam Shockley}(cid:1 ) .
+( cid:0)(John Bardeen , award - received , N obel P rize in P hysics ) , { |−− point - in - time : 1956 , |−− together - with : W alter Houser Brattain , |−− place - of -marriage : N ew Y ork City}(cid:1 ) .
 In the above ﬁrst n - ary fact , the primary triple is invalid .
 In the second one , some auxiliary description is incompatible with the primary triple .
 Therefore , we believe that a valid n - ary fact has two prerequisites .
 On the one hand , its primary triple should be valid .
 If the primary triple is invalid , attaching any number of attribute - value pairs to it does not make the resulting n - ary fact valid ; on the other hand , since each auxiliary description presents a qualiﬁer to the primary triple , it should be compatible with the primary triple .
 Even if the primary triple is basically valid , any incompatible attribute - value pair makes the n - ary fact invalid .
-Therefore , NeuInfer is designed to characterize these two aspects and thus consists of two components corresponding to the validity evaluation of the primary triple and the compatibility evaluation of the n - ary fact , respectively.4.1.2 The Framework of NeuInfer The framework of NeuInfer is illustrated in Figure 1 , with the 5 - ary fact presented in Section 1 as an example .
-For an n - ary fact Fct , we look up the embeddings of its relation rand the attributes in AFct from the embedding matrix MR2RjRjkof relations and attributes , where Ris the set of all the relations and attributes , and kis the dimension of the latent vector space .
-The embeddings of h , t , and the attribute values in VFctare looked up from the embedding matrix ME2RjEjkof entities and attribute values , where Eis the set of all the entities and attribute values .
+Therefore , NeuInfer is designed to characterize these two aspects and thus consists of two components corresponding to the validity evaluation of the primary triple and the compatibility evaluation of the n - ary fact , respectively .
+For an n - ary fact F ct , we look up the embeddings of its relation r and the attributes in AF ct from the embedding matrix MR ∈ R|R|×k of relations and attributes , where R is the set of all the relations and attributes , and k is the dimension of the latent vector space .
+The embeddings of h , t , and the attribute values in VF ct are looked up from the embedding matrix ME ∈ R|E|×k of entities and attribute values , where E is the set of all the entities and attribute values .
 In what follows , the embeddings are denoted with the same letters but in boldface by convention .
-As presented in Figure 1 , these embeddings are fed into the validity evaluation component ( the upper part of Figure 1 ) and the compatibility evaluation component ( the bottom part of Figure 1 ) to compute the validity score of ( h;r;t ) and the compatibility score of Fct , respectively .
-These two scores are used to generate the ﬁnal score of Fctby weighted sumand further compute the loss .
-Note that , following RAE ( Zhang et al . , 2018 ) and NaLP ( Guan et al . , 2019 ) , we only apply fully - connected neural networks in NeuInfer .
-4.2 Validity Evaluation This component estimates the validity of ( h;r;t ) , including the acquisition of its interaction vector and the assessment of its validity , corresponding to “ hrt - FCNs ” and “ FCN 1 ” in Figure 1 , respectively .
-Detailedly , the embeddings of h , r , andtare
-6145concatenated and fed into a fully - connected neural network .
-After layer - by - layer learning , the last layer outputs the interaction vector ohrtof(h;r;t ): ohrt = f(f(f(f([h;r;t]W1;1+b1;1) W1;2+b1;2))W1;n1+b1;n1);(1 ) wheref()is
-the ReLU function ; n1is the number of the neural network layers ; fW1;1;W1;2 ; : : : ; W1;n1gandfb1;1;b1;2;:::;b1;n1gare their weight matrices and bias vectors , respectively .
-Withohrtas the input , the validity score valhrt of(h;r;t ) is computed via a fully - connected layer and then the sigmoid operation : valhrt=(ohrtWval+bval ) ; ( 2 ) where Wvalandbvalare the weight matrix and bias variable , respectively ; (x ) = 1 1+e xis the sigmoid function , which constrains valhrt2(0;1 ) .
-For simplicity , the number of hidden nodes in each fully - connected layer of “ hrt - FCNs ” and “ FCN 1 ” gradually reduces with the same difference between layers .
-4.3 Compatibility Evaluation This component estimates the compatibility of Fct .
-It contains three sub - processes , i.e. , the capture of the interaction vector between ( h;r;t ) and each auxiliary description ai : vi(i= 1;2;:::;m ) , the acquisition of the overall interaction vector , and the assessment of the compatibility of Fct , corresponding to “ hrtav - FCNs ” , “ min ” and “ FCN 2 ” in Figure 1 , respectively .
-Similar to “ hrt - FCNs ” , we obtain the interaction vector ohrta iviof(h;r;t ) andai : vi : ohrta ivi = f(f(f(f([h;r;t;ai;vi]W2;1+b2;1) W2;2+b2;2))W2;n2+b2;n2 ) ; ( 3 ) wheren2is the number of the neural network layers;fW2;1;W2;2;:::;W2;n2gandfb2;1 ; b2;2;:::;b2;n2gare their weight matrices and bias vectors , respectively .
-The number of hidden nodes in each fully - connected layer also gradually reduces with the same difference between layers .
-And the dimension of the resulting ohrta iviisd .
-All the auxiliary descriptions share the same parameters in this sub - process .
-The overall interaction vector ohrtav ofFctis generated based on ohrta ivi .
-Before introducing this sub - process , let us see the principle behind ﬁrst .
-Straightforwardly , if Fctis valid , ( h;r;t ) should be compatible with any of its auxiliary description .
+As presented in Figure 1 , these embeddings are fed into the validity evaluation component ( the upper part of Figure 1 ) and the compatibility evaluation component ( the bottom part of Figure 1 ) to compute the validity score of ( h , r , t ) and the compatibility score of F ct , respectively .
+These two scores are used to generate the ﬁnal score of F ct by weighted sum ⊕ and further compute the loss .
+Note that , following RAE ( Zhang et al , 2018 ) and NaLP ( Guan et al , 2019 ) , we only apply fully - connected neural networks in NeuInfer .
+4.2 Validity Evaluation
+This component estimates the validity of ( h , r , t ) , including the acquisition of its interaction vector and the assessment of its validity , corresponding to “ hrt - FCNs ” and “ FCN1 ” in Figure 1 , respectively .
+Detailedly , the embeddings of h , r , and t are
+6144hrt - FCNs … … … … … … … … FCN1Validity score … … hrtav - FCNs𝑖:1→𝑚FCN2⨁FinalscoreminCompatibilityscore … 𝑖:1→𝑚 … … 𝐚𝐢𝐯𝐢 … … … … … … … … … … … … … … … … … … … … … … … … … … … Concate … 𝐫 … 𝐭𝐡 … Concate𝐽𝑜ℎ𝑛 	 𝐵𝑎𝑟𝑑𝑒𝑒𝑛𝑎𝑤𝑎𝑟𝑑−𝑟𝑒𝑐𝑒𝑖𝑣𝑒𝑑𝑁𝑜𝑏𝑒𝑙 	 𝑃𝑟𝑖𝑧𝑒 	 𝑖𝑛 	 𝑃ℎ𝑦𝑠𝑖𝑐𝑠𝑝𝑜𝑖𝑛𝑡−𝑖𝑛−𝑡𝑖𝑚𝑒1956𝑡𝑜𝑔𝑒𝑡ℎ𝑒𝑟−𝑤𝑖𝑡ℎ𝑊𝑎𝑙𝑡𝑒𝑟 	 𝐻𝑜𝑢𝑠𝑒𝑟 	 𝐵𝑟𝑎𝑡𝑡𝑎𝑖𝑛𝑡𝑜𝑔𝑒𝑡ℎ𝑒𝑟−𝑤𝑖𝑡ℎ𝑊𝑖𝑙𝑙𝑖𝑎𝑚 	 𝑆ℎ𝑜𝑐𝑘𝑙𝑒𝑦  concatenated and fed into a fully - connected neural network .
+After layer - by - layer learning , the last layer outputs the interaction vector ohrt of ( h , r , t ):
+ohrt = f ( f ( · · · f ( f ( [ h ; r ; t]W1,1 + b1,1 ) · W1,2 + b1,2 ) · · · ) W1,n1 + b1,n1 ) ,
+( 1 )
+where f ( · ) is the ReLU function ; n1 is the number of the neural network layers ; { W1,1 , W1,2 , . . .
+, W1,n1 } and { b1,1 , b1,2 , . . .
+, b1,n1 } are their weight matrices and bias vectors , respectively .
+With ohrt as the input , the validity score valhrt of ( h , r , t ) is computed via a fully - connected layer and then the sigmoid operation :
+Straightforwardly , if F ct is valid , ( h , r , t ) should be compatible with any of its auxiliary description .
 Then , the values of their interaction vector , measuring the compatibility in many different views , are all encouraged to be large .
 Therefore , for each dimension , the minimum over it of all the interaction vectors is not allowed to be too small .
-Thus , the overall interaction vector ohrtav of ( h;r;t ) and its auxiliary description(s ) is : ohrtav = minm i=1(ohrta ivi ) ; ( 4 ) where min()is the element - wise minimizing function .
-Then , similar to “ FCN 1 ” , we obtain the compatibility scorecompFctofFct : compFct=(ohrtavWcomp + bcomp);(5 ) where Wcomp of dimension d1andbcomp are the weight matrix and bias variable , respectively .
-4.4 Final Score and Loss Function The ﬁnal score sFctofFctis the weighted sum  of the above validity score and compatibility score : sFct = valhrtcompFct = wvalhrt+ ( 1 w)compFct;(6 ) wherew2(0;1)is the weight factor .
-If the arity of Fctis 2 , the ﬁnal score is equal to the validity score of the primary triple ( h;r;t ) .
-Then , Equation ( 6 ) is reduced to : sFct = valhrt : ( 7 ) Currently , we obtain the ﬁnal score sFctofFct .
-In addition , Fcthas its target score lFct .
-By comparingsFctwithlFct , we get the binary crossentropy loss : LFct= lFctlogsFct (1 lFct ) log(1 sFct);(8 ) wherelFct= 1 , ifFct2 T , otherwiseFct2T  , lFct= 0 .
-Here , Tis the training set and T is the set of negative samples constructed by corrupting the n - ary facts in T. Speciﬁcally , for each n - ary fact inT , we randomly replace one of its elements with a random element in E / Rto generate one negative sample not contained in T.
-We then optimize NeuInfer via backpropagation , and Adam ( Kingma and Ba , 2015 ) with learning rateis used as the optimizer .
-61465 Experiments 5.1 Datasets and Metrics We conduct experiments on two n - ary datasets .
-The ﬁrst one is JF17 K ( Wen et al . , 2016 ; Zhang et
-al . , 2018 ) , derived from Freebase ( Bollacker et al . , 2008 ) .
+Thus , the overall interaction vector ohrtav of
+( h , r , t ) and its auxiliary description(s ) is :
+ohrtav = minm
+i=1(ohrtaivi ) ,
+( 4 )
+where min ( · ) is the element - wise minimizing function .
+valhrt = σ(ohrtWval + bval ) ,
+( 2 )
+Then , similar to “ FCN1 ” , we obtain the compatibility score compF ct of F ct :
+where Wval and bval are the weight matrix and bias variable , respectively ; σ(x ) = 1 1+e−x is the sigmoid function , which constrains valhrt ∈ ( 0 , 1 ) .
+For simplicity , the number of hidden nodes in each fully - connected layer of “ hrt - FCNs ” and “ FCN1 ” gradually reduces with the same difference between layers .
+4.3 Compatibility Evaluation
+This component estimates the compatibility of F ct .
+It contains three sub - processes , i.e. , the capture of the interaction vector between ( h , r , t ) and each auxiliary description ai : vi ( i = 1 , 2 , . . .
+, m ) , the acquisition of the overall interaction vector , and the assessment of the compatibility of F ct , corresponding to “ hrtav - FCNs ” , “ min ” and “ FCN2 ” in Figure 1 , respectively .
+Similar to “ hrt - FCNs ” , we obtain the interaction
+vector ohrtaivi of ( h , r , t ) and ai : vi :
+ohrtaivi = f ( f ( · · · f ( f ( [ h ; r ; t ; ai ; vi]W2,1 + b2,1 ) ·
+W2,2 + b2,2 ) · · · ) W2,n2 + b2,n2 ) ,
+where n2 is the number of the neural network layers ; { W2,1 , W2,2 , . . .
+, W2,n2 } and { b2,1 , b2,2 , . . .
+, b2,n2 } are their weight matrices and bias vectors , respectively .
+The number of hidden nodes in each fully - connected layer also gradually reduces with the same difference between layers .
+And the dimension of the resulting ohrtaivi is d. All the auxiliary descriptions share the same parameters in this sub - process .
+The overall interaction vector ohrtav of F ct is generated based on ohrtaivi .
+Before introducing this sub - process , let us see the principle behind ﬁrst .
+compF ct = σ(ohrtavWcomp + bcomp ) ,
+( 5 )
+where Wcomp of dimension d × 1 and bcomp are the weight matrix and bias variable , respectively .
+4.4 Final Score and Loss Function
+The ﬁnal score sF ct of F ct is the weighted sum ⊕ of the above validity score and compatibility score :
+sF ct = valhrt ⊕ compF ct
+= w · valhrt + ( 1 − w ) · compF ct ,
+( 6 )
+where w ∈ ( 0 , 1 ) is the weight factor .
+If the arity of F ct is 2 , the ﬁnal score is equal to the validity score of the primary triple ( h , r , t ) .
+Then , Equation ( 6 ) is reduced to :
+sF ct = valhrt .
+( 7 )
+Currently , we obtain the ﬁnal score sF ct of F ct .
+In addition , F ct has its target score lF
+ct .
+By comparing sF ct with lF ct , we get the binary crossentropy loss :
+( 3 )
+LF ct = −lF ct logsF ct−(1−lF ct ) log(1−sF ct ) , ( 8)
+where lF ct = 1 , if F ct ∈ T , otherwise F ct ∈ T − , lF ct = 0 .
+Here , T is the training set and T − is the set of negative samples constructed by corrupting the n - ary facts in T .
+Speciﬁcally , for each n - ary fact in T , we randomly replace one of its elements with a random element in E / R to generate one negative sample not contained in T .
+We then optimize NeuInfer via backpropagation , and Adam ( Kingma and Ba , 2015 ) with learning rate λ is used as the optimizer .
+6145  5 Experiments
+5.1 Datasets and Metrics
+We conduct experiments on two n - ary datasets .
+The ﬁrst one is JF17 K ( Wen et al , 2016 ; Zhang et al , 2018 ) , derived from Freebase ( Bollacker et al , 2008 ) .
 In JF17 K , an n - ary relation of a certain type is deﬁned by a ﬁxed number of ordered attributes .
 Then , any n - ary fact of this relation is denoted as an ordered sequence of attribute values corresponding to the attributes .
-For example , for all n - ary facts of the n - ary relation olympics : olympic medalhonor , they all have four attribute values ( e.g. , 2008 Summer Olympics , United States , Natalie Coughlin , andSwimming at the 2008 SummerOlympics – Women0s4100metre freestyle relay ) , corresponding to the four ordered attributes of this n - ary relation .
-The second one is WikiPeople ( Guan et al . , 2019 ) , derived from Wikidata ( Vrande ˇci´c and Kr ¨otzsch , 2014 ) .
+For example , for all n - ary facts of the n - ary relation olympics.olympic medal honor , they all have four attribute values ( e.g. , 2008 Summer Olympics , U nited States , N atalie the 2008 and Swimming at Coughlin , Summer Olympics – W omen(cid:48)s 4×100 metre f reestyle relay ) , corresponding to the four ordered attributes of this n - ary relation .
+The second one is WikiPeople ( Guan et al , 2019 ) , derived from Wikidata ( Vrandeˇci´c and Kr¨otzsch , 2014 ) .
 Its n - ary facts are more diverse than JF17 K ’s .
-For example , for all n - ary facts that narrateaward -received , some have the attribute together -with , while some others do not .
+For example , for all n - ary facts that narrate award - received , some have the attribute together - with , while some others do not .
 Thus , WikiPeople is more difﬁcult .
 To run NeuInfer on JF17 K and WikiPeople , we transform the representation of their n - ary facts .
 For JF17 K , we need to convert each attribute value sequence of a speciﬁc n - ary relation to a primary triple coupled with a set of its auxiliary description(s ) .
 The core of this process is to determine the primary triple , formed by merging the two primary attributes of the n - ary relation and the corresponding attribute values .
-The two primary attributes are selected based on RAE ( Zhang et al . , 2018 ) .
+The two primary attributes are selected based on RAE ( Zhang et al , 2018 ) .
 For each attribute of the n - ary relation , we count the number of its distinct attribute values from all the n - ary facts of this relation .
 The two attributes that correspond to the largest and second - largest numbers are chosen as the two primary attributes .
 For WikiPeople , since there is a primary triple for each n - ary fact in Wikidata , with its help , we simply reorganize a set of attribute - value pairs in WikiPeople to a primary triple coupled with a set of its auxiliary description(s ) .
-The statistics of the datasets after conversion or reorganization are outlined in Table 1 , where # Train , # Valid , and # Test are the sizes of the training set , validation set , and test set , respectively .
-As for metrics , we adopt the standard Mean Re - DatasetjRjjEj#Train # V alid # Test JF17 K 501 28,645 76,379 - 24,568 WikiPeople 193 47,765 305,725 38,223 38,281 Table 1 : The statistics of the datasets .
-ciprocal Rank ( MRR ) and Hits@ N.
+The statistics of the datasets after conversion or reorganization are outlined in Table 1 , where # T rain , # V alid , and # T est are the sizes of the training set , validation set , and test set , respectively .
+As for metrics , we adopt the standard Mean ReDataset
+|R|
+|E| # T rain # V alid # T est
+JF17 K
+501 28,645 WikiPeople 193 47,765
+76,379 305,725
+38,223
+24,568 38,281
+Table 1 : The statistics of the datasets .
+ciprocal Rank ( MRR ) and Hits@N .
 For each n - ary test fact , one of its elements is removed and replaced by all the elements in E / R. These corrupted n - ary facts are fed into NeuInfer to obtain the ﬁnal scores .
 Based on these scores , the n - ary facts are sorted in descending order , and the rank of the n - ary test fact is stored .
 Note that , except the nary test fact , other corrupted n - ary facts existing in the training / validation / test set , are discarded before sorting .
 This process is repeated for all other elements of the n - ary test fact .
-Then , MRR is the average of these reciprocal ranks , and Hits@ Nis the proportion of the ranks less than or equal to N. Knowledge inference includes entity inference and relation inference .
-As presented in Table 1 , the number of relations and attributes in each dataset is far less than that of entities and attribute values ( on JF17K , jRj= 501 , whilejEj= 28;645 ; on WikiPeople , jRj= 193 , whilejEj= 47;765 ) .
+Then , MRR is the average of these reciprocal ranks , and Hits@N is the proportion of the ranks less than or equal to N .
+Knowledge inference includes entity inference and relation inference .
+As presented in Table 1 , the number of relations and attributes in each dataset is far less than that of entities and attribute values ( on JF17 K , |R| = 501 , while |E| = 28 , 645 ; on WikiPeople , |R|
+= 193 , while |E| = 47 , 765 ) .
 That is , inferring a relation / attribute is much simpler than inferring an entity / attribute value .
-Therefore , we adopt MRR and Hits@ f1 , 3 , 10gon entity inference , while pouring attention to more ﬁnegrained metrics , i.e. , MRR and Hits@1 on relation inference .
-5.2 Experimental Settings The hyper - parameters of NeuInfer are tuned via grid search in the following ranges : The embedding dimension k2f50;100 g , the batch size  2f128;256 g , the learning rate 2f5e 6 ; 1e 5;5e 5;1e 4;5e 4;1e 3 g , the numbers n1 andn2of the neural network layers of “ hrt - FCNs ” and “ hrtav - FCNs ” in f1;2 g , the dimension dof the interaction vector ohrta iviinf50;100;200;400 ; 500;800;1000;1200 g , the weight factor wof the scores inf0:1;0:2 ; : : : ; 0:9 g. The adopted optimal settings are : k= 100 ,  = 128 , = 5e 5 , n1= 2,n2= 1,d= 1200 , andw= 0:1for JF17K;k= 100 ,  = 128 , = 1e 4,n1= 1 , n2= 1,d= 1000 , andw= 0:3for WikiPeople .
-5.3 Simple Knowledge Inference Simple knowledge inference includes simple entity inference and simple relation inference .
+Therefore , we adopt MRR and Hits@{1 , 3 , 10 } on entity inference , while pouring attention to more ﬁnegrained metrics , i.e. , MRR and Hits@1 on relation inference .
+5.2 Experimental Settings
+The hyper - parameters of NeuInfer are tuned via grid search in the following ranges : The embedding dimension k ∈ { 50 , 100 } , the batch size the learning rate λ ∈ { 5e−6 , β ∈ { 128 , 256 } , 1e−5 , 5e−5 , 1e−4 , 5e−4 , 1e−3 } , the numbers n1 and n2 of the neural network layers of “ hrt - FCNs ” and “ hrtav - FCNs ” in { 1 , 2 } , the dimension d of the interaction vector ohrtaivi in { 50 , 100 , 200 , 400 , 500 , 800 , 1000 , 1200 } , the weight factor w of the scores in { 0.1 , 0.2 , . . .
+, 0.9 } .
+The adopted optimal settings are : k = 100 , β = 128 , λ = 5e−5 , n1 = 2 , n2 = 1 , d = 1200 , and w = 0.1 for JF17 K ; k = 100 , β = 128 , λ = 1e−4 , n1 = 1 , n2 = 1 , d = 1000 , and w = 0.3 for WikiPeople .
+5.3 Simple Knowledge Inference
+Simple knowledge inference includes simple entity inference and simple relation inference .
 For an nary fact , they infer one of the entities / the relation in
-6147MethodJF17 K WikiPeople MRR Hits@1 Hits@3 Hits@10 MRR Hits@1 Hits@3 Hits@10 RAE 0.310 0.219 0.334 0.504 0.172 0.102 0.182 0.320
-NaLP 0.366 0.290 0.391 0.516 0.338 0.272 0.364 0.466 NeuInfer
-0.517 0.436 0.553 0.675 0.350 0.282 0.381 0.467 Table 2 : Experimental results of simple entity inference .
+6146  Method
+JF17 K
+WikiPeople
+MRR Hits@1 Hits@3 Hits@10 MRR Hits@1 Hits@3 Hits@10
+RAE NaLP NeuInfer
+0.310 0.366 0.517
+0.219 0.290 0.436
+0.334 0.391 0.553
+0.504 0.516 0.675
+0.172 0.338 0.350
+0.102 0.272 0.282
+0.182 0.364 0.381
+0.320 0.466 0.467
+Table 2 : Experimental results of simple entity inference .
 the primary triple or the attribute value / attribute in an auxiliary description , given its other information .
-5.3.1 Baselines Knowledge inference methods on n - ary facts are scarce .
-The representative methods are mTransH ( Wen et al . , 2016 ) and its modiﬁed version RAE ( Zhang et al . , 2018 ) , and the state - of - the - art one is NaLP ( Guan et
-al . , 2019 ) .
+5.3.1 Baselines
+Knowledge inference methods on n - ary facts are scarce .
+The representative methods are mTransH ( Wen et al , 2016 ) and its modiﬁed version RAE ( Zhang et al , 2018 ) , and the state - of - the - art one is NaLP ( Guan et al , 2019 ) .
 As m - TransH is worse than RAE , following NaLP , we do not adopt it as a baseline .
 5.3.2 Simple Entity Inference
 The experimental results of simple entity inference are reported in Table 2 .
@@ -183,77 +280,180 @@ It testiﬁes the strength of NeuInfer treating the information in the same n - 
 By differentiating the primary triple from other auxiliary description(s ) , NeuInfer considers the validity of the primary triple and the compatibility between the primary triple and its auxiliary description(s ) to model each n - ary fact more appropriately and reasonably .
 Thus , it is not surprising that NeuInfer beats the baselines .
 And on simpler JF17 K ( see Section 5.1 ) , NeuInfer gains more signiﬁcant performance improvement than on WikiPeople .
-5.3.3 Simple Relation Inference Since RAE is deliberately developed only for simple entity inference , we compare NeuInfer only with NaLP on simple relation inference .
+5.3.3 Simple Relation Inference
+Since RAE is deliberately developed only for simple entity inference , we compare NeuInfer only with NaLP on simple relation inference .
 Table 3 demonstrates the experimental results of simple relation inference .
 From the table , we can observe that NeuInfer outperforms NaLP consistently .
-Detailedly , on JF17 K , the performance improvement of NeuInfer on MRR and Hits@1 is 0.036 and 7.0 % , respectively ; on WikiPeople , they are 0.030and 9.1 % , respectively .
+Detailedly , on JF17 K , the performance improvement of NeuInfer on MRR and Hits@1 is 0.036 and 7.0 % , respectively ; on WikiPeople , they are 0.030
+and 9.1 % , respectively .
 It is ascribed to the reasonable modeling of n - ary facts , which not only improves the performance of simple entity inference but also is beneﬁcial to pick the exact right relations / attributes out .
-MethodJF17 K WikiPeople MRR Hits@1 MRR Hits@1 NaLP 0.825 0.762 0.735 0.595 NeuInfer 0.861 0.832 0.765 0.686 Table 3 : Experimental results of simple relation inference .
-5.4 Ablation Study We perform an ablation study to look deep into the framework of NeuInfer .
+Method
+JF17 K
+WikiPeople
+MRR Hits@1 MRR Hits@1
+NaLP NeuInfer
+0.825 0.861
+0.762 0.832
+0.735 0.765
+0.595 0.686
+Table 3 : Experimental results of simple relation inference .
+5.4 Ablation Study
+We perform an ablation study to look deep into the framework of NeuInfer .
 If we remove the compatibility evaluation component , NeuInfer is reduced to a method for binary but not n - ary facts .
 Since we handle knowledge inference on n - ary facts , it is inappropriate to remove this component .
-Thus , as an ablation , we only deactivate the validity evaluation component , denoted as NeuInfer . The experimental comparison between NeuInfer and NeuInfer  is illustrated in Figure 2 .
-It can be observed from the ﬁgure that NeuInfer outperforms NeuInfer  signiﬁcantly .
+Thus , as an ablation , we only deactivate the validity evaluation component , denoted as NeuInfer−.
+The experimental comparison between NeuInfer and NeuInfer− is illustrated in Figure 2 .
+It can be observed from the ﬁgure that NeuInfer outperforms NeuInfer− signiﬁcantly .
 It suggests that the validity evaluation component plays a pivotal role in our method .
 Thus , each component of our method is necessary .
-5.5 Flexible Knowledge Inference The newly proposed ﬂexible knowledge inference focuses on n - ary facts of arities greater than 2 .
+5.5 Flexible Knowledge Inference
+The newly proposed ﬂexible knowledge inference focuses on n - ary facts of arities greater than 2 .
 It includes ﬂexible entity inference and ﬂexible relation inference .
 For an n - ary fact , they infer one of the entities / the relation in the primary triple given any number of its auxiliary description(s ) or infer the attribute value / attribute in an auxiliary description given the primary triple and any number of other auxiliary description(s ) .
 In existing knowledge inference methods on n - ary facts , each n - ary fact is represented as a group of peer attributes and attribute values .
 These methods have not poured attention to the above ﬂexible knowledge inference .
 Thus , we conduct this new type of task only on
-6148 MRR Hits@1 Hits@3 Hits@10 Ablation study of simple entity inference on JF17K0.4000.5000.6000.700Scores0.517 0.4360.5530.675 0.433 0.3790.4650.529
-MRR Hits@1 Hits@3 Hits@10 Ablation study of simple entity inference on WikiPeople0.0000.2000.4000.350 0.2820.3810.467 0.0500.0330.0550.085NeuInfer NeuInfer MRR Hits@1 Hits@3 Hits@10 Ablation study of simple relation inference on JF17K0.7000.8000.9000.861 0.8320.8860.904 0.710 0.7020.713 0.717 MRR Hits@1 Hits@3 Hits@10 Ablation study of simple relation inference on WikiPeople0.2500.5000.7501.000 0.765 0.6860.8280.897 0.2110.1830.209 0.229Figure 2 : The experimental comparison between NeuInfer and NeuInfer . DatasetFlexible entity inference Flexible relation inference MRR Hits@1 Hits@3 Hits@10 MRR Hits@1 JF17 K
-0.398 0.348
-0.422 0.494 0.616 0.599 WikiPeople 0.200 0.161 0.208 0.276 0.477 0.416 Table 4 : Experimental results of ﬂexible knowledge inference .
+6147  Figure 2 : The experimental comparison between NeuInfer and NeuInfer−.
+Dataset
+Flexible entity inference MRR Hits@1 Hits@3 Hits@10
+JF17 K WikiPeople
+0.398 0.200
+0.348 0.161
+0.422 0.208
+0.494 0.276
+Flexible relation inference
+MRR
+0.616 0.477
+Hits@1
+0.599 0.416
+Table 4 : Experimental results of ﬂexible knowledge inference .
 NeuInfer .
 Before elaborating on the experimental results , let us look into the new test set used in this section ﬁrst .
 5.5.1
-The New Test Set We generate the new test set as follows : •Collect the n - ary facts of arities greater than 2 from the test set .
-•For each collected n - ary fact , compute all the subsets of the auxiliary description(s ) .
+The New Test Set We generate the new test set as follows :
+description(s ) and models them properly .
+Thus , NeuInfer well handles various types of entity and relation inference concerning the primary triple coupled with any number of its auxiliary description(s ) .
+• Collect the n - ary facts of arities greater than 2
+5.6 Performance under Different Scenarios
+from the test set .
+• For each collected n - ary fact , compute all the subsets of the auxiliary description(s ) .
 The primary triple and each subset form a new n - ary fact , which is added to the candidate set .
-•Remove the n - ary facts that also exist in the training / validation set from the candidate set and then remove the duplicate n - ary facts .
+• Remove the n - ary facts that also exist in the training / validation set from the candidate set and then remove the duplicate n - ary facts .
 The remaining n - ary facts form the new test set .
 The size of the resulting new test set on JF17 K is 34,784 , and that on WikiPeople is 13,833 .
 5.5.2 Flexible Entity and Relation Inference
 The experimental results of ﬂexible entity and relation inference on these new test sets are presented in Table 4 .
 It can be observed that NeuInfer well tackles ﬂexible entity and relation inference on partial facts , and achieves excellent performance .
 We also attribute this to the reasonable modeling of n - ary facts .
-For each n - ary fact , NeuInfer distinguishes the primary triple from other auxiliarydescription(s ) and models them properly .
-Thus , NeuInfer well handles various types of entity and relation inference concerning the primary triple coupled with any number of its auxiliary description(s ) .
-5.6 Performance under Different Scenarios To further analyze the effectiveness of the proposed NeuInfer method , we look into the breakdown of its performance on different arities , as well as on primary triples and auxiliary descriptions .
+For each n - ary fact , NeuInfer distinguishes the primary triple from other auxiliary
+To further analyze the effectiveness of the proposed NeuInfer method , we look into the breakdown of its performance on different arities , as well as on primary triples and auxiliary descriptions .
 Without loss of generality , here we report only the experimental results on simple entity inference .
-The test sets are grouped into binary and n - ary ( n>2 ) categories according to the arities of the facts .
+The test sets are grouped into binary and n - ary ( n > 2 ) categories according to the arities of the facts .
 Table 5 presents the experimental results of simple entity inference on these two categories of JF17 K and WikiPeople .
 From the tables , we can observe that NeuInfer consistently outperforms the baselines on both categories on simpler JF17K.
 On more difﬁcult WikiPeople , NeuInfer is comparable to the best baseline NaLP on the binary category and gains much better performance on the n - ary category in terms of the ﬁne - grained MRR and Hits@1 .
 In general , NeuInfer performs much better on JF17 K than on WikiPeople .
-We attribute this to the simplicity of JF17K. Where does the above performance improvement come from ?
+We attribute this to the simplicity of JF17K.
+Where does the above performance improvement come from ?
 Is it from inferring the head / tail
-6149Dataset MethodMRR Hits@1 Hits@3 Hits@10 Binary N - ary Binary N - ary Binary N - ary Binary N - ary JF17KRAE 0.115 0.397 0.050 0.294 0.108 0.434 0.247 0.618 NaLP 0.118 0.477 0.058 0.394 0.121 0.512 0.246 0.637 NeuInfer 0.267 0.628 0.173 0.554 0.300 0.666 0.462 0.770 WikiPeopleRAE 0.169 0.187 0.096 0.126 0.178 0.198 0.323 0.306 NaLP 0.351 0.283 0.291 0.187 0.374 0.322 0.465 0.471 NeuInfer 0.350 0.349 0.278 0.303 0.385 0.364 0.473 0.439 Table 5 : Experimental results of simple entity inference on binary and n - ary categories of JF17 K and WikiPeople .
-Dataset MethodMRR Hits@1 Hits@3 Hits@10 Binary N - ary Overall Binary N - ary
-Overall Binary N - ary Overall Binary N - ary
-Overall JF17KNaLP 0.118 0.456 0.313
-0.058 0.369 0.237 0.121 0.491 0.334 0.246 0.625 0.464 NeuInfer 0.267 0.551 0.431 0.173 0.467 0.342 0.300 0.588 0.466 0.462 0.720 0.611 WikiPeopleNaLP 0.351 0.237 0.337 0.291 0.161 0.276 0.374 0.262 0.361 0.465 0.384 0.455 NeuInfer 0.350 0.280
-0.342 0.278 0.225 0.272 0.385 0.299 0.382 0.473 0.375 0.463 Table 6 : Detailed experimental results on inferring head / tail entities .
-MethodJF17 K WikiPeople MRR Hits@1 Hits@3 Hits@10 MRR Hits@1 Hits@3 Hits@10 NaLP 0.510 0.432 0.545 0.655 0.345 0.223 0.402 0.589 NeuInfer 0.746 0.687 0.787 0.848 0.443 0.408 0.453 0.516 Table 7 : Experimental results on inferring attribute values .
+6148MRRHits@1Hits@3Hits@10Ablation study of simple entity inference on JF17K0.4000.5000.6000.700Scores0.5170.4360.5530.6750.4330.3790.4650.529MRRHits@1Hits@3Hits@10Ablation study of simple entity inference on WikiPeople0.0000.2000.4000.3500.2820.3810.4670.0500.0330.0550.085NeuInferNeuInferMRRHits@1Hits@3Hits@10Ablation study of simple relation inference on JF17K0.7000.8000.9000.8610.8320.8860.9040.7100.7020.7130.717MRRHits@1Hits@3Hits@10Ablation study of simple relation inference on WikiPeople0.2500.5000.7501.0000.7650.6860.8280.8970.2110.1830.2090.229  Dataset
+Method
+MRR
+Hits@1
+Hits@3
+Hits@10
+Binary N - ary Binary N - ary Binary N - ary Binary N - ary
+JF17 K
+WikiPeople
+RAE NaLP NeuInfer
+RAE NaLP NeuInfer
+0.115 0.118 0.267
+0.169 0.351 0.350
+0.397 0.477 0.628
+0.187 0.283 0.349
+0.050 0.058 0.173
+0.096 0.291 0.278
+0.294 0.394 0.554
+0.126 0.187 0.303
+0.108 0.121 0.300
+0.178 0.374 0.385
+0.434 0.512 0.666
+0.198 0.322 0.364
+0.247 0.246 0.462
+0.323 0.465 0.473
+0.618 0.637 0.770
+0.306 0.471 0.439
+Table 5 : Experimental results of simple entity inference on binary and n - ary categories of JF17 K and WikiPeople .
+Dataset Method
+MRR
+Hits@1
+Hits@3
+Hits@10
+Binary N - ary Overall Binary N - ary Overall Binary N - ary Overall Binary N - ary Overall
+JF17 K
+NaLP
+0.118 NeuInfer 0.267
+0.456 0.551
+WikiPeople
+NaLP
+0.351 NeuInfer 0.350
+0.237 0.280
+0.313 0.431
+0.337 0.342
+0.058 0.173
+0.369 0.467
+0.291 0.278
+0.161 0.225
+0.237 0.342
+0.276 0.272
+0.121 0.300
+0.491 0.588
+0.374 0.385
+0.262 0.299
+0.334 0.466
+0.361 0.382
+0.246 0.462
+0.625 0.720
+0.465 0.473
+0.384 0.375
+0.464 0.611
+0.455 0.463
+Table 6 : Detailed experimental results on inferring head / tail entities .
+Method
+JF17 K
+WikiPeople
+MRR Hits@1 Hits@3 Hits@10 MRR Hits@1 Hits@3 Hits@10
+NaLP NeuInfer
+0.510 0.746
+0.432 0.687
+0.545 0.787
+0.655 0.848
+0.345 0.443
+0.223 0.408
+0.402 0.453
+0.589 0.516
+Table 7 : Experimental results on inferring attribute values .
 entities in primary triples or the attribute values in auxiliary descriptions ?
 To go deep into it , we study the performance of NeuInfer on inferring the head / tail entities and the attribute values and compare it with the best baseline NaLP .
 The detailed experimental results are demonstrated in Tables 6 and 7 .
 It can be observed that NeuInfer brings more performance gain on inferring attribute values .
 It indicates that combining the validity of the primary triple and the compatibility between the primary triple and its auxiliary description(s ) to model each n - ary fact is more effective than only considering the relatedness of attribute - value pairs in NaLP , especially for inferring attribute values .
-6 Conclusions In this paper , we distinguished the information in the same n - ary fact and represented each n - ary fact as a primary triple coupled with a set of its auxiliary description(s ) .
-We then proposed a neural network model , NeuInfer , for knowledge inference on n - ary facts .
-NeuInfer combines the validity evaluation of the primary triple and the compatibility evaluation of the n - ary fact to obtain the validity score of the n - ary fact .
-In this way , NeuInfer has the ability of well handling simple knowledge inference , which copes with the inference on wholefacts .
+6 Conclusions
+facts .
 Furthermore , NeuInfer is capable of dealing with the newly proposed ﬂexible knowledge inference , which tackles the inference on partial facts consisting of a primary triple coupled with any number of its auxiliary descriptive attributevalue pair(s ) .
 Experimental results manifest the merits and superiority of NeuInfer .
 Particularly , on simple entity inference , NeuInfer outperforms the state - of - the - art method signiﬁcantly in terms of all the metrics .
 NeuInfer improves the performance of Hits@3 even by 16.2 % on JF17K.
 In this paper , we use only n - ary facts in the datasets to conduct knowledge inference .
 For future works , to further improve the method , we will explore the introduction of additional information , such as rules and external texts .
-Acknowledgments The work is supported by the National Key Research and Development Program of China under grant 2016YFB1000902 , the National Natural Science Foundation of China under grants U1911401 , 61772501 , U1836206 , 91646120 , and 61722211 , the GFKJ Innovation Program , Beijing Academy of Artiﬁcial Intelligence ( BAAI ) under grant BAAI2019ZD0306 , and the Lenovo - CAS Joint Lab Youth Scientist Project .
-6150References Kurt Bollacker , Colin Evans , Praveen Paritosh , Tim Sturge , and Jamie Taylor . 2008 .
+In this paper , we distinguished the information in the same n - ary fact and represented each n - ary fact as a primary triple coupled with a set of its auxiliary description(s ) .
+We then proposed a neural network model , NeuInfer , for knowledge inference on n - ary facts .
+NeuInfer combines the validity evaluation of the primary triple and the compatibility evaluation of the n - ary fact to obtain the validity score of the n - ary fact .
+In this way , NeuInfer has the ability of well handling simple knowledge inference , which copes with the inference on whole
+Acknowledgments
+The work is supported by the National Key Research and Development Program of China under grant 2016YFB1000902 , the National Natural Science Foundation of China under grants U1911401 , 61772501 , U1836206 , 91646120 , and 61722211 , the GFKJ Innovation Program , Beijing Academy of Artiﬁcial Intelligence ( BAAI ) under grant BAAI2019ZD0306 , and the Lenovo - CAS Joint Lab Youth Scientist Project .
+6149  References
+Kurt Bollacker , Colin Evans , Praveen Paritosh , Tim Sturge , and Jamie Taylor . 2008 .
 Freebase :
 A collaboratively created graph database for structuring human knowledge .
 In Proceedings of the 2008 ACM SIGMOD International Conference on Management of Data , pages 1247–1250 .
@@ -264,10 +464,10 @@ In Proceedings of the 26th International Conference on Neural Information Proces
 Mingyang Chen , Wen Zhang , Wei Zhang , Qiang Chen , and Huajun Chen . 2019 .
 Meta relational learning for few - shot link prediction in knowledge graphs .
 In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing , pages 4208–4217 , Hong Kong , China .
-Tim Dettmers , Pasquale Minervini , Pontus Stenetorp , and Sebastian Riedel .
-2018 .
-Convolutional 2D knowledge graph embeddings .
-In Proceedings of the 32nd AAAI Conference on Artiﬁcial Intelligence , pages 1811–1818 .
+Tim Dettmers , Pasquale Minervini , Pontus Stenetorp , and Sebastian Riedel . 2018 .
+Convolutional 2D
+In Proceedings of knowledge graph embeddings .
+the 32nd AAAI Conference on Artiﬁcial Intelligence , pages 1811–1818 .
 Boyang Ding , Quan Wang , Bin Wang , and Li Guo .
 2018 .
 Improving knowledge graph embedding using simple constraints .
@@ -277,8 +477,7 @@ Question answering over Freebase with multicolumn convolutional neural networks 
 In Proceedings of the 53rd Annual Meeting of the Association for Computational Linguistics , pages 260–269 .
 Takuma Ebisu and Ryutaro Ichise .
 2018 .
-TorusE :
-Knowledge graph embedding on a Lie group .
+TorusE : Knowledge graph embedding on a Lie group .
 In Proceedings of the 32nd AAAI Conference on Artiﬁcial Intelligence , pages 1819–1826 .
 Saiping Guan , Xiaolong Jin , Yuanzhuo Wang , and Xueqi Cheng .
 2018 .
@@ -288,28 +487,28 @@ Saiping Guan , Xiaolong Jin , Yuanzhuo Wang , and Xueqi Cheng .
 2019 .
 Link prediction on n - ary relational data .
 In Proceedings of the 28th International Conference on World Wide Web , pages 583–593 .
-Shu Guo , Quan Wang , Bin Wang , Lihong Wang , and Li Guo . 2015 .
-Semantically smooth knowledge graph embedding .
-In Proceedings of the 53rd Annual Meeting of the Association for Computational Linguistics , pages 84–94.Prachi
-Jain , Pankaj Kumar , Soumen Chakrabarti , et al . 2018 .
-Type - sensitive knowledge base inference without explicit type supervision .
-In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics , pages 75–80 .
+Shu Guo , Quan Wang , Bin Wang , Lihong Wang , and Semantically smooth knowledge Li Guo . 2015 .
+In Proceedings of the 53rd Angraph embedding .
+nual Meeting of the Association for Computational Linguistics , pages 84–94 .
+Prachi Jain , Pankaj Kumar , Soumen Chakrabarti , et al Type - sensitive knowledge base inference 2018 .
+In Proceedings without explicit type supervision .
+of the 56th Annual Meeting of the Association for Computational Linguistics , pages 75–80 .
 Guoliang Ji , Shizhu He , Liheng Xu , Kang Liu , and Jun Zhao . 2015 .
-Knowledge graph embedding via dynamic mapping matrix .
-In Proceedings of the 53rd Annual Meeting of the Association for Computational Linguistics , pages 687–696 .
+Knowledge graph embedding via In Proceedings of the dynamic mapping matrix .
+53rd Annual Meeting of the Association for Computational Linguistics , pages 687–696 .
 Yantao Jia , Yuanzhuo Wang , Hailun Lin , Xiaolong Jin , and Xueqi Cheng . 2016 .
-Locally adaptive translation for knowledge graph embedding .
-In Proceedings of the 30th AAAI Conference on Artiﬁcial Intelligence , pages 992–998 .
+Locally adaptive translaIn Proceedtion for knowledge graph embedding .
+ings of the 30th AAAI Conference on Artiﬁcial Intelligence , pages 992–998 .
 Xiaotian Jiang , Quan Wang , and Bin Wang .
 2019 .
 Adaptive convolution for multi - relational learning .
-InProceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long and Short Papers ) , pages 978–987 , Minneapolis , Minnesota .
+In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long and Short Papers ) , pages 978–987 , Minneapolis , Minnesota .
 Diederik Kingma and Jimmy Ba . 2015 .
 Adam : A method for stochastic optimization .
 In Proceedings of the 3rd International Conference for Learning Representations .
 Yankai Lin , Zhiyuan Liu , Huanbo Luan , Maosong Sun , Siwei Rao , and Song Liu . 2015a .
 Modeling relation paths for representation learning of knowledge bases .
-InProceedings of the 2015 Conference on Empirical Methods in Natural Language Processing , pages 705–714 .
+In Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing , pages 705–714 .
 Yankai Lin , Zhiyuan Liu , Maosong Sun , Yang Liu , and Xuan Zhu . 2015b .
 Learning entity and relation embeddings for knowledge graph completion .
 In Proceedings of the 29th AAAI Conference on Artiﬁcial Intelligence , pages 2181–2187 .
@@ -319,19 +518,19 @@ Neural network - based question answering over knowledge graphs on word and char
 In Proceedings of the 26th International Conference on World Wide Web , pages 1211–1220 .
 Deepak Nathani , Jatin Chauhan , Charu Sharma , and Manohar Kaul .
 2019 .
-Learning attention - based embeddings for relation prediction in knowledge graphs .
-In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 4710–4723 , Florence , Italy .
+Learning attention - based embeddings for relation prediction in knowledge In Proceedings of the 57th Annual Meetgraphs .
+ing of the Association for Computational Linguistics , pages 4710–4723 , Florence , Italy .
 Dai Quoc Nguyen , Tu Dinh Nguyen , Dat Quoc Nguyen , and Dinh Phung .
 2018 .
-A novel embedding model for knowledge base completion based on convolutional neural network .
-In Proceedings of the 16th Annual Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 327–333 .
-6151Maximilian Nickel , Kevin Murphy , V olker Tresp , and Evgeniy Gabrilovich .
+A novel embedding model for knowledge base completion based In Proceedings on convolutional neural network .
+of the 16th Annual Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 327–333 .
+6150  Maximilian Nickel , Kevin Murphy , Volker Tresp , and Evgeniy Gabrilovich .
 2016 .
 A review of relational machine learning for knowledge graphs .
 Proceedings of the IEEE , 104(1):11–33 .
-Maximilian Nickel , V olker Tresp , and Hans - Peter Kriegel . 2011 .
-A three - way model for collective learning on multi - relational data .
-In Proceedings of the 28th International Conference on Machine Learning , pages 809–816 .
+Maximilian Nickel , Volker Tresp , and Hans - Peter Kriegel . 2011 .
+A three - way model for collective In Proceedings learning on multi - relational data .
+of the 28th International Conference on Machine Learning , pages 809–816 .
 Fabian M Suchanek , Gjergji Kasneci , and Gerhard Weikum .
 2007 .
 Yago :
@@ -339,28 +538,29 @@ A core of semantic knowledge .
 In Proceedings of the 16th International Conference on World Wide Web , pages 697–706 .
 Yi Tay , Anh Tuan Luu , and Siu Cheung Hui . 2017 .
 Non - parametric estimation of multiple embeddings for link prediction on dynamic knowledge graphs .
-InProceedings of the 31st AAAI Conference on Artiﬁcial Intelligence , pages 1243–1249 .
+In Proceedings of the 31st AAAI Conference on Artiﬁcial Intelligence , pages 1243–1249 .
 Th´eo Trouillon , Johannes Welbl , Sebastian Riedel , Eric Gaussier , and Guillaume Bouchard . 2016 .
 Complex embeddings for simple link prediction .
 In Proceedings of the 33rd International Conference on Machine Learning , pages 2071–2080 .
-Denny Vrande ˇci´c and Markus Kr ¨otzsch .
-2014 .
+Denny Vrandeˇci´c and Markus Kr¨otzsch . 2014 .
 Wikidata : A free collaborative knowledgebase .
-Communications of the ACM , 57(10):78–85.Quan Wang , Zhendong Mao , Bin Wang , and Li Guo . 2017 .
-Knowledge graph embedding : A survey of approaches and applications .
-IEEE Transactions on Knowledge and Data Engineering , 29(12):2724 – 2743 .
+Communications of the ACM , 57(10):78–85 .
+Quan Wang , Zhendong Mao , Bin Wang , and Li Guo . 2017 .
+Knowledge graph embedding : A survey of IEEE Transactions approaches and applications .
+on Knowledge and Data Engineering , 29(12):2724 – 2743 .
 Zhen Wang , Jianwen Zhang , Jianlin Feng , and Zheng Chen .
 2014 .
-Knowledge graph embedding by translating on hyperplanes .
-In Proceedings of the 28th AAAI Conference on Artiﬁcial Intelligence , pages 1112–1119 .
+Knowledge graph embedding by transIn Proceedings of the 28th lating on hyperplanes .
+AAAI Conference on Artiﬁcial Intelligence , pages 1112–1119 .
 Jianfeng Wen , Jianxin Li , Yongyi Mao , Shini Chen , and Richong Zhang .
 2016 .
 On the representation and embedding of knowledge bases beyond binary relations .
 In Proceedings of the 25th International Joint Conference on Artiﬁcial Intelligence , pages 1300–1307 .
 Han Xiao , Minlie Huang , and Xiaoyan Zhu . 2016 .
 TransG :
-A generative model for knowledge graph embedding .
-In Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics , pages 2316–2325 .
+A generative model for knowledge graph In Proceedings of the 54th Annual embedding .
+Meeting of the Association for Computational Linguistics , pages 2316–2325 .
 Richong Zhang , Junpeng Li , Jiajie Mei , and Yongyi Mao . 2018 .
 Scalable instance reconstruction in knowledge bases via relatedness afﬁliated embedding .
 In Proceedings of the 27th International Conference on World Wide Web , pages 1185–1194 .
+6151

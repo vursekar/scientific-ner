@@ -1,0 +1,320 @@
+Building a De - identiﬁcation System for Real Swedish Clinical Text Using Pseudonymised Clinical Text
+Hanna Berg Department of Computer and Systems Sciences Stockholm University Kista , Sweden hanna.berg@dsv.su.se
+Taridzo Chomutare Norwegian Centre for E - health Research University Hospital of North Norway Tromsø , Norway Taridzo.Chomutare@ehealthresearch.no
+Hercules Dalianis ⇤ Department of Computer and Systems Sciences Stockholm University Kista , Sweden hercules@dsv.su.se
+Abstract
+article
+presents
+This experiments with pseudonymised Swedish clinical text used as training data to de - identify real clinical text with the future aim to transfer non - sensitive training data to other hospitals .
+Conditional Random Fields ( CFR ) and Long Short - Term Memory ( LSTM ) machine learning algorithms were used to train deidentiﬁcation models .
+The two models were trained on pseudonymised data and evaluated on real data .
+For benchmarking , models were also trained on real data , and evaluated on real data as well as trained on pseudonymised data and evaluated on pseudonymised data .
+CRF showed better performance for some PHI information like Date Part , First Name and Last Name ; consistent with some reports in the literature .
+In contrast , poor performances on Location and Health Care Unit information were noted , partially due to the constrained vocabulary in the pseudonymised training data .
+is concluded that
+is possible to train it It transferable models based on pseudonymised Swedish clinical data , but even small narrative and distributional variation could negatively impact performance .
+1 Introduction
+Electronic health records ( EHR ) are produced in a steady stream , with the potential of advancing future medical care .
+Research on EHR data holds the potential to improve our understanding of patient care , care processes , and disease characteristics and progression .
+However , much of the data
+⇤ Hercules Dalianis is also guest professor at the Norwegian Centre for E - health Research
+is sensitive , containing Protected Health Information ( PHI ) such as personal names , addresses , phone numbers , that can identify particular individuals and thus can not be available to the public for general scientiﬁc inquiry .
+Although good progress has been made in the general sub-ﬁeld of de - identifying clinical text , the problem is still not fully resolved ( Meystre et al , 2010 ; Yogarajan et al , 2018 ) .
+This study examines the use of pseudonymised health records as training data for de - identiﬁcation tasks .
+Several ethical and scientiﬁc issues arise regarding the balance between maintaining patient conﬁdentiality and the need for wider application of trained models .
+How will a de - identiﬁcation system be constructed and used in a cross hospital setting without risking the privacy of patients ?
+Is it possible to obscuring the training data by pseudonymising it and then use it for the training of a machine learning system ?
+De - identiﬁcation and pseudonymisation are two In this paper de - identiﬁcation related concepts .
+is used as a more general term to describe the process of ﬁnding personal health information to be able to conceal identifying information .
+A pseudonymised text is a text where the personal health information has been identiﬁed either manually or automatically and then replaced with realistic surrogates .
+The research question in this study is whether it is possible to use de - identiﬁed and pseudonymised clinical text in Swedish as training data for deidentifying real clinical text , and hence make it possible to transfer the system cross hospital .
+We highlight whether learning from the existProceedingsofthe10thInternationalWorkshoponHealthTextMiningandInformationAnalysis(LOUHI2019),pages118–125HongKong , November3,2019.c(cid:13)2019AssociationforComputationalLinguisticshttps://doi.org/10.18653 / v1 / D19 - 62118  ing , non - sensitive , pseudonymised Swedish clinical text can be useful in a new and different context ; considering the normal variations in the distribution and nature of PHI information , and potential effects of scrubbing ( Berman , 2003 ) , that is , removing and modifying PHIs that was carried out to patient records during the de - identiﬁcation process .
+2 Previous research
+The identiﬁcation of PHI is a type of named entity recognition task where sensitive named entities speciﬁcally are identiﬁed .
+The ﬁrst study with CRF - based de - identiﬁcation for Swedish was on the gold standard Stockholm EPR PHI Corpus .
+The distribution of PHIs is shown in Table 1 .
+In this instance , manual annotation with expert consensus was used to create the gold standard ( Dalianis and Velupillai , 2010 ) .
+De - identiﬁcation tasks based on the CRF machine learning algorithm has been carried out on this data set previously with precision scores ranging between 85 % and 95 % , recalls ranging between 71 % and 87 % and F1 - scores between 0.76 and 0.91 ( Dalianis and Velupillai , 2010 ; Berg and Dalianis , 2019 ) .
+One approach previously used for concealing the training set ’s sensitive data was carried out by ( Dalianis and Boström , 2012 ) , using the Stockholm EPR PHI Corpus .
+In the study , the textual part of the data were used to create 14 different features and part of speech tags .
+The textual part was then removed , and only the features and part of speech tags were used for training a Random Forest model .
+Fairly high precision of 89.1 % was obtained , but with a recall of 54.3 % and F1 - score of 64.8 .
+In contrast to using only the sensitive EHR data for training , McMurry et al ( 2013 ) integrated both publicly available scientiﬁc , medical publications and private sensitive clinical notes to develop a de - identiﬁcation system .
+While considering the term frequencies and part of speech tags between the two data sources , they used both rule lists and decision trees for their system .
+This was an interesting approach since it raised the prospect of using non - sensitive data in building useful deidentiﬁcation models .
+However , it is not clear whether medical journals have signiﬁcant advantages over any other public text , like news corpora , for detecting PHI .
+A study similar to McMurry et al ( 2013 ) , by Berg and Dalianis ( 2019 ) , showed few beneﬁts of combining non - medical public text and sensitive clinical notes to build a de - identiﬁcation system for medical records .
+More recently , deep learning approaches using recurrent neural networks seem to yield signiﬁcant improvements over traditional rules - based methods or statistical machine learning ( Dernoncourt et al , 2017 ) .
+Still , recent studies indicate that combining several approaches will yield the best results .
+For instance , the best system in a recent de - identiﬁcation shared task was a combination of bidirectional LSTM , CRF and a rule - based subsystem ( Liu et al , 2017 ) .
+Signiﬁcant domain variation , such as a different language , is an important factor that was not considered in the discussed shared task .
+Domain differences were cited as the reason for poor performance on psychiatric notes de - identiﬁcation ( Stubbs et al , 2017 ) , compared with the previous de - identiﬁcation task on general clinical narratives ( Stubbs et al , 2015 ) .
+Within the same language and similar clinical settings , the change of domain is likely not substantial .
+While in future research it may be worth considering domain adaption techniques to work towards a system meant to be used between hospitals , they were not considered in this study , beyond the use of non - sensitive dictionaries for names and location .
+3 Data and methods
+In this study , machine learning approaches are used since the best de - identiﬁcation systems appear to be machine learning - based ( Kushida et al , 2012 ) .
+While rule - based methods such as using dictionaries and pattern - matching were previously more prevalent than machine learning methods for solving text - based de - identiﬁcation problems ( Meystre et al , 2010 ) , today it is more typical to have both approaches used , since rule - based methods still yield better results for some PHI information ( Neamatullah et al , 2008b ) .
+Dictionaries and patterns were therefore used as features within one of the models .
+3.1 Data
+Two different data sets for de - identiﬁcation were used : Stockholm EPR PHI Psuedo Corpus ( Pseudo ) as well as the Stockholm EPR PHI Cor119  Table 1 : Results from ( Dalianis and Velupillai , 2010 ) using the Stanford CRF .
+pus ( Real)1 .
+The Stockholm EPR PHI Pseudo Corpus was produced from the Stockholm EPR PHI Corpus by automatically pseudonymising all PHIs .
+This process is described by Dalianis ( 2019 ) .
+The Stockholm EPR PHI Corpus is described by Dalianis and Velupillai ( 2010 ) .
+An example is shown in Figure 1 from the Stockholm EPR PHI Pseudo Corpus .
+The Stockholm EPR PHI Corpus and the Stockholm EPR PHI Pseudo Corpus are both parts of Swedish Health Record Research Bank ( HEALTH BANK ) .
+HEALTH BANK encompasses structured and unstructured data from 512 clinical units from Karolinska University Hospital collected from 2006 to 2014 ( Dalianis et al , 2015 ) .
+The number of entities and types of entities in both the Stockholm EPR PHI Psuedo Corpus and the Stockholm EPR PHI Corpus is shown in Table 2 .
+From Table 2 , it can be observed that the distribution of PHI instances between the two data sets is somewhat similar , but there is a signiﬁcant difference when it comes to unique instances beIn total , the Real data tween the two data sets .
+set contains proportionally more unique instances than the Pseudo data set .
+The entities in the Real data set alo tend to have more tokens .
+3.2 Methods
+Using the de - identiﬁed and pseudonymised data set , two models were trained based on two machine learning algorithms ; CRF and the deep learning algorithm LSTM .
+The two algorithms were chosen since both have been shown to produce state of the art performance , and applying the two on Swedish clinical data sets makes for an informative comparison .
+PHI classes First Name Last Name
+Age Phone Number Location Full Date Date Part Health Care Unit Total PHI instances
+Pseudo Unique Real Unique
+885 911 51 310 159 726 1897 1278 6217
+24 % 938 15 % 957 80 % 64 78 % 327 94 % 229 25 % 770 6 % 2079 13 % 2277 20 % 7647
+79 % 86 % 97 % 92 % 84 % 89 % 72 % 73 % 78 %
+Table 2 : The distribution of PHI instances between the the Stockholm EPR PHI Psuedo Corpus , ’ Pseudo ’ , and the Stockholm EPR PHI Corpus , ’ Real ’ based on the number of tokens .
+A PHI entity can cover from one token ( one - word expression ) to several tokens ( multiword - expression ) , for example " Karolinska " and " R54 , Karolinska , Solna " respectively .
+The proportion of unique instances , ’ Unique ’ , is shown as a percentage .
+The two models were evaluated on both the real data set that is annotated for PHI , but not pseudonymised , ’ Pseudo - Real ’ , as well as on the pseudonymised data set , ’ Pseudo - Pseudo ’ .
+For additional comparison basis models trained on the real data set were evaluated on test sets from the same data set , ’ Real - Real ’ .
+3.2.1 CRF
+In this study , the CRF algorithm implemented in CRFSuite ( Okazaki , 2007 ) is used with the sklearn - crfsuite wrapper2 and the LSTM architecture described by Lample et al ( 2016 ) , based on an open - source implementation with Tensorﬂow3 is used .
+The linear - chain Conditional Random Fields implemented with sklearn - CRFSuite4 ,
+model ,
+2sklearn - crfsuite , https://sklearn - crfsuite .
+readthedocs.io
+3Sequence
+tagging ,
+https://github.com/
+1This research has been approved by the Regional Ethical
+guillaumegenthial / sequence_tagging
+Review Board in Stockholm ( 2014/1607 - 32 ) .
+4Linear - chain
+CRF ,
+https://
+120  Figure 1 : Example of a pseudonymised record .
+The original Swedish pseudonymised record is to the right and the translated version is to the left .
+The underlined words are the surrogates , where real data has been replaced with pseudonyms .
+uses lexical , orthographic , syntactic and dictionary features .
+The CRF is based on trial - and - error experiments with feature sets described by Berg and Dalianis ( 2019 ) , and uses the same features except for section features .
+3.2.2 LSTM The long short - term memory ( LSTM ) needs word embeddings as features for the training .
+Word2vec5 was used to produce word embeddings using shallow neural networks , based on two corpora ; a clinical corpus and medical journals .
+For the training using real clinical data , word embeddings were produced using a clinical corpus of 200 million tokens that produced 300,824 vectors with a dimension of 300 .
+For the training with pseudo clinical data , word embeddings were produced using Läkartidningen corpus ( The Swedish scientiﬁc medical journals from 1996 to 2005 ) containing 21 million tokens that produced 118,662 vectors with a dimension of 300 .
+The reason for using Läkartidningen is that the corpus does not contain sensitive data and hence is also more easily usable for transferable cross hospital training .
+4 Results
+The results of the experimental work are summarised in Figure 2 .
+As can be observed in the ﬁgure , the CRF algorithm seems to generally outperform the LSTM algorithm on all metrics ; precision , recall and F1 measure .
+This result is not consistent with repeated reports in the literature , where deep learning apsklearn-crfsuite.readthedocs.io/en/ latest/
+https://github.com/tmikolov/
+5word2vec ,
+word2vec
+proaches such as LSTM have been shown to out - perform most other methods , including CRF .
+Since deep learning approaches normally require very large amounts of data , one explanation for this result could be that the word embeddings used in this study did not contain sufﬁcient context variations required for more robust performance or an insufﬁcient training set of annotated data .
+The ability to identify date part and age entities are similar when training on pseudonymised data and real data for the CRF .
+In contrast , Location , Health Care Unit and Full Date were negatively affected when using pseudonymised training data regardless of using a CRF or LSTM model .
+4.1 CRF - Results
+Experimental results of the CRF algorithm are shown in Table 3 .
+Not presented in the table is the combination of training on real data and evaluation of pseudo data ( Real - Pseudo ) , but the results of this combination gave a precision of 86.37 and recall of 77.80 % and an F1 - score of 81.86 .
+4.2 LSTM - Results
+The experimental results of the LSTM algorithm are shown in Table 4 and again , not presented in the table is the combination of training on real data and evaluation of pseudo data ( Real - Pseudo ) .
+The result of this combination is a precision of 65.83 % and recall of 74.79 % and F1 - score of 70.03 .
+5 Analysis
+The training set used in this study has a substantially constrained vocabulary compared to the evaluation set , which may partially explain the overall performance achieved when evaluating on real data ( Pseudo - Real ) .
+The pseudo ( training )
+121  Table 3 : Entity - based evaluation for CRF with ten fold cross - validation .
+A comparison is made for the different combinations of training on real data and evaluation on real ( Real - Real ) as well as pseudo data and on training on pseudo data and evaluation on pseudo ( Pseudo - Pseudo ) as well as real data ( Pseudo - Real ) .
+CRF
+First Name Last Name Age Phone Number Location Full Date Date Part Health Care Unit Overall
+LSTM
+First Name Last Name Age Phone Number Location Full Date Date Part Health Care Unit Overall
+P % 95.94 97.91 97.06 94.69 80.85 95.68 96.27 85.40 94.03
+P % 91.61 96.40 87.50 33.53 20.47 77.67 90.31 68.37 76.76
+Pseudo - Pseudo
+Pseudo - Real
+Real - Real R % 92.42 93.22 68.75 82.95 58.46 95.48 94.94 64.00 85.30
+F1 - score 94.15 95.51 80.49 88.43 67.86 95.58 95.60 73.17 89.45
+P % 98.52 98.54 100.00 92.37 93.27 91.02 98.29 93.75 96.31
+R % 98.08 97.55 68.09 80.15 74.05 86.32 96.05 87.50 92.22
+F1 - score 98.30 98.04 81.01 85.83 82.55 88.61 97.16 90.52 94.22
+P % 97.14 96.80 97.50 83.48 57.38 47.56 87.04 45.29 80.44
+Pseudo - Pseudo
+Pseudo - Real
+Real - Real R % 86.49 87.02 58.33 82.22 46.02 74.06 90.60 61.82 78.62
+F1 - score 88.98 91.47 70.00 47.64 28.34 75.82 90.45 64.93 77.68
+P % 81.41 89.29 80.95 64.83 60.71 67.76 91.48 81.24 82.49
+R % 78.27 91.88 36.17 71.21 17.35 72.20 95.08 81.63 81.79
+F1 - score 79.81 90.57 50.00 67.87 26.98 69.91 93.25 81.44 82.14
+P % 73.42 84.70 83.33 30.87 27.40 52.58 59.08 27.18 60.56
+R % 72.39 38.90 81.25 74.42 53.85 21.97 94.79 16.30 49.83
+R % 72.99 75.00 31.25 71.32 10.77 23.00 94.79 14.00 55.10
+F1 - score 82.96 55.50 88.64 78.69 55.56 30.06 90.75 23.97 61.54
+F1 - score 73.20 79.55 45.45 43.09 15.47 32.00 72.79 18.48 57.70
+Table 4 : Entity - based evaluation for LSTM with three fold cross - validation where 66 % of the data were used for training and 33 % for evaluation .
+10 % of the data was previously held out as a development set .
+A comparison is made for the different combinations of training on real data and evaluation on real as well as pseudo data and on training on pseudo data and evaluation on pseudo as well as real data .
+version of the data has less PHI tokens and the entities are more often single tokens .
+The Full Date structure yyyyddmm - yyyyddmm is commonly occurring in the pseudo data , and the dash between the dates , " - " , is often incorrectly identiﬁed .
+For example , using the CRF algorithm on real - data training and pseudo - data testing ( Real - Pseudo ) , of the 159 instances not identiﬁed as full dates tokens , sixty contain ’ - ’ .
+The pseudo data uses the structure yyyyddmm while the real data uses yyddmm , which leads to errors .
+For these kinds of errors on standard data formats such as dates , it is easy to see how rule - based approaches using regular expressions could signiﬁcantly improve the overall performance of the system .
+The weakest performance area was for location information .
+There is a large variety of locations in the pseudo - data .
+These are also fairly speciﬁc and unlikely to occur in the real data , for example , locations with very few inhabitants .
+These uncommon rural places have names similar to residential homes ( äldreboenden ) .
+There are multiple instances of the sufﬁx ’ gården ’ ( yard ) in the location pseudo - PHI , whereas , in the real data , the
+same sufﬁx is common for care units .
+In the pseudo - data , the care units are more general than in the real data , often too general to be annotated in the real data set .
+Inﬁrmaries are fairly common in the real data but non - existent in the pseudo data .
+This lack of variation in the pseudo is partially responsible for the drop in performance .
+There are at least two ways to think about mitigating this poor performance .
+First , location and care unit could be combined as one entity type since they are conceptually very similar , and sometimes have interchangeable entity names .
+Secondly , using more detailed municipality street and location mapping databases as dictionaries could be considered .
+6 Discussion
+There is one similar study to ours but for English by Yeniterzi et al ( 2010 ) , where the authors train their de - identiﬁcation system with all combinations of pseudonymised textual data ( or what they call resynthesized records ) and real data and their results are in line with ours .
+However , there are some studies on cross - domain adaptation .
+In cross - domain adaption there is , however ,
+122  Real - Real CRF Pseudo - Pseudo CRF Pseudo - Real CRF
+Real - Real LSTM Pseudo - Pseudo LSTM Pseudo - Real LSTM
+n o
+i s i c e r P
+l l a c e R
+1 F
+100
+100
+80
+60
+40
+20
+80
+60
+40
+20
+80
+60
+40
+20
+100
+Age Dp Fn Fd Hcu Ln
+L
+Pn Avg
+PHI
+Figure 2 : Line graphs visualising the results of both CRF and LSTM , and the outcomes of the evaluations .
+The x - axis have the PHI entities ; Age , Date Part ( Dp ) , First Name ( Fn ) , Full Date ( Fd ) , Health Care Unit ( Hcu ) , Last Name ( Ln ) , Location ( L ) and the average result ( Avg ) .
+a substantial domain change between the training and testing data , unlike in this study .
+Martinez et al ( 2014 ) used models trained in one hospital on pathology reports in another hospital .
+Their system only required minor feature normalisation , and the reported results were comparable across the hospitals .
+Although this demonstrates feasibility , it is important to note that the pathology reports were from the same medical sub - speciality with only some narrative differences .
+In this study , in addition to narrative differences between the training data and the target evaluation data , the number of care units and locations involved , as well as personal names , are widely varied .
+With large amounts of out of vocabulary variation , training on limited data will likely yield poor results .
+In practice , these data types exist in other non - sensitive sources such as city and rural location and street mapping data .
+Except for location and care unit , evaluation on pseudo - data ( Pseudo - Pseudo ) produced better outcomes compared to performance on real - data ( Pseudo - Real ) , which can be expected .
+What was a bit unexpected was the lower performance of the LSTM algorithm .
+The algorithm ’s results would potentially have been improved by larger vector data or more labelled data ( Dernoncourt et al , 2017 ) .
+While clinical notes have unique linguistic structures and grammatical peculiarities , nonclinical data sources could still provide important contextual information for constructing a useful vector space .
+Additional sources using nonsensitive data , such as public corpora in the general domain , hold a potential to improve performance on the de - identiﬁcation task , therefore this line of inquiry will be followed up on in future work .
+In the same vein , factoring in part of speech tags from other sources of clinical data could be useful in this case .
+For instance , there are deidentiﬁcation databases of clinical text , such as MIMIC ( Neamatullah et al , 2008a ;
+Goldberger et al , 2000 ) , which could be used as additional information for training purposes , and using only the part of speech tags reduces security risks ( Boström and Dalianis , 2012 ) .
+Current results are calculated as exact matches , and the partial match is not factored in , which may affect the result .
+As mentioned in the analysis the CRF algorithm rarely classiﬁes the ’ - ’ in between dates as a part of the dates , and these are therefore not counted as matches despite the most identifying parts of the entity being identiﬁed .
+To improve the general performance , a combination of both the LSTM and CRF algorithms could be performed instead of testing them independently .
+Combining high - performance algorithms and the use of ensemble methods seem to produce the best results as reported in the literature ( Dernoncourt et al , 2017 ; Liu et al , 2017 ) , and these techniques will be investigated in future work on the data sets .
+123  7 Conclusions and future directions
+The results of this study suggest that although it is possible to train models on pseudonymised data for use in different contexts , there is severe deterioration in performance for some PHI information .
+Even small narrative and distributional variation could negatively impact performance .
+Transferring a system from one set of clinical text to a different set could result in the performance of the system deteriorating ; in this study the Pseudo - Real case .
+This problem , what we call The cross pseudo - real text adaptation problem , is an issue that could happen due to the pseudonymisation / de - identiﬁcation processes on the training data due to the narrative and distributional variation as well as other differences in the nature of the PHI between the training data and the target .
+In the future , we will
+try to improve the pseudonymisation module described in Dalianis ( 2019 ) to produce a larger variation in the vocabulary as the lack of variation may affect the current result negatively .
+We will also apply the learned models to other Nordic languages such as Norwegian clinical text and use the system as a pre - annotation system to assist the manual annotators in their work to create a Norwegian gold standard .
+Acknowledgments
+We are grateful to the DataLEASH project and Helse Nord for funding this research work .
+References Hanna Berg and Hercules Dalianis .
+2019 .
+Augmenting a De - identiﬁcation System for Swedish Clinical Text Using Open Resources ( and Deep learning ) .
+In Proceedings of the Workshop on NLP and Pseudonymisation , NoDaLiDa , Turku , Finland September 30 , 2019 .
+Jules J Berman .
+2003 .
+Concept - match medical data scrubbing : how pathology text can be used in Archives of pathology & laboratory research .
+medicine , 127(6):680–686 .
+Henrik Boström and Hercules Dalianis .
+2012 .
+Deidentifying health records by means of active learnIn Proceedings of ICML 2012 , The 29th Ining .
+ternational Conference on Machine Learning , pages 1–3 .
+Hercules Dalianis .
+2019 .
+Pseudonymisation of Swedish Electronic Patient Records using a ruleIn Proceedings of the Workshop based approach .
+on NLP and Pseudonymisation , NoDaLiDa , Turku , Finland September 30 , 2019 .
+Hercules Dalianis and Henrik Boström . 2012 .
+Releasing a Swedish clinical corpus after removing all words – de - identiﬁcation experiments with condiIn Protional random ﬁelds and random forests .
+ceedings of the Third Workshop on Building and Evaluating Resources for Biomedical Text Mining ( BioTxtM 2012 ) held in conjunction with LREC , pages 45–48 .
+Hercules Dalianis , Aron Henriksson , Maria Kvist , Sumithra Velupillai , and Rebecka Weegar . 2015 .
+HEALTH BANK – A Workbench for Data Science In Proceedings of the Applications in Healthcare .
+CAiSE-2015 Industry Track co - located with 27th Conference on Advanced Information Systems Engineering ( CAiSE 2015 ) , J. Krogstie , G. Juel - Skielse and V. Kabilan , ( Eds . ) , Stockholm , Sweden , June 11 , 2015 , CEUR , Vol-1381 , pages 1–18 .
+Hercules Dalianis and Sumithra Velupillai .
+2010 .
+Deidentifying Swedish clinical text - Reﬁnement of a Gold Standard and Experiments with Conditional Random ﬁelds .
+Journal of Biomedical Semantics , 1:6 .
+Franck Dernoncourt , Ji Young Lee , Ozlem Uzuner , and Peter Szolovits . 2017 .
+De - identiﬁcation of patient notes with recurrent neural networks .
+Journal of the American Medical Informatics Association , 24(3):596–606 .
+Ary L. Goldberger , Luciani Alano Amaral , Leon Glass , Jeffrey M. Hausdorff , Plamen Ch .
+Ivanov , Roger G. Mark , Joseph E. Mietus , George B. Moody , Chih Kang Peng , and Harry Eugene Stanley .
+2000 .
+Physiobank , physiotoolkit , and physionet : components of a new research resource for complex physiologic signals .
+Circulation , 101 23 : E215–20 .
+Clete A. Kushida , Deborah A. Nichols , Rik Jadrnicek , Ric Miller , James K. Walsh , and Kara Grifﬁn .
+2012 .
+Strategies for de - identiﬁcation and anonymization of electronic health record data for use in multicenter research studies .
+Medical Care , 50(7):S82 – S101 .
+Guillaume Lample , Miguel Ballesteros , Sandeep Subramanian , Kazuya Kawakami , and Chris Dyer . 2016 .
+Neural architectures for named entity recognition .
+arXiv preprint arXiv:1603.01360 .
+Zengjian Liu , Buzhou Tang , Xiaolong Wang , and Qingcai Chen . 2017 .
+De - identiﬁcation of clinical notes via recurrent neural network and conditional Journal of biomedical informatics , random ﬁeld .
+75 : S34 – S42 .
+David Martinez , Graham Pitson , Andrew MacKinlay , and Lawrence Cavedon . 2014 .
+Cross - hospital portability of information extraction of cancer staging information .
+Artiﬁcial intelligence in medicine , 62(1):11–21 .
+124  Andrew J. McMurry , Britt Fitch , Guergana Savova , Isaac S. Kohane , and Ben Y. Reis .
+2013 .
+Improved de - identiﬁcation of physician notes through integrative modeling of both public and private medical text .
+BMC medical informatics and decision making , 13:112–112 .
+24083569[pmid ] .
+Stephane Meystre , Jeffrey Friedlin , Brett South , Shuying Shen , and Matthew Samore .
+2010 .
+Automatic de - identiﬁcation of textual documents in the electronic health record : a review of recent research .
+BMC Medical Research Methodology , 10(1):70 .
+Ishna Neamatullah , Margaret M. Douglass , Li - wei H. Lehman , Andrew Reisner , Mauricio Villarroel , William J. Long , Peter Szolovits , George B. Moody , Roger G. Mark , and Gari D. Clifford .
+2008a .
+Automated de - identiﬁcation of free - text medical records .
+BMC Medical Informatics and Decision Making , 8(1):32 .
+Ishna Neamatullah , Margaret M Douglass , H Lehman Li - wei , Andrew Reisner , Mauricio Villarroel , William J Long , Peter Szolovits , George B. Moody , Roger G. Mark , and Gari D. Clifford .
+2008b .
+Automated de - identiﬁcation of free - text medical records .
+BMC Medical Informatics and Decision Making , 8(1):1 .
+Naoaki Okazaki .
+2007 .
+CRFsuite : a fast implementation of Conditional Random Fields .
+Accessed 201906 - 17 .
+Amber Stubbs , Michele Filannino , and Özlem Uzuner .
+De - identiﬁcation of psychiatric intake 2017 .
+records : Overview of 2016 cegs n - grid shared tasks track 1 . Journal of biomedical informatics , 75 : S4 – S18 .
+Amber Stubbs , Christopher Kotﬁla , and Özlem Uzuner . 2015 .
+Automated systems for the de - identiﬁcation of longitudinal clinical narratives : Overview of 2014 i2b2 / uthealth shared task track 1 . Journal of Biomedical Informatics , 58 : S11 – S19 .
+Proceedings of the 2014 i2b2 / UTHealth Shared - Tasks and Workshop on Challenges in Natural Language Processing for Clinical Data .
+Reyyan Yeniterzi , John Aberdeen , Samuel Bayer , Ben Wellner , Lynette Hirschman , and Bradley Malin .
+2010 .
+Effects of personal identiﬁer resynthesis on clinical text de - identiﬁcation .
+Journal of the American Medical Informatics Association , 17(2):159 – 168 .
+Vithya Yogarajan , Michael Mayo , and Bernhard A survey of automatic delongitudinal clinical narratives .
+Pfahringer .
+2018 .
+identiﬁcation of arXiv preprint arXiv:1810.06765 .
+125

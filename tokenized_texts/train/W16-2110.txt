@@ -1,8 +1,10 @@
 Proceedings of the 10th SIGHUM Workshop on Language Technology for Cultural Heritage , Social Sciences , and Humanities ( LaTeCH ) , pages 90–94 , Berlin , Germany , August 11 , 2016 .
-c  2016 Association for Computational Linguistics Nomen Omen .
+c(cid:13)2016 Association for Computational Linguistics
+90
+Nomen Omen .
 Enhancing the Latin Morphological Analyser Lemlat with an Onomasticon    Marco Budassi Università di Pavia Corso Strada Nuova , 65 27100
 Pavia - Italy
-marcobudassi@hotmail.it   Marco Passarotti Università Cattolica del Sacro Cuore Largo Gemelli , 1 20123 Milan - Italy marco.passarotti@unicatt.it      
+marcobudassi@hotmail.it   Marco Passarotti Università Cattolica del Sacro Cuore Largo Gemelli , 1 20123 Milan - Italy marco.passarotti@unicatt.it     
 Abstract Lemlat is a morphological analyser for Latin , which shows a remarkably wide coverage of the Latin lexicon .
 However , the performance of the tool is limited by the absence of proper names in its lexical basis .
 In this paper we present the extension of Lemlat with a large Onomasticon for Latin .
@@ -26,8 +28,8 @@ Section 3 describes our method to enhance Lem - lat with an Onomasticon , by det
 Section 4 evaluates the rules and presents one experiment run on four Latin texts .
 Section 5 is a short con - clusion and sketches the future work .
 2 Lemlat The lexical basis of Lemlat results from the col - lation of three Latin dictionaries ( Georges and Georges , 1913 - 1918 ; Glare , 1982 ; Gradenwitz , 1904 ) .
-It counts 40,014 lexical entries and 43,432 lemmas , as more than one lemma can be includ - ed into the same lexical entry .
-90
+It counts 40,014 lexical entries and 43,432 lemmas , as more than one lemma can be includ - ed into the same lexical entry . 
+91
 Given an input wordform that is recognised by Lemlat , the tool produces in output the corre - sponding lemma(s ) and a number of tags convey - ing ( a ) the inflectional paradigm of the lemma(s ) ( e.g. first declension noun ) and ( b ) the morpho - logical features of the input wordform ( e.g. sin - gular nominative ) , as well as the identification number ( ID ) of the lemma(s ) in the lexical basis of Lemlat .
 No contextual disambiguation is per - formed .
 For instance , receiving in input the wordform abamitae ( “ great - aunt ” ) , Lemlat outputs the cor - responding lemma ( abamita , ID : A0019 ) , the tags for its inflectional paradigm ( N1 : first declension noun ) and those for the morphological features of the input wordform ( feminine singular geni - tive and dative ; feminine plural nominative and vocative ) .  
@@ -59,7 +61,7 @@ Again , this is done according both to the inflectional paradigm and to the endi
 For instance , the LES for lemmas with inflectional code CM ( third de - clension masculine nouns ) and ending in -o is built by adding an -n after the last character .
 One example is the lemma bappo ( “ Bappo ” ) , whose LES is bappon , as third declension imparisyllable nouns are analysed by Lemlat by using the basis for their singular genitive ( bappon - is ) .
 The third type of rules ( 19 ) replaces one or more characters on the right side of the lemma with others .
-For instance , the LES of clemens ( “ Clement ” , third declension masculine noun 91
+For instance , the LES of clemens ( “ Clement ” , third declension masculine noun  92
 ending in -s , with singular genitive clement - is ) is built by replacing the final -s with a -t ( clement ) .  
 The last type of rules ( 24 ) deals with those lemmas that are equal to their LES ( no change is needed ) .
 These are uninflected nouns , ( like ha - milcar - “ Hamilcar ” ) , which can be easily re - trieved because they are assigned a specific in - flectional code in Busa ( 1988 ) .
@@ -95,8 +97,8 @@ Inflectional Class Lemmas per Class Lemmas per Rules Recall 1st decl .
 5,397 3,923 72.688 % 4th decl .
 50 11 22 % 5th decl .
 6 6 100 % Uninflected 1,166 11,66 100 %   26,184 24,664 94.194 %   Table 1 : The recall of rules .  
-The most problematic inflectional class is that of third declension nouns.2 As mentioned above , this is motivated by the fact that it is not always                                                  2 The rules for fourth declension nouns show an even lower recall than those for third declension , but the results for such class must be evaluated carefully as the lemmas of the fourth declension in the Onomasticon are just a few ( 50 ) .
-92
+The most problematic inflectional class is that of third declension nouns.2 As mentioned above , this is motivated by the fact that it is not always                                                  2 The rules for fourth declension nouns show an even lower recall than those for third declension , but the results for such class must be evaluated carefully as the lemmas of the fourth declension in the Onomasticon are just a few ( 50 ) . 
+93
 possible to match regularly an inflectional para - digm ( e.g. third declension imparisyllable nouns ) with one specific ending .
 Hence , given such a low recall , the amount of manual work required for enhancing Lemlat with third declension prop - er names was quite considerable .
 To provide an example , the number of third declension femi - nine nouns in the Onomasticon is 1,200 .
@@ -135,8 +137,8 @@ Text Tokens Lemlat LemlatON Improv .
 “ RN ” : Roman numbers .
 “ FW ” : foreign words .
 “ Abb ” : abbreviations .
-“ Misc ” : graphical variants and miss - ing lemmas .
-93
+“ Misc ” : graphical variants and miss - ing lemmas . 
+94
 It is worth noting that , while the text of Virgil shows the highest improvement in type - based evaluation ( +5.7 % ) , Caesar ’s De Bello Gallico is the one that mostly benefits from the extension of Lemlat with the Onomasticon in token - based evaluation ( +6.64 % ) .
 This is due to the higher number of occurrences of proper names in Cae - sar than in Virgil .
 Indeed , although the number of new word types analysed by LemlatON in comparison to Lemlat is lower for Caesar than for Virgil , the opposite holds when tokens are concerned.6 In more detail , the average number of occurrences ( tokens ) of the new word types analysed by LemlatON for Caesar is 3.59 ( 542/151 ) , while it is 1.71 for Virgil ( 493/288 ) .
@@ -217,5 +219,4 @@ Lexis , 27 : 5–23 .
 Cornelis J. Van Rijsbergen .
 1979 .
 Information Retrie - val .
-Butterworths , London .  
-94
+Butterworths , London .

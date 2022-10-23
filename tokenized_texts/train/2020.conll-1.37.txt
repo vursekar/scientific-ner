@@ -1,6 +1,7 @@
-Proceedings of the 24th Conference on Computational Natural Language Learning , pages 455–475 Online , November 19 - 20 , 2020 .
-c  2020 Association for Computational Linguistics https://doi.org/10.18653/v1/P17455On the Computational Power of Transformers and its Implications in Sequence Modeling Satwik Bhattamishra Arkil Patel Navin Goyal Microsoft Research India ft - satbh , t - arkpat , navingo g@microsoft.com
-Abstract Transformers are being used extensively across several sequence modeling tasks .
+On the Computational Power of Transformers and its Implications in Sequence Modeling
+Satwik Bhattamishra Arkil Patel Navin Goyal Microsoft Research India { t-satbh,t-arkpat,navingo}@microsoft.com
+Abstract
+Transformers are being used extensively across several sequence modeling tasks .
 Signiﬁcant research effort has been devoted to experimentally probe the inner workings of Transformers .
 However , our conceptual and theoretical understanding of their power and inherent limitations is still nascent .
 In particular , the roles of various components in Transformers such as positional encodings , attention heads , residual connections , and feedforward networks , are not clear .
@@ -9,229 +10,319 @@ We analyze the computational power as captured by Turing - completeness .
 We ﬁrst provide an alternate and simpler proof to show that vanilla Transformers are Turing - complete and then we prove that Transformers with only positional masking and without any positional encoding are also Turing - complete .
 We further analyze the necessity of each component for the Turing - completeness of the network ; interestingly , we ﬁnd that a particular type of residual connection is necessary .
 We demonstrate the practical implications of our results via experiments on machine translation and synthetic tasks .
-1 Introduction Transformer ( Vaswani et al . , 2017 ) is a recent selfattention based sequence - to - sequence architecture which has led to state of the art results across various NLP tasks including machine translation ( Ott et al . , 2018 ) , language modeling ( Radford et al . , 2018 ) and question answering ( Devlin et al . , 2019 ) .
+1
+Introduction
+Transformer ( Vaswani et al , 2017 ) is a recent selfattention based sequence - to - sequence architecture which has led to state of the art results across various NLP tasks including machine translation ( Ott et al , 2018 ) , language modeling ( Radford et al , 2018 ) and question answering ( Devlin et al , 2019 ) .
 Although a number of variants of Transformers have been proposed , the original architecture still underlies these variants .
-While the training and generalization of machine learning models such as Transformers are the central goals in their analysis , an essential prerequisite to this end is characterization of the computational POS(1 ) POS(2 ) POS(3 ) ( a ) ( b)Figure 1 : ( a ) Self - Attention Network with positional encoding , ( b ) Self - Attention Network with positional masking without any positional encoding power of the model : training a model for a certain task can not succeed if the model is computationally incapable of carrying out the task .
+While the training and generalization of machine learning models such as Transformers are the central goals in their analysis , an essential prerequisite to this end is characterization of the computational
+Figure 1 : ( a ) Self - Attention Network with positional encoding , ( b ) Self - Attention Network with positional masking without any positional encoding
+power of the model : training a model for a certain task can not succeed if the model is computationally incapable of carrying out the task .
 While the computational capabilities of recurrent networks ( RNNs ) have been studied for decades ( Kolen and Kremer , 2001 ; Siegelmann , 2012 ) , for Transformers we are still in the early stages .
 The celebrated work of Siegelmann and Sontag ( 1992 ) showed , assuming arbitrary precision , that RNNs are Turing - complete , meaning that they are capable of carrying out any algorithmic task formalized by Turing machines .
-Recently , P ´ erez et al .
-( 2019 ) have shown that vanilla Transformers with hard - attention can also simulate Turing machines given arbitrary precision .
+Recently , P´erez et al ( 2019 ) have shown that vanilla Transformers with hard - attention can also simulate Turing machines given arbitrary precision .
 However , in contrast to RNNs , Transformers consist of several components and it is unclear which components are necessary for its Turing - completeness and thereby crucial to its computational expressiveness .
 The role of various components of the Transformer in its efﬁcacy is an important question for further improvements .
 Since the Transformer does not process the input sequentially , it requires some form of positional information .
-Various positional encoding schemes have been proposed to capture order information ( Shaw et al . , 2018 ; Dai et al . , 2019 ; Huang et al . , 2018 ) .
+Various positional encoding schemes have been proposed to capture order information ( Shaw et al , 2018 ; Dai et al , 2019 ; Huang et al , 2018 ) .
 At the same time , on
-456machine translation , Yang et al .
-( 2019 ) showed that the performance of Transformers with only positional masking ( Shen et al . , 2018 ) is comparable to that with positional encodings .
+Proceedingsofthe24thConferenceonComputationalNaturalLanguageLearning , pages455–475Online , November19 - 20,2020.c(cid:13)2020AssociationforComputationalLinguisticshttps://doi.org/10.18653 / v1 / P17455POS(1)POS(2)POS(3)(a)(b )  machine translation , Yang et al ( 2019 ) showed that the performance of Transformers with only positional masking ( Shen et al , 2018 ) is comparable to that with positional encodings .
 In case of positional masking ( Fig . 1 ) , as opposed to explicit encodings , the model is only allowed to attend over preceding inputs and no additional positional encoding vector is combined with the input vector .
-Tsai et al .
-( 2019 ) raised the question of whether explicit encoding is necessary if positional masking is used .
-Additionally , since P ´ erez et al . ( 2019 ) ’s
+Tsai et al ( 2019 ) raised the question of whether explicit encoding is necessary if positional masking is used .
+Additionally , since P´erez et al ( 2019 ) ’s
 Turingcompleteness proof relied heavily on residual connections , they asked whether these connections are essential for Turing - completeness .
 In this paper , we take a step towards answering such questions .
-Below , we list the main contributions of the paper , We provide an alternate and arguably simpler proof to show that Transformers are Turingcomplete by directly relating them to RNNs .
-More importantly , we prove that Transformers with positional masking and without positional encoding are also Turing - complete .
-We analyze the necessity of various components such as self - attention blocks , residual connections and feedforward networks for Turing - completeness .
+Below , we list the main contributions of the paper ,
+• We provide an alternate and arguably simpler proof to show that Transformers are Turingcomplete by directly relating them to RNNs .
+• More importantly , we prove that Transformers with positional masking and without positional encoding are also Turing - complete .
+• We analyze the necessity of various components such as self - attention blocks , residual connections and feedforward networks for Turing - completeness .
 Figure 2 provides an overview .
-We explore implications of our results on machine translation and synthetic tasks.1 2 Related Work Computational Power of neural networks has been studied since the foundational paper McCulloch and Pitts ( 1943 ) ; in particular , among sequence - to - sequence models , this aspect of RNNs has long been studied ( Kolen and Kremer , 2001 ) .
+• We explore implications of our results on machine translation and synthetic tasks.1
+2 Related Work
+Computational Power of neural networks has been studied since the foundational paper McCulloch and Pitts ( 1943 ) ; in particular , among sequence - to - sequence models , this aspect of RNNs has long been studied ( Kolen and Kremer , 2001 ) .
 The seminal work by Siegelmann and Sontag ( 1992 ) showed that RNNs can simulate a Turing machine by using unbounded precision .
-Chen et al .
-( 2018 ) showed that RNNs with ReLU activations are also Turing - complete .
+Chen et al ( 2018 ) showed that RNNs with ReLU activations are also Turing - complete .
 Many recent works have explored the computational power of RNNs in practical settings .
-Several works ( Merrill et al . , 2020 ) , ( Weiss et al . , 2018 ) recently studied the ability of RNNs to recognize counter - like languages .
-The capability of RNNs to recognize strings of balanced 1We have made our source code available at https://github.com/satwik77/Transformer-ComputationAnalysis.parantheses has also been studied ( Sennhauser and Berwick , 2018 ; Skachkova et al . , 2018 ) .
+Several works ( Merrill et al , 2020 ) , ( Weiss et al , 2018 ) recently studied the ability of RNNs to recognize counter - like languages .
+The capability of RNNs to recognize strings of balanced
+1We have made our
+available https://github.com/satwik77/Transformer-ComputationAnalysis .
+source
+code
+at
+parantheses has also been studied ( Sennhauser and Berwick , 2018 ;
+Skachkova et al , 2018 ) .
 However , such analysis on Transformers has been scarce .
-Theoretical work on Transformers was initiated by P´erez et al .
-( 2019 ) who formalized the notion of Transformers and showed that it can simulate a Turing machine given arbitrary precision .
-Concurrent to our work , there have been several efforts to understand self - attention based models ( Levine et al . , 2020 ;
-Kim et al . , 2020 ) .
-Hron et al .
-( 2020 ) show that Transformers behave as Gaussian processes when the number of heads tend to inﬁnity .
+Theoretical work on Transformers was initiated by P´erez et al ( 2019 ) who formalized the notion of Transformers and showed that it can simulate a Turing machine given arbitrary precision .
+Concurrent to our work , there have been several efforts to understand self - attention based models ( Levine et
+al , 2020 ; Kim et al , 2020 ) .
+Hron et al ( 2020 ) show that Transformers behave as Gaussian processes when the number of heads tend to inﬁnity .
 Hahn ( 2020 ) showed some limitations of Transformer encoders in modeling regular and context - free languages .
-It has been recently shown that Transformers are universal approximators of sequence - tosequence functions given arbitrary precision ( Yun et al . , 2020 ) .
+It has been recently shown that Transformers are universal approximators of sequence - tosequence functions given arbitrary precision ( Yun et al , 2020 ) .
 However , these are not applicable2 to the complete Transformer architecture .
-With a goal similar to ours , Tsai et al .
-( 2019 ) attempted to study the attention mechanism via a kernel formulation .
+With a goal similar to ours , Tsai et al ( 2019 ) attempted to study the attention mechanism via a kernel formulation .
 However , a systematic study of various components of Transformers has not been done .
-3 Deﬁnitions and Preliminaries All the numbers used in our computations will be from the set of rational numbers denoted Q.
-For a sequenceX= ( x1;:::;xn ) , we setXj:= ( x1;:::;xj)for1jn .
-We will work with an alphabet of sizem , with special symbols#and$signifying the beginning and end of the input sequence , respectively .
-The symbols are mapped to vectors via a given ‘ base ’ embedding fb:!Qdb , wheredbis the dimension of the embedding .
+3 Deﬁnitions and Preliminaries
+All the numbers used in our computations will be from the set of rational numbers denoted Q.
+For : = a sequence X = ( x1 , . . .
+, xn ) , we set Xj ( x1 , . .
+. , xj ) for 1 ≤ j ≤ n. We will work with an alphabet Σ of size m , with special symbols # and $ signifying the beginning and end of the input sequence , respectively .
+The symbols are mapped to vectors via a given ‘ base ’ embedding fb : Σ → Qdb , where db is the dimension of the embedding .
 E.g. , this embedding could be the one used for processing the symbols by the RNN .
-We setfb ( # ) = 0dbandfb($ ) = 0db .
-Positional encoding is a function pos : N!Qdb .
-Together , these provide embedding for a symbol sat positionigiven byf(fb(s);pos(i ) ) , often taken to be simply fb(s ) + pos(i ) .
-Vector JsK2Qm denotes one - hot encoding of a symbol s2. 3.1 RNNs We follow Siegelmann and Sontag ( 1992 ) in our deﬁnition of RNNs .
-To feed the sequences 2Hahn ( 2020 ) and Yun et al .
-( 2020 ) study encoder - only seqto - seq models with ﬁxed length outputs in which the computation halts as soon as the last symbol of the input is processed .
+We set fb ( # ) = 0db and fb($ ) = 0db .
+Positional encoding is a function pos : N → Qdb .
+Together , these provide embedding for a symbol s at position i given by f ( fb(s ) , pos(i ) ) , often taken ∈ Qm to be simply fb(s ) + pos(i ) .
+Vector denotes one - hot encoding of a symbol s ∈ Σ.
+s ( cid:74 )
+( cid:75 )
+3.1 RNNs
+We follow Siegelmann and Sontag ( 1992 ) in our deﬁnition of RNNs .
+To feed the sequences
+2Hahn ( 2020 ) and Yun et al ( 2020 ) study encoder - only seqto - seq models with ﬁxed length outputs in which the computation halts as soon as the last symbol of the input is processed .
 Our work is about the full Transformer ( encoder and decoder ) which is a seq - to - seq model with variable length sequence output in which the decoder starts operating sequentially after the encoder .
-457s1s2:::sn2to the RNN , these are converted to the vectors x1;x2;:::;xnwherexi= fb(si ) .
-The RNN is given by the recurrence ht= g(Whht 1+Wxxt+b ) , wheret1 , function g()is a multilayer feedforward network ( FFN ) with activation  , bias vectorb2Qdh , matrices Wh2QdhdhandWx2Qdhdb , andht2Qdh is the hidden state with given initial hidden state h0;dhis the hidden state dimension .
-After the last symbol snhas been fed , we continue to feed the RNN with the terminal symbol fb($)until it halts .
+456  s1s2 . . .
+sn ∈ Σ∗ to the RNN , these are converted to the vectors x1 , x2 , . . .
+, xn
+where xi = fb(si ) .
+The RNN is given by the recurrence
+ht = g(Whht−1 +
+Wxxt + b ) , where t ≥ 1 , function g ( · ) is a multilayer feedforward network ( FFN ) with activation σ , bias vector b ∈ Qdh ,
+matrices Wh ∈ Qdh×dh and Wx ∈ Qdh×db , and
+ht ∈ Qdh is the hidden state with given initial hidden state h0 ; dh is the hidden state dimension .
+After the last symbol sn has been fed , we continue to feed the RNN with the terminal symbol fb($ ) until it halts .
 This allows the RNN to carry out computation after having read the input .
 A class of seq - to - seq neural networks is Turingcomplete if the class of languages recognized by the networks is exactly the class of languages recognized by Turing machines .
 Theorem 3.1 .
 ( Siegelmann and Sontag , 1992 )
-Any seq - to - seq function !computable by a Turing machine can also be computed by an RNN .
+Any seq - to - seq function Σ∗ → Σ∗ computable by a Turing machine can also be computed by an RNN .
 For details please see section B.1 in appendix .
-3.2 Transformer Architecture Vanilla Transformer .
-We describe the original Transformer architecture with positional encoding ( Vaswani et al . , 2017 ) as formalized by P ´ erez et al .
-( 2019 ) , with some modiﬁcations .
+3.2 Transformer Architecture
+Vanilla Transformer .
+We describe the original Transformer architecture with positional encoding ( Vaswani et al , 2017 ) as formalized by P´erez et al ( 2019 ) , with some modiﬁcations .
 All vectors in this subsection are from Qd .
 The transformer , denoted Trans , is a seq - to - seq architecture .
-Its input consists of ( i ) a sequence X= ( x1;:::;xn)of vectors , ( ii ) a seed vector y0 .
-The output is a sequence Y= ( y1;:::;yr ) of vectors .
-The sequence Xis obtained from the sequence ( s1;:::;sn)2nof symbols by using the embedding mentioned earlier : xi= f(fb(si);pos(i ) ) .
-The transformer consists of composition of transformer encoder andtransformer decoder .
-For the feedforward networks in the transformer layers we use the activation as in Siegelmann and Sontag ( 1992 ) , namely the saturated linear activation function(x)which takes value 0forx < 0 , valuex for0 < x < 1and value 1forx>1 .
-This activation can be easily replaced by the standard ReLU activation via (x )
-= ReLU(x) ReLU(x 1 ) .
+Its input consists of ( i ) a sequence X = ( x1 , . . .
+, xn ) of vectors , ( ii ) a seed vector y0 .
+The output is a sequence
+Y = ( y1 , . . .
+, yr ) of vectors .
+The sequence X is obtained from the sequence ( s1 , . . .
+, sn ) ∈ Σn of symbols by using the embedding mentioned earlier : xi = f ( fb(si ) , pos(i ) ) .
+The transformer consists of composition of transformer encoder and transformer decoder .
+For the feedforward networks in the transformer layers we use the activation as in Siegelmann and Sontag ( 1992 ) , namely the saturated linear activation function σ(x ) which takes value 0 for x < 0 , value x for 0
+<
+x < 1 and value 1 for x > 1 .
+This activation can be easily replaced by the standard ReLU activation via σ(x )
+= ReLU(x )
+− ReLU(x − 1 ) .
 Self - attention .
-The self - attention mechanism takes as input ( i ) a query vectorq , ( ii ) a sequence ofkeyvectorsK= ( k1;:::;kn ) , and ( iii ) a sequence of value vectorsV= ( v1;:::;vn ) .
-The q - attention over KandV , denoted Att(q;K;V ) , is a vectora=  1v1 +  2v2++  nvn , where ( i ) (  1 ; : : : ;  n ) = (fatt(q;k1);:::;fatt(q;kn ) ) .
-( ii ) The normalization function :Qn!Qn 0is hardmax : forx= ( x1;:::;xn)2Qn , if the maximum value occurs rtimes among x1;:::;xn , then hardmax ( x)i:= 1 = rifxiis a maximum value andhardmax ( x)i:= 0otherwise .
+The self - attention mechanism takes as input ( i ) a query vector q , ( ii ) a sequence of key vectors K = ( k1 , . . .
+, kn ) , and ( iii ) a sequence of value vectors V = ( v1 , . . .
+, vn ) .
+The q - attention over K and V , denoted Att(q , K , V ) , is a vector a = α1v1+α2v2 + · · · + αnvn , where ( i )
+( α1 , . .
+. , αn ) = ρ(f att(q , k1 ) , . . .
+, f att(q , kn ) ) .
+( ii ) The normalization function ρ :
+Qn → Qn ≥0 is hardmax : for x = ( x1 , . . .
+, xn ) ∈ Qn , if the maximum value occurs r times among x1 , . . .
+, xn , then hardmax(x)i : = 1 / r if xi is a maximum value and hardmax(x)i : = 0 otherwise .
 In practice , the softmax is often used but its output values are in general not rational .
-( iii ) For vanilla transformers , the scoring function fattused is a combination of multiplicative attention ( Vaswani et
-al . , 2017 ) and a non - linear function : fatt(q;ki )
-=    hq;kii  .
-This was also used by P´erez et al .
-( 2019 ) .
+( iii ) For vanilla transformers , the scoring function f att used is a combination of multiplicative attention ( Vaswani et al , 2017 ) and a non - linear func(cid:12)(cid:104)q , ki(cid:105)(cid:12 ) tion : f att(q , ki )
+= − ( cid:12 ) ( cid:12 ) .
+This was also used by P´erez et al ( 2019 ) .
 Transformer encoder .
-Asingle - layer encoder is a function Enc(X; ) , with input X= ( x1;:::;xn)a sequence of vectors in Qd , and parameters.
-The output is another sequence Z= ( z1;:::;zn)of vectors in Qd .
-The parametersspecify functions Q();K();V( ) , andO( ) , all of type Qd!Qd .
-The functions Q();K( ) ; andV()are linear transformations and O()an FFN .
-For 1in , the output of the self - attention block is produced by ai= Att(Q(xi);K(X);V(X ) )
-+ xi ( 1 ) This operation is also referred to as the encoderencoder attention block .
-The output Zis computed byzi = O(ai ) + aifor1in .
-The addition operations + xiand+aiare the residual connections .
-The complete L - layer transformer encoder TEnc(L)(X; ) = ( Ke;Ve)has the same inputX= ( x1;:::;xn)as the single - layer encoder .
-In contrast , its output Ke= ( ke 1;:::;ke n ) andVe= ( ve 1;:::ve n)contains two sequences .
-TEnc(L)is obtained by composition of Lsinglelayer encoders : let X(0):=X , and for 0` L 1 , letX(`+1)= Enc(X(`);`)and ﬁnally , Ke = K(L)(X(L));Ve = V(L)(X(L ) ):
+A single - layer encoder is a function Enc(X ; θ ) , with input X = ( x1 , . . .
+, xn ) a sequence of vectors in Qd , and parameters θ .
+The output is another sequence Z = ( z1 , . . .
+, zn ) of vectors in Qd .
+The parameters θ specify functions Q ( · ) , K ( · ) , V ( · ) , and O ( · ) , all of type Qd → Qd .
+The functions Q ( · ) , K ( · ) , and V ( · ) are linear transformations and O ( · ) an FFN .
+For 1 ≤ i ≤ n , the output of the self - attention block is produced by
+ai = Att(Q(xi ) , K(X ) , V ( X ) )
++ xi
+( 1 )
+This operation is also referred to as the encoderencoder attention block .
+The output Z is computed by zi = O(ai ) + ai for 1 ≤ i ≤ n.
+The addition operations + xi and + ai are the residual connections .
+The complete L - layer transformer encoder TEnc(L)(X ; θ ) = ( Ke , V e ) has the same input X = ( x1 , . . .
+, xn ) as the single - layer encoder .
+In contrast , its output Ke = ( ke 1 , . . . , ke n ) and V e = ( ve 1 , . . .
+ve n )
+contains two sequences .
+TEnc(L ) is obtained by composition of L singlelayer encoders : let X ( 0 ) : = X , and for 0 ≤ ( cid:96 ) ≤ L − 1 , let X ( ( cid:96)+1 ) = Enc(X ( ( cid:96 ) ) ; θ(cid:96 ) ) and ﬁnally , Ke = K(L)(X ( L ) ) , V e = V ( L)(X ( L ) ) .
 Transformer decoder .
-The input to a singlelayer decoder is ( i ) ( Ke;Ve)output by the encoder , and ( ii ) sequence Y= ( y1;:::;yk)of vectors fork1 .
-The output is another sequence Z= ( z1;:::;zk ) .
-Similar to the single - layer encoder , a singlelayer decoder is parameterized by functions Q();K();V()andO()and is deﬁned by pt= Att(Q(yt);K(Yt);V(Yt ) )
-+ yt;(2 ) at= Att(pt;Ke;Ve )
-+ pt ; ( 3 ) zt = O(at ) + at ; where 1tk .
+The input to a singlelayer decoder is ( i ) ( Ke , V e ) output by the encoder , and ( ii ) sequence
+Y = ( y1 , . . .
+, yk ) of vectors for k ≥ 1 .
+The output is another sequence Z = ( z1 , . . . , zk ) .
+Similar to the single - layer encoder , a singleis parameterized by functions
+layer decoder Q ( · ) , K ( · ) , V ( · ) and O ( · ) and is deﬁned by
+pt = Att(Q(yt ) , K(Yt ) , V ( Yt ) )
++ yt , ( 2 ) at = Att(pt , Ke , V e ) + pt , ( 3 ) zt = O(at ) + at ,
+where 1 ≤ t ≤ k.
 The operation in ( 2 ) will be
-458referred to as the decoder - decoder attention block and the operation in ( 3 ) as the decoder - encoder attention block .
+457  referred to as the decoder - decoder attention block and the operation in ( 3 ) as the decoder - encoder attention block .
 In ( 2 ) , positional masking is applied to prevent the network from attending over symbols which are ahead of them .
-AnL - layer Transformer decoder TDecL((Ke;Ve);Y; ) = zis obtained by repeated application of Lsingle - layer decoders each with its own parameters , and a transformation functionF : Qd!Qdapplied to the last vector in the sequence of vectors output by the ﬁnal decoder .
-Formally , for 0`L 1andY0:=Ywe have Y`+1= Dec((Ke;Ve);Y`;`);z = F(yL k ): Note that while the output of a single - layer decoder is a sequence of vectors , the output of an L - layer Transformer decoder is a single vector .
+An
+L - layer
+Transformer
+z = F ( yL
+decoder TDecL((Ke , V e ) , Y ; θ ) = z is obtained by repeated application of L single - layer decoders each with its own parameters , and a transformation function F :
+Qd → Qd applied to the last vector in the sequence of vectors output by the ﬁnal decoder .
+Formally , for 0 ≤ ( cid:96 ) ≤ L−1 and Y 0 : = Y we have Y ( cid:96)+1 = Dec((Ke , V e ) , Y ( cid:96 ) ; θ(cid:96 ) ) , k ) .
+Note that while the output of a single - layer decoder is a sequence of vectors , the output of an L - layer Transformer decoder is a single vector .
 The complete Transformer .
-The output Trans(X;y0 )
-= Yis computed by the recurrence ~yt+1= TDec(TEnc ( X);(y0;y1;:::;yt ) ) , for0tr 1 .
-We getyt+1by adding positional encoding : yt+1=~yt+1 + pos(t+ 1 ) .
+The output Trans(X , y0 )
+= Y is computed by the recurrence ˜yt+1 = TDec(TEnc(X ) , ( y0 , y1 , . . .
+, yt ) ) , for 0 ≤ t ≤ r − 1 .
+We get yt+1 by adding positional encoding : yt+1 = ˜yt+1 + pos(t + 1 ) .
 Directional Transformer .
 We denote the Transformer with only positional masking and no positional encodings as Directional Transformer and use them interchangeably .
-In this case , we use standard multiplicative attention as the scoring function in our construction , i.e , fatt(q;ki ) = hq;kii .
+In this case , we use standard multiplicative attention as the scoring function in our construction , i.e , f att(q , ki ) = ( cid:104)q , ki(cid:105 ) .
 The general architecture is the same as for the vanilla case ; the differences due to positional masking are the following .
+t ) .
+t , V e
 There are no positional encodings .
-So the input vectors xionly involve fb(si ) .
-Similarly , yt=~yt .
-In ( 1 ) , Att()is replaced byAtt(Q(xi);K(Xi);V(Xi))whereXi:= ( x1;:::;xi)for1in .
-Similarly , in ( 3 ) , Att()is replaced by Att(pt;Ke t;Ve t ) .
-Remark 1 .
+So the input vectors xi only involve fb(si ) .
+Similarly , yt = ˜yt .
+In ( 1 ) , Att ( · ) is replaced : = by Att(Q(xi ) , K(Xi ) , V ( Xi ) ) where Xi ( x1 , . . .
+, xi ) for 1 ≤ i ≤ n.
+Similarly , in ( 3 ) , Att ( · ) is replaced by Att(pt , Ke Remark 1 .
 Our deﬁnitions deviate slightly from practice , hard - attention being the main one since hardmax keeps the values rational whereas softmax takes the values to irrational space .
 Previous studies have shown that soft - attention behaves like hard - attention in practice and Hahn ( 2020 ) discusses its practical relevance .
 Remark 2 .
-Transformer Networks with positional encodings are not necessarily equivalent in terms of their computational expressiveness ( Yun et al . , 2020 ) to those with only positional masking when considering the encoder only model ( as used in BERT and GPT-2 ) .
-Our results in Section 4.1 show their equivalence in terms of expressiveness for the complete seq - to - seq architecture.4 Primary Results 4.1 Turing - Completeness Results In light of Theorem 3.1 , to prove that Transformers are Turing - complete , it sufﬁces to show that they cansimulate RNNs .
-We say that a Transformer simulates an RNN ( as deﬁned in Sec . 3.1 ) if on every input s2 , at each step t , the vectoryt contains the hidden state htas a subvector , i.e. yt=
-[ ht; ] , and halts at the same step as the RNN .
+Transformer Networks with positional encodings are not necessarily equivalent in terms of their computational expressiveness ( Yun et al , 2020 ) to those with only positional masking when considering the encoder only model ( as used in BERT and GPT-2 ) .
+Our results in Section 4.1 show their equivalence in terms of expressiveness for the complete seq - to - seq architecture .
+4 Primary Results
+4.1 Turing - Completeness Results
+In light of Theorem 3.1 , to prove that Transformers are Turing - complete , it sufﬁces to show that they can simulate RNNs .
+We say that a Transformer simulates an RNN ( as deﬁned in Sec . 3.1 ) if on every input s ∈ Σ∗ , at each step t , the vector yt contains the hidden state ht as a subvector , i.e. yt =
+[ ht , · ] , and halts at the same step as the RNN .
 Theorem 4.1 .
 The class of Transformers with positional encodings is Turing - complete .
 Proof Sketch .
-The inputs0;:::;sn2is provided to the transformer as the sequence of vectors x0;:::;xn , wherexi= [ 0dh;fb(si);0dh;i;1 ] , which has as sub - vector the given base embedding fb(si)and the positional encoding i , along with extra coordinates set to constant values and will be used later .
+The input s0 , . . .
+, sn ∈ Σ∗ is provided to the transformer as the sequence of vectors x0 , . . .
+, xn , where xi
+=
+[ 0dh , fb(si ) , 0dh , i , 1 ] , which has as sub - vector the given base embedding fb(si ) and the positional encoding i , along with extra coordinates set to constant values and will be used later .
 The basic observation behind our construction of the simulating Transformer is that the transformer decoder can naturally implement the recurrence operations of the type used by RNNs .
-To this end , the FFNOdec()of the decoder , which plays the same role as the FFN component of the RNN , needs sequential access to the input in the same way as RNN .
+To this end , the FFN Odec ( · ) of the decoder , which plays the same role as the FFN component of the RNN , needs sequential access to the input in the same way as RNN .
 But the Transformer receives the whole input at the same time .
 We utilize positional encoding along with the attention mechanism to isolate xt
-at timetand feed it to Odec( ) , thereby simulating the RNN .
-As stated earlier , we append the input s1;:::;sn of the RNN with $ ’s until it halts .
+at time t and feed it to Odec ( · ) , thereby simulating the RNN .
+As stated earlier , we append the input s1 , . . .
+, sn of the RNN with $ ’s until it halts .
 Since the Transformer takes its input all at once , appending by $ ’s is not possible ( in particular , we do not know how long the computation would take ) .
 Instead , we append the input with a single $ .
-After encountering a$once , the Transformer will feed ( encoding of ) $ toOdec()in subsequent steps until termination .
-Here we conﬁne our discussion to the case tn ; thet > n case is slightly different but simpler .
+After encountering a $ once , the Transformer will feed ( encoding of ) $ to Odec ( · ) in subsequent steps until termination .
+Here we conﬁne our discussion to the case t ≤ n ; the t > n case is slightly different but simpler .
 The construction is straightforward : it has only one head , one encoder layer and one decoder layer ; moreover , the attention mechanisms in the encoder and the decoder - decoder attention block of the decoder are trivial as described below .
-The encoder attention layer does trivial computation in that it merely computes the identity function :
-zi = xi , which can be easily achieved , e.g. by using the residual connection and setting the value vectors to 0 .
-The ﬁ-
-459 Encoder - Encoder   Attention HeadFeed Forward   Network Input EmbeddingDecoder - Decoder Attention HeadDecoder - Encoder Attention HeadFeed Forward   Network Output EmbeddingPositional   EncodingPositional   EncodingFigure 2 : Transformer network with various components highlighted .
-The components marked red are essential for the Turing - completeness whereas for the pairs of blocks and residual connections marked green , either one of the component is enough .
-The dashed residual connection is not necessary for Turingcompleteness of the network .
-nalK(1)()andV(1)()functions bring ( Ke;Ve ) into useful forms by appropriate linear transformations : ki=
-[ 0db;0db;0db; 1;i]andvi= [ 0db;fb(si);0db;0;0 ] .
-Thus , the key vectors only encode the positional information and the value vectors only encode the input symbols .
-The output sequence of the decoder is y1;y2 ; : : : .
-Our construction will ensure , by induction on t , thatytcontains the hidden states htof the RNN as a sub - vector along with positional information :
-yt=
-[ ht;0db;0db;t+1;1 ] .
-This is easy to arrange fort= 0 , and assuming it for twe prove it for t+1 .
-As for the encoder , the decoder - decoder attention block acts as the identity : pt = yt .
-Now , using the last but one coordinate in ytrepresenting the time t+ 1 , the attention mechanism Att(pt;Ke;Ve ) can retrieve the embedding of the t - th input symbolxt .
-This is possible because in the key vector kimentioned above , almost all coordinates other than the one representing the position iare set to 0 , allowing the mechanism to only focus on the positional information and not be distracted by the other contents of pt = yt : the scoring function has valuefatt(pt;ki )
-=  jhpt;kiij= ji (t+ 1)j .
-For a given t , it is maximized at i = t+ 1 fort < n and ati = nfortn .
-This use of scoring function is similar to P ´ erez et al .
-( 2019 ) .
-At this point , Odec()has at its disposal the hidden stateht(coming from ytviaptand the residual connection ) and the input symbol xt(coming via the attention mechanism and the residual connection ) .
-Hence O()can act just like the FFN ( Lemma C.4 ) underlying the RNN to compute ht+1 and thusyt+1 , proving the induction hypothesis .
+The encoder attention layer does trivial computation in that it merely computes the identity function : zi = xi , which can be easily achieved , e.g. by using the residual connection and setting the value vectors to 0 .
+The ﬁ458  t < n and at i = n for t ≥ n.
+This use of scoring function is similar to P´erez et al ( 2019 ) .
+At this point , Odec ( · ) has at its disposal the hidden state ht ( coming from yt via pt and the residual connection ) and the input symbol xt
+( coming via the attention mechanism and the residual connection ) .
+Hence O ( · ) can act just like the FFN ( Lemma C.4 ) underlying the RNN to compute ht+1 and thus yt+1 , proving the induction hypothesis .
 The complete construction can be found in Sec .
 C.2 in the appendix .
 Theorem 4.2 .
 The class of Transformers with positional masking and no explicit positional encodings is Turing - complete .
 Proof Sketch .
 As before , by Theorem 3.1 it sufﬁces to show that Transformers can simulate RNNs .
-The inputs0;:::;snis provided to the transformer as the sequence of vectors x0;:::;xn , where xi=
-[ 0dh;0dh;fb(si);JsiK;0;0m;0m;0 m ] .
-The general goal for the directional case is similar to the vanilla case , namely we would like the FFN Odec()of the decoder to directly simulate the computation in the underlying RNN .
-In the vanilla case , positional encoding and the attention mechanism helped us feed input xtat thet - th iteration of the decoder toOdec( ) .
-However , we no longer have explicit positional information in the input xtsuch as a coordinate with value t.
-The key insight is that we do not need the positional information explicitly to recover xtat stept : in our construction , the attention mechanism with masking will recover xt in an indirect manner even though it ’s not able to “ zero in ” on the t - th position .
+The input s0 , . . .
+, sn is provided to the transformer as the sequence of vectors x0 , . . .
+, xn , where xi
+=
+[ 0dh , 0dh , fb(si ) , , 0 , 0 m , 0 m , 0 m ] .
+The si ( cid:75 ) ( cid:74 ) general goal for the directional case is similar to the vanilla case , namely we would like the FFN Odec ( · ) of the decoder to directly simulate the computation in the underlying RNN .
+In the vanilla case , positional encoding and the attention mechanism helped us feed input xt
+at the t - th iteration of the decoder to Odec ( · )
+.
+However , we no longer have explicit positional information in the input xt such as a coordinate with value t.
+The key insight is that we do not need the positional information explicitly to recover xt
+at step t : in our construction , the attention mechanism with masking will recover xt in an indirect manner even though it ’s not able to “ zero in ” on the t - th position .
 Let us ﬁrst explain this without details of the construction .
-We maintain in vector !
-t2Qm , with a coordinate each for symbols in  , the fraction of times the symbol has occurred up to step t.
-Now , at a steptn , for the difference !
-t !t 1(which is part of the query vector ) , it can be shown easily that only the coordinate corresponding to stis positive .
-Thus after applying the linearized sigmoid (!t !t 1 ) , we can isolate the coordinate corresponding to st . Now using this query vector , the ( hard ) attention mechanism will be able to retrieve the value vectors for all indices jsuch thatsj = st and output their average .
-Crucially , the value vector for an index jis essentiallyxjwhich depends only onsj .
+We maintain in vector ωt ∈ Qm , with a coordinate each for symbols in Σ , the fraction of times the symbol has occurred up to step t.
+Now , at a step t ≤ n , for the difference ωt − ωt−1 ( which is part of the query vector ) , it can be shown easily that only the coordinate corresponding to st is positive .
+Thus after applying the linearized sigmoid σ(ωt − ωt−1 ) , we can isolate the coordinate corresponding to st . Now using this query vector , the ( hard ) attention mechanism will be able to retrieve the value vectors for all indices j such that sj = st and output their average .
+Crucially , the value vector for an index j is essentially xj which depends only on sj .
 Thus , all these vectors are equal to xt , and so is their average .
 This recovers xt , which
-460can now be fed to Odec( ) , simulating the RNN .
+Figure 2 : Transformer network with various components highlighted .
+The components marked red are essential for the Turing - completeness whereas for the pairs of blocks and residual connections marked green , either one of the component is enough .
+The dashed residual connection is not necessary for Turingcompleteness of the network .
+nal K(1 ) ( · ) and V ( 1 ) ( · ) functions bring ( Ke , V e ) into useful forms by appropriate linear transformations :
+ki = [ 0db , 0db , 0db , −1 , i ] and vi = [ 0db , fb(si ) , 0db , 0 , 0 ] .
+Thus , the key vectors only encode the positional information and the value vectors only encode the input symbols .
+The output sequence of the decoder is y1 , y2 , . . ..
+Our construction will ensure , by induction on t , that yt contains the hidden states ht of the RNN as a sub - vector along with positional information :
+yt =
+[ ht , 0db , 0db , t + 1 , 1 ] .
+This is easy to arrange for t = 0 , and assuming it for t we prove it for t+1 .
+As for the encoder , the decoder - decoder attention block acts as the identity : pt = yt .
+Now , using the last but one coordinate in yt representing the time t + 1 , the attention mechanism Att(pt , Ke , V e ) can retrieve the embedding of the t - th input symbol xt .
+This is possible because in the key vector ki mentioned above , almost all coordinates other than the one representing the position i are set to 0 , allowing the mechanism to only focus on the positional information and not be distracted by the other contents of pt = yt : the scoring function has value f att(pt , ki ) = −|(cid:104)pt , ki(cid:105)| = −|i − ( t + 1)| .
+For a given t , it is maximized at i = t + 1 for
+459Encoder - Encoder Attention HeadFeed Forward NetworkInputEmbeddingDecoder - DecoderAttention HeadDecoder - EncoderAttention HeadFeed Forward NetworkOutputEmbeddingPositional EncodingPositional Encoding  can now be fed to Odec ( · ) , simulating the RNN .
 We now outline the construction and relate it to the above discussion .
-As before , for simplicity we restrict to the case tn .
-We use only one head , one layer encoder and two layer decoder .
+As before , for simplicity we restrict to the case t ≤ n. We use only one head , one layer encoder and two layer decoder .
 The encoder , as in the vanilla case , does very little other than pass information along .
-The vectors in ( Ke;Ve)are obtained by the trivial attention mechanism followed by simple linear transformations : ke i=
-[ 0dh;0dh;0db;JsiK;0;0m;0m;0 m ] andve i=
-[ 0dh;0dh;fb(si);0m;0;0m;JsiK;0 m ] .
-Our construction ensures that at step twe have yt=
-[ ht 1;0dh;0db;0m;1 2t;0m;0m;!t 1 ] .
-As before , the proof is by induction on t. In the ﬁrst layer of decoder , the decoderdecoder attention block is trivial : p(1 ) t = yt .
-In the decoder - encoder attention block , we give equal attention to all the t+ 1 values , which along with Oenc( ) , leads toz(1 ) t=
-[ ht 1;0dh;0db;t;1 2t+1;0m;0m;!t ] , where essentiallyt=(!t !t 1 ) , except with a change for the last coordinate due to special status of the last symbol $ in the processing of RNN .
-In the second layer , the decoder - decoder attention block is again trivial with p(2 ) t = z(1 )
-t. We remark that in this construction , the scoring function is the standard multiplicative attention3 .
-Now hp(2 ) t;ke ji = ht;JsjKi=t;j , which is positive if and only if sj = st , as mentioned earlier .
-Thus attention weights in Att(p(2 ) t;Ke t;Ve t)satisfy hardmax ( hp(2 ) t;ke 1i;:::;hp(2 ) t;ke ti ) = 1 t(I(s0= st);I(s1 = st);:::;I(st = st ) ) , wheretis a normalization constant and I()is the indicator .
+The vectors in ( Ke , V e ) are obtained by the trivial attention mechanism followed by simple linear transformations : ke , 0 , 0 m , 0 m , 0 m ] ( cid:75 ) and ve
+si ( cid:74 ) Our construction ensures that at step t we have 2 t , 0 m , 0 m , ωt−1 ] .
+As
+yt =
+[ ht−1 , 0dh , 0db , 0 m , 1 before , the proof is by induction on t.
+i =
+[ 0dh , 0dh , fb(si ) , 0 m , 0 , 0 m ,
+i =
+[ 0dh , 0dh , 0db ,
+, 0 m ] .
+( cid:75 )
+si ( cid:74 )
+In the ﬁrst
+layer of decoder ,
+the decoderp(1 )
+= decoder attention block is trivial : t yt .
+In the decoder - encoder attention block , we give equal attention to all the t + 1 values , which along with Oenc ( · ) , leads to z(1 ) t = 1 2t+1 , 0 m , 0 m , ωt ] , where [ ht−1 , 0dh , 0db , δt , essentially δt = σ(ωt − ωt−1 ) , except with a change for the last coordinate due to special status of the last symbol $ in the processing of RNN .
+t
+, ke
+j ( cid:105 ) = ( cid:104)δt ,
+t = z(1 )
+In the second layer , the decoder - decoder attention block is again trivial with p(2 ) .
+We remark that in this construction , the scoring function is the standard multiplicative attention 3 .
+Now ( cid:104)p(2 ) ( cid:105 ) = δt , j , which is positive if t ( cid:75 ) and only if sj = st , as mentioned earlier .
+Thus attention weights in Att(p(2 ) t ) satisfy hardmax((cid:104)p(2 ) 1(cid:105 ) , . . .
+, ( cid:104)p(2 ) ( I(s0 = , ke st ) , I(s1 = st ) , . . .
+, I(st = st ) ) , where λt is a normalization constant and I ( · ) is the indicator .
 See Lemma D.3 for more details .
-At this point , Odec()has at its disposal the hidden stateht(coming from z(1 ) tviap(2 ) tand the residual connection ) and the input symbol xt(coming via the attention mechanism and the residual connection ) .
-Hence Odec()can act just like the FFN underlying the RNN to compute ht+1and
-thusyt+1 , proving the induction hypothesis .
-The complete construction can be found in Sec .
+t , V e , Ke t ( cid:105 ) )
+= 1
+λt
+sj ( cid:74 )
+, ke
+t
+t
+t
+t
+via p(2 )
+At this point , Odec ( · ) has at its disposal the hidden state ht ( coming from z(1 ) and the residual connection ) and the input symbol xt
+( coming via the attention mechanism and the residual connection ) .
+Hence Odec ( · ) can act just like the FFN underlying the RNN to compute ht+1 and thus yt+1 , proving the induction hypothesis .
+t
+The complete construction can be found in
+Sec .
 D in the Appendix .
-In practice , Yang et al .
-( 2019 ) found that for NMT , Transformers with only positional masking achieve comparable performance compared to the ones with positional encodings .
-Similar evidence 3Note that it is closer to practice than the scoring function  jhq;kijused in P ´ erez
-et al .
-( 2019 ) and Theorem 4.1was found by Tsai et al .
-( 2019 ) .
+In practice , Yang et al ( 2019 ) found that for NMT , Transformers with only positional masking achieve comparable performance compared to the ones with positional encodings .
+Similar evidence
+3Note that it is closer to practice than the scoring function
+−|(cid:104)q , k(cid:105)| used in P´erez et al ( 2019 ) and Theorem 4.1
+was found by Tsai et al ( 2019 ) .
 Our proof for directional transformers entails that there is no loss of order information if positional information is only provided in the form of masking .
 However , we do not recommend using masking as a replacement for explicit encodings .
 The computational equivalence of encoding and masking given by our results implies that any differences in their performance must come from differences in learning dynamics .
-4.2 Analysis of Components The results for various components follow from our construction in Theorem 4.1 .
+4.2 Analysis of Components
+The results for various components follow from our construction in Theorem 4.1 .
 Note that in both the encoder and decoder attention blocks , we need to compute the identity function .
 We can nullify the role of the attention heads by setting the value vectors to zero and making use of only the residual connections to implement the identity function .
 Thus , even if we remove those attention heads , the model is still Turing - complete .
@@ -245,38 +336,53 @@ Proposition 4.3 .
 The class of Transformers without residual connection around the decoderencoder attention block is not Turing - complete .
 Proof Sketch .
 We conﬁne our discussion to singlelayer decoder ; the case of multilayer decoder is similar .
-Without the residual connection , the decoder - encoder attention block produces at= Att(pt;Ke;Ve )
-= Pn i=1 
-i ve ifor some  i ’s such
-thatPn i  i= 1 .
-Note that , without residual connectionatcan take on at most 2n 1values .
-This is because by the deﬁnition of hard attention the vector (  1 ; : : : ;  n)is characterized by the set of zero coordinates and there are at most 2n 1
-461such sets ( all coordinates can not be zero ) .
-This restriction on the number of values on atholds regardless of the value of pt .
-If the task requires the network to produce values of atthat come from a set with size at least 2n , then the network will not be able to perform the task .
-Here ’s an example task : given a number 2(0;1 ) , the network must produce numbers 0;;2;:::;k
- , wherek is the maximum integer such that k1 .
-If the network receives a single input  , then it is easy to see that the vector atwill be a constant ( ve 1 ) at any step and hence the output of the network will also be constant at all steps .
+Without the residual connection , the decoder - encoder attention block produces at = Att(pt , Ke , V e )
+= ( cid:80)n i=1
+αive i for some αi ’s such that ( cid:80)n i αi = 1 .
+Note that , without residual connection at can take on at most 2n − 1 values .
+This is because by the deﬁnition of hard attention the vector ( α1 , . . .
+, αn ) is characterized by the set of zero coordinates and there are at most 2n − 1
+460  such sets ( all coordinates can not be zero ) .
+This restriction on the number of values on at holds regardless of the value of pt .
+If the task requires the network to produce values of at that come from a set with size at least 2n , then the network will not be able to perform the task .
+Here ’s an example task : given a number ∆ ∈ ( 0 , 1 ) , the network must produce numbers 0 , ∆ , 2∆ , . .
+. , k∆ , where k is the maximum integer
+such that k∆ ≤ 1 .
+If the network receives a single input ∆ , then it is easy to see that the vector at will be a constant ( ve 1 ) at any step and hence the output of the network will also be constant at all steps .
 Thus , the model can not perform such a task .
-If the input is combined with n 1auxiliary symbols ( such as # and$ ) , then in the network , each attakes on at most 2n 1values .
-Hence , the model will be incapable of performing the task if <1=2n .
-Such a limitation does not exist with a residual connection since the vector at = Pn i=1  i ve i+ptcan take arbitrary number of values depending on its prior computations in pt .
+If the input is combined with n − 1 auxiliary symbols ( such as # and $ ) , then in the network , each at takes on at most 2n − 1 values .
+Hence , the model will be incapable of performing the task if ∆ <
+1/2n .
+Such a limitation does not exist with a residual connection since the vector at = ( cid:80)n
+i + pt can take arbitrary number of values depending on its prior computations in pt .
 For further details , see Sec . C.1 in the Appendix .
+i=1 αive
 Discussion .
 It is perhaps surprising that residual connection , originally proposed to assist in the learning ability of very deep networks , plays a vital role in the computational expressiveness of the network .
 Without it , the model is limited in its capability to make decisions based on predictions in the previous steps .
-We explore practical implications of this result in section 5 . 5 Experiments In this section , we explore the practical implications of our results .
-Our experiments are geared towards answering the following questions : Q1.Are there any practical implications of the limitation of Transformers without decoder - encoder residual connections ?
+We explore practical implications of this result in section 5 .
+5 Experiments
+In this section , we explore the practical implications of our results .
+Our experiments are geared towards answering the following questions : Q1 .
+Are there any practical implications of the limitation of Transformers without decoder - encoder residual connections ?
 What tasks can they do or not do compared to vanilla Transformers ?
 Q2 .
-Is there any additional beneﬁt of using positional masking as opposed to absolute positional encoding ( Vaswani et al . , 2017 ) ?
+Is there any additional beneﬁt of using positional masking as opposed to absolute positional encoding ( Vaswani et al , 2017 ) ?
 Although we showed that Transformers without decoder - encoder residual connection are not Turing complete , it does not imply that they are incapable of performing all the tasks .
 Our results suggest that they are limited in their capability to make inferences based on their previous computations , which is required for tasks such as counting and language modeling .
-However , it can be shown that the modelis capable of performing tasks which rely only on information provided at a given step such as copying and mapping .
+However , it can be shown that the model
+is capable of performing tasks which rely only on information provided at a given step such as copying and mapping .
 For such tasks , given positional information at a particular step , the model can look up the corresponding input and map it via the FFN .
 We evaluate these hypotheses via our experiments .
-Model Copy Task Counting Vanilla Transformers 100.0 100.0 - Dec - Enc Residual 99.7 0.0 - Dec - Dec Residual 99.7 99.8 Table 1 : BLEU scores ( " ) for copy and counting task .
-Please see Section 5 for details For our experiments on synthetic data , we consider two tasks , namely the copy task and the counting task .
+Model
+Copy Task
+Counting
+Vanilla Transformers - Dec - Enc Residual - Dec - Dec Residual
+100.0 99.7 99.7
+100.0 0.0 99.8
+Table 1 : BLEU scores ( ↑ ) for copy and counting task .
+Please see Section 5 for details
+For our experiments on synthetic data , we consider two tasks , namely the copy task and the counting task .
 For the copy task , the goal of a model is to reproduce the input sequence .
 We sample sentences of lengths between 5 - 12 words from Penn Treebank and create a train - test split of 40k-1k with all sentences belonging to the same range of length .
 In the counting task , we create a very simple dataset where the model is given one number between 0 and 100 as input and its goal is to predict the next ﬁve numbers .
@@ -291,7 +397,13 @@ We again compare vanilla Transformer with the ones without decoder - encoder and
 While tuning the models , we vary the number of layers from 1 to 4 , the learning rate , warmup steps and the number of heads .
 Speciﬁcations of the models , experimental setup , datasets and sample outputs can be found in Sec .
 E
-462Model De - En En - Vi Vanilla Transformers 32.9 28.8 - Dec - Enc Residual 24.1 21.8 - Dec - Dec Residual 30.6 27.2 Table 2 : BLEU scores ( " ) for translation task .
+461  Model
+De - En
+En - Vi
+Vanilla Transformers - Dec - Enc Residual - Dec - Dec Residual
+32.9 24.1 30.6
+28.8 21.8 27.2
+Table 2 : BLEU scores ( ↑ ) for translation task .
 Please see Section 5 for details .
 in the Appendix .
 Results on the effect of residual connections on synthetic tasks can be found in Table 1 .
@@ -315,21 +427,23 @@ Hence , when evaluFigure 3 : Performance of the two models on the copy task acro
 DiSAN refers to Transformer with only positional masking .
 SAN refers to vanilla Transformers .
 ated on higher lengths it never produces a sentence of length greater than 12 .
-Other encoding schemes such as relative positional encodings ( Shaw et al . , 2018 ; Dai et al . , 2019 ) can generalize better , since they are inherently designed to address this particular issue .
+Other encoding schemes such as relative positional encodings ( Shaw et al , 2018 ; Dai et al , 2019 ) can generalize better , since they are inherently designed to address this particular issue .
 However , our goal is not to propose masking as a replacement of positional encodings , rather it is to determine whether the mechanism that the model develops during training is helpful in generalizing to higher lengths .
 Note that , positional masking was not devised by keeping generalization or any other beneﬁt in mind .
 Our claim is only that , the use of masking does not limit the model ’s expressiveness and it may beneﬁt in other ways , but during practice one should explore each of the mechanisms and even a combination of both .
-Yang et al .
-( 2019 ) showed that a combination of both masking and encodings is better able to learn order information as compared to explicit encodings .
-SOURCE – 42 REFERENCE – 43 44 45 46 47 VANILLA TRANSFORMER – 43 44 45 46 47 - DEC - ENCRESIDUAL – 27 27 27 27 27 - DEC - DECRESIDUAL – 43 44 45 46 47 Table 3 : Sample outputs by the models on the counting task .
+Yang et al ( 2019 ) showed that a combination of both masking and encodings is better able to learn order information as compared to explicit encodings .
+SOURCE REFERENCE
+VANILLA TRANSFORMER - DEC - ENC RESIDUAL - DEC - DEC RESIDUAL
+– 42 – 43 44 45 46 47
+– 43 44 45 46 47 – 27 27 27 27 27 – 43 44 45 46 47
+Table 3 : Sample outputs by the models on the counting task .
 Without the residual connection around DecoderEncoder block , the model is incapable of predicting more than one distinct output .
-6 Discussion and Final Remarks We showed that the class of languages recognized by Transformers and RNNs are exactly the same .
+6 Discussion and Final Remarks
+We showed that the class of languages recognized by Transformers and RNNs are exactly the same .
 This implies that the difference in performance of both the networks across different tasks can be attributed only to their learning abilities .
-In contrast to RNNs , Transformers are composed of multiple components which are not essential for their com-
-463putational expressiveness .
+In contrast to RNNs , Transformers are composed of multiple components which are not essential for their com462  putational expressiveness .
 However , in practice they may play a crucial role .
-Recently , V oita et al .
-( 2019 ) showed that the decoder - decoder attention heads in the lower layers of the decoder do play a signiﬁcant role in the NMT task and suggest that they may be helping in language modeling .
+Recently , Voita et al ( 2019 ) showed that the decoder - decoder attention heads in the lower layers of the decoder do play a signiﬁcant role in the NMT task and suggest that they may be helping in language modeling .
 This indicates that components which are not essential for the computational power may play a vital role in improving the learning and generalization ability .
 Take - Home Messages .
 We showed that the order information can be provided either in the form of explicit encodings or masking without affecting computational power of Transformers .
@@ -337,507 +451,8 @@ The decoder - encoder attention block plays a necessary role in conditioning the
 The feedforward network in the decoder is the only component capable of performing computations based on the input and prior computations .
 Our experimental results show that removing components essential for computational power inhibit the model ’s ability to perform certain tasks .
 At the same time , the components which do not play a role in the computational power may be vital to the learning ability of the network .
-Although our proofs rely on arbitrary precision , which is common practice while studying the computational power of neural networks in theory ( Siegelmann and Sontag , 1992 ; P ´ erez et al . , 2019 ; Hahn , 2020 ; Yun et al . , 2020 ) , implementations in practice work over ﬁxed precision settings .
+Although our proofs rely on arbitrary precision , which is common practice while studying the computational power of neural networks in theory ( Siegelmann and Sontag , 1992 ; P´erez et al , 2019 ; Hahn , 2020 ; Yun et al , 2020 ) , implementations in practice work over ﬁxed precision settings .
 However , our construction provides a starting point to analyze Transformers under ﬁnite precision .
 Since RNNs can recognize all regular languages in ﬁnite precision ( Korsky and Berwick , 2019 ) , it follows from our construction that Transformer can also recognize a large class of regular languages in ﬁnite precision .
 At the same time , it does not imply that it can recognize all regular languages given the limitation due to the precision required to encode positional information .
 We leave the study of Transformers in ﬁnite precision for future work .
-Acknowledgements We thank the anonymous reviewers for their constructive comments and suggestions .
-We would also like to thank our colleagues at Microsoft Research and Michael Hahn for their valuable feedback and helpful discussions .
-References Yining Chen , Sorcha Gilroy , Andreas Maletti , Jonathan May , and Kevin Knight .
-2018 .
-Recurrent neural networks as weighted language recognizers .
-In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long Papers ) , pages 2261–2271 , New Orleans , Louisiana . Association for Computational Linguistics .
-Zihang Dai , Zhilin Yang , Yiming Yang , Jaime Carbonell , Quoc Le , and Ruslan Salakhutdinov .
-2019 .
-Transformer - XL : Attentive language models beyond a ﬁxed - length context .
-In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 2978–2988 , Florence , Italy . Association for Computational Linguistics .
-Jacob Devlin , Ming - Wei Chang , Kenton Lee , and Kristina Toutanova . 2019 .
-BERT : Pre - training of deep bidirectional transformers for language understanding .
-In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 1 ( Long and Short Papers ) , pages 4171–4186 , Minneapolis , Minnesota .
-Association for Computational Linguistics .
-Michael Hahn .
-2020 .
-Theoretical limitations of selfattention in neural sequence models .
-Transactions of the Association for Computational Linguistics , 8:156–171 .
-Jiri Hron , Yasaman Bahri , Jascha Sohl - Dickstein , and Roman Novak .
-2020 .
-Inﬁnite attention : Nngp and ntk for deep attention networks .
-arXiv preprint arXiv:2006.10540 .
-Cheng - Zhi Anna Huang , Ashish Vaswani , Jakob Uszkoreit , Noam Shazeer , Curtis Hawthorne , Andrew M. Dai , Matthew D. Hoffman , and Douglas Eck . 2018 .
-An improved relative self - attention mechanism for transformer with application to music generation .
-ArXiv , abs/1809.04281 .
-Hyunjik Kim , George Papamakarios , and Andriy Mnih . 2020 .
-The lipschitz constant of self - attention .
-arXiv preprint arXiv:2006.04710 .
-Guillaume Klein , Yoon Kim , Yuntian Deng , Jean Senellart , and Alexander Rush . 2017 .
-OpenNMT : Opensource toolkit for neural machine translation .
-In Proceedings of ACL 2017 , System Demonstrations , pages 67–72 , Vancouver , Canada .
-Association for Computational Linguistics .
-John F Kolen and Stefan C Kremer .
-2001 .
-A ﬁeld guide to dynamical recurrent networks .
-John Wiley & Sons .
-Samuel A Korsky and Robert C Berwick .
-2019 .
-On the computational power of rnns .
-arXiv preprint arXiv:1906.06349 .
-464Yoav Levine , Noam Wies , Or Sharir , Hoﬁt Bata , and Amnon Shashua . 2020 .
-Limits to depth efﬁciencies of self - attention .
-arXiv preprint arXiv:2006.12467 .
-Minh - Thang Luong and Christopher D Manning .
-2015 .
-Stanford neural machine translation systems for spoken language domains .
-In Proceedings of the International Workshop on Spoken Language Translation , pages 76–79 .
-Warren S McCulloch and Walter Pitts .
-1943 .
-A logical calculus of the ideas immanent in nervous activity .
-The bulletin of mathematical biophysics , 5(4):115 – 133 .
-William Merrill , Gail Weiss , Yoav Goldberg , Roy Schwartz , Noah A. Smith , and Eran Yahav .
-2020 .
-A formal hierarchy of RNN architectures .
-In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics , pages 443–459 , Online .
-Association for Computational Linguistics .
-Myle Ott , Sergey Edunov , David Grangier , and Michael Auli .
-2018 .
-Scaling neural machine translation .
-In Proceedings of the Third Conference on Machine Translation : Research Papers , pages 1–9 , Brussels , Belgium .
-Association for Computational Linguistics .
-Jorge P ´ erez , Javier Marinkovi ´ c , and Pablo Barcel ´ o. 2019 .
-On the turing completeness of modern neural network architectures .
-In International Conference on Learning Representations .
-Alec Radford , Karthik Narasimhan , Tim Salimans , and Ilya Sutskever . 2018 .
-Improving language understanding by generative pre - training .
-URL https://s3 - us - west-2 .
-amazonaws .
-com / openaiassets / researchcovers / languageunsupervised / language understanding paper .
-pdf .
-Alexander Rush .
-2018 .
-The annotated transformer .
-InProceedings of Workshop for NLP Open Source Software ( NLP - OSS ) , pages 52–60 , Melbourne , Australia . Association for Computational Linguistics .
-Luzi Sennhauser and Robert Berwick .
-2018 .
-Evaluating the ability of LSTMs to learn context - free grammars .
-In Proceedings of the 2018 EMNLP Workshop BlackboxNLP : Analyzing and Interpreting Neural Networks for NLP , pages 115–124 , Brussels , Belgium .
-Association for Computational Linguistics .
-Peter Shaw , Jakob Uszkoreit , and Ashish Vaswani . 2018 .
-Self - attention with relative position representations .
-In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 2 ( Short Papers ) , pages 464–468 , New Orleans , Louisiana .
-Association for Computational Linguistics .
-Tao Shen , Tianyi Zhou , Guodong Long , Jing Jiang , Shirui Pan , and Chengqi Zhang .
-2018 .
-Disan : Directional self - attention network for rnn / cnn - free language understanding .
-In Thirty - Second AAAI Conference on Artiﬁcial Intelligence
-.Hava
-T Siegelmann .
-2012 .
-Neural networks and analog computation : beyond the Turing limit .
-Springer Science & Business Media .
-Hava T Siegelmann and Eduardo D Sontag .
-1992 .
-On the computational power of neural nets .
-In Proceedings of the ﬁfth annual workshop on Computational learning theory , pages 440–449 .
-ACM .
-Natalia Skachkova , Thomas Trost , and Dietrich Klakow .
-2018 .
-Closing brackets with recurrent neural networks .
-In Proceedings of the 2018 EMNLP Workshop BlackboxNLP : Analyzing and Interpreting Neural Networks for NLP , pages 232–239 , Brussels , Belgium .
-Association for Computational Linguistics .
-Yao - Hung Hubert Tsai , Shaojie Bai , Makoto Yamada , Louis - Philippe Morency , and Ruslan Salakhutdinov .
-2019 .
-Transformer dissection : An uniﬁed understanding for transformer ’s attention via the lens of kernel .
-In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing ( EMNLP - IJCNLP ) , pages 4344–4353 , Hong Kong , China .
-Association for Computational Linguistics .
-Ashish Vaswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N Gomez , Łukasz Kaiser , and Illia Polosukhin . 2017 .
-Attention is all you need .
-In Advances in neural information processing systems , pages 5998–6008 .
-Elena V oita , David Talbot , Fedor Moiseev , Rico Sennrich , and Ivan Titov .
-2019 .
-Analyzing multi - head self - attention : Specialized heads do the heavy lifting , the rest can be pruned .
-In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 5797–5808 , Florence , Italy . Association for Computational Linguistics .
-Gail Weiss , Yoav Goldberg , and Eran Yahav .
-2018 .
-On the practical computational power of ﬁnite precision RNNs for language recognition .
-In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Volume 2 : Short Papers ) , pages 740–745 , Melbourne , Australia . Association for Computational Linguistics .
-Baosong Yang , Longyue Wang , Derek F. Wong , Lidia S. Chao , and Zhaopeng Tu .
-2019 .
-Assessing the ability of self - attention networks to learn word order .
-In Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 3635–3644 , Florence , Italy . Association for Computational Linguistics .
-Chulhee Yun , Srinadh Bhojanapalli , Ankit Singh Rawat , Sashank Reddi , and Sanjiv Kumar .
-2020 .
-Are transformers universal approximators of sequence - to - sequence functions ?
-In International Conference on Learning Representations .
-465A Roadmap We begin with various deﬁnitions and results .
-We deﬁne simulation of Turing machines by RNNs and state the Turing - completeness result for RNNs .
-We deﬁne vanilla and directional Transformers and what it means for Transformers to simulate RNNs .
-Many of the deﬁnitions from the main paper are reproduced here , but in more detail .
-In Sec .
-C.1 we discuss the effect of removing a residual connection on computational power of Transformers .
-Sec .
-C.2 contains the proof of Turing completeness of vanilla Transformers and Sec .
-D the corresponding proof for directional Transformers .
-Finally , Sec . 5 has further details of experiments .
-B Deﬁnitions
-Denote the setf1;2;:::;ngby[n ] .
-Functions deﬁned for scalars are extended to vectors in the natural way : for a function Fdeﬁned on a set A , for a sequence ( a1;:::;an)of elements in A , we setF(a1;:::;an):= ( F(a1);:::;F ( an ) ) .
-IndicatorI(P)is1 , if predicate Pis true and is 0 otherwise .
-For a sequence X= ( xn0;:::;xn ) for somen00 , we setXj:= ( xn0;:::;xj)for j2fn0;i+1;:::;ng .
-We will work with an alphabet = f  1 ; : : : ;  mg , with  1= # and  m= $ .
-The special symbols # and$correspond to the beginning and end of the input sequence , resp .
-For a vectorv , by0vwe mean the all- 0vector of the same dimension as v. Let t:= minft;ng B.1 RNNs and Turing - completeness Here we summarize , somewhat informally , the Turing - completeness result for RNNs due to ( Siegelmann and Sontag , 1992 ) .
-We recall basic notions from computability theory .
-In the main paper , for simplicity we stated the results for total recursive functions  : f0;1g!f0;1g , i.e. a function that is deﬁned on every s2 f0;1g and whose values can be computed by a Turing machine .
-While total recursive functions form a satisfactory formalization of seq - to - seq tasks , here we state the more general result for partial recursive functions .
-Let  : f0;1g!f0;1gbe partial recursive .
-A partial recursive function is one that need not be deﬁned for every s2 f0;1g , and there exists a Turing Machine Mwith the following property .
-The input sis initially written on the tape of the Turing Machine Mand the output  ( s ) is the content of the tape upon acceptance whichis indicated by halting in a designated accept state .
-Onsfor which  is undeﬁned , Mdoes not halt .
-We now specify how Turing machine Mis simulated by RNN R(M ) .
-In the RNNs in ( Siegelmann and Sontag , 1992 ) the hidden state hthas the form ht=
-[ qt ; 	 1 ; 	 2 ] ; whereqt= [ q1;:::;qs]denotes the state of M one - hot form .
-Numbers 	 1 ; 	 22Q , called stacks , store the contents of the tape in a certain Cantor set like encoding ( which is similar to , but slightly more involved , than binary representation ) at each step .
-The simulating RNN R(M ) , gets as input encodings of s1s2:::snin the ﬁrstnsteps , and from then on receives the vector 0as input in each step .
-If  is deﬁned on s , thenMhalts and accepts with the output  ( s)the content of the tape .
-In this case , R(M)enters a special accept state , and 	 1 encodes  ( s)and 	 2= 0 .
-IfMdoes not halt then R(M)also does not enter the accept state .
-Siegelmann and Sontag ( 1992 ) further show that fromR(M)one can further explicitly produce the  ( s)as its output .
-In the present paper , we will not deal with explicit production of the output but rather work with the deﬁnition of simulation in the previous paragraph .
-This is for simplicity of exposition , and the main ideas are already contained in our results .
-If the Turing machine computes  ( s ) in timeT(s ) , the simulation takes O(jsj)time to encode the input sequence sand4T(s)to compute  ( s ) .
-Theorem B.1 ( ( Siegelmann and Sontag , 1992 ) ) .
-Given any partial recursive function  : f0;1g ! f0;1gcomputed by Turing machine M  , there exists a simulating RNN R(M  ) .
-In view of the above theorem , for establishing Turing - completeness of Transformers , it sufﬁces to show that RNNs can be simulated by Transformers .
-Thus , in the sequel we will only talk about simulating RNNs .
-B.2 Vanilla Transformer Architecture
-Here we describe the original transformer architecture due to ( Vaswani et al . , 2017 ) as formalized by ( P ´ erez et al . , 2019 ) .
-While our notation and deﬁnitions largely follow ( P ´ erez et al . , 2019 ) , they are not identical .
-The transformer here makes use of positional encoding ; later we will discuss the transformer variant using directional attention but without using positional encoding .
-466The transformer , denoted Trans , is a sequenceto - sequence architecture .
-Its input consists of ( i ) a sequence X= ( x1;:::;xn)of vectors in Qd , ( ii ) a seed vector y02Qd .
-The output is a sequenceY= ( y1;:::;yr)of vectors in Qd .
-The sequence Xis obtained from the sequence ( s0;:::;sn)2n+1of symbols by using the embedding mentioned earlier : xi = f(fb(si);pos(i ) ) for0in .
-The transformer consists of composition of transformer encoder and a transformer decoder .
-The transformer encoder is obtained by composing one or more single - layer encoders and similarly the transformer decoder is obtained by composing one or more single - layer decoders .
-For the feed - forward networks in the transformer layers we use the activation as in ( Siegelmann and Sontag , 1992 ) , namely the saturated linear activation function : (x )
-= 8 > < > :0 ifx<0 ; x if0x1 ; 1 ifx>1:(4 ) As mentioned in the main paper , we can easily work with the standard ReLU activation via (x )
-= ReLU ( x) ReLU ( x 1 ) .
-In the following , after deﬁning these components , we will put them together to specify the full transformer architecture .
-But we begin with self - attention mechanism which is the central feature of the transformer .
-Self - attention .
-The self - attention mechanism takes as input ( i ) a query vectorq , ( ii ) a sequence ofkeyvectorsK= ( k1;:::;kn ) , and ( iii ) a sequence of value vectorsV= ( v1;:::;vn ) .
-All vectors are in Qd .
-Theq - attention over keys Kand valuesV , denoted by Att(q;K;V ) , is a vectoragiven by (  1 ; : : : ;  n ) = (fatt(q;k1);:::;fatt(q;kn ) ) ; a=  1v1 +  2v2++  nvn : The above deﬁnition uses two functions and
-fattwhich we now describe .
-For the normalization function :Qn!Qn 0we will use hardmax : forx= ( x1;:::;xn)2Qn , if the maximum value occurs rtimes among x1;:::;xn , then hardmax ( x)i:= 1 = rifxiis a maximum value andhardmax ( x)i:= 0otherwise .
-In practice , the softmax is often used but its output values are in general not rational .
-The names soft - attention andhard - attention are used for the attention mechanism depending on which normalization function is used .
-For the Turing - completeness proof of vanilla transformers , the scoring function fattused is a combination of multiplicative attention ( Vaswani et
-al . , 2017 ) and a non - linear function : fatt(q;ki )
-=    hq;kii  .
-For directional transformers , the standard multiplicative attention is used , that is , fatt(q;ki ) = hq;kii .
-Transformer encoder .
-Asingle - layer encoder is a function Enc(X; ) , whereis the parameter vector and the input X= ( x1;:::;xn)is a sequence of vector in Qd .
-The output is another sequenceZ= ( z1;:::;zn)of vectors in Qd .
-The parametersspecify functions Q();K();V( ) , andO( ) , all of type Qd!Qd .
-The functions Q();K();andV()are usually linear transformations and this will be the case in our constructions : Q(xi )
-= xT iWQ ; K(xi )
-= xT iWK ; V(xi )
-= xT iWV ; whereWQ;WK;WV2Qdd .
-The function O( ) is a feed - forward network .
-The single - layer encoder is then deﬁned by ai= Att(Q(xi);K(X);V(X ) )
-+ xi;(5 ) zi = O(ai )
-+ ai : The addition operations + xiand+aiare the residual connections .
-The operation in ( 5 ) is called the encoder - encoder attention block .
-The complete L - layer transformer encoder TEnc(L)(X;)has the same input X = ( x1;:::;xn)as the single - layer encoder .
-By contrast , its output consists of two sequences ( Ke;Ve ) , each a sequence of nvectors in Qd .
-The encoder TEnc(L)()is obtained by repeated application of single - layer encoders , each with its own parameters ; and at the end , two trasformation functionsKL()andVL()are applied to the sequence of output vectors at the last layer .
-Functions K(L)()andV(L)()are linear transformations in our constructions .
-Formally , for 1`L 1 andX1:=X , we have X`+1= Enc(X`; ` ) ;
-Ke = K(L)(XL ) ; Ve = V(L)(XL ):
-467The output of the L - layer Transformer encoder ( Ke;Ve ) = TEnc(L)(X)is fed to the Transformer decoder which we describe next .
-Transformer decoder .
-The input to a singlelayer decoder is ( i ) ( Ke;Ve ) , the sequences of key and value vectors output by the encoder , and ( ii ) a sequence Y= ( y1;:::;yk)of vectors in Qd .
-The output is another sequence Z= ( z1;:::;zk ) of vectors in Qd .
-Similar to the single - layer encoder , a singlelayer decoder is parameterized by functions Q();K();V()andO()and is deﬁned by pt= Att(Q(yt);K(Yt);V(Yt ) )
-+ yt;(6 ) at= Att(pt;Ke;Ve )
-+ pt ; ( 7 ) zt = O(at )
-+ at : The operation in ( 6 ) will be referred to as the decoder - decoder attention block and the operation in ( 7 ) as the decoder - encoder attention block .
-In the decoder - decoder attention block , positional masking is applied to prevent the network from attending over symbols which are ahead of them .
-AnL - layer Transformer decoder is obtained by repeated application of Lsingle - layer decoders each with its own parameters and a transformation functionF : Qd!Qdapplied to the last vector in the sequence of vectors output by the ﬁnal decoder .
-Formally , for 1`L 1andY1 = Ywe have Y`+1= Dec((Ke;Ve);Y`; ` ) ; z = F(yL t ):
-We usez= TDecL((Ke;Ve);Y;)to denote anL - layer Transformer decoder .
-Note that while the output of a single - layer decoder is a sequence of vectors , the output of an L - layer Transformer decoder is a single vector .
-The complete Transformer .
-ATransformer network receives an input sequence X , a seed vector y0 , andr2N. Fort0its output is a sequence Y= ( y1;:::;yr)deﬁned by ~yt+1= TDec  TEnc(X);(y0;y1;:::;yt) : We getyt+1by adding positional encoding : yt+1=~yt+1 + pos(t+ 1 ) .
-We denote the complete Transformer by Trans(X;y0 )
-= Y. The Transformer “ halts ” when yT2H , whereHis a prespeciﬁed halting set .
-Simulation of RNNs by Transformers .
-We say that a Transformer simulates an RNN ( as deﬁned in Sec . B.1 ) if on input s2 , at each step t , the vectorytcontains the hidden state htas a subvector : yt=
-[ ht; ] , and halts at the same step as RNN .
-C Results on Vanilla Transformers C.1 Residual Connections Proposition C.1 .
-The Transformer without residual connection around the Decoder - Encoder Attention block in the Decoder is not Turing Complete Proof .
-Recall that the vectors atis produced from the Encoder - Decoder Attention block in the following way , at= Att(pt;Ke;Ve )
-+ pt
-The result follows from the observation that without the residual connections , at= Att(pt;Ke;Ve ) , which leads to at = Pn i=1  i ve i for some  is such
-thatPn i  i= 1 .
-Sinceve iis produced from the encoder , the vector atwill have no information about its previous hidden state values .
-Since the previous hidden state information was computed and stored in pt , without the residual connection , the information in atdepends solely on the output of the encoder .
-One could argue that since the attention weights  is depend on the query vector pt , it could still use it gain the necessary information from the vectors ve is .
-However , note that by deﬁnition of hard attention , the attention weights  iinat
-= Pn i=1 
-i ve i can either be zero or some nonzero value depending on the attention logits .
-Since the attention weights  iare such thatPn i  i= 1 and all the nonzero weights are equal to each other .
-Thus given the constraints there are 2n 1ways to attend over ninputs excluding the case where no input is attended over .
-Hence , the network without decoder - encoder residual connection with ninputs can have at most 2n 1 distinctatvalues .
-This implies that the model will be unable to perform a task that takes ninputs and has to produce more than 2n 1outputs .
-Note that , such a limitation will not exist with a residual connection since the vector at= n i=1  i ve i+pt can take arbitrary number of values depending on its prior computations in pt .
-As an example to illustrate the limitation , consider the following simple problem , given a value  , where 01 , the network must produce
-468the values 0;;2;:::;k
- , wherekis the maximum integer such that k1 .
-If the network receives a single input  , the encoder will produce only one particular output vector and regardless of what the value of the query vector ptis , the vector atwill be constant at every timestep .
-Since atis fed to feedforward network which maps it to zt , the output of the decoder will remain the same at every timestep and it can not produce distinct values .
-If the input is combined with n 1auxiliary symbols ( such as # and$ ) , then the network can only produce 2n 1outputs .
-Hence , the model will be incapable of performing the task if <1=2n .
-Thus the model can not perform the task deﬁned above which RNNs and Vanilla Transformers can easily do with a simple counting mechanism via their recurrent connection .
-For the case of multilayer decoder , consider anyLlayer decoder model .
-If the residual connection is removed , the output of decoder - encoder attention block at each layer is a ( ` ) t = Pn i=1  ( ` ) i ve i for1`L. Observe , that since output of the decoder - encoder attention block in the last ( L - th ) layer of the decoder is a(L ) t = Pn i=1  ( L ) i ve i. Since the output of the Llayer decoder will be a feedforward network over a(L ) t , the computation reduces to the single layer decoder case .
-Hence , similar to the single layer case , if the task requires the network to produce values of atthat come from a set with size at least 2n , then the network will not be able to perform the task .
-This implies that the model without decoderencoder residual connection is limited in its capability to perform tasks which requires it to make inferences based on previously generated outputs .
-C.2 Simulation of RNNs by Transformers with positional encoding Theorem C.2 .
-RNNs can be simulated by vanilla Transformers and hence the class of vanilla Transformers is Turing - complete .
-Proof .
-The construction of the simulating transformer is simple : it uses a single head and both the encoder and decoder have one layer .
-Moreover , the encoder does very little and most of the action happens in the decoder .
-The main task for the simulation is to design the input embedding ( building on the given base embedding fb ) , the feedforward networkO()and
-the matrices corresponding to functionsQ();K();V().Input embedding .
-The input embedding is obtained by summing the symbol and positional encodings which we next describe .
-These encodings have dimension d= 2dh+db+ 2 , wheredhis the dimension of the hidden state of the RNN and db is the dimension of the given encoding fbof the input symbols .
-We will use the symbol encoding fsymb:!Qdwhich is essentially the same as fbexcept that the dimension is now larger : fsymb(s ) =
-[ 0dh;fe(s);0dh;0;0 ] : The positional encoding pos : N!Qdis simply pos(i ) =
-[ 0dh;0db;0dh;i;1 ] : Together , these deﬁne the combined embedding f for a given input sequence s0s1sn2by f(si )
-= fsymb(si)+pos(i )
-=
-[ 0dh;fb(si);0dh;i;1 ] : The vectorsv2Qdused in the computation of our transformer are of the form v=
-[ h1;s;h2;x1;x2 ] ; whereh1;h22Qdh;s2Qde;andx1;x22Q. The coordinates corresponding to the hi ’s are reserved for computation related to hidden states of theRNN , the coordinates corresponding to sare reserved for base embeddings , and those for x1 andx2are reserved for scalar values related to positional operations .
-The ﬁrst two blocks , corresponding toh1andsare reserved for computation of the RNN .
-During the computation of the Transformer , the underlying RNN will get the input stat steptfor t= 0;1 ; : : : , where recall that t= minft;ng : This sequence leads to the RNN getting the embedding of the input sequence s0;:::;snin the ﬁrstn+ 1 steps followed by the embedding of the symbol $ for the subsequent steps , which is in accordance with the requirements of ( Siegelmann and Sontag , 1992 ) .
-Similar to ( P ´ erez et al . , 2019 ) we use the following scoring function in the attention mechanism in our construction , fatt(qi;kj )
-=  jhqi;kjij ( 8) Construction of TEnc .As
-previously mentioned , our transformer encoder has only one layer , and the computation in the encoder is very simple : the attention mechanism is not utilized , only the residual connections are .
-This is done by setting
-469the matrix for V()to the all - zeros matrix , and the feedforward networks to always output 0 .
-The application of appropriately chosen linear transformations for the ﬁnal K()andV()give the following lemma about the output of the encoder .
-Lemma C.3 .
-There exists a single layer encoder denoted by TEnc that takes as input the sequence ( x1;:::;xn;$)and generates the tuple ( Ke;Ve ) whereKe= ( k1;:::;kn)andVe= ( v1;:::;vn ) such that , ki= [ 0h;0s;0h; 1;i ] ; vi= [ 0h;si;0h;0;0 ] : Construction of TDec .As
-in the construction ofTEnc , our TDec has only one layer .
-Also likeTEnc , the decoder - decoder attention block just computes the identity : we set V(1)( )
-= 0 identically , and use the residual connection so that pt = yt .
-Fort0 , at thet - th step we denote the input to the decoder as yt=~yt+ pos(t ) .
-Leth0= 0hand ~ y0=0 .
-We will show by induction that at thet - th timestep we have yt=
-[ ht;0s;0h;t+ 1;1 ] : ( 9 ) By construction , this is true for t= 0 :
-y0=
-[ 0h;0s;0h;1;1 ] :
-Assuming that it holds for t , we show it for t+ 1 .
-By Lemma C.5 Att(pt;Ke;Ve )
-=
-[ 0h;vt+1;0h;0;0]:(10 ) Lemma C.5 basically shows how we retrieve the inputst+1at the relevant step for further computation in the decoder .
-It follows that at= Att(pt;Ke;Ve )
-+
-pt
-=
-[ ht;st+1;0h;t+ 1;1 ] : In the ﬁnal block of the decoder , the computation for RNN takes place : Lemma C.4 .
-There exists a function O()deﬁned by feed - forward network such that , O(at )
-=
-[ ( ht+1 ht); st+1;0h; (t+ 1); 1 ] ; whereWh;Wxandbdenote the parameters of the RNN under consideration .
-This leads to zt = O(at )
-+ at=
-[ ht+1;0s;0h;0;0 ] : We choose the function Ffor our decoder to be the identity function , therefore ~yt+1=
-[ ht+1;0s;0h;0;0 ] , which means yt+1=~yt+1 + pos(i+ 1 ) =
-[ ht+1;0s;0h;t+ 2;1 ] , proving our induction hypothesis .
-C.3 Technical Lemmas Proof of Lemma C.3 .
-We construct a single - layer encoder achieving the desired KeandVe .
-We make use of the residual connections and via trivial selfattention we get that zi = xi .
-More speciﬁcally fori2[n]we have V(1)(xi )
-= 0 ; ai=0+xi ; O(ai ) = 0 ; zi=0+ai = xi : V(1)(xi )
-= 0can be achieved by setting the weight matrix as the all- 0matrix .
-Recall that xiis deﬁned as xi= [ 0h;si ; 0h;i;1 ] :
-We then apply linear transformations in K(zi ) = ziWkandV(zi ) = ziWv , where WT k=2 66666640 0 0 0 ............ 0 0 0 0 0 0 0 1 0 0   1 03 7777775 ; andWk2Qdd , and similarly one can obtain vi by setting the submatrix of Wv2Qddformed by the ﬁrstd 2rows and columns to the identity matrix , and the rest of the entries to zeros .
-Lemma C.5 .
-Letqt2Qdbe a query vector such thatq= [ ;:::;;t+ 1;1]wheret2Nand ‘  ’ denotes an arbitrary value .
-Then we have Att(qt;Ke;Ve )
-=
-[ 0h;st+1;0h;0;0]:(11 )
-470Proof .
-Recall thatpt = yt=
-[ ht;0 ; : : : ; 0;t+ 1;1]andki=
-[ 0;0 ; : : : ; 0; 1;i]and hence hpt;kii = i (t+ 1 ) ; fatt(pt;ki )
-=  ji (t+ 1)j :
-Thus , fori2[n ] , the scoring function fatt(pt;ki ) has the maximum value 0at
-indexi = t+ 1 if t < n ; fortn , the maximum value t+ 1 nis achieved for i = n. Therefore Att(pt;Ke;Ve )
-= st+1 : Proof of Lemma C.4 .
-Recall that at=
-[ ht;st+1 ; 0h;t+ 1;1 ] NetworkO(at)is of the form O(at ) = W2(W1at+b1 ) ; where Wi2Qddandb2Qdand W1 = dhdedh2 dh de dh 22 6664WhWx00 0
-I00
-I 000 0 00I3 7775 andb1=
-[ bh;0s;0h;0;0 ] .
-Hence (W1at+b1 )
-=
-[ (Whht+Wxst+1+b ) ; st+1;ht;t+ 1;1 ]
-Next we deﬁne W2by W2 = dhdedh2 dh de dh 22 6664I0 I0 0 I00
-0000 000 I3 7775 :
-This leads to O(at ) = W2(W1at+b1 ) =
-[ (Whht+Wxst+1+b) ht; st+1 ; 0h; (t+ 1); 1 ] ; which is what we wanted to prove .
-D Completeness of Directional Transformers There are a few changes in the architecture of the Transformer to obtain directional Transformer .
-The ﬁrst change is that there are no positional encodings and
-thus the input vector xionly consists of si .
-Similarly , there are no positional encodings in the decoder inputs and hence yt=~yt .
-The vector ~yis the output representation produced at the previous step and the ﬁrst input vector to the decoder ~y0=0 .
-Instead of using positional encodings , we apply positional masking to the inputs and outputs of the encoder .
-Thus the encoder - encoder attention in ( 5 ) is redeﬁned as a(`+1 ) i = Att(Q(z ( ` ) i);K(Z ( ` ) i);V(Z ( ` ) i))+z ( ` ) i ; whereZ(0)=X. Similarly the decoder - encoder attention in ( 7 ) is redeﬁned by a ( ` ) t= Att(p ( ` ) t;Ke t;Ve t ) + p ( ` ) t ; where`ina ( ` ) tdenotes the layer ` and we use v(`;b)to denote any intermediate vector being used in`-th layer and b - th block in cases where the same symbol is used in multiple blocks in the same layer .
-Theorem D.1 .
-RNNs can be simulated by vanilla Transformers and hence the class of vanilla Transformers is Turing - complete .
-Proof .
-The Transformer network in this case will be more complex than the construction for the vanilla case .
-The encoder remains very similar , but the decoder is different and has two layers .
-Embedding .
-We will construct our Transformer to simulate an RNN of the form given in the deﬁnition with the recurrence ht = g(Whht 1+Wxxt+b ): The vectors used in the Transformer layers are of dimensiond= 2dh+de+ 4jj+ 1 .
-Wheredhis the dimension of the hidden state of the RNN and deis the dimension of the input embedding .
-All vectorv2Qdused during the computation of the network are of the form v=
-[ h1;h2;s1;Js1K;x1;Js2KJs3K;Js4 K ] wherehi2Qdh;s2Qdeandxi2Q.
-These blocks reserved for different types of objects .
-The
-471vectorshis are reserved for computation related to hidden states of RNN s , sis are reserved for input embeddings and xis are reserved for scalar values related to positional operations .
-Given an input sequence s0s1s2sn2 wheres0= # andsn= $ , we use an embedding functionf:!Qddeﬁned as f(si )
-= xi=
-[ 0h;0h;si ; JsiK;0;0!;0!;0 ! ]
-Unlike ( P ´ erez et al . , 2019 ) , we use the dot product as our scoring function as used in Vaswani et al .
-( 2017 ) in the attention mechanism in our construction , fatt(qi;kj )
-= hqi;kji : For the computation of the Transformer , we also use a vector sequence in Qjjdeﬁned by !
-t=1 t+ 1tX j=0JstK ; where 0tn .
-The vector ! t=
-( ! t;1;:::;!t;jj)contains the proportion of each input symbol till step tfor0tn .
-Set !  1=0 .
-From the deﬁntion of ! t , it follows that at any step 1kjjwe have ! t;k=  t;k t+ 1 ; ( 12 ) where  t;kdenotes the number of times the k - th symbol  kinhas appeared till the t - th step .
-Note that!t;0=1 t+1since the ﬁrst coordinate corresponds to the proportion of the start symbol # which appears only once at t= 0 .
-Similarly , ! t;jj= 0
-for0t <
-n and!t;jj= 1=(t+ 1 ) fortn , since the end symbol $ does n’t appear till the end of the input and it appears only once at t
-= n. We deﬁne two more sequences of vectors in Qjj for0tn : t=(!t !t 1 ) ; t= ( t;1;:::;t;jj 1;1=2t+1 ): Heretdenotes the difference in the proportion of symbols between the t - th and ( t 1)-th steps , with the applicatin of sigmoid activation .
-In vector t , the last coordinate of thas been replaced with 1=2t+1 .
-The last coordinate in ! tindicates the proportion of the terminal symbol $ and hence the last value in tdenotes the change in proportion of $ .We set the last coordinate in tto an exponentially decreasing sequence so that after nsteps we always have a nonzero score for the terminal symbol and it is taken as input in the underlying RNN .
-Different and perhaps simpler choices for the last coordinate oftmay be possible .
-Note that 0t;k1and 0t;k1for0tnand1kjj .
-Construction of TEnc
-.The
-input to the network DTransMis the sequence ( s0;s1;:::;sn 1;sn ) wheres0= # andsn= $ .
-Our encoder is a simple single layer network such that TEnc(x0;x1;:::;xn ) = ( Ke;Ve)whereKe= ( ke 0;:::;ke n)andVe= ( ve 0;:::;ve n)such that , ke i= [ 0h;0h;0s ; JsiK;0;0!;0!;0!];(13 ) ve i= [ 0h;0h;si ; 0!;0;0!;JsiK;0 ! ] : Similar to our construction of the encoder for vanilla transformer ( Lemma C.3 ) , the above Ke andVecan be obtained by making the output of Att( ) = 0 by choosing the V()to always evaluate to 0and similarly for O( ) , and using residual connections .
-Then one can produce KeandVe via simple linear transformations using K()and V( ) .
-Construction of TDec .At
-thet - th step we denote the input to the decoder as yt=~yt , where 0tr , whereris the step where the decoder halts .
-Leth 1=0handh0=0h .
-We will prove by induction on tthat for 0trwe have yt=
-[ ht 1;0h;0s ; 0!;1 2t;0!;0!;!t 1]:(14 )
-This is true for t= 0by
-the choice of seed vector : y0= [ 0h;0h;0s ; 0!;1;0!;0!;0 ! ] : Assuming the truth of ( 14 ) for t , we show it for t+ 1 . Layer 1 . Similar to the construction in Lemma C.3 , in the decoder - decoder attention block we set V(1)( )
-= 0dand use the residual connections to set p(1 ) t = yt .
-At thet - th step in the decoder - encoder attention block of layer 1 we have Att(p(1 ) t;Ket;Vet ) = tX j=0^  ( 1;2 ) t;jve j ;
-472where ( ^  ( 2;2 ) t;1 ; : : : ; ^  ( 2;2 ) t;t )
-= hardmax hp(1 ) t;ke 1i;:::;hp(1 ) t;keti = hardmax ( 0 ; : : : ; 0 )
-= 1 t+ 1;:::;1 t+ 1 : Therefore Pt j=0^  ( 1;2 ) t;jve j= [ 0h;0h;s0 : t ; 0!;0;0!;!t;0 ! ] where s0 : t=1
-t+
-1tX j=0sj :
-Thus , a(1 ) t= Att(p(1 ) t;Ket;Vet ) + p(1 ) t =
-[ ht 1;0h;s0 : t;0!;1 2t;0!;!t;!t 1 ] : In Lemma D.2 we construct feed - forward network O(1)()such that O(1)(a(1 ) t ) =
-[ 0h;0h; s0 : t;t; 1 2t+1 2t+1 ; 0!; !t; !t 1+!t ] : Hence z(1 ) t = O(1)(a(1 ) t ) + a(1 ) t ( 15 ) =
-[ ht 1;0h;0s;t;1 2t+1;0!;0!;!t ] : Layer 2 .
-In the ﬁrst block of layer 2 , we set the value transformation function to identically zero similar to Lemma C.3 , i.e. V(2)( ) = 0which leads to the output of Att()to be0and then using the residual connection we get p(2 ) t = z(1 ) t.
-It follows by Lemma D.3 that Att(p(2 ) t;Ket;Vet ) =
-[ 0h;0h;st;0!;0;0!;JstK;0 ! ] : Thus , a(2 ) t= Att(p(2 ) t;Ket;Vet ) + p(2 ) t
-=
-[ ht 1;0h;st;t;1 2t+1;0!;JstK;!t ] :
-In the ﬁnal block of the decoder in the second layer , the computation for RNN takes place .
-InLemma D.4 below we construct the feed - forward networkO(2)()such that O(2)(a(2 ) t ) =
-[ (Whht 1+Wxst+b) ht 1 0h; st; t;0;0!; JstK;0 ! ]
-and hence z(2 ) t = O(2)(a(2 ) t ) + a(2 ) t =[ (Whht 1+Wxst+b);0h;0s ; 0!;1 2t+1;0!;0!;!t ] ; which gives yt+1= [ ht;0h;0s ; 0!;1 2t+1;0!;0!;!t ] ; proving the induction hypothesis ( 14 ) for t+1 , and completing the simulation of RNN .
-D.1 Technical Lemmas Lemma D.2 .
-There exists a function O(1)(:)deﬁned by feed - forward network such that , O(1)(a(1 ) t ) =
-[ 0h;0h; s0 : t;t ;  1 2t+1 2t+1;0!; !t; !t 1+!t ] Proof .
-We deﬁne the feed - forward network O(1 ) (: ) such that O(1)(a(1 ) t ) =
-[ 0h;0h; s0 : t;t !t ;  1 2t+1 2t+1;0!;0!; !t 1+!t ] where t= ( t;1;:::;t;n 1;1=2t+1);0t1 Recall that , a(1 ) t=
-[ ht 1;0h;s0 : t ; ! t;1
-2t;0!;0!;!t 1 ] We deﬁne the feed - forward network O(at)as follows , O(1)(at )
-= W2(W1a(1 ) t+b1 )
-473whereWi2Qddandb12Qd .
-DeﬁneW1as 2dhded!1d!d!d !
-2dh de d! 1 1 1 d !
-d ! d!2 6666666666640000000 0I00000 00000I I 0001 2000 0001 2000 00I0000 00000I0 000000I3 777777777775 andb1=0 , then (W1a(1 ) t+b1 ) =
-[ 0h;0h;s0 : t;t;1 2t+1 ; !
-t;!t 1;!t 1 ]
-We deﬁneW2as 2dhded! 12d!d!d !
-2dh de d! 1 1 1 d !
-d ! d!2
-6666666666640000000 0 I00000 00I0000 0001;0000 000 2;1000 00I0000
-00000 I0 00000I I3
-777777777775
-This leads to O(1)(a(1 ) t ) =
-[ 0h;0h;s0 : t;t ;  1 2t+1 2t+1;0!; !t; !t 1+!t ] which is what we wanted to prove .
-Lemma D.3 .
-Letp(2 ) t2Qdbe a query vector such that p(2 ) t=
-[ ;; ; t;;;; ] wheret0and ‘  ’ denotes an arbitrary value .
-Then we have Att(p(2 ) t;Ket;Vet ) = [ 0h;0h;st ; 0!;0;0!;JstK;0 ! ] : ( 16 ) Proof .
-Let ( ^  ( 2;2 ) t;1 ; : : : ; ^  ( 2;2 ) t;t )
-= hardmax hp(2 ) t;ke 1i;:::;hp(2 )
-t;ketibe
-the vector of normalized attention scores in the decoder - encoder attention block of layer 2 at time t.
-Then Att(p(2 ) t;Ket;Vet ) = tX j=0^  ( 2;2 ) t;jve j : We claim that Claim 1 .
-Fort0we have ( ^  ( 2;2 ) t;1 ; : : : ; ^  ( 2;2 ) t;t )
-= 1 t  I(s0 = st);I(s1 = st);:::;I(st = st) ; wheretis a normalization factor given by t = Pn 1 j=0I(sj = st ) .
-We now prove the lemma assuming the claim above .
-Denote the L.H.S. in ( 16 ) by  t. Note that ifsj = st , thenve j=  t. Now we have tX j=0^  ( 2;2 ) t;jve j=1 ttX j=0I(sj = st)ve j = 1 t0 @tX j=0I(sj = st)1 A  t =  t ; completing the proof of the lemma modulo the proof of the claim , which we prove next .
-Proof .
-( of Claim 1 ) For 0 < tn , the vector ! t !t 1has the form   1 t+ 1 1 t ; : : : ;   t;k t+ 1   t 1;k t ; : : : ; 0 ! :
-Ifst=  k , then ( ! t !t 1)k ( 17 ) =   t;k t+ 1   t 1;k t ( 18 ) =   t 1;k+ 1 t+ 1   t 1;k t ( 19 ) = t   t 1;k t(t+ 1)(20 ) 1 t(t+ 1 ): ( 21 ) The last inequality used our assumption that s0= # and that # does not occur at any later time and
-474therefore  t 1;j < t.
-On the other hand , if st6=  k , then ( ! t !t 1)k=  t;k t+ 1   t 1;k t
-=   t 1;k t+ 1   t 1;k
-t
-=    t 1;j t(t+ 1)(22 ) 0 : This leads to , ( ! t !t 1)k>0 ifst=  k ; ( !
-t !t 1)k0 otherwise : In words , the change in the proportion of a symbol is positive from step t 1totif and only if it is the input symbol at the t - th step .
-For 0tn and1kjj , this leads to t;k=(!t !t 1)k>0 ifst=  k ; t;k=(!t !t 1)k= 0 otherwise ; Fort > n , t=0 : Recall thatp(2 ) t = z(1 ) twhich comes from ( 15 ) , andke jis deﬁned in ( 13 ) .
-We reproduce these for convenience : p(2 ) t=
-[ ht 1;0h;0s ; t;1 2t+1;0!;0!;!t ] ; ke j= [ 0h;0h;0s ; JsjK;0;0!;0!;0 ! ] :
-It now follows that for 0 < t < n , if0jtis such thatsj6 = st , then hp(2 ) t;ke ji = ht;JsjKi=t;i= 0 :
-And for 0 < t < n , if0jtis such that sj = st=  i , then hp(2 ) t;ke ji = ht;JsjKi=t;i ( 23 ) = t   t 1;j t(t+
-1)1 t(t+ 1 ): ( 24 ) Thus , for 0t < n , in the vector  hp(2 ) t;ke 0i;:::;hp(2 ) t;ke ti , the largest coordinates are the ones indexed by jwithsj = st and they all equalt   t 1;i t(t+1 ) .
-All other coordinates are 0 .
-Fortn , only the last coordinate hp(2 ) t;ke ni = ht;J$Ki=1 2t+1is non - zero .
-Now the claim follows immediately by the deﬁnition of hardmax .Lemma
-D.4 .
-There exists a function O(2)(:)deﬁned by feed - forward network such that , for t0 , O(2)(a(2 ) t ) =
-[ (Whht 1+Wxst+b) ht 1 ; 0h; st; t;0;0!; JstK;0 ! ]
-whereWh;Wxandbdenote the parameters of the RNN under consideration .
-Proof .
-Proof is very similar to proof of lemma C.4 .
-E Details of Experiments In this section , we describe the speciﬁcs of our experimental setup .
-This includes details about the dataset , models , setup and some sample outputs .
-E.1 Impact of Residual Connections The models under consideration are the vanilla Transformer , the one without decoder - encoder residual connection and the one without decoderdecoder residual connection .
-For the synthetic tasks , we implement a single layer encoder - decoder network with only a single attention head in each block .
-Our implementation of the Transformer is adapted from the implementation of ( Rush , 2018 ) .
-Table 4 provides some illustrative sample outputs of the models for the copy task .
-SOURCE & REFERENCE – there was no problem at all says douglas ford chief executive ofﬁcer of the futures exchange DIRECTIONAL TRANS FORMER – there was no problem at all says douglas ford chief executive ofﬁcer of the futures exchange VANILLA TRANS FORMER – there was no problem at all says douglas ford chief executive ofﬁcer Table 4 : Sample outputs by the models on the copy task on length 16 .
-With absolute positional encodings the model overﬁts on terminal symbol at position 13 and generates sequence of length 12 .
-For the machine translation task , we use OpenNMT ( Klein et al . , 2017 ) for our implementation .
-For preprocessing the German - English dataset we used the script from fairseq .
-The dataset contains about 153k training sentences , 7k development sentences and 7k test sentences .
-The hyperparameters to train the vanilla Transformer were obtained from fairseq ’s guidelines .
-We tuned the parameters on the validation set for the two baseline model .
-To preprocess the English - Vietnamese dataset , we follow Luong and Manning ( 2015 ) .
-The dataset contains about 133k training sentences .
-We use
-475the tst2012 dataset containing 1.5k sentences for validation and tst2013 containing 1.3k sentences as test set .
-We use noam optimizer in all our experiments .
-While tuning the network , we vary the number of layer from 1 to 4 , the learning rate , the number of heads , the warmup steps , embedding size and feedforward embedding size .
-E.2 Masking and Encodings Our implementation for directional transformer is based on ( Yang et al . , 2019 ) but we use only unidirectional masking as opposed to bidirectional used in their setup .
-While tuning the models , we vary the layers from 1 to 4 , the learning rate , warmup steps and the number of heads .

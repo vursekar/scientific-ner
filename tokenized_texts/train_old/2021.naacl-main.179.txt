@@ -1,0 +1,997 @@
+Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , pages 2219–2263 June 6–11 , 2021 .
+© 2021 Association for Computational Linguistics2219Modeling Framing in Immigration Discourse on Social Media Julia Mendelsohn University of Michigan juliame@umich.eduCeren Budak University of Michigan cbudak@umich.eduDavid Jurgens University of Michigan jurgens@umich.edu
+Abstract
+The framing of political issues can inﬂuence policy and public opinion .
+Even though the public plays a key role in creating and spreading frames , little is known about how ordinary people on social media frame political issues .
+By creating a new dataset of immigrationrelated tweets labeled for multiple framing typologies from political communication theory , we develop supervised models to detect frames .
+We demonstrate how users ’ ideology and region impact framing choices , and how a message ’s framing inﬂuences audience responses .
+We ﬁnd that the more commonlyused issue - generic frames obscure important ideological and regional patterns that are only revealed by immigration - speciﬁc frames .
+Furthermore , frames oriented towards human interests , culture , and politics are associated with higher user engagement .
+This large - scale analysis of a complex social and linguistic phenomenon contributes to both NLP and social science research .
+1 Introduction Framing selects particular aspects of an issue and makes them salient in communicating a message ( Entman , 1993 ) .
+Framing can impact how people understand issues , attribute responsibility ( Iyengar , 1991 ) , and endorse possible solutions , thus having major implications for public opinion and policy decisions ( Chong and Druckman , 2007 ) .
+While past work has studied framing by the news media and the political elite , little is known about how ordinary people frame political issues .
+Yet , framing by ordinary people can inﬂuence others ’ perspectives and may even shape elites ’ rhetoric ( Russell Neuman et al . , 2014 ) .
+To shed light on this important topic , we focus on one issue — immigration — and develop a new methodology to computationally analyze its framing on Twitter .
+Our work highlights unique insights that social media data offers .
+The massive amount of availablesocial media content enables us to compare framing strategies across countries and political ideologies .
+Furthermore , social media provides unique insights into how messages resonate with audiences through interactive signals such as retweets and favorites .
+By jointly analyzing the production and reception of frames on Twitter , we provide an in - depth analysis of immigration framing by and on the public .
+Political communications research has identiﬁed numerous typologies of frames , such as issuegeneric policy , immigration - speciﬁc , and narrative .
+Each of these frame types can signiﬁcantly shape the audience ’s perceptions of an issue ( Iyengar , 1991 ; Chong and Druckman , 2007 ; Lecheler et al . , 2015 ) , but prior NLP work seeking to detect frames in mass media ( e.g. Card et al . , 2016 ; Field et al . , 2018 ;
+Kwak et al . , 2020 ) has largely been limited to a single issue - generic policy typology .
+Multiple dimensions of framing must be considered in order to better understand the structure of immigration discourse and its effect on public opinion and attitudes .
+We thus create a novel dataset of immigration - related tweets containing labels for each typology to facilitate more nuanced computational analyses of framing .
+This work combines political communication theory with NLP to model multiple framing strategies and analyze how the public on Twitter frames immigration .
+Our contributions are as follows : ( 1 ) We create a novel dataset of immigrationrelated tweets labeled for issue - generic policy , immigration - speciﬁc , and narrative frames .
+( 2 ) We develop and evaluate multiple methods to detect each type of frame .
+( 3 ) We illustrate how a message ’s framing is inﬂuenced by its author ’s ideology and country .
+( 4 ) We show how a message ’s framing affects its audience by analyzing favoriting and retweeting behaviors .
+Finally , our work highlights the need to consider multiple framing typologies and their effects .
+22202
+Framing in the Media Framing serves four functions : ( i ) deﬁning problems , ( ii ) diagnosing causes , ( ii ) making evaluative judgments , and ( iv ) suggesting solutions ( Entman , 1993 ) .
+Framing impacts what people notice about an issue , making it a key mechanism by which a text inﬂuences its audience .
+Framing Typologies We draw upon distinct typologies of frames that can be applied to the issue of immigration : ( 1 ) issue - speciﬁc , which identify aspects of a particular issue , or ( 2 ) issue - generic , which appear across a variety of issues and facilitate cross - issue comparison ( de Vreese , 2005 ) .
+Issue - generic frames include policy frames that focus on aspects of issues important for policymaking , such as economic consequences or fairness and equality ( Boydstun et al . , 2013 ) .
+Other generic frames focus on a text ’s narrative ; news articles use both episodic frames , which highlight speciﬁc events or individuals , and thematic frames , which place issues within a broader social context .
+The use of episodic versus thematic frames can inﬂuence the audience ’s attitudes .
+For example , episodic frames lead audiences to attribute responsibility for issues such as poverty to individual citizens while thematic frames lead them to hold the government responsible ( Iyengar , 1991 ) .
+Issue - speciﬁc frames for immigration focus on the portrayal of immigrants .
+Our analysis uses Benson ( 2013 ) ’s set of issue - speciﬁc frames , which represent immigrants as heroes ( cultural diversity , integration , good workers ) , victims ( humanitarian , global economy , discrimination ) , and threats ( to jobs , public order , taxpayers , cultural values ) .
+Both issue - speciﬁc and generic frames provide unique insights but present advantages and drawbacks .
+While issue - speciﬁc frames analysis are speciﬁc and detailed , they are hard to generalize and replicate across studies , which is a key advantage for generic frames ( de Vreese , 2005 ) .
+Framing effects Studies of framing typically focus on either frame - building orframesetting ( Scheufele , 1999 ; de Vreese , 2005 ) .
+Frame - building is the process by which external factors , such as a journalist ’s ideology or economic pressures , inﬂuence what frames are used ; frame - building studies thus treat framing as the dependent variable .
+Frame - setting studies treat frames as independent variables that impact how an audience interprets and evaluates issues .
+Prior analyses of frame - building in immigrationnews highlight region and ideology as particularly important factors .
+Right - leaning media from conservative regions are more likely to frame immigrants as intruders ( van Gorp , 2005 ) , and as threats to the economy and public safety ( Fryberg et al . , 2012 ) .
+Framing also differs across countries ; while the US press emphasizes public order , discrimination , and humanitarian concerns , the French press more frequently frames immigrants as victims of global inequality ( Benson , 2013 ) .
+Frame - setting has also been studied in the context of immigration .
+For example , experimental work has shown that frames eliciting angry or enthusiastic emotions impact participants ’ opinions on immigration ( Lecheler et al . , 2015 ) .
+While past work has analyzed linguistic framing in Twitter immigration discourse ( e.g. , de Saint Laurent et al . , 2020 ) , little is known about how such framing affects users ’ interactive behaviors such as resharing content , which is a key objective of frame setting .
+3 Computational Approaches to Framing Because many people now generate and consume political content on social media , scholars have increasingly used automated techniques to study framing on social media .
+Large - scale research of framing on Twitter has commonly focused on unsupervised approaches .
+( e.g. , Russell Neuman et al . , 2014 ; Meraz and Papacharissi , 2013 ; de Saint Laurent et
+al . , 2020 ) .
+Such approaches , including those focused on hashtag analysis , can reveal interesting framing patterns .
+For instance , Siapera et al .
+( 2018 ) shows that frame usage varies across events .
+Similarly , topic models have been used to compare “ refugee crisis " media discourses across the European countries ( Heidenreich et al . , 2019 ) , and to uncover differences in attitudes towards migrants ( Hartnett , 2019 ) .
+Although lexicon analysis and topic models can provide insights about immigration discourse , here , we adopt a supervised approach to ground our work in framing research and to enable robust evaluation .
+We draw inspiration from a growing body of NLP research that uses supervised approaches to detect issue - generic policy frames in news articles , a task popularized by the Media Frames Corpus ( Card et al . , 2015 ) , which contains issuegeneric policy frame labels for articles across several issues ( Boydstun et al . , 2013 ) .
+Using this corpus , prior work has detected frames with techniques including logistic regression ( Card et al . ,
+2221Frame Type Frame Description Issue - Generic Economic Financial implications of an issue Policy Capacity & Resources The availability or lack of time , physical , human , or ﬁnancial resources Morality & Ethics Perspectives compelled by religion or secular sense of ethics or social responsibility Fairness & Equality The ( in)equality with which laws , punishments , rewards , resources are distributed Legality , Constitutionality & JurisdictionCourt cases and existing laws that regulate policies ; constitutional interpretation ; legal processes such as seeking asylum or obtaining citizenship ; jurisdiction Crime & Punishment The violation of policies in practice and the consequences of those violations Security & Defense
+Any threat to a person , group , or nation and defenses taken to avoid that threat Health & Safety Health and safety outcomes of a policy issue , discussions of health care Quality of Life Effects on people ’s wealth , mobility , daily routines , community life , happiness , etc .
+Cultural Identity Social norms , trends , values , and customs ; integration / assimilation efforts Public Sentiment General social attitudes , protests , polling , interest groups , public passage of laws Political Factors & ImplicationsFocus on politicians , political parties , governing bodies , political campaigns and debates ; discussions of elections and voting Policy Prescription & EvaluationDiscussions of existing or proposed policies and their effectiveness External Regulation & ReputationRelations between nations or states / provinces ; agreements between governments ; perceptions of one nation / state by another Immigration Victim : Global Economy Immigrants are victims of global poverty , underdevelopment and inequality Speciﬁc Victim : Humanitarian Immigrants experience economic , social , and political suffering and hardships Victim : War Focus on war and violent conﬂict as reason for immigration Victim :
+Discrimination Immigrants are victims of racism , xenophobia , and religion - based discrimination Hero : Cultural Diversity Highlights positive aspects of differences that immigrants bring to society Hero : Integration Immigrants successfully adapt and ﬁt into their host society Hero : Worker Immigrants contribute to economic prosperity and are an important source of labor Threat :
+Jobs Immigrants take nonimmigrants ’ jobs or lower their wages Threat : Public Order Immigrants threaten public safety by being breaking the law or spreading disease Threat : Fiscal Immigrants abuse social service programs and are a burden on resources Threat : National Cohesion Immigrants ’ cultural differences are a threat to national unity and social harmony Narrative Episodic Message provides concrete information about on speciﬁc people , places , or events Thematic Message is more abstract , placing stories in broader political and social contexts Table 1 : List of all issue - generic policy ( Boydstun et al . , 2013 ) , immigration - speciﬁc ( Benson , 2013 ; Hovden and Mjelde , 2019 ) , and narrative ( Iyengar , 1991 ) frames with brief descriptions .
+2016 ) , recurrent neural networks ( Naderi and Hirst , 2017 ) , lexicon induction ( Field et al . , 2018 ) , and ﬁne - tuning pretrained language models ( Khanehzar et al . , 2019 ; Kwak et
+al . , 2020 ) .
+Roy and Goldwasser ( 2020 ) further extracted subcategories of issue - generic policy frames in newspaper coverage using a weakly - supervised approach .
+Finally , issue - generic frames have also been computationally studied in other media , including online fora and politicians ’ tweets ( Johnson et al . , 2017 ; Hartmann et al . , 2019 ) .
+We build upon this literature by incorporating additional frame typologies that reﬂect important dimensions of media discourse with real - world consequences ( Iyengar , 1991 ; Gross , 2008 ; Eberl et al . , 2018 ) .
+Beyond detecting frames , we computationally analyze frame - building and frame - setting among social media users ; though well - studied in traditional news media , little is known about how social media users frame immigration or its effects ( Eberl et al . , 2018 ) .
+Noting that issue - generic policy frames obscure important linguistic differences , several works stud - ied issue - speciﬁc frames in news media for issues such as missile defense and gun violence ( Morstatter et al . , 2018 ; Liu et al . , 2019a ) .
+We extend issuespeciﬁc frame analyses to immigration by adopting an immigration - speciﬁc typology developed by political communication scholars ( Benson , 2013 ) .
+In contrast to prior NLP work focused on traditional media or political elites ( Johnson et al . , 2017 ; Field et al . , 2018 ) , we highlight the role that social media publics play in generating and propagating frames .
+Furthermore , we provide a new computational model of narrative framing ( Iyengar , 1991 ) , that together with models for issue - generic policy and issue - speciﬁc frames , provides complementary views on the framing of immigration .
+Finally , our large - scale analysis of frame - setting illustrates the potential for using NLP to understand how a message ’s framing shapes its audience behavior .
+4 Data We ﬁrst collect a large dataset of immigrationrelated tweets , and then annotate a subset of this
+2222full dataset for multiple types of frames .
+Data Collection We extract all English - language tweets in 2018 and 2019 from the Twitter Decahose containing at least one of the following terms : immigration , immigrant(s ) , emigration , emigrant(s ) , migration , migrant(s ) , illegal alien(s ) , illegals , and undocumented1 .
+We focus on content creation and thus exclude retweets from our dataset , though we consider retweeting rates when analyzing the social inﬂuence of different frames .
+We further restrict our dataset to tweets whose authors are identiﬁed as being located in the United States ( US ) , United Kingdom ( GB ) , and European Union ( EU ) by an existing location inference tool ( Compton et al . , 2014 ) .
+To compare framing across political ideologies , we obtain ideal point estimates for nearly two - thirds of US - based users with Barberá ( 2015 ) ’s
+Bayesian Spatial Following model .
+Our full dataset contains over 2.66 million tweets , 86.2 % of which are from the United States , 10.4 % from the United Kingdom , and 3.4 % from the European Union .
+Data Annotation Tweets are annotated using three frame typologies : ( i ) issue - generic policy , ( ii ) immigration - speciﬁc , and ( iii ) narrative frames , where a tweet may use multiple frames simultaneously .
+We use Boydstun et al .
+( 2013 ) ’s
+Policy Frames Codebook to formulate our initial guidelines to code for policy frames .
+We use Benson ( 2013 ) ’s immigration - speciﬁc frames , but follow Hovden and Mjelde ( 2019 ) in including an additional category for framing immigrants as victims of war .
+Finally , we code for narrative frames using deﬁnitions from Iyengar ( 1991 ) .
+All frames and descriptions can be found in Table 1 , with a complete codebook in Supplementary Materials .
+Because annotation guidelines from prior work focus on elite communications , we ﬁrst adjusted our codebook to address challenges posed by Twitter content .
+Changes were made based on feedback from four trained annotators who labeled 360 tweets from 2018 , split between the EU , GB , and US .
+Even for humans , identifying frames in tweets is a difﬁcult task .
+Deﬁning the boundaries of what constitutes a message is not trivial .
+Beyond the text , frames could be identiﬁed in hashtags , images , videos , and content from linked pages .
+Furthermore , tweets are often replies to other users or part of a larger thread .
+This additional context may 1We obtained this list by starting with the seed terms immigrants , immigration , and illegal aliens .
+We then added the remaining terms by manually inspecting and ﬁltering nearby words in pretrained GloVe and Word2Vec vector spaces.inﬂuence an issue ’s framing .
+For simplicity , we treat each tweet as a standalone message and label frames based only on the text ( including hashtags ) .
+Unlike news stories , where frames are clearly cued , tweets often implicitly allude to frames due to character limitations .
+For example , a tweet expressing desire to “ drive immigrants out " with no additional context may suggest a criminal frame , but criminality is not explicit .
+To minimize errors , we avoid making assumptions about intended meaning and interpret all messages literally .
+Training , development , and test data were annotated using two procedures after four annotators completed four rounds of training .
+The dataset contains equal numbers of tweets from the EU , UK , and US .
+Training data was singly annotated and includes 3,600 tweets , while the development and test sets each contain 450 tweets ( 10 % of the full dataset ) and were consensus - coded by pairs of trained annotators .
+We opt for this two - tier approach due to ( i ) the inherent difﬁculty of the task2 and ( ii ) the need to maximize diversity seen in training .
+During annotator training , pilot studies attained moderate agreement , suggesting that to attain high - reliability , consensus coding with adjudication would be needed ( Krippendorff , 2013 ) , which comes at a cost of substantially increased time .
+Because a large dataset of unique , singlycoded documents is preferable to a small dataset of documents coded by multiple annotators for text classiﬁcation ( Barbera et al . , 2021 ) , we decided to increase corpus diversity in the training data by singly - annotating , at the expense of potentially noisier annotation , and to consensus code all evaluation data .
+On the double annotated data , annotators attained Krippendorff ’s  = 0.45 .
+Additional details are provided in Supplementary Material ( § B , Figures 6 and 7 ) .
+Results We observe differences across frame typologies in coverage rates within the annotated data set .
+While 84 % of tweets are labeled with at least one issue - generic policy frame and 85 % with at least one narrative frame , only 51 % are labeled with at least one issue - speciﬁc frame .
+This difference is due to immigration - speciﬁc frames being more narrowly - deﬁned , as they require explicit judgment of immigrants as heroes , victims , or threats .
+Further details about frame distributions 2For example , in identifying just the primary issue - generic frame of a document , the Media Frames corpus attained an Krippendorff ’s  = 0.6 ( Card et al . , 2015 , Fig . 4 ) , whereas we ask annotators to identify allframes across three typologies .
+2223Random LogReg RoBERTa FT RoBERTa 0.193 0.296 0.611 0.657 Table 2 : F1 scores on the test set for all models , calculated as an ( unweighted ) average over all frames and initialization seeds .
+The ﬁne - tuned ( FT ) RoBERTa model improvements over all models are signiﬁcant at p<0.001 ( McNemar ’s test ) .
+Frame Type Precision Recall F1 Score LRAP Issue - Generic Policy 0.727 0.721 0.711 0.750 Issue - Speciﬁc 0.593 0.531 0.552 0.806 Narrative 0.757 0.887 0.808 0.894 Table 3 : Test set performance on each frame typology .
+in our annotations can be found in Supplementary Material ( § A , Figure 5 ) .
+While the precision of issue - speciﬁc frames can reveal patterns otherwise obscured by the broader issue - generic frames , this lack of coverage presents two challenges : 1 ) automated detection is more challenging given this sparsity and 2 ) analyses of issue - speciﬁc frames do not capture a large portion of immigration - related discourse .
+By incorporating multiple framing strategies , we leverage both the coverage of issue - generic frames and the precision and interpretability of issue - speciﬁc frames .
+5 Frame Detection We formulate frame detection as a multilabel classiﬁcation problem for each of the three typologies , using our dataset to train supervised models .
+Experimental Setup Our proposed model is a RoBERTa model ( Liu et al . , 2019b ) trained using binary cross - entropy on the CLS token .
+We consider both ( i ) a model trained using the roberta - base parameters and ( ii ) a second model that has ﬁrst been ﬁne - tuned on our full set of immigration tweets using masked - language modeling .
+Fine tuning was performed for 60 epochs .
+In both models , early stopping is used to avoid overﬁtting .
+Models are compared with two baselines : random prediction , and logistic regression with unigram and bigram features .
+Each model was trained ﬁve times with different random seeds and we report bootstrapped mean performance .
+Results
+The ﬁne - tuned RoBERTa model signiﬁcantly outperforms all baselines ( Table 2 ) .
+RoBERTa has the most substantial gains over logistic regression for low - frequency frames ( Supplementary Material § C , Figure 8) .
+These gains for rare frames are essential for analyzing immigra - tion discourse on social media in order to capture diverse perspectives and arguments .
+Table 3 shows several evaluation metrics separated by frame type .
+Precision , recall , and F1 are calculated as unweighted averages over all frames belonging to each category .
+Overall , issue - generic policy and narrative frames can be detected more effectively than issue - speciﬁc frames .
+This difference reﬂects that issue - speciﬁc frames were sparser in the training data , but also that detecting these frames is inherently more challenging because it requires jointly reasoning about immigration - related topics and how these topics affect immigrants .
+For example , tweets about immigrants committing crimes and tweets about hate crimes committed against immigrants have distinct issue - speciﬁc frames ( threat : public order andvictim : discrimination ) , even though these texts can be linguistically quite similar .
+Given some thematic similarities between typologies , we tested an additional model that jointly predicted frames from all three typologies using the ﬁne - tuned RoBERTa model ; however , the resulting model offered worse performance than any single - typology model , suggesting minimal beneﬁts of cross - typology learning .
+Supplementary Section C contains additional model performance analyses by frame and region .
+Issue - Generic Issue - Specific Narrative Frame Type0.00.20.40.60.8F1
+ScoreLiberal Conservative Figure 1 : Average F1 scores on combined dev / test set separated by US authors ’ ideologies .
+Issue - generic policy and issue - speciﬁc frame detection models have higher performance for conservatives than liberals .
+Hegemonic Framing Conservative media ’s framing of political issues is known to be more consistent , coordinated , and hegemonic than mainstream media , which has been vital to the success of the American conservative movement ( Hemmer , 2016 ; Speakman and Funk , 2020 ) .
+If the same pattern holds for social media , we would expect automated
+2224Error Type Description Example Plausible interpretationThese instances highlight the challenges of annotation ; there are convincing arguments that model ’s predicted frames can be appropriate labels .
+Interestingly , the criteria to which immigrants would be held would not be met by a large number of the ‘ British ’ people either .
+Model erroneously predicted Policy Inferring frames not explicitly cued in textModel predicts frames that may capture an author ’s intention but without sufﬁcient evidence from the textStop immigration Model erroneously predicted Threat : Public Order Missing necessary contextual knowledgeSome frames are directly cued by lexical items ( e.g. politicians ’ names cue Political frame ) , but model lacks real - world knowledge required to identify these frames@EricTrump Eric I have been alive longer than your immigrant mother in law and you .
+I paid more in taxes than you did and your immigrant mother in law combined ...
+Model missed Political frame Overgeneralizing highly - correlated featuresMany words and phrases do not directly cue frames , but are highly - correlated .
+The model makes erroneous predictions when such features are used in different contexts ( e.g. violence against immigrants , rather than immigrants being violent)Lunaria ’s ﬁgures from 2018 recorded 12 shootings , two murders and 33 physical assaults against migrants in the ﬁrst two months since Salvini entered government .
+Model missed Victim : Humanitarian frame Pronoun ambiguityCoreference resolution is often not possible and annotators avoided making assumptions to resolve ambiguities .
+For example , " you " can be used to discuss individuals ’ experiences ( episodic ) but its impersonal sense can be in broad generalizations ( thematic).It ’s worse when you have immigrant parents who do n’t speak the language cause you have to deal with all the paperwork , be the translator for them whenever they go ( ... )
+its tiring but someone has to Model predicted Episodic but referent is unclear Table 4 :
+Types of common errors in frame prediction along with brief descriptions and examples .
+frame detection to achieve higher performance on conservative tweets due to more linguistic regularities across messages .
+Indeed , we ﬁnd that issuegeneric and issue - speciﬁc classiﬁers achieve higher F1 scores on tweets written by conservative authors compared to liberal authors ( Figure 1 ) , even though there are fewer conservative tweets in the training data ( 334 conservative vs 385 liberal tweets ) .
+Higher model performance on conservative tweets suggests that , like political and media elites , conservatives on social media are more consistent than liberals in their linguistic framing of immigration .
+Error Analysis We identify classiﬁcation errors by qualitatively analyzing a random sample of 200 tweets that misclassiﬁed at least one frame .
+Table 4 shows the most common categories of errors .
+6 Frame - Building Analysis In writing about an issue , individuals are known to select particular frames — a process known as frame - building — based on numerous factors , such as exposure to politicians ’ rhetoric or their own identity ( Scheufele , 1999 ) .
+Here , we focus on two speciﬁc identity attributes affecting frame building : ( i ) political ideology and ( ii ) country / region .
+The political , social , and historical contexts of an one ’s nation - state can impact how they frame immigration ( Helbling , 2014 ) .
+Immigration has a long history in the USA relative to Europe , and former European colonial powers ( e.g. the UK ) have longer immigration histories than other countries ( e.g. Norway ) ( Thorbjørnsrud , 2015 ; Eberl et al . , 2018 ) .
+Cross - country variation in news framing also arise from differences in immigration policies ( Helbling , 2014 ; Lawlor , 2015 ) , media systems ( Thorbjørnsrud , 2015 ) , journalis - tic norms ( Papacharissi and De Fatima Oliveira , 2008 ) , geographic proximity to immigrant populations or points of entry ( Grimm and Andsager , 2011 ;
+Fryberg et al . , 2012 ) , and immigrants ’ race / ethnicity ( Grimm and Andsager , 2011 ) .
+At the same time , increased globalization may result in a uniform transnational immigration discourse ( Helbling , 2014 ) .
+Framing variations across countries has implications for government policies and initiatives , particularly in determining what solutions could be applied internationally or tailored to each country ( Caviedes , 2015 ) .
+Prior studies on the role of ideology in framebuilding have focused on the newspapers or political movements , showing patterns in frames like morality and security by political afﬁliation in European immigration discourse ( Helbling , 2014 ; Hogan and Haltinner , 2015 ) or in use of economic frames by American newspapers ( Fryberg et al . , 2012 ; Abrajano et al . , 2017 ) .
+However , it remains unclear whether these patterns observed for elite groups can generalize to the effect of individual people ’s political dispositions .
+Experimental Setup We detect frames for all 2.6 M immigration - related tweets using the ﬁnetuned RoBERTa model with the best - performing seed on development data .
+Using this labeled data , we estimate the effects of region and ideology by ﬁtting separate mixed - effects logistic regression models to predict the presence or absence of each frame .
+We treat region ( US , UK , and EU ) as a categorical variable , with US as the reference level .
+Ideology is estimated using the method of Barberá ( 2015 ) , which is based on users ’ connections to US political elites ; as such , we restrict our analysis of ideology to only tweets from the United States .
+2225 0.5   0.0 0.5   Coefficient Victim : Humanitarian Hero : Cultural Diversity Victim : Discrimination Victim : War Morality & Ethics Hero : Worker Hero : Integration Episodic Fairness & Equality Quality of Life Cultural Identity Public Sentiment Victim : Global Economy Health & Safety Policy Prescription Economic Political Factors External Regulation Threat : Jobs Crime & Punishment Security & Defense Capacity & Resources Thematic Threat : National Cohesion Threat : Fiscal Threat : Public OrderLiberal        Conservative Frame Type Issue - Specific Issue - Generic NarrativeFigure 2 : Logistic regression coefﬁcients of political ideology in predicting each frame .
+Positive ( negative ) values correspond to more conservative ( liberal ) ideology .
+Only frames associated with ideology after HolmBonferroni correction with p<0:01are included .
+To account for exogenous events that may impact framing , we include nested random effects for year , month , and date .
+We further control for user characteristics ( e.g. the author ’s follower count , friends count , veriﬁed status and number of prior tweets ) as well as other tweet characteristics ( e.g. tweet length , if a tweet is a reply , and whether the tweet contains hashtags , URLs , or mentions of other users ) .
+We apply Holm - Bonferroni corrections on p - values before signiﬁcance testing to account for multiple hypothesis testing .
+Ideology Ideology is strongly predictive of framing strategies in all three categories , as shown in Figure 2 .
+Our results reveal three broad themes .
+First , prior work has argued that liberals and conservatives adhere to different moral foundations , with conservatives being more sensitive to in - group / loyalty and authority than liberals , who are more sensitive to care and fairness ( Graham et al . , 2009 ) .
+Our results agree with this argument .
+Liberals are more likely to frame immigration as a fairness and morality issue , and immigrants as victims of discrimination and inhumane policies .
+More conservative authors , on the other hand , fo - cus on frames with implications for the in - group .
+They express concerns about 1 ) immigrants imposing a burden on taxpayers and governmental programs and 2 ) immigrants being criminals and threats to public safety .
+We qualitatively observe three distinct , though unsubstantiated , conservative claims contributing to the latter : ( i. )
+Immigrants commit violent crimes ( Light and Miller , 2018 ) , ( ii . )
+Undocumented immigrants illegally vote in US elections ( Smith , 2017 ; Udani and Kimball , 2018 ) , and ( iii . ) Immigrants are criminals simply by virtue of being immigrants ( Ewing et al . , 2015 ) .
+Figure 2 shows a clear ideological stratiﬁcation for issue - speciﬁc frames : liberals favor hero and victim frames , while conservatives favor threat frames .
+This ﬁnding is consistent with prior work on the role perceived threats play in shaping white American attitudes towards immigration ( Brader et al . , 2008 ) , and the disposition of political conservatism to avoid potential threats ( Jost et al . , 2003 ) .
+Second , while all frame categories show ideological bias , issue - speciﬁc frames are the most extreme .
+Most notably , our analysis shows that focusing solely on issue - generic policy frames would obscure important patterns .
+For example , the issuegeneric cultural identity frame shows a slight liberal bias ; yet , related issue - speciﬁc frames diverge : hero : cultural diversity is very liberal while threat : national cohesion is very conservative .
+Similarly , the issue - generic economic policy frame is slightly favored by more conservative authors , but the related issue - speciﬁc frames threat : jobs andhero : worker reveal ideological divides .
+This ﬁnding highlights the importance of using multiple framing typologies to provide a more nuanced analysis of immigration discourse .
+Third , more liberal authors tend to use episodic frames , while conservative authors tend to use thematic frames .
+This difference is consistent with Somaini ( 2019 ) ’s ﬁnding that a local liberal newspaper featured more episodic framing in immigration coverage , but a comparable conservative newspaper featured more thematic framing .
+Other efforts that examine the relationship between narrative frames and cognitive and emotional responses provide some clues for the observed pattern .
+For instance , Aarøe ( 2011 ) shows that thematic frames are stronger when there are no or weak emotional responses ; and that the opposite is true for episodic frames .
+The divergence of ﬁndings could be driven by partisans ’ differing emotional responses .
+Our
+2226ﬁndings also highlight important consequences for opinion formation .
+Iyengar ( 1990 ) shows that episodic framing diverts attention from societal and political party responsibility ; our results suggest that liberal Twitter users are likely to produce ( and , due to partisan self - segregation , consume ) social media content with such effects .
+Threat : Public Order Crime & Punishment Threat :
+Fiscal Political Factors Threat : Jobs Security & Defense Thematic Economic Morality & Ethics Policy Prescription Episodic Hero : Integration Capacity & Resources Health & Safety Fairness & Equality Victim : Humanitarian Threat : National Cohesion Hero : Worker Victim : War Cultural Identity Victim : Global Economy External Regulation USA           EU   Frame Type Issue - Specific Issue - Generic Narrative 1   0 1   Coefficient Threat : Public Order Crime & Punishment Morality & Ethics Security & Defense Victim : Humanitarian Threat : Fiscal Health & Safety Political Factors Episodic Hero : Integration Threat : National Cohesion Economic Quality of Life Victim : War Fairness & Equality Public Sentiment Policy Prescription Capacity & Resources Threat : Jobs Victim : Discrimination Cultural Identity External Regulation Victim : Global Economy Hero : Worker USA           UK   Figure 3 : Effect of author being from the EU ( top ) or the UK ( bottom ) relative to the US .
+Frames with positive  coefﬁcients are associated with authors from the EU ( top ) and UK ( bottom ) , and frames with negative values are associated with US - based authors .
+Frames not signiﬁcantly associated with region after HolmBonferroni correction are not included .
+Region Immigration framing depends heavily on one ’s geopolitical entity ( US , UK , and EU ) , as shown in Figure 3 .
+Several notable themes emerge .
+First , many ideologically - extreme frames in the US , including crime & punishment , security & defense , threat : public order , and threat : ﬁscal are all signiﬁcantly more likely to be found in US - based tweets relative to the UK and EU .
+This pattern suggests that region and ideology , and likely manyother factors , interact in intricate ways to shape how ordinary people frame political issues .
+Second , cultural identity is more strongly associated with both the UK and EU than the US .
+Perhaps immigrants ’ backgrounds are more marked in European discourse than in US discourse because the UK and EU have longer histories of cultural and ethnic homogeneity ( Thorbjørnsrud , 2015 ) .
+This ﬁnding also reﬂects that Europeans ’ attitudes towards immigration depend on where immigrants are from and parallels how European newspapers frame immigration differently depending on migrants ’ countries of origin ( Eberl et al . , 2018 ) .
+Finally , the bottom of Figure 3 shows that users from the UK are more likely to invoke labor - related frames .
+This prevalence of labor and economic frames has also been found in British traditional media ( Caviedes , 2015 ; Lawlor , 2015 ) , and has been attributed to differences in the labor market .
+Unlike migrants in the US , Italy , and France , who often work clandestinely in different economic sectors than domestic workers , UK migrants have proper authorization and are thus viewed as competition for British workers because they can work in the same industries ( Caviedes , 2015 ) .
+7 Audience Response to Frames Chong and Druckman ( 2007 , p. 116 ) assert that a “ challenge for future work concerns the identiﬁcation of factors that make a frame strong . ”
+Studies of frame - setting — i.e. , how a message ’s framing affects its audience ’s emotions , beliefs , and opinions — have largely been restricted to smallscale experimental studies because responses to news media framing can not be directly observed ( Eberl et al . , 2018 ) .
+However , Twitter provides insight into the frame - setting process via interactive signals : favorites and retweets .
+While related , these two actions can have distinct underlying motivations : favoriting often indicates positive alignment between the author and the reader ; in contrast , retweeting may also be driven by other motivations , such as the desire to inform or entertain others ( boyd et al . , 2010 ) .
+Different audience interactions have been shown to exhibit distinct patterns in political communication on Twitter ( Minot et al . , 2020 ) .
+Here , we test how a message ’s framing impacts both the favorites and retweets that it receives .
+Experimental Setup We ﬁt hierarchical linear mixed effects models with favorites and retweets ( log - transformed ) as the dependent variable on US
+2227 0.05   0.00 0.05 0.10 Change in ( log ) responsesMorality & Ethics Fairness & Equality Public Sentiment Cultural Identity Quality of Life Economic Political Factors Policy Prescription Health & Safety Security & Defense Capacity & Resources Crime & Punishment External Regulation Hero : Integration Hero : Cultural Diversity Victim : Discrimination Victim : Humanitarian Victim : Global Economy Threat : Public Order Threat : Jobs Threat : National Cohesion Threat : Fiscal Thematic EpisodicResponse Favorite RetweetFigure 4 : Effects of framing on two audience responses : favorites and retweets .
+The x - axis shows regression coefﬁcients for the presence of each frame in predicting the log - scaled number of responses .
+Along the y - axis are all issue - generic policy frames ( top ) , immigrationspeciﬁc frames ( middle ) , and narrative frames ( bottom ) that are signiﬁcantly associated with either the number of favorites or retweets .
+tweets with detected author ideology .
+The presence of a frame is treated as a binary ﬁxed effect .
+We control for all temporal , user - level and tweet - level features as in the prior section , as well as ideology .
+Results The framing of immigration has a signiﬁcant impact on how users engage with the content via retweets and favorites ( Figure 4 ) .
+Many issuespeciﬁc frames have a stronger effect on audience responses than either of the other typologies .
+As recent NLP approaches have adopted issue - generic frames for analysis ( e.g. , Kwak et
+al . , 2020 ) , the strength of issue - speciﬁc frames highlights the importance of expanding computational analyses beyond issue - generic frames , as other frames may have larger consequences for public opinion .
+Most frames impact favorites and retweets differently , suggesting that the strength of a frame ’s effects is tied to the speciﬁc engagement behavior .
+Cultural frames ( e.g. hero : integration ) and frames oriented around human interest ( e.g. morality , victim : discrimination ) are particularly associated with more endorsements ( favorites ) , perhapsdue to their increased emotional appeal to readers ( Semetko and Valkenburg , 2000 ) .
+On the other hand , political factors & implications is most highly associated with increased retweets .
+As the political frame emphasizes competition and strategy ( Boydstun et al . , 2013 ) , this result mirrors similar links between the “ horse - race " frame in news reports and engagement ( Iyengar et
+al . , 2004 ) ; users may prefer amplifying political messages via retweeting to help their side win .
+Similarly , frames about security and safety ( e.g. crime & punishment , victim : humanitarian ) are highly associated with more retweets , but not necessarily favorites .
+While security and safety frames may not lead audience members to endorse such messages , perhaps they are more likely to amplify these messages due to perceived urgency or the desire to persuade others of such concerns .
+Finally , Figure 4 shows how a message ’s narrative framing impacts audience response , even after controlling for all other frames .
+Both episodic and thematic frames are signiﬁcantly associated with increased engagement ( retweets ) , but less strongly than issue frames .
+Having a clear narrative is important for messages to spread , but the underlying mechanisms driving engagement behaviors may differ for episodic andthematic frames ; prior work on mainstream media has found that news stories using episodic frames tend to be more emotionally engaging , while thematic frames can be more persuasive ( Iyengar , 1991 ; Gross , 2008 ) .
+8 Conclusion Users ’ exposure to political information on social media can have immense consequences .
+By leveraging multiple theory - informed typologies , our computational analysis of framing enables us to better understand public discourses surrounding immigration .
+We furthermore show that framing on Twitter affects how audience interactions with messages via favoriting and retweeting behaviors .
+This work has implications for social media platforms , who may wish to improve users ’ experiences by enabling them to discover content with a diversity of frames .
+By exposing users to a wide range of perspectives , this work can help lay foundations for more cooperative and effective online discussions .
+All code , data , annotation guidelines , and pretrained models are available at https : //github.com / juliamendelsohn / framing .
+22289 Ethical Considerations Our analysis of frame - building involves inferring political ideology and regional from users with existing tools , so we aggregated this information in our analysis in order to minimize the risk of exposing potentially sensitive personal data about individuals .
+Our dataset includes tweet IDs along with frame labels , but no additional social information .
+However , there are also ethical consequences of categorizing people along these social dimensions .
+We acknowledge that reducing people ’s social identities to region and ideology obscures the wide range of unobservable and non - quantiﬁable predispositions and experiences that may impact framing and attitudes towards immigration .
+We emphasize that our dataset is not fully representative of all immigration discourse and should not be treated as such .
+Twitter ’s demographics are not representative of the global population ( Mislove et al . , 2011 ) .
+Furthermore , our dataset only includes tweets with authors from particular Western countries .
+All tweets were automatically identiﬁed by Twitter as being written in English , thus additionally imposing standard language ideologies on the data that we include ( Milroy , 2001 ) .
+Furthermore , language choice itself can be a socially and politically meaningful linguistic cue that may have unique interactions with framing ( e.g. , Gal , 1978 ; Shoemark et al . , 2017 ; Stewart et al . , 2018 ; Ndubuisi - Obi et al . , 2019 ) .
+Although we do not focus on abusive language , our topical content contains frequent instances of racism , Islamophobia , antisemitism , and personal insults .
+We caution future researchers about potentially traumatic psychological effects of working with this dataset .
+We aim to support immigrants , an often marginalized group , by shedding light on their representation on social media .
+However , there is a risk that malicious agents could exploit our framesetting ﬁndings by disseminating harmful content packaged in more popular frames .
+10 Acknowledgements We thank Anoop Kotha , Shiqi Sheng , Guoxin Yin , and Hongting Zhu for their contributions to the data annotation effort .
+We also thank Libby Hemphill and Stuart Soroka for their valuable comments and feedback .
+This work was supported in part through funding from the V olkswagen Foundation .
+References Lene Aarøe .
+2011 .
+Investigating Frame Strength : The Case of Episodic and Thematic Frames .
+Political Communication , 28(2):207–226 .
+Marisa A Abrajano , Zoltan Hajnal , and Hans J.G. Hassell .
+2017 .
+Media Framing and Partisan Identity : The Case of Immigration Coverage and White Macropartisanship .
+Pablo Barberá . 2015 .
+Birds of the same feather tweet together : Bayesian ideal point estimation using Twitter data .
+Political Analysis , 23(1):76–91 .
+Pablo Barbera , Amber E Boydstun , Suzanna Linn , Ryan McMahon , and Jonathan Nagler .
+2021 .
+Automated text classiﬁcation of news articles : A practical guide .
+Political Analysis , 29(1):19–42 .
+Rodney Benson .
+2013 .
+Shaping Immigration News : A French - American Comparison .
+Cambridge University Press .
+danah boyd , Scott Golder , and Gilad Lotan .
+2010 .
+Tweet , tweet , retweet : Conversational aspects of retweeting on Twitter .
+In 2010 43rd Hawaii International Conference on System Sciences , pages 1–10 .
+IEEE .
+Amber E. Boydstun , Justin H Gross , Philip Resnik , and Noah A. Smith .
+2013 .
+Identifying Media Frames and Frame Dynamics Within and Across Policy Issues .
+New Directions in Analyzing Text as Data Workshop , pages 1–13 .
+Ted Brader , Nicholas A. Valentino , and Elizabeth Suhay . 2008 .
+What triggers public opposition to immigration ?
+Anxiety , group cues , and immigration threat .
+American Journal of Political Science , 52(4):959–978 .
+Dallas Card , Amber E Boydstun , Justin H Gross , Philip Resnik , and Noah A Smith .
+2015 .
+The media frames corpus : Annotations of frames across issues .
+In 53rd Annual Meeting of the Association for Computational Linguistics and the 7th International Joint Conference on Natural Language Processing , volume 2 , pages 438–444 .
+Dallas Card , Justin H Gross , Amber E Boydstun , and Noah A Smith .
+2016 .
+Analyzing framing through the casts of characters in the news .
+In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing , pages 1410–1420 .
+Alexander Caviedes .
+2015 .
+An Emerging ‘ European ’ News Portrayal of Immigration ?
+Journal of Ethnic and Migration Studies , 41(6):897–917 .
+Dennis Chong and James N. Druckman . 2007 .
+Framing Theory .
+Annual Review of Political Science , 10(1):103–126 .
+Ryan Compton , David Jurgens , and David Allen .
+2014 .
+Geotagging one hundred million Twitter accounts with total variation minimization .
+In 2014 IEEE International Conference on Big Data ( Big Data ) .
+2229Constance de Saint Laurent , Vlad Glaveanu , and Claude Chaudet .
+2020 .
+Malevolent Creativity and Social Media : Creating Anti - immigration Communities on Twitter .
+Creativity Research Journal , 32(1):66–80 .
+Claes H de Vreese .
+2005 .
+News framing : Theory and typology .
+Information Design Journal , 13(1):51 – 62 .
+Jakob - Moritz Eberl , Christine E. Meltzer , Tobias Heidenreich , Beatrice Herrero , Nora Theorin , Fabienne Lind , Rosa Berganza , Hajo G. Boomgaarden , Christian Schemer , and Jesper Strömbäck .
+2018 .
+The European media discourse on immigration and its effects : a literature review .
+Annals of the International Communication Association , 42(3):207–223 .
+Robert M. Entman .
+1993 .
+Framing :
+Toward Clariﬁcation of a Fractured Paradigm .
+Journal of Communication , 43(4):51–58 .
+Walter A Ewing , Daniel Martinez , and Rubén G Rumbaut . 2015 .
+The criminalization of immigration in the United States .
+Washington , DC : American Immigration Council Special Report .
+Anjalie Field , Doron Kliger , Shuly Wintner , Jennifer Pan , Dan Jurafsky , and Yulia Tsvetkov .
+2018 .
+Framing and agenda - setting in Russian news : A computational analysis of intricate political strategies .
+Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 3570 – 3580 .
+Stephanie A. Fryberg , Nicole M. Stephens , Rebecca Covarrubias , Hazel Rose Markus , Erin D. Carter , Giselle A. Laiduc , and Ana J. Salido .
+2012 .
+How the Media Frames the Immigration Debate : The Critical Role of Location and Politics .
+Analyses of Social Issues and Public Policy , 12(1):96–112 .
+Susan Gal . 1978 .
+Peasant men ca n’t get wives : Language change and sex roles in a bilingual community .
+Language in society , 7(1):1–16 .
+Jesse Graham , Jonathan Haidt , and Brian A Nosek . 2009 .
+Liberals and conservatives rely on different sets of moral foundations .
+Journal of personality and social psychology , 96(5):1029 .
+Josh Grimm and Julie L. Andsager . 2011 .
+Framing immigration : Geo - ethnic context in california newspapers .
+Journalism and Mass Communication Quarterly , 88(4):771–788 .
+Kimberly Gross . 2008 .
+Framing persuasive appeals : Episodic and thematic framing , emotional response , and policy opinion .
+Political Psychology , 29(2):169–192 .
+Mareike Hartmann , Tallulah Jansen , Isabelle Augenstein , and Anders Søgaard .
+2019 .
+Issue framing in online discussion fora .
+In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics : HumanLanguage Technologies , Volume 1 ( Long and Short Papers ) , pages 1401–1407 .
+Sabina Hartnett .
+2019 .
+Willkommenskultur : A computational and socio - linguistic study of modern german discourse on migrant populations .
+Transit , 12(1 ) .
+Tobias Heidenreich , Fabienne Lind , Jakob - Moritz Eberl , and Hajo G Boomgaarden .
+2019 .
+Media Framing Dynamics of the ‘ European Refugee Crisis ’ : A Comparative Topic Modelling Approach .
+Journal of Refugee Studies , 32(Special_Issue_1):i172 – i182 .
+Marc Helbling .
+2014 .
+Framing Immigration in Western Europe .
+Journal of Ethnic and Migration Studies , 40(1):21–41 .
+Nicole Hemmer .
+2016 .
+Messengers of the right : Conservative media and the transformation of American politics .
+University of Pennsylvania Press .
+Jackie Hogan and Kristin Haltinner .
+2015 .
+Floods , Invaders , and Parasites : Immigration Threat Narratives and Right - Wing Populism in the USA , UK and Australia .
+Journal of Intercultural Studies , 36(5):520–543 .
+Jan Fredrik Hovden and Hilmar Mjelde .
+2019 .
+Increasingly Controversial , Cultural , and Political : The Immigration Debate in Scandinavian Newspapers 1970–2016 .
+Javnost , 26(2):138–157 .
+Shanto Iyengar .
+1990 .
+Framing responsibility for political issues : The case of poverty .
+Political Behavior , 12(1):19–40 .
+Shanto Iyengar .
+1991 .
+Is anyone responsible ?
+How television frames political issues .
+University of Chicago Press .
+Shanto Iyengar , Helmut Norpoth , and Kyu S Hahn .
+2004 .
+Consumer demand for election news : The horserace sells .
+The Journal of Politics , 66(1):157 – 175 .
+Kristen Johnson , Di Jin , and Dan Goldwasser . 2017 .
+Modeling of political discourse framing on Twitter .
+InProceedings of the International AAAI Conference on Web and Social Media , volume 11 .
+John T Jost , Jack Glaser , Arie W Kruglanski , and Frank J Sulloway .
+2003 .
+Political conservatism as motivated social cognition .
+Psychological bulletin , 129(3):339 .
+Shima Khanehzar , Andrew Turpin , and Gosia Mikolajczak . 2019 .
+Predicting Political Frames Across Policy Issues and Contexts .
+In Proceedings of the 17th Workshop of the Australasian Language Technology Association , pages 101–106 .
+Klaus Krippendorff .
+2013 .
+Content Analysis : An Introduction to Its Methodology .
+Sage Publications .
+2230Haewoon Kwak , Jisun An , and Yong - Yeol Ahn . 2020 .
+A systematic media frame analysis of 1.5 million New York Times articles from 2000 to 2017 .
+In 12th ACM Conference on Web Science , pages 305–314 .
+Andrea Lawlor .
+2015 .
+Local and National Accounts of Immigration Framing in a Cross - national Perspective .
+Journal of Ethnic and Migration Studies , 41(6):918–941 .
+Sophie Lecheler , Linda Bos , and Rens Vliegenthart .
+2015 .
+The mediating role of emotions : News framing effects on opinions about immigration .
+Journalism & Mass Communication Quarterly , 92(4):812 – 838 .
+Michael T Light and Ty Miller .
+2018 .
+Does undocumented immigration increase violent crime ?
+Criminology , 56(2):370–401 .
+Siyi Liu , Lei Guo , Kate Mays , Margrit Betke , and Derry Tanti Wijaya . 2019a .
+Detecting frames in news headlines and its application to analyzing news framing trends surrounding US gun violence .
+In Proceedings of the 23rd Conference on Computational Natural Language Learning , pages 504–514 .
+Yinhan Liu , Myle Ott , Naman Goyal , Jingfei Du , Mandar Joshi , Danqi Chen , Omer Levy , Mike Lewis , Luke Zettlemoyer , and Veselin Stoyanov . 2019b .
+RoBERTa : A Robustly Optimized BERT Pretraining Approach .
+arXiv preprint arXiv:1907.11692 .
+Sharon Meraz and Zizi Papacharissi .
+2013 .
+Networked Gatekeeping and Networked Framing on # Egypt .
+The International Journal of Press / Politics , 18(2):138–166 .
+James Milroy .
+2001 .
+Language ideologies and the consequences of standardization .
+Journal of sociolinguistics , 5(4):530–555 .
+Joshua R Minot , Michael V Arnold , Thayer Alshaabi , Christopher M Danforth , and Peter Sheridan Dodds .
+2020 .
+Ratioing the president : An exploration of public engagement with Obama and Trump on Twitter .
+arXiv preprint arXiv:2006.03526 .
+Alan Mislove , Sune Lehmann , Yong - Yeol Ahn , JukkaPekka Onnela , and James Rosenquist . 2011 .
+Understanding the demographics of Twitter users .
+In Proceedings of the International AAAI Conference on Web and Social Media , volume 5 .
+Fred Morstatter , Liang Wu , Uraz Yavanoglu , Stephen R. Corman , and Huan Liu .
+2018 .
+Identifying Framing Bias in Online News .
+ACM Transactions on Social Computing , 1(2):1–18 .
+Nona Naderi and Graeme Hirst .
+2017 .
+Classifying frames at the sentence level in news articles .
+International Conference Recent Advances in Natural Language Processing , RANLP , 2017 - Septe:536–542.Innocent Ndubuisi - Obi , Sayan Ghosh , and David Jurgens .
+2019 .
+Wetin dey with these comments ?
+Modeling sociolinguistic factors affecting codeswitching behavior in Nigerian online discussions .
+InProceedings of the 57th Annual Meeting of the Association for Computational Linguistics , pages 6204–6214 .
+Zizi Papacharissi and Maria De Fatima Oliveira . 2008 .
+News frames terrorism : A comparative analysis of frames employed in terrorism coverage in U.S. and U.K. newspapers .
+International Journal of Press / Politics , 13(1):52–74 .
+Shamik Roy and Dan Goldwasser .
+2020 .
+Weakly supervised learning of nuanced frames for analyzing polarization in news media .
+In Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing , pages 7698–7716 .
+W. Russell Neuman , Lauren Guggenheim , S. Mo Jang , and Soo Young Bae .
+2014 .
+The Dynamics of Public Attention : Agenda - Setting Theory Meets Big Data .
+Journal of Communication , 64(2):193–214 .
+Dietram A. Scheufele .
+1999 .
+Framing as a theory of media effects .
+Journal of Communication , 49(1):103–122 .
+Holli A Semetko and Patti M Valkenburg .
+2000 .
+Framing European politics : A content analysis of press and television news .
+Journal of communication , 50(2):93–109 .
+Philippa Shoemark , Debnil Sur , Luke Shrimpton , Iain Murray , and Sharon Goldwater . 2017 .
+Aye or naw , whit dae ye hink ?
+scottish independence and linguistic identity on social media .
+In Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics , pages 1239–1248 .
+Eugenia Siapera , Moses Boudourides , Sergios Lenis , and Jane Suiter .
+2018 .
+Refugees and Network Publics on Twitter : Networked Framing , Affect , and Capture .
+Social Media and Society , 4(1 ) .
+Robert Courtney Smith . 2017 .
+Do nt let the illegals vote ! :
+The myths of illegal latino voters and voter fraud in contested local immigrant integration .
+The Russell Sage Foundation Journal of the Social Sciences , 3(4):148–175 .
+Francesco Somaini .
+2019 .
+News stories framed episodically offer more diversiﬁed portrayals of immigrants .
+Newspaper Research Journal , 40(2):190 – 210 .
+Burton Speakman and Marcus Funk .
+2020 .
+News , nationalism , and hegemony : The formation of consistent issue framing throughout the U.S. political right .
+Mass Communication and Society , 23(5):656–681 .
+Ian Stewart , Yuval Pinter , and Jacob Eisenstein .
+2018 .
+Si o
+no , que penses ?
+Catalonian independence and linguistic identity on social media .
+In Proceedings
+2231of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , Volume 2 ( Short Papers ) , pages 136–141 .
+Kjersti Thorbjørnsrud .
+2015 .
+Framing irregular immigration in western media .
+American Behavioral Scientist , 59(7):771–782 .
+Adriano Udani and David C Kimball .
+2018 .
+Immigrant resentment and voter fraud beliefs in the US electorate .
+American Politics Research , 46(3):402–433 .
+Baldwin van Gorp . 2005 .
+Where is the frame ?
+: Victims and intruders in the Belgian press coverage of the asylum issue .
+European Journal of Communication , 20(4):484–507 .
+2232A Frame distribution in annotated data Figure 5 shows the distribution of frames as a fraction of total tweets in the annotated data .
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 Fraction of tweetsPolitical Factors Policy Prescription Cultural Identity Economic Crime & Punishment Health & Safety Fairness & Equality Security & Defense Morality & Ethics Legality External Regulation Quality of Life Capacity & Resources Public Sentiment Threat : Public Order Victim : Humanitarian Victim : Discrimination Threat : Fiscal Hero : Worker Threat : National Cohesion Hero : Cultural Diversity Hero : Integration Threat : Jobs Victim : Global Economy Victim : War Episodic ThematicFrame Type Issue - Generic Issue - Specific Narrative Figure 5 : Distribution of frames in annotated data .
+B Inter - annotator agreement plots Figures 6 and 7 show inter - annotator agreement ( Krippendorff ’s  ) across frame types .
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 Krippendorff AlphaCoder 1 Coder 2 Coder 3 Coder 4AnnotatorAgreement With First Author Frame Type Issue - Specific Issue - Generic Narrative Figure 6 : Inter - annotator agreement between ﬁrst author and other coders before consensus - coding .
+0.0 0.2 0.4 0.6 0.8 Krippendorff AlphaCoder 1 Coder 2 Coder 3 Coder 4 Coder 5AnnotatorAgreement
+With Consensus Issue - Specific Issue - Generic Narrative Figure 7 : Agreement between each coder and consensus annotations before consensus - coding .
+C Frame detection performance Tables 5 - 8 and Figures 8 - 9 provide details about the ﬁne - tuned RoBERTa models ’ performance .
+Frame Type Precision Recall F1 - score LRAP Issue - Generic Policy 0.722 0.727 0.716 0.745 Issue - Speciﬁc 0.667 0.493 0.550 0.785 Narrative 0.780 0.884 0.825 0.896 Table 5 : Performance by frame type on dev set .
+Issue - Generic Issue - Speciﬁc Narrative Human - Machine 0.443 0.488 0.421 Human - Human 0.417 0.491 0.458 Table 6 : Average Krippendorff  agreement between human annotators and machine - predicted labels ( top row ) and between human annotator pairs ( bottom row ) .
+Overall , our classiﬁers had similar agreement with human annotators as humans did with one another .
+0 50 100 150 200 250 300 Support0.00.20.40.60.8F1 ScoreModel performance per frame RoBERTa FT LogReg Figure 8 : F1 score of logistic regression ( 1,2 - gram features ) and ﬁne - tuned RoBERTa for each frame and frame support in evaluation sets .
+RoBERTa consistently outperforms logistic regression , especially for low - frequency frames .
+Issue - Generic Issue - Specific Narrative Frame Type0.00.10.20.30.40.50.60.70.8F1 ScoreUS GB EU Figure 9 : Average F1 scores on combined dev / test set separated by region .
+Models achieve comparable performance for the United States , United Kingdom , and European Union , except for slightly lower performance for issue - speciﬁc frames on EU tweets .
+2233Frame Type Frame Precision Recall F1 - score Support LRAP Issue - GeneralCapacity and Resources 0.530 0.706 0.601 17.0 0.745 Crime and Punishment 0.787 0.798 0.791 88.0 0.745 Cultural Identity 0.716 0.815 0.762 91.0 0.745 Economic 0.821 0.968 0.888 87.0 0.745 External Regulation and Reputation 0.658 0.493 0.562 45.0 0.745 Fairness and Equality 0.678 0.712 0.692 68.0 0.745 Health and Safety 0.841 0.866 0.852 73.0 0.745 Legality , Constitutionality , Jurisdiction 0.764 0.822 0.790 37.0 0.745 Morality and Ethics 0.792 0.549 0.643 55.0 0.745 Policy Prescription and Evaluation 0.689 0.807 0.740 108.0 0.745 Political Factors and Implications
+0.890 0.948 0.918 154.0 0.745 Public Sentiment 0.619 0.388 0.473 33.0 0.745 Quality of Life 0.502 0.484 0.490 31.0 0.745 Security and Defense 0.825 0.818 0.821 80.0 0.745 Issue - SpeciﬁcHero : Cultural Diversity 0.699 0.387 0.490 15.0 0.785 Hero : Integration 0.455 0.354 0.391 13.0 0.785 Hero : Worker 0.501 0.369 0.421 13.0 0.785 Threat : Fiscal 0.613 0.504 0.541 25.0 0.785 Threat : Jobs 1.000 0.525 0.683 8.0 0.785 Threat : National Cohesion 0.565 0.512 0.526 16.0 0.785 Threat : Public Order 0.773
+0.746 0.758 74.0 0.785 Victim : Discrimination 0.615 0.684 0.646 45.0 0.785 Victim : Global Economy 0.933 0.600 0.720 5.0 0.785 Victim : Humanitarian 0.647 0.488 0.551 64.0 0.785 Victim : War 0.533
+0.250 0.328 4.0 0.785 NarrativeEpisodic 0.706 0.902 0.791 200.0 0.896 Thematic 0.855 0.865 0.859 260.0 0.896 Table 7 : Performance per frame on development set Frame Type Frame Precision Recall F1 - score Support LRAP Issue - GeneralCapacity and Resources 0.451 0.611 0.517 18.0 0.750 Crime and Punishment 0.817 0.695 0.749 76.0 0.750 Cultural Identity 0.687 0.852 0.760 93.0 0.750 Economic 0.824 0.950 0.882 112.0 0.750 External Regulation and Reputation 0.708 0.581 0.629 32.0 0.750 Fairness and Equality 0.721 0.635 0.673 79.0 0.750 Health and Safety 0.784 0.878 0.828 54.0 0.750 Legality , Constitutionality , Jurisdiction 0.817 0.875 0.844 32.0 0.750 Morality and Ethics 0.698 0.570 0.623 47.0 0.750 Policy Prescription and Evaluation 0.660 0.855 0.743 87.0 0.750 Political Factors and Implications 0.912 0.911 0.911 149.0 0.750 Public Sentiment 0.713 0.338 0.455 26.0 0.750 Quality of Life 0.657 0.520 0.574 30.0 0.750 Security and Defense 0.725 0.816
+0.768 51.0 0.750 Issue - SpeciﬁcHero : Cultural Diversity 0.591 0.567 0.569 12.0 0.806 Hero : Integration 0.503 0.500 0.498 14.0 0.806 Hero : Worker 0.710 0.575 0.634 24.0 0.806 Threat :
+Fiscal 0.694 0.689 0.683 27.0 0.806 Threat : Jobs 0.743 0.620 0.671 10.0 0.806 Threat : National Cohesion 0.344 0.455 0.383 11.0 0.806 Threat : Public Order 0.737 0.681 0.707 52.0 0.806 Victim : Discrimination 0.785 0.570 0.656 60.0 0.806 Victim : Global Economy 0.571 0.450 0.489 8.0 0.806 Victim : Humanitarian 0.715 0.658 0.681 45.0 0.806 Victim : War 0.133 0.080 0.100 5.0 0.806 NarrativeEpisodic 0.630 0.922 0.748 181.0 0.894 Thematic 0.885 0.852 0.868 263.0 0.894 Table 8 : Performance per frame on test set
+2234D Frame - building ( region ) regressions Tables 9 - 35 show independent variable coefﬁcients for logit regressions predicting frames from region .
+Table 9 : Capacity.and .
+Resources countryEU  0.091(0.015 ) countryGB 0.403(0.007 ) has_hashtag1  0.301(0.011 ) has_mention1 0.057(0.009 ) has_url1 0.001 ( 0.011 ) is_quote_status1 0.324(0.009 ) is_reply1 0.359(0.009 ) is_veriﬁed1  0.239(0.020 ) log_chars 0.730(0.008 ) log_followers  0.019(0.003 ) log_following 0.006(0.003 ) log_statuses  0.005(0.002 )
+Constant  6.801(0.082 )
+Observations 2,661,435 Log Likelihood  611,982.800 Akaike Inf .
+Crit .
+1,223,998.000 Bayesian Inf .
+Crit .
+1,224,202.000 Note:p<0.1;p<0.05;p<0.01
+Table 10 : Crime.and .
+Punishment countryEU  0.635(0.008 ) countryGB  1.162(0.006 ) has_hashtag1  0.123(0.005 ) has_mention1  0.032(0.004 ) has_url1 0.175(0.005 ) is_quote_status1 0.084(0.005 ) is_reply1 0.072(0.005 ) is_veriﬁed1  0.311(0.009 ) log_chars 0.261(0.004 ) log_followers  0.013(0.001 ) log_following 0.031(0.001 ) log_statuses 0.023(0.001 )
+Constant  2.550(0.038 ) Observations 2,661,435
+Log Likelihood  1,598,017.000
+Akaike Inf .
+Crit .
+3,196,066.000 Bayesian Inf .
+Crit .
+3,196,271.000 Note:p<0.1;p<0.05;p<0.01 Table 11 : Cultural .
+Identity countryEU 0.641(0.008 ) countryGB 0.643(0.005 ) has_hashtag1  0.102(0.006 ) has_mention1  0.357(0.006 ) has_url1  0.322(0.007 ) is_quote_status1 0.008 ( 0.006 ) is_reply1 0.228(0.006 ) is_veriﬁed1  0.065(0.011 ) log_chars 0.758(0.005 ) log_followers 0.029(0.002 ) log_following  0.043(0.002 ) log_statuses  0.022(0.001 )
+Constant  4.890(0.043 ) Observations 2,661,435 Log Likelihood  1,162,059.000 Akaike Inf .
+Crit .
+2,324,150.000
+Bayesian Inf .
+Crit . 2,324,354.000
+Note:p<0.1;p<0.05;p<0.01Table 12 : Economic countryEU  0.197(0.009 ) countryGB 0.154(0.005 ) has_hashtag1  0.129(0.006 ) has_mention1  0.010(0.005 ) has_url1 0.017(0.006 ) is_quote_status1 0.208(0.005 ) is_reply1 0.199(0.005 ) is_veriﬁed1  0.089(0.010 ) log_chars 0.916(0.005 ) log_followers  0.053(0.001 ) log_following 0.027(0.002 ) log_statuses 0.031(0.001 )
+Constant  6.173(0.052 ) Observations 2,661,435 Log Likelihood  1,409,032.000 Akaike Inf .
+Crit .
+2,818,096.000 Bayesian Inf .
+Crit .
+2,818,301.000 Note:p<0.1;p<0.05;p<0.01 Table 13 : External . Regulation.and .
+Reputation countryEU 0.934(0.012 ) countryGB 0.898(0.008 ) has_hashtag1 0.112(0.011 ) has_mention1 0.016 ( 0.010 ) has_url1 0.673(0.014 ) is_quote_status1  0.044(0.011 ) is_reply1  0.058(0.010 ) is_veriﬁed1 0.020 ( 0.020 ) log_chars 0.551(0.009 ) log_followers  0.014(0.003 ) log_following  0.011(0.003 ) log_statuses 0.047(0.002 )
+Constant  7.119(0.087 ) Observations 2,661,435 Log Likelihood  448,512.800 Akaike Inf . Crit .
+897,057.500 Bayesian Inf . Crit .
+897,262.200 Note:p<0.1;p<0.05;p<0.01 Table 14 : Fairness.and .
+Equality countryEU  0.068(0.010 ) countryGB 0.280(0.006 ) has_hashtag1 0.029(0.007 )
+has_mention1  0.243(0.006 ) has_url1  0.117(0.008 ) is_quote_status1 0.511(0.006 ) is_reply1 0.566(0.007 ) is_veriﬁed1  0.031(0.013 ) log_chars 0.933(0.006 ) log_followers  0.034(0.002 ) log_following 0.017(0.002 ) log_statuses 0.002 ( 0.001 )
+Constant  6.774(0.042 ) Observations 2,661,435 Log Likelihood  1,027,084.000 Akaike Inf .
+Crit .
+2,054,199.000
+Bayesian Inf .
+Crit .
+2,054,404.000 Note:p<0.1;p<0.05;p<0.01
+2235Table 15 : Health.and .
+Safety countryEU  0.070(0.009 ) countryGB  0.375(0.006 ) has_hashtag1  0.061(0.006 ) has_mention1  0.134(0.005 ) has_url1 0.512(0.007 ) is_quote_status1  0.148(0.006 ) is_reply1  0.140(0.005 ) is_veriﬁed1  0.072(0.011 ) log_chars 0.432(0.005 ) log_followers  0.026(0.002 ) log_following 0.036(0.002 ) log_statuses 0.028(0.001 )
+Constant  4.279(0.078 ) Observations 2,661,435 Log Likelihood  1,256,905.000
+Akaike Inf .
+Crit .
+2,513,841.000 Bayesian Inf .
+Crit .
+2,514,046.000 Note:p<0.1;p<0.05;p<0.01
+Table 16 : Legality .. Constitutionality .. Jurisdiction countryEU  0.494(0.012 ) countryGB  0.688(0.008 ) has_hashtag1  0.041(0.007 ) has_mention1  0.012(0.006 ) has_url1 0.263(0.008 ) is_quote_status1  0.206(0.007 ) is_reply1  0.200(0.006 ) is_veriﬁed1 0.363(0.012 ) log_chars 0.734(0.006 ) log_followers  0.050(0.002 ) log_following 0.024(0.002 ) log_statuses 0.058(0.001 )
+Constant  6.193(0.041 ) Observations 2,661,435 Log Likelihood  968,625.200
+Akaike Inf .
+Crit .
+1,937,282.000
+Bayesian Inf .
+Crit .
+1,937,487.000 Note:p<0.1;p<0.05;p<0.01
+Table 17 : Morality.and .
+Ethics countryEU  0.195(0.013 ) countryGB  0.495(0.009 ) has_hashtag1 0.169(0.007 ) has_mention1  0.231(0.007 ) has_url1 0.064(0.009 ) is_quote_status1 0.126(0.007 ) is_reply1  0.125(0.007 ) is_veriﬁed1 0.164(0.014 ) log_chars 0.874(0.007 ) log_followers  0.044(0.002 ) log_following 0.033(0.002 ) log_statuses  0.006(0.002 )
+Constant  6.794(0.077 ) Observations 2,661,435 Log Likelihood  768,383.100 Akaike Inf .
+Crit .
+1,536,798.000 Bayesian Inf .
+Crit .
+1,537,003.000 Note:p<0.1;p<0.05;p<0.01Table 18 : Policy .
+Prescription.and .
+Evaluation countryEU  0.152(0.008 ) countryGB 0.356(0.004 ) has_hashtag1 0.220(0.005 ) has_mention1 0.107(0.004 ) has_url1 0.213(0.005 ) is_quote_status1 0.059(0.005 ) is_reply1  0.083(0.005 ) is_veriﬁed1 0.337(0.009 ) log_chars 0.670(0.004 ) log_followers  0.046(0.001 ) log_following 0.021(0.001 )
+log_statuses 0.042(0.001 ) Constant  4.886(0.031 ) Observations 2,661,435
+Log Likelihood  1,574,272.000
+Akaike Inf .
+Crit .
+3,148,576.000 Bayesian Inf .
+Crit .
+3,148,780.000 Note:p<0.1;p<0.05;p<0.01 Table 19 : Political .
+Factors.and .
+Implications countryEU  0.531(0.007 ) countryGB  0.326(0.004 ) has_hashtag1 0.192(0.005 ) has_mention1 0.180(0.004 ) has_url1 0.214(0.005 ) is_quote_status1 0.156(0.005 )
+is_reply1  0.301(0.004 ) is_veriﬁed1  0.060(0.008 ) log_chars 0.984(0.004 ) log_followers  0.044(0.001 ) log_following 0.052(0.001 ) log_statuses 0.075(0.001 )
+Constant  6.163(0.028 ) Observations 2,661,435 Log Likelihood  1,735,632.000
+Akaike Inf .
+Crit .
+3,471,297.000 Bayesian Inf .
+Crit .
+3,471,501.000 Note:p<0.1;p<0.05;p<0.01
+Table 20 : Public .
+Sentiment countryEU 0.047(0.015 ) countryGB 0.286(0.008 ) has_hashtag1 0.278(0.009 )
+has_mention1  0.017(0.009 ) has_url1 0.462(0.013 ) is_quote_status1  0.135(0.010 ) is_reply1  0.279(0.009 ) is_veriﬁed1 0.049(0.017 ) log_chars 0.538(0.008 ) log_followers 0.011(0.003 ) log_following 0.009(0.003 ) log_statuses 0.0004 ( 0.002 )
+Constant  6.210(0.085 ) Observations 2,661,435 Log Likelihood  523,820.000 Akaike Inf .
+Crit .
+1,047,672.000 Bayesian Inf .
+Crit .
+1,047,877.000 Note:p<0.1;p<0.05;p<0.01
+2236Table 21 : Quality.of .
+Life countryEU 0.059(0.016 ) countryGB 0.168(0.009 ) has_hashtag1  0.178(0.011 )
+has_mention1  0.565(0.010 ) has_url1 0.139(0.014 ) is_quote_status1 0.131(0.010 ) is_reply1 0.349(0.010 ) is_veriﬁed1 0.123(0.018 ) log_chars 1.050(0.009 ) log_followers 0.033(0.003 ) log_following  0.031(0.003 ) log_statuses  0.063(0.002 )
+Constant  7.958(0.058 ) Observations 2,661,435 Log Likelihood  491,143.800 Akaike Inf .
+Crit .
+982,319.500 Bayesian Inf . Crit .
+982,524.300 Note:p<0.1;p<0.05;p<0.01 Table 22 :
+Security.and . Defense countryEU  0.260(0.009 ) countryGB  0.469(0.006 ) has_hashtag1 0.203(0.005 ) has_mention1 0.012(0.005 ) has_url1 0.260(0.006 ) is_quote_status1 0.006 ( 0.005 ) is_reply1  0.104(0.005 ) is_veriﬁed1  0.147(0.010 ) log_chars 0.602(0.005 ) log_followers  0.016(0.002 ) log_following 0.014(0.002 ) log_statuses 0.026(0.001 )
+Constant  4.981(0.071 ) Observations 2,661,435
+Log Likelihood  1,332,280.000 Akaike Inf .
+Crit .
+2,664,591.000 Bayesian Inf .
+Crit .
+2,664,796.000 Note:p<0.1;p<0.05;p<0.01 Table 23 : Hero .. Cultural .
+Diversity countryEU 0.041 ( 0.031 ) countryGB 0.051(0.018 ) has_hashtag1 0.114(0.020 ) has_mention1  0.208(0.020 ) has_url1  0.480(0.021 ) is_quote_status1 0.270(0.020 ) is_reply1 0.200(0.020 ) is_veriﬁed1 0.405(0.035 ) log_chars 0.449(0.017 ) log_followers  0.003 ( 0.006 ) log_following 0.004 ( 0.006 ) log_statuses  0.095(0.004 )
+Constant  5.560(0.104 ) Observations 2,661,435 Log Likelihood  164,157.100
+Akaike Inf . Crit .
+328,346.100 Bayesian Inf .
+Crit .
+328,550.800 Note:p<0.1;p<0.05;p<0.01Table 24 : Hero .. Integration countryEU  0.096(0.023 ) countryGB  0.073(0.013 ) has_hashtag1  0.103(0.015 ) has_mention1  0.399(0.014 ) has_url1  0.169(0.016 ) is_quote_status1 0.102(0.014 ) is_reply1 0.199(0.014 ) is_veriﬁed1 0.404(0.023 ) log_chars 0.649(0.012 ) log_followers 0.031(0.004 ) log_following  0.033(0.004 ) log_statuses  0.088(0.003 )
+Constant  6.012(0.075 ) Observations 2,661,435 Log Likelihood  287,803.800 Akaike Inf . Crit .
+575,639.600 Bayesian Inf .
+Crit .
+575,844.400 Note:p<0.1;p<0.05;p<0.01 Table 25 : Hero .. Worker countryEU 0.287(0.027 ) countryGB 1.287(0.011 ) has_hashtag1  0.134(0.020 ) has_mention1  0.123(0.018 ) has_url1 0.119(0.020 ) is_quote_status1 0.111(0.019 ) is_reply1 0.501(0.018 ) is_veriﬁed1 0.342(0.033 ) log_chars 0.462(0.015 ) log_followers  0.049(0.005 ) log_following 0.009(0.005 ) log_statuses  0.016(0.004 ) Constant  6.720(0.099 )
+Observations 2,661,435 Log Likelihood  210,181.700
+Akaike Inf .
+Crit .
+420,395.400 Bayesian Inf .
+Crit .
+420,600.100 Note:p<0.1;p<0.05;p<0.01 Table 26 : Threat .. Fiscal countryEU  0.633(0.017 ) countryGB  0.435(0.009 ) has_hashtag1  0.244(0.010 ) has_mention1 0.227(0.008 ) has_url1  0.238(0.009 ) is_quote_status1 0.716(0.008 ) is_reply1 0.557(0.009 ) is_veriﬁed1  1.728(0.034 ) log_chars 0.480(0.007 ) log_followers 0.019(0.002 ) log_following 0.023(0.003 ) log_statuses  0.035(0.002 )
+Constant  5.272(0.085 ) Observations 2,661,435 Log Likelihood  709,024.600
+Akaike Inf .
+Crit .
+1,418,081.000 Bayesian Inf .
+Crit .
+1,418,286.000 Note:p<0.1;p<0.05;p<0.01
+2237Table 27 : Threat .. Jobs countryEU  0.339(0.043 ) countryGB 0.438(0.017 ) has_hashtag1  0.233(0.028 ) has_mention1  0.158(0.024 ) has_url1  0.220(0.025 ) is_quote_status1 0.488(0.024 ) is_reply1 0.710(0.024 ) is_veriﬁed1  0.702(0.071 ) log_chars 0.560(0.019 ) log_followers  0.090(0.007 ) log_following  0.013(0.007 ) log_statuses 0.046(0.005 )
+Constant  7.588(0.101 ) Observations 2,661,435 Log Likelihood  143,493.400 Akaike Inf .
+Crit .
+287,018.800 Bayesian Inf . Crit .
+287,223.500 Note:p<0.1;p<0.05;p<0.01 Table 28 : Threat .. National .
+Cohesion countryEU 0.279(0.012 ) countryGB 0.083(0.008 ) has_hashtag1 0.117(0.009 )
+has_mention1 0.067(0.009 ) has_url1  0.372(0.009 ) is_quote_status1 0.863(0.008 ) is_reply1 0.631(0.009 ) is_veriﬁed1  1.817(0.035 ) log_chars 0.643(0.007 ) log_followers 0.040(0.003 ) log_following  0.003 ( 0.003 ) log_statuses  0.028(0.002 )
+Constant  6.122(0.061 ) Observations 2,661,435 Log Likelihood  659,886.300 Akaike Inf .
+Crit .
+1,319,805.000
+Bayesian Inf .
+Crit .
+1,320,009.000 Note:p<0.1;p<0.05;p<0.01 Table 29 : Threat .. Public .
+Order countryEU  0.675(0.009 ) countryGB  1.381(0.007 ) has_hashtag1 0.053(0.005 ) has_mention1 0.216(0.005 ) has_url1 0.029(0.005 ) is_quote_status1 0.448(0.005 ) is_reply1 0.244(0.005 ) is_veriﬁed1  1.226(0.013 ) log_chars 0.274(0.004 ) log_followers 0.006(0.001 ) log_following 0.045(0.002 ) log_statuses  0.012(0.001 )
+Constant  2.966(0.056 )
+Observations 2,661,435 Log Likelihood  1,469,478.000 Akaike Inf . Crit .
+2,938,987.000 Bayesian Inf .
+Crit . 2,939,192.000
+Note:p<0.1;p<0.05;p<0.01Table 30 : Victim ..
+Discrimination countryEU 0.046(0.012 ) countryGB 0.453(0.006 ) has_hashtag1  0.165(0.009 ) has_mention1  0.162(0.007 ) has_url1  0.103(0.009 ) is_quote_status1 0.201(0.008 )
+is_reply1 0.173(0.008 ) is_veriﬁed1 0.473(0.015 ) log_chars 1.022(0.007 ) log_followers  0.151(0.002 ) log_following 0.074(0.002 ) log_statuses 0.101(0.002 )
+Constant  8.099(0.058 ) Observations 2,661,435 Log Likelihood  770,001.000 Akaike Inf . Crit .
+1,540,034.000 Bayesian Inf .
+Crit .
+1,540,239.000 Note:p<0.1;p<0.05;p<0.01 Table 31 : Victim .. Global .
+Economy countryEU 0.914(0.033 ) countryGB 1.088(0.019 ) has_hashtag1  0.344(0.036 ) has_mention1 0.018 ( 0.029 ) has_url1 0.015 ( 0.033 ) is_quote_status1 0.213(0.031 ) is_reply1 0.387(0.029 ) is_veriﬁed1 0.272(0.057 ) log_chars 0.603(0.024 ) log_followers  0.059(0.008 ) log_following  0.004 ( 0.008 ) log_statuses  0.015(0.006 )
+Constant  8.433(0.130 ) Observations 2,661,435 Log Likelihood  94,328.800
+Akaike Inf .
+Crit .
+188,689.600 Bayesian Inf . Crit .
+188,894.300 Note:p<0.1;p<0.05;p<0.01 Table 32 : Victim .. Humanitarian countryEU  0.059(0.013 ) countryGB  0.453(0.009 ) has_hashtag1 0.198(0.007 ) has_mention1  0.339(0.007 ) has_url1 0.534(0.010 ) is_quote_status1  0.306(0.008 ) is_reply1  0.570(0.008 ) is_veriﬁed1 0.553(0.013 ) log_chars 0.473(0.007 ) log_followers  0.048(0.002 ) log_following 0.033(0.002 ) log_statuses 0.045(0.002 )
+Constant  5.456(0.098 ) Observations 2,661,435 Log Likelihood  679,409.600 Akaike Inf .
+Crit .
+1,358,851.000 Bayesian Inf .
+Crit .
+1,359,056.000 Note:p<0.1;p<0.05;p<0.01
+2238Table 33 : Victim .. War countryEU 0.631(0.046 ) countryGB 0.228(0.033 ) has_hashtag1  0.135(0.042 ) has_mention1  0.596(0.036 ) has_url1 0.529(0.058 ) is_quote_status1  0.144(0.039 ) is_reply1 0.274(0.038 ) is_veriﬁed1 0.612(0.060 ) log_chars 1.017(0.033 ) log_followers  0.062(0.010 ) log_following 0.015 ( 0.011 ) log_statuses 0.005 ( 0.008 )
+Constant  11.326(0.175 ) Observations 2,661,435 Log Likelihood  56,045.610 Akaike Inf .
+Crit .
+112,123.200 Bayesian Inf .
+Crit .
+112,327.900 Note:p<0.1;p<0.05;p<0.01 Table 34 : Episodic countryEU  0.147(0.007 )
+countryGB  0.204(0.004 ) has_hashtag1 0.017(0.005 ) has_mention1 0.174(0.005 ) has_url1 0.451(0.005 ) is_quote_status1  0.866(0.005 ) is_reply1  1.078(0.005 ) is_veriﬁed1 0.578(0.011 ) log_chars  0.288(0.004 ) log_followers  0.006(0.001 ) log_following 0.024(0.001 ) log_statuses 0.043(0.001 )
+Constant 1.857(0.032 ) Observations 2,661,435 Log Likelihood  1,633,108.000 Akaike Inf .
+Crit .
+3,266,249.000 Bayesian Inf .
+Crit .
+3,266,453.000 Note:p<0.1;p<0.05;p<0.01
+Table 35 : Thematic countryEU  0.249(0.008 ) countryGB  0.012(0.005 ) has_hashtag1  0.273(0.005 ) has_mention1  0.062(0.004 ) has_url1  0.471(0.005 ) is_quote_status1 1.094(0.005 ) is_reply1 1.061(0.005 ) is_veriﬁed1  0.408(0.009 ) log_chars 1.845(0.004 ) log_followers  0.047(0.001 ) log_following 0.022(0.001 ) log_statuses  0.018(0.001 )
+Constant  9.106(0.036 ) Observations 2,661,435 Log Likelihood  1,489,756.000 Akaike Inf .
+Crit .
+2,979,544.000 Bayesian Inf .
+Crit .
+2,979,749.000
+Note:p<0.1;p<0.05;p<0.01E Frame - building ( ideology ) regressions Tables 36 - 62 show independent variable coefﬁcients for logit regressions predicting frames from ideology .
+Table 36 : Capacity.and .
+Resources has_hashtag1  0.268(0.014 ) has_mention1  0.056(0.011 ) has_url1  0.049(0.013 ) is_quote_status1 0.248(0.012 ) is_reply1 0.329(0.011 ) is_veriﬁed1  0.084(0.025 ) log_chars 0.767(0.010 ) log_followers  0.013(0.004 ) log_following  0.019(0.004 ) log_statuses  0.023(0.003 )
+ideology 0.178(0.002 )
+Constant  6.763(0.101 )
+Observations 1,680,164 Log Likelihood  373,804.500 Akaike Inf . Crit .
+747,638.900 Bayesian Inf . Crit .
+747,823.900 Note:p<0.1;p<0.05;p<0.01 Table 37 : Crime.and .
+Punishment has_hashtag1  0.074(0.006 ) has_mention1  0.145(0.005 ) has_url1 0.152(0.006 ) is_quote_status1 0.009 ( 0.006 ) is_reply1 0.096(0.006 ) is_veriﬁed1  0.213(0.011 ) log_chars 0.302(0.005 ) log_followers  0.010(0.002 ) log_following 0.010(0.002 ) log_statuses 0.021(0.001 )
+ideology 0.174(0.001 )
+Constant  2.652(0.042 )
+Observations 1,680,164 Log Likelihood  1,052,324.000 Akaike Inf .
+Crit .
+2,104,679.000 Bayesian Inf .
+Crit .
+2,104,864.000 Note:p<0.1;p<0.05;p<0.01
+Table 38 : Cultural .
+Identity has_hashtag1  0.104(0.008 ) has_mention1  0.336(0.008 ) has_url1  0.311(0.009 ) is_quote_status1 0.022(0.008 ) is_reply1 0.253(0.008 ) is_veriﬁed1  0.043(0.014 ) log_chars 0.725(0.007 ) log_followers 0.025(0.002 ) log_following  0.005(0.003 ) log_statuses  0.021(0.002 )
+ideology  0.097(0.001 )
+Constant  4.993(0.051 ) Observations 1,680,164 Log Likelihood  654,480.300 Akaike Inf .
+Crit .
+1,308,991.000 Bayesian Inf .
+Crit .
+1,309,176.000 Note:p<0.1;p<0.05;p<0.01
+2239Table 39 : Economic has_hashtag1  0.140(0.007 ) has_mention1  0.003 ( 0.006 ) has_url1  0.067(0.008 ) is_quote_status1 0.181(0.006 ) is_reply1 0.138(0.006 ) is_veriﬁed1  0.043(0.013 ) log_chars 0.973(0.006 ) log_followers  0.069(0.002 ) log_following 0.025(0.002 ) log_statuses 0.041(0.002 )
+ideology 0.048(0.001 ) Constant  6.375(0.066 ) Observations 1,680,164
+Log Likelihood  882,709.100
+Akaike Inf .
+Crit .
+1,765,448.000 Bayesian Inf .
+Crit .
+1,765,633.000 Note:p<0.1;p<0.05;p<0.01 Table 40 : External .
+Regulation.and .
+Reputation has_hashtag1 0.097(0.014 ) has_mention1  0.082(0.013 ) has_url1 0.634(0.020 ) is_quote_status1  0.100(0.014 ) is_reply1  0.082(0.013 ) is_veriﬁed1  0.068(0.027 ) log_chars 0.586(0.012 ) log_followers 0.004 ( 0.004 ) log_following  0.031(0.005 ) log_statuses 0.035(0.003 )
+ideology 0.067(0.003 ) Constant  7.099(0.092 )
+Observations 1,680,164 Log Likelihood  254,086.900 Akaike Inf .
+Crit .
+508,203.700 Bayesian Inf .
+Crit .
+508,388.700 Note:p<0.1;p<0.05;p<0.01 Table 41 : Fairness.and .
+Equality has_hashtag1 0.065(0.009 ) has_mention1  0.126(0.008 ) has_url1  0.195(0.010 ) is_quote_status1 0.564(0.008 ) is_reply1 0.562(0.008 ) is_veriﬁed1  0.215(0.016 ) log_chars 0.909(0.007 ) log_followers 0.008(0.003 ) log_following 0.001 ( 0.003 ) log_statuses  0.021(0.002 ) ideology  0.169(0.001 )
+Constant  6.508(0.050 )
+Observations 1,680,164 Log Likelihood  615,207.800 Akaike Inf .
+Crit .
+1,230,446.000 Bayesian Inf .
+Crit .
+1,230,631.000 Note:p<0.1;p<0.05;p<0.01Table 42 : Health.and .
+Safety has_hashtag1  0.056(0.007 ) has_mention1  0.174(0.006 ) has_url1 0.500(0.008 ) is_quote_status1  0.180(0.007 ) is_reply1  0.118(0.006 ) is_veriﬁed1  0.123(0.013 ) log_chars 0.429(0.006 ) log_followers  0.013(0.002 ) log_following 0.025(0.002 ) log_statuses 0.022(0.002 ) ideology 0.027(0.001 )
+Constant  4.194(0.086 ) Observations 1,680,164 Log Likelihood  814,400.700 Akaike Inf .
+Crit .
+1,628,831.000 Bayesian Inf .
+Crit .
+1,629,016.000 Note:p<0.1;p<0.05;p<0.01
+Table 43 : Legality .. Constitutionality .. Jurisdiction has_hashtag1  0.046(0.008 ) has_mention1 0.011 ( 0.007 ) has_url1 0.185(0.010 ) is_quote_status1  0.221(0.008 ) is_reply1  0.229(0.007 ) is_veriﬁed1 0.345(0.014 ) log_chars 0.799(0.007 ) log_followers  0.060(0.002 ) log_following 0.022(0.003 ) log_statuses 0.077(0.002 ) ideology  0.043(0.001 )
+Constant  6.462(0.052 )
+Observations 1,680,164 Log Likelihood  652,442.400 Akaike Inf .
+Crit .
+1,304,915.000 Bayesian Inf .
+Crit .
+1,305,100.000 Note:p<0.1;p<0.05;p<0.01 Table 44 : Morality.and .
+Ethics has_hashtag1 0.186(0.009 ) has_mention1  0.077(0.008 ) has_url1  0.013 ( 0.012 ) is_quote_status1 0.257(0.009 ) is_reply1  0.058(0.009 ) is_veriﬁed1  0.214(0.016 ) log_chars 0.905(0.008 ) log_followers 0.013(0.003 ) log_following 0.018(0.003 ) log_statuses  0.034(0.002 ) ideology  0.411(0.002 )
+Constant  6.804(0.082 )
+Observations 1,680,164 Log Likelihood  478,969.600 Akaike Inf .
+Crit .
+957,969.100 Bayesian Inf .
+Crit .
+958,154.100 Note:p<0.1;p<0.05;p<0.01
+2240Table 45 : Policy . Prescription.and .
+Evaluation has_hashtag1 0.223(0.006 ) has_mention1 0.086(0.005 ) has_url1 0.126(0.007 ) is_quote_status1  0.001 ( 0.006 ) is_reply1  0.162(0.006 ) is_veriﬁed1 0.336(0.011 ) log_chars 0.730(0.005 ) log_followers  0.038(0.002 ) log_following  0.011(0.002 ) log_statuses 0.039(0.001 ) ideology 0.037(0.001 )
+Constant  4.844(0.037 )
+Observations 1,680,164
+Log Likelihood  1,001,011.000 Akaike Inf . Crit .
+2,002,052.000 Bayesian Inf .
+Crit .
+2,002,237.000 Note:p<0.1;p<0.05;p<0.01
+Table 46 : Political .
+Factors.and .
+Implications has_hashtag1 0.267(0.006 )
+has_mention1 0.101(0.005 ) has_url1 0.152(0.006 ) is_quote_status1 0.113(0.006 ) is_reply1  0.333(0.005 ) is_veriﬁed1  0.186(0.010 ) log_chars 1.063(0.005 ) log_followers  0.010(0.002 ) log_following  0.009(0.002 ) log_statuses 0.064(0.001 )
+ideology 0.066(0.001 ) Constant  6.140(0.034 )
+Observations 1,680,164 Log Likelihood  1,097,548.000
+Akaike Inf .
+Crit .
+2,195,126.000 Bayesian Inf .
+Crit .
+2,195,311.000 Note:p<0.1;p<0.05;p<0.01
+Table 47 : Public .
+Sentiment has_hashtag1 0.368(0.011 ) has_mention1  0.030(0.010 ) has_url1 0.383(0.016 ) is_quote_status1  0.142(0.012 ) is_reply1  0.308(0.011 ) is_veriﬁed1  0.065(0.021 ) log_chars 0.581(0.010 ) log_followers 0.047(0.004 ) log_following  0.020(0.004 ) log_statuses  0.018(0.003 ) ideology  0.060(0.002 )
+Constant  6.130(0.088 ) Observations 1,680,164 Log Likelihood  332,620.700 Akaike Inf . Crit .
+665,271.500 Bayesian Inf . Crit .
+665,456.500 Note:p<0.1;p<0.05;p<0.01Table 48 : Quality.of .
+Life has_hashtag1  0.159(0.015 ) has_mention1  0.452(0.013 ) has_url1 0.122(0.018 ) is_quote_status1 0.184(0.013 ) is_reply1 0.366(0.013 ) is_veriﬁed1 0.046(0.022 ) log_chars 1.071(0.012 ) log_followers 0.069(0.004 ) log_following  0.039(0.004 ) log_statuses  0.100(0.003 ) ideology  0.103(0.002 )
+Constant  7.934(0.070 ) Observations 1,680,164 Log Likelihood  287,794.400 Akaike Inf .
+Crit .
+575,618.700 Bayesian Inf . Crit .
+575,803.700 Note:p<0.1;p<0.05;p<0.01 Table 49 : Security.and .
+Defense has_hashtag1 0.306(0.007 ) has_mention1  0.075(0.006 )
+has_url1 0.254(0.008 ) is_quote_status1  0.075(0.006 ) is_reply1  0.142(0.006 ) is_veriﬁed1  0.043(0.013 ) log_chars 0.697(0.006 ) log_followers  0.013(0.002 ) log_following  0.014(0.002 ) log_statuses 0.023(0.002 ) ideology 0.177(0.001 )
+Constant  5.359(0.080 ) Observations 1,680,164 Log Likelihood  859,551.100 Akaike Inf .
+Crit .
+1,719,132.000 Bayesian Inf .
+Crit .
+1,719,317.000 Note:p<0.1;p<0.05;p<0.01
+Table 50 : Threat ..
+Fiscal has_hashtag1  0.157(0.012 ) has_mention1  0.0002 ( 0.011 ) has_url1  0.279(0.011 ) is_quote_status1 0.586(0.010 ) is_reply1 0.573(0.011 ) is_veriﬁed1  1.036(0.039 ) log_chars 0.576(0.009 ) log_followers  0.037(0.004 ) log_following 0.021(0.004 ) log_statuses  0.037(0.002 )
+ideology 0.505(0.002 )
+Constant  5.913(0.098 )
+Observations 1,680,164
+Log Likelihood  440,199.100 Akaike Inf . Crit .
+880,428.300 Bayesian Inf .
+Crit .
+880,613.300 Note:p<0.1;p<0.05;p<0.01
+2241Table 51 : Threat .. Jobs has_hashtag1  0.061(0.035 )
+has_mention1  0.170(0.031 ) has_url1  0.220(0.033 ) is_quote_status1 0.465(0.031 ) is_reply1 0.693(0.032 ) is_veriﬁed1  0.649(0.091 ) log_chars 0.610(0.026 ) log_followers  0.097(0.010 ) log_following  0.011 ( 0.011 ) log_statuses 0.037(0.007 )
+ideology 0.094(0.005 )
+Constant  7.864(0.136 )
+Observations 1,680,164
+Log Likelihood  80,905.320 Akaike Inf . Crit .
+161,840.600 Bayesian Inf . Crit .
+162,025.700 Note:p<0.1;p<0.05;p<0.01 Table 52 : Threat .. National .
+Cohesion has_hashtag1 0.270(0.011 ) has_mention1  0.139(0.011 ) has_url1  0.451(0.012 ) is_quote_status1 0.756(0.011 ) is_reply1 0.634(0.012 ) is_veriﬁed1  1.171(0.043 ) log_chars 0.806(0.010 ) log_followers  0.016(0.004 ) log_following 0.017(0.004 ) log_statuses  0.009(0.003 ) ideology 0.479(0.002 )
+Constant  7.435(0.066 ) Observations 1,680,164 Log Likelihood  382,405.800 Akaike Inf . Crit .
+764,841.500 Bayesian Inf . Crit .
+765,026.600 Note:p<0.1;p<0.05;p<0.01 Table 53 : Threat .. Public .
+Order has_hashtag1 0.190(0.007 ) has_mention1  0.012(0.006 ) has_url1  0.005 ( 0.007 ) is_quote_status1 0.314(0.006 ) is_reply1 0.258(0.006 ) is_veriﬁed1  0.666(0.016 ) log_chars 0.421(0.005 ) log_followers  0.042(0.002 ) log_following 0.035(0.002 ) log_statuses  0.005(0.001 ) ideology 0.506(0.001 )
+Constant  3.815(0.054 )
+Observations 1,680,164 Log Likelihood  902,962.200 Akaike Inf .
+Crit .
+1,805,954.000 Bayesian Inf .
+Crit .
+1,806,139.000 Note:p<0.1;p<0.05;p<0.01Table 54 : Victim .. Discrimination has_hashtag1  0.199(0.011 ) has_mention1 0.180(0.009 ) has_url1  0.213(0.013 ) is_quote_status1 0.232(0.010 )
+is_reply1  0.003 ( 0.009 ) is_veriﬁed1 0.300(0.018 ) log_chars 1.120(0.009 ) log_followers  0.151(0.003 ) log_following 0.124(0.004 ) log_statuses 0.111(0.002 ) ideology  0.485(0.002 )
+Constant  8.942(0.072 ) Observations 1,680,164
+Log Likelihood  417,485.600 Akaike Inf . Crit .
+835,001.200 Bayesian Inf .
+Crit .
+835,186.200 Note:p<0.1;p<0.05;p<0.01 Table 55 : Victim ..
+Global .
+Economy has_hashtag1  0.387(0.051 ) has_mention1  0.037 ( 0.039 ) has_url1 0.033 ( 0.051 ) is_quote_status1  0.078(0.044 ) is_reply1 0.156(0.039 ) is_veriﬁed1 0.445(0.071 ) log_chars 0.876(0.035 ) log_followers  0.065(0.012 ) log_following 0.006 ( 0.014 ) log_statuses  0.024(0.009 ) ideology  0.053(0.007 )
+Constant  9.659(0.194 )
+Observations 1,680,164 Log Likelihood  47,175.170 Akaike Inf .
+Crit .
+94,380.340 Bayesian Inf . Crit .
+94,565.350 Note:p<0.1;p<0.05;p<0.01 Table 56 : Victim .. Humanitarian has_hashtag1 0.184(0.009 ) has_mention1  0.168(0.008 ) has_url1 0.460(0.013 ) is_quote_status1  0.177(0.010 ) is_reply1  0.506(0.009 ) is_veriﬁed1 0.188(0.015 ) log_chars 0.491(0.008 ) log_followers 0.005 ( 0.003 ) log_following 0.035(0.003 ) log_statuses 0.021(0.002 ) ideology  0.603(0.002 )
+Constant  5.537(0.103 )
+Observations 1,680,164 Log Likelihood  409,562.800 Akaike Inf .
+Crit .
+819,155.600 Bayesian Inf .
+Crit .
+819,340.600 Note:p<0.1;p<0.05;p<0.01
+2242Table 57 : Victim .. War has_hashtag1  0.067 ( 0.052 ) has_mention1  0.468(0.045 )
+has_url1 0.441(0.078 ) is_quote_status1  0.116(0.050 )
+is_reply1 0.173(0.047 ) is_veriﬁed1 0.379(0.074 ) log_chars 1.010(0.044 ) log_followers  0.021 ( 0.014 ) log_following 0.0003 ( 0.016 ) log_statuses  0.004 ( 0.011 ) ideology  0.465(0.010 )
+Constant  11.222(0.240 )
+Observations 1,680,164 Log Likelihood  31,227.890 Akaike Inf .
+Crit .
+62,485.790
+Bayesian Inf . Crit .
+62,670.810 Note:p<0.1;p<0.05;p<0.01 Table 58 : Hero .. Cultural .
+Diversity has_hashtag1 0.209(0.026 ) has_mention1  0.067(0.025 ) has_url1  0.562(0.029 ) is_quote_status1 0.448(0.025 ) is_reply1 0.343(0.026 ) is_veriﬁed1 0.184(0.043 ) log_chars 0.431(0.023 ) log_followers 0.040(0.008 ) log_following 0.001 ( 0.009 ) log_statuses  0.133(0.006 ) ideology  0.533(0.006 )
+Constant  5.399(0.141 ) Observations 1,680,164 Log Likelihood  89,983.880 Akaike Inf . Crit .
+179,997.800 Bayesian Inf .
+Crit .
+180,182.800 Note:p<0.1;p<0.05;p<0.01 Table 59 : Hero .. Integration has_hashtag1  0.076(0.020 ) has_mention1  0.244(0.017 ) has_url1  0.158(0.022 ) is_quote_status1 0.188(0.018 ) is_reply1 0.235(0.018 ) is_veriﬁed1 0.205(0.029 ) log_chars 0.636(0.016 ) log_followers 0.069(0.005 ) log_following  0.036(0.006 ) log_statuses  0.122(0.004 )
+ideology  0.297(0.003 )
+Constant  5.862(0.093 ) Observations 1,680,164 Log Likelihood  166,396.500 Akaike Inf . Crit .
+332,823.000 Bayesian Inf .
+Crit .
+333,008.000 Note:p<0.1;p<0.05;p<0.01Table 60 : Hero .. Worker has_hashtag1  0.246(0.031 ) has_mention1  0.092(0.025 ) has_url1  0.027 ( 0.029 ) is_quote_status1 0.166(0.028 ) is_reply1 0.600(0.026 ) is_veriﬁed1 0.091(0.046 ) log_chars 0.348(0.022 ) log_followers  0.016(0.008 ) log_following  0.004 ( 0.009 ) log_statuses  0.048(0.006 )
+ideology  0.322(0.005 )
+Constant  5.766(0.136 ) Observations 1,680,164 Log Likelihood  103,008.500
+Akaike Inf .
+Crit .
+206,047.000 Bayesian Inf .
+Crit .
+206,232.000 Note:p<0.1;p<0.05;p<0.01 Table 61 : Episodic has_hashtag1 0.038(0.007 ) has_mention1 0.263(0.006 ) has_url1 0.560(0.006 ) is_quote_status1  0.969(0.006 ) is_reply1  1.188(0.006 ) is_veriﬁed1 0.395(0.014 ) log_chars  0.369(0.005 ) log_followers 0.018(0.002 ) log_following 0.024(0.002 ) log_statuses 0.033(0.001 ) ideology  0.171(0.001 )
+Constant 2.346(0.040 )
+Observations 1,680,164 Log Likelihood  988,528.600 Akaike Inf .
+Crit .
+1,977,087.000
+Bayesian Inf .
+Crit .
+1,977,272.000 Note:p<0.1;p<0.05;p<0.01 Table 62 :
+Thematic has_hashtag1  0.170(0.006 ) has_mention1  0.164(0.006 ) has_url1  0.579(0.006 ) is_quote_status1 1.069(0.006 ) is_reply1 1.068(0.006 ) is_veriﬁed1  0.406(0.011 ) log_chars 2.002(0.006 ) log_followers  0.013(0.002 ) log_following  0.036(0.002 ) log_statuses  0.045(0.001 ) ideology 0.205(0.001 )
+Constant  9.476(0.042 )
+Observations 1,680,164 Log Likelihood  914,986.900 Akaike Inf .
+Crit .
+1,830,004.000 Bayesian Inf .
+Crit .
+1,830,189.000 Note:p<0.1;p<0.05;p<0.01
+2243F Frame - setting ( audience response ) regressions Tables 63 - 67 show independent variable coefﬁcients for linear regressions predicting favorite and retweet counts from frames .
+Results from Table 63 are discussed in the main paper .
+We ﬁnd comparable effects of frames on audience responses when excluding frames from the regression model with F1 scores below 0.5 ( Figure 64 ) , and when ﬁtting separate regressions for each frame type ( Figures 65 - 67 ) .
+Table 63 : Fit audience response variables on all frames log_favorites log_retweets Capacity.and . Resources1  0.017(0.004 )  0.010(0.003 ) Crime.and . Punishment1  0.018(0.002 ) 0.018(0.002 ) Cultural .
+Identity1 0.020 ( 0.003 ) 0.001 ( 0.002 )
+Economic1 0.010(0.002 ) 0.017(0.002 )
+Episodic1 0.002(0.002 ) 0.013(0.002 )
+External .
+Regulation.and . Reputation1  0.020 ( 0.004 )  0.001 ( 0.003 ) Fairness.and .
+Equality1 0.032(0.003 ) 0.021(0.002 ) Health.and .
+Safety1  0.007(0.002 ) 0.017(0.002 ) Hero .. Cultural .
+Diversity1 0.043 ( 0.008 )  0.011 ( 0.006 ) Hero .. Integration1 0.100(0.005 ) 0.019(0.004 ) Hero .. Worker1  0.017 ( 0.007 ) 0.005 ( 0.006 ) Legality .. Constitutionality .. Jurisdiction1 0.002(0.002 ) 0.020(0.002 ) Morality.and . Ethics1 0.066(0.003 ) 0.022(0.002 )
+Policy . Prescription.and .
+Evaluation1  0.003(0.002 ) 0.004(0.001 ) Political .
+Factors.and .
+Implications1 0.008(0.002 ) 0.031(0.001 ) Public .
+Sentiment1 0.030(0.004 ) 0.023(0.003 ) Quality.of .
+Life1 0.018 ( 0.004 )  0.004 ( 0.003 ) Security.and . Defense1  0.017(0.002 ) 0.013(0.002 )
+Thematic1 0.007(0.002 ) 0.014(0.002 ) Threat .. Fiscal1  0.016(0.003 ) 0.011(0.003 ) Threat .. Jobs1 0.019(0.009 ) 0.027(0.007 ) Threat ..
+National . Cohesion1  0.016(0.003 ) 0.013(0.003 ) Threat .. Public .
+Order1 0.020(0.002 ) 0.028(0.002 ) Victim .. Discrimination1 0.048(0.004 ) 0.029(0.003 ) Victim .. Global .
+Economy1  0.033 ( 0.012 )  0.014 ( 0.010 ) Victim .. Humanitarian1 0.008(0.003 ) 0.064(0.003 ) Victim .. War1 0.013 ( 0.014 ) 0.011 ( 0.012 ) has_hashtag1  0.048(0.003 )  0.020(0.002 ) has_mention1  0.116(0.002 )  0.096(0.002 ) has_url1  0.299(0.003 )  0.168(0.002 ) is_quote_status1  0.010(0.003 )  0.071(0.002 ) is_reply1 0.050(0.003 )  0.129(0.002 ) is_veriﬁed1 0.666(0.005 ) 0.590(0.004 ) log_chars 0.326(0.002 ) 0.220(0.002 )
+log_followers 0.318(0.001 ) 0.243(0.001 ) log_following  0.123(0.001 )  0.087(0.001 ) log_statuses  0.145(0.001 )  0.098(0.001 ) ideology  0.046(0.001 )  0.007(0.0004 ) Constant  0.747(0.033 )  0.739(0.012 )
+Observations 1,262,326 1,262,326 Log Likelihood  1,613,009.000  1,335,368.000
+Akaike Inf .
+Crit .
+3,226,105.000 2,670,822.000 Bayesian Inf . Crit .
+3,226,623.000 2,671,340.000 Note:p<0.05;p<0.01;p<0.005
+2244Table 64 : Fit audience response variables on frames with test F1 > 0.5 log_favorites log_retweets Capacity.and .
+Resources1  0.019(0.004 )  0.010(0.003 ) Crime.and . Punishment1  0.019(0.002 ) 0.017(0.002 ) Cultural .
+Identity1 0.024 ( 0.002 ) 0.004(0.002 ) Economic1 0.012(0.002 ) 0.017(0.002 ) Episodic1 0.003(0.002 ) 0.013(0.002 )
+External .
+Regulation.and . Reputation1  0.024 ( 0.004 )  0.001 ( 0.003 ) Fairness.and .
+Equality1 0.028(0.003 ) 0.021(0.002 ) Health.and .
+Safety1  0.008(0.002 ) 0.016(0.002 )
+Hero .. Cultural .
+Diversity1 0.055 ( 0.008 )  0.011 ( 0.006 ) Hero .. Worker1  0.010 ( 0.007 ) 0.005 ( 0.006 ) Legality .. Constitutionality .. Jurisdiction1 0.002(0.002 ) 0.019(0.002 ) Morality.and . Ethics1 0.066(0.003 ) 0.021(0.002 ) Policy .
+Prescription.and .
+Evaluation1  0.003(0.002 ) 0.004(0.001 ) Political .
+Factors.and .
+Implications1 0.007(0.002 ) 0.031(0.001 ) Quality.of .
+Life1 0.024 ( 0.004 )  0.003 ( 0.003 ) Security.and . Defense1  0.018(0.002 ) 0.013(0.002 ) Thematic1 0.008(0.002 ) 0.015(0.002 ) Threat .. Fiscal1  0.017(0.003 ) 0.010(0.003 ) Threat .. Jobs1 0.015(0.009 ) 0.026(0.007 ) Threat .. Public .
+Order1 0.020(0.002 ) 0.028(0.002 ) Victim .. Discrimination1 0.048(0.003 ) 0.028(0.003 ) Victim .. Humanitarian1 0.007(0.003 ) 0.064(0.003 ) has_hashtag1  0.047(0.003 )  0.019(0.002 ) has_mention1  0.117(0.002 )  0.096(0.002 ) has_url1  0.298(0.003 )  0.168(0.002 ) is_quote_status1  0.011(0.003 )  0.071(0.002 ) is_reply1 0.050(0.003 )  0.129(0.002 ) is_veriﬁed1 0.667(0.005 ) 0.589(0.004 ) log_chars 0.327(0.002 ) 0.221(0.002 ) log_followers 0.318(0.001 ) 0.243(0.001 ) log_following  0.123(0.001 )  0.087(0.001 ) log_statuses  0.145(0.001 )  0.099(0.001 ) ideology  0.047(0.001 )  0.007(0.0004 ) Constant  0.749(0.033 )  0.743(0.012 )
+Observations 1,262,326 1,262,326 Log Likelihood  1,613,210.000  1,335,401.000
+Akaike Inf .
+Crit .
+3,226,496.000 2,670,878.000 Bayesian Inf . Crit .
+3,226,953.000 2,671,336.000 Note:p<0.05;p<0.01;p<0.005
+2245Table 65 : Fit audience response variables on only issue - generic policy frames log_favorites log_retweets Capacity.and . Resources1  0.028(0.003 )  0.011(0.003 ) Crime.and . Punishment1  0.010(0.002 ) 0.030(0.001 ) Cultural .
+Identity1 0.029 ( 0.002 ) 0.001 ( 0.002 ) Economic1 0.008(0.002 ) 0.017(0.002 )
+External .
+Regulation.and . Reputation1  0.024 ( 0.004 )  0.003 ( 0.003 ) Fairness.and .
+Equality1 0.048(0.002 ) 0.032(0.002 )
+Health.and .
+Safety1  0.006(0.002 ) 0.026(0.002 ) Legality .. Constitutionality .. Jurisdiction1 0.003(0.002 ) 0.020(0.002 ) Morality.and . Ethics1 0.069(0.003 ) 0.049(0.002 ) Policy .
+Prescription.and .
+Evaluation1  0.003 ( 0.002 ) 0.003(0.001 ) Political .
+Factors.and .
+Implications1 0.006(0.002 ) 0.030(0.001 ) Public .
+Sentiment1 0.029(0.004 ) 0.023(0.003 ) Quality.of .
+Life1 0.023 ( 0.004 ) 0.001 ( 0.003 ) Security.and . Defense1  0.013(0.002 ) 0.019(0.002 ) has_hashtag1  0.048(0.003 )  0.019(0.002 ) has_mention1  0.115(0.002 )  0.096(0.002 ) has_url1  0.300(0.003 )  0.169(0.002 )
+is_quote_status1  0.009(0.003 )  0.070(0.002 ) is_reply1 0.050(0.003 )  0.129(0.002 ) is_veriﬁed1 0.667(0.005 ) 0.589(0.004 ) log_chars 0.332(0.002 ) 0.228(0.002 ) log_followers 0.317(0.001 ) 0.243(0.001 ) log_following  0.122(0.001 )  0.087(0.001 ) log_statuses  0.145(0.001 )  0.098(0.001 ) ideology  0.047(0.0005 )  0.007(0.0004 ) Constant  0.767(0.032 )  0.757(0.011 ) Observations 1,262,326 1,262,326 Log Likelihood  1,613,329.000  1,335,820.000
+Akaike Inf .
+Crit .
+3,226,718.000 2,671,700.000 Bayesian Inf .
+Crit .
+3,227,079.000 2,672,061.000 Note:p<0.05;p<0.01;p<0.005
+2246Table 66 :
+Fit audience response variables on only issue - speciﬁc frames log_favorites log_retweets Hero .. Cultural .
+Diversity1 0.060(0.008 )  0.025(0.006 )
+Hero .. Integration1 0.111 ( 0.005 ) 0.007 ( 0.004 ) Hero .. Worker1  0.013 ( 0.007 ) 0.003 ( 0.006 ) Threat .. Fiscal1  0.013(0.003 ) 0.014(0.002 ) Threat .. Jobs1 0.026(0.009 ) 0.027(0.007 ) Threat .. National . Cohesion1  0.003(0.003 ) 0.012(0.003 ) Threat .. Public .
+Order1 0.00003(0.002 ) 0.038(0.002 ) Victim .. Discrimination1 0.075(0.003 ) 0.040(0.002 ) Victim .. Global .
+Economy1  0.033 ( 0.012 )  0.015 ( 0.009 ) Victim .. Humanitarian1 0.033(0.003 ) 0.078(0.002 ) Victim .. War1 0.009 ( 0.014 ) 0.011 ( 0.012 ) has_hashtag1  0.046(0.003 )  0.018(0.002 ) has_mention1  0.117(0.002 )  0.097(0.002 ) has_url1  0.302(0.003 )  0.166(0.002 ) is_quote_status1  0.005(0.003 )  0.069(0.002 ) is_reply1 0.054(0.003 )  0.130(0.002 ) is_veriﬁed1 0.661(0.005 ) 0.588(0.004 ) log_chars 0.335(0.002 ) 0.243(0.002 ) log_followers 0.318(0.001 ) 0.243(0.001 ) log_following  0.123(0.001 )  0.087(0.001 ) log_statuses  0.146(0.001 )  0.098(0.001 ) ideology  0.047(0.001 )  0.007(0.0004 ) Constant  0.775(0.033 )  0.808(0.012 ) Observations 1,262,326 1,262,326
+Log Likelihood  1,613,485.000
+ 1,335,947.000 Akaike Inf .
+Crit .
+3,227,023.000 2,671,949.000 Bayesian Inf .
+Crit .
+3,227,349.000 2,672,274.000 Note:p<0.05;p<0.01;p<0.005 Table 67 : Fit audience response variables on only narrative frames log_favorites log_retweets Episodic1 0.006(0.002 ) 0.014(0.002 ) Thematic1 0.014(0.002 ) 0.026(0.002 ) has_hashtag1  0.046(0.003 )  0.016(0.002 )
+has_mention1  0.117(0.002 )  0.098(0.002 ) has_url1  0.303(0.003 )  0.165(0.002 ) is_quote_status1  0.006(0.003 )  0.070(0.002 ) is_reply1 0.051(0.003 )  0.134(0.002 ) is_veriﬁed1 0.665(0.005 ) 0.586(0.004 ) log_chars 0.338(0.002 ) 0.243(0.002 ) log_followers 0.317(0.001 ) 0.242(0.001 ) log_following  0.122(0.001 )  0.087(0.001 ) log_statuses  0.145(0.001 )  0.097(0.001 ) ideology  0.052(0.0005 )  0.008(0.0004 ) Constant  0.792(0.032 )  0.818(0.012 )
+Observations 1,262,326 1,262,326 Log Likelihood  1,614,099.000
+ 1,336,791.000
+Akaike Inf .
+Crit .
+3,228,233.000 2,673,619.000 Bayesian Inf . Crit .
+3,228,450.000 2,673,836.000 Note:p<0.05;p<0.01;p<0.005

@@ -1,0 +1,747 @@
+Fully Quantized Transformer for Machine Translation
+Gabriele Prato Mila , Universit´e de Montr´eal pratogab@mila.quebec
+Ella Charlaix Huawei Noah ’s Ark Lab ella.charlaix@huawei.com
+Mehdi Rezagholizadeh Huawei Noah ’s Ark Lab mehdi.rezagholizadeh@huawei.com
+Abstract
+State - of - the - art neural machine translation methods employ massive amounts of paramDrastically reducing computational eters .
+costs of such methods without affecting performance has been up to this point unsuccessful .
+To this end , we propose FullyQT : an allinclusive quantization strategy for the Transformer .
+To the best of our knowledge , we are the ﬁrst to show that it is possible to avoid any loss in translation quality with a fully quantized Transformer .
+Indeed , compared to fullprecision , our 8 - bit models score greater or equal BLEU on most tasks .
+Comparing ourselves to all previously proposed methods , we achieve state - of - the - art quantization results .
+1
+Introduction
+The idea of using neural networks for machine translation was only recently proposed ( Kalchbrenner and Blunsom , 2013 ; Sutskever et al , 2014 ; Cho et al , 2014 ) .
+Nonetheless , the approach became the state - of - the - art in the ﬁeld ( Ahmed et al , 2017 ; Ott et al , 2018 ; Edunov et al , 2018 ) .
+A key element of this success was to allow the decoder to attend to all hidden states of the encoder ( Bahdanau et al , 2014 ) .
+A few variations to this additive attention mechanism have been proposed , such as multiplicative and self - attention ( Luong et al , 2015 ; Cheng et al , 2016 ; Lin et al , 2017 ) .
+The latter formed the basis of the Transformer network ( Vaswani et al , 2017 ) , which achieved state - of - the - art results in machine translation .
+Inspiring a new wave of work , numerous natural language processing tasks reached new heights ( Devlin et al , 2018 ; Liu et al , 2019 ) .
+Unfortunately , these models use an enormous amount of parameters .
+Inference on resource - limited hardware such as edge - devices is thus impractical .
+A solution to reduce the computational burden of these networks is to lower numerical precision .
+Consequently , numerical values can be represented
+using fewer bits ( Tang and Kwan , 1993 ; Marchesi et al , 1993 ) .
+This method called quantization has the advantage of providing good compression rates with minimal loss in accuracy .
+It is also conveniently supported by most hardware .
+Properly quantizing the Transformer would allow computational speed gains at inference , as well as deployment on more constrained devices .
+In this work , we propose a quantization - aware training strategy for the entire Transformer architecture .
+Our method is easy to implement and results are consistent with the full - precision Transformer .
+We test our approach on multiple translation tasks such as WMT14 EN - FR and WMT14 EN - DE and obtain state - of - the - art quantization results .
+In comparison with full - precision , our quantized models score equal or higher BLEU on most tasks .
+We are , to the best of our knowledge , the ﬁrst to show that the Transformer architecture can be fully quantized without impairing translation quality .
+We also perform an ablation study and show that quantizing speciﬁc components of the Transformer improves BLEU score .
+2 Background
+In this section , we review a broad spectrum of quantization and pruning methods for neural network compression .
+2.1 Quantization
+Over the years , a large range of methods have been proposed to quantize neural networks .
+These include , among many others , binary ( Courbariaux et al , 2016 ) , ternary ( Lin et al , 2015 ; Li et al , 2016 ) , uniform ( Jacob et al , 2017 ) and learned ( Zhang et al , 2018 ) quantization .
+These methods can be universally applied to any type of neural network .
+To maintain performance though , speciﬁc architectures usually require custom tailored quantization schemes .
+FindingsoftheAssociationforComputationalLinguistics : EMNLP2020,pages1–14November16 - 20,2020.c(cid:13)2020AssociationforComputationalLinguistics1  Several recent work explore recurrent neural network ( Jordan , 1990 ) quantization .
+Ott et al ( 2016 ) propose an exponential quantization method for RNN weights .
+They ﬁnd ternary and exponential quantization to work well on language modeling and speech recognition , while binary weights seemed ineffective .
+Hubara et al ( 2016 ) quantize weights and activations of both RNNs and LSTMs ( Hochreiter and Schmidhuber , 1997 ) to 2 , 4 and 6bit .
+Meanwhile , He et al ( 2016 ) propose modiﬁcations to the gates and interlinks of quantized LSTM and GRU ( Cho et al , 2014 ) cells , as well as a balanced quantization method for weights .
+Wu et al ( 2016 ) successfully quantize a stacked sequence - tosequence LSTM to 8 - bit without any loss in translation quality .
+Most recently , Wang et al ( 2018 ) propose applying different quantization methods for different RNN components .
+With regards to CNNs ( LeCun et al , 1989 ) , various works have also explored quantizing these models .
+Gong et
+al ( 2014 ) compare matrix factorization , binarization , k - means clustering , product quantization and residual quantization of CNNs .
+Wu et al ( 2015 ) apply quantization to both kernels and fully connected layers of convolutional neural networks .
+Rastegari et
+al ( 2016 ) propose using binary weighted ﬁlters on AlexNet ( Krizhevsky et al , 2012 ) .
+Testing their method on ImageNet , they show classiﬁcation accuracy to be on par with fullprecision .
+For faster inference and training , Zhou et al ( 2016 ) use low bitwidth weights , activations and gradients on CNNs .
+Quantization has been applied in tandem with other compression methods .
+Han et al ( 2015 ) combine pruning , quantization , weight sharing and Huffman coding .
+In another line of work , Polino et al ( 2018 ) employ quantization with knowledge distillation ( Hinton et al , 2015 ) for higher compression rates .
+Moreover , Chen et al ( 2018 ) blend quantization with block based low - rank matrix approximation of embeddings .
+2.2 Pruning
+The pruning of neural networks for model compression has also been largely explored .
+LeCun et al ( 1990 ) were the ﬁrst to propose a Hessian based method to prune neural net weights .
+Hassibi et al ( 1994 ) later improved the method .
+More recently , See et al ( 2016 ) show that pruning a fully trained model and then retraining it can increase performance over the original non - pruned
+model .
+Gradually pruning in tandem with training has also been shown to increase performance ( Zhu and Gupta , 2017 ) .
+To avoid sparse matrices , Liu et al ( 2017 ) prune nodes instead of weights .
+They apply a penalty in the loss on the γ parameters of batch normalization layers .
+With a similar objective , Narang et al ( 2017b ) make better use of hardware by applying pruning and weight decay in blocks to minimize the number of loaded weight matrix chunks .
+Similarly to quantization , pruning methods have also been adapted to speciﬁc architectures .
+Liu et al ( 2015 ) propose an efﬁcient sparse matrix multiplication algorithm for CNNs .
+As for RNNs , Narang et al ( 2017a ) show sparse pruning to work well on the architecture .
+In order to maintain dimension consistency , Wen et al ( 2017 ) propose to prune all basic LSTM structures concurrently .
+Lastly , Park et al ( 2018 ) introduce simple recurrent units ( SRUs ) for easy pruning of RNNs .
+3 FullyQT
+3.1 Quantization Methodology
+Our quantization scheme was chosen to be uniform , meaning that the step size between two quantized values is constant .
+This choice , which is an additional constraint , was made for practical reasons .
+It indeed simpliﬁes all computations required during inference , enabling the exploitation of hardware resources more efﬁciently .
+If the performance with uniform quantization is already on par with fullprecision , then more weighty methods are unnecessary .
+A brief overview of uniform quantization is given in this section .
+For more details , we refer the reader to Jacob et al ( 2017 ) .
+Given an element x of a tensor X , we apply the
+quantization function Q :
+Q(x )
+=
+( cid:22 ) clamp(x ; xmin , xmax )
+− xmin s
+( cid:25 )
+∗ s + xmin ( 1 )
+s =
+xmax − xmin 2k − 1
+( 2 )
+where xmin and xmax deﬁnes the endpoints of the quantization interval .
+When quantization is applied to weights , these values are respectively min(X ) and max(X ) .
+However , when quantization is applied to activations , those values are running estimates .
+The latter are computed during training , where for every forward pass , the xmin and xmax variables are updated via an exponential moving average with a momentum of 0.9 .
+The clamp function associates all values outside of the
+2  [ xmin , xmax ] range to the closest endpoint and ( cid:98)·(cid:101 ) represents rounding to the nearest integer .
+The value k is simply the bit precision .
+For example , in the context of 8 - bit quantization , k = 8 .
+During backpropagation , we use the straightthrough estimator ( Hinton , 2012 ) and set the gradients of clamped values to zero .
+Once training is ﬁnished , s and xmin are frozen along with the weights .
+3.2 What to Quantize
+We choose to quantize all operations which can provide a computational speed gain at inference .
+In this regard , we quantize all matrix multiplications , meaning that the inputs and weights of MatMuls will both be k - bit quantized .
+The other operations we quantize are divisions , but only if both the numerator and denominator are second or higher rank tensors .
+For all other operations , such as sums , the computational cost added by the quantization operation outweighs the beneﬁt of performing the operation with reduced precision .
+Hence , we do not quantize such operations .
+More precisely , we quantize all weights of the Transformer , excluding biases .
+The latter are summed with the INT32 output of matrix multiplications and thus provide no additional computational efﬁciency from being quantized .
+Furthermore , the memory space of biases is insigniﬁcant in comparison to the weight matrices , representing less than 0.1 % of total weights .
+For positional embeddings , these are ﬁxed and can thus be quantized once prior to training .
+The γ weights of LayerNorms are also quantized .
+As for activations , we quantize the sum of the input embeddings with the positional encodings in both the encoder and decoder .
+In the Multi - Head Attention , we quantize the ( Q , K , V ) input , the softmax ’s numerator , the softmax ’s denominator , the softmax ’s output and the Scaled Dot - Product Attention ’s output .
+At inference , the softmax does not need to be computed in full - precision .
+Indeed , the exponential function can instead be replaced with a step function .
+For the position - wise feed - forward networks , we quantize the output of the ReLUs and of the feed - forwards themselves .
+Finally , for all LayerNorms , we quanσ2 + ( cid:15 ) , tize the numerator x−µ , the denominator their quotient and the output of the LayerNorm .
+A visual guide is provided in appendix A.
+√
+3.3 Bucketing
+Instead of using a single set of ( s , xmin ) per quantized tensor , we can quantize subsets of the latter with each its own set of ( s , xmin ) ( Alistarh et al , 2016 ) .
+Even though this adds more scalars , the memory cost is insigniﬁcant overall .
+Furthermore , the added ﬂexibility can greatly alleviate the precision loss resulting from all values being mapped to a single low numerical precision domain .
+We use this bucketing method for all weight matrices , with a number of subset equal to the output dimension .
+For activations , we use bucketing when quantizing : the sum of input embeddings with the positional encoding , the Q , K , V inputs , the Scaled Dot - Product Attention ’s output , the feed - forward ’s output , the LayerNorm ’s numerator , quotient and output .
+3.4 Dealing with Zeros
+Unlike Jacob et al ( 2017 ) , we do not nudge the domain so that the zero value gets perfectly mapped .
+The only zero values which we have to deal with are the padding , the Softmax numerator and output , the output of ReLU layers and dropouts .
+Since padding has no effect on the ﬁnal output , we completely ignore these values when quantizing .
+For ReLUs and the Softmax ’s numerator and output , we ﬁx their xmin to 0 , which guarantees the perfect mapping of the value .
+Finally , quantization is applied before any dropout operation .
+Indeed , even though the zeros added to the output of the quantization layer might not be part of the domain , this only happens during training .
+4 Related Work
+Recently , simple quantization solutions have been applied to the Transformer .
+Cheong and Daniel ( 2019 ) apply k - means quantization and binarization with two centroids over the weights of the network .
+For both methods , a look up table associated with each quantized layer is used to map indices to their corresponding centroids .
+Similarly , Fan ( 2019 ) compares binary , 4 and 8 - bit uniform quantization of the Transformer weights .
+A big disadvantage with quantizing only the weights of a network is that operations must still be performed in full - precision .
+Even though the parameters ’ memory usage is reduced , these constantly have to be converted back to full - precision .
+Achieving quantization of both weights and activations is much more beneﬁcial .
+The ﬁrst attempt at doing so for the
+3  √
+Transformer applies 8 - bit quantization on weights and inputs of feed forward layers and binarizes the ( Q , K ) input of the Multi - Head Attention ( Tierno , dk is approximated by 2019 ) .
+The scaling factor a constant which can be computed as a right bitshift .
+The method resulted in a huge drop in translation accuracy .
+Achieving better performance , Bhandare et al ( 2019 ) quantize certain MatMul operations and use the KL divergence to estimate the most suited parameters for each quantization range .
+They restrain from quantizing all MatMuls , reporting poorer results in accuracy .
+Aside from translation , the concurrent work by Zafrir et al ( 2019 ) quantizes the embedding and fully connected layers of BERT ( Devlin et al , 2018 ) .
+The Softmax and LayerNorm operations are kept in full - precision .
+On the GLUE benchmark , their loss in accuracy is minimal compared to the original model .
+All of these methods omit quantizing the whole Transformer architecture , resulting in suboptimal computational efﬁciency .
+Furthermore , these solutions all fail to avoid impairing translation quality .
+Our method achieves both .
+5 Experiments
+In this section , we present the results of our full quantization scheme on various tasks .
+We ﬁrst compare our method on a machine translation setup .
+Then we present the results of numerous ablation studies .
+We also compare the impact of delaying quantization on translation quality .
+Finally , we evaluate our method on two language model tasks and experiment with node pruning .
+5.1 Full Quantization
+We apply our quantization strategy on both the base and big Transformer ( Vaswani et al , 2017 ) .
+The training setup of all presented models is the same as in the original paper , with the exception that the dropout ratio is set to 0.1 in all cases .
+We refer readers to the original paper for experimental details .
+Our models were ﬁrst evaluated on the WMT 2014 / 2017 English - toGerman and WMT 2014
+English - to - French translation tasks .
+Reported perplexity is per token and BLEU was measured with multi - bleu.pl1 on the newstest20142 test set .
+We used beam
+1https://github.com/moses-smt/ mosesdecoder / blob / master / scripts/ generic / multi - bleu.perl
+2https://www.statmt.org/wmt14/
+translation-task.html
+search with a beam size of 4 and a length penalty of 0.6 .
+Unlike Vaswani et al ( 2017 ) , no checkpoint averaging was performed .
+We compare our results with the original Transformer and other 8 - bit quantization methods in Table 1 .
+All models are base Transformers .
+Original uncompressed size is the same in all cases .
+Most work do not report their compressed model size .
+For those , we give lower bounds based on their reports .
+Our BLEU score was computed on the test set using the checkpoint with the highest validation accuracy over 2 million training steps .
+Validation was computed every training epoch .
+Models were trained once .
+Our objective was to train quantized models up to convergence .
+Very similar BLEU scores can be obtained with much fewer training ( see below ) .
+As for other methods , Cheong and Daniel ( 2019 ) retrain for 10k steps a 200k steps pretrained Transformer .
+Fan ( 2019 ) also does the same but does not mention the number of retraining steps .
+Bhandare et al ( 2019 ) and the original Transformer paper both do not mention the number of training steps .
+Out of all methods , we are the only one quantizing every component of the model ( see section 4 for details ) .
+In Table 2 , we show performance of our method on the WMT14 EN - DE and WMT14 EN - FR for a ﬁxed amount of training steps .
+We compare our results with two full - precision Transformers : base and big variants .
+We also evaluate two other quantization approaches .
+The ﬁrst one is the ” default ” approach , which is to naively quantize every possible operation .
+The second approach applies our quantization strategy post - training ( see section 5.3 ) .
+In all cases except for post - quantization , BLEU was computed on the test set using the checkpoint which scored the highest accuracy on the validation set .
+Towards the end of training , we ran one validation epoch for every 100 training steps .
+Baselines and FullyQT 8 - bit results were averaged over 5 trials .
+Standard deviation of the BLEU scores did not seem higher for any method and ranged between 0.09 and 0.51 .
+Training with quantization was about twice as slow as with the baselines .
+As for post - training quantization , the BLEU score was computed on the test set using the best validation performance out of 20 trials .
+The default approach ’s nan in the EN - FR task is due to numerical instability .
+By quantizing every operation , zeros in the LayerNorm ’s denominator are more frequent .
+4  Method
+Fully Quantized
+Size ( Gb ) [ EN - DE , EN - FR ]
+BLEU EN - DE ( 2014 ) EN - FR EN - DE ( 2017 )
+Vaswani et al ( 2017 ) Cheong and Daniel ( 2019 )
+Bhandare et al ( 2019 ) Fan ( 2019 ) FullyQT
+( cid:88 )
+[ 2.02 , 1.94 ] 0.69 ≥ 0.96 ≥ 0.51 [ 0.52 , 0.50 ]
+27.3 27.33 26.94 27.60
+38.1 39.91
+27.38 27.60
+Compr .
+1x 2.92x ≤ 2.1x ≤ 3.99x 3.91x
+Table 1 : Our quantization strategy achieves better BLEU scores than all other quantization methods for the Transformer on the WMT14 EN - DE , WMT14 EN - FR and WMT17 EN - DE test set .
+Model Method
+Precision
+EN - DE
+EN - FR
+PPL
+BLEU Size ( Gb ) Compr .
+PPL
+BLEU Size ( Gb ) Compr .
+Base
+Big
+Baseline Default Approach Post - Quantization FullyQT Post - Quantization FullyQT FullyQT
+Baseline Post - Quantization FullyQT Post - Quantization FullyQT FullyQT
+32 - bit 8 - bit 8 - bit 8 - bit 6 - bit 6 - bit 4 - bit
+32 - bit 8 - bit 8 - bit 6 - bit 6 - bit 4 - bit
+4.95 74.04 4.97 4.94 6.00 5.09 11.96
+4.38 4.27 4.57 5.12 4.78 33.11
+26.46 0.21 26.44 26.38 24.84 26.98 18.32
+27.13 26.55 26.96 24.86 26.76 10.22
+2.02 0.52 0.52 0.52 0.39 0.39 0.26
+6.85 1.74 1.74 1.31 1.31 0.88
+1x 3.91x 3.91x 3.91x 5.18x 5.18x 7.66x
+1x 3.95x
+3.95x 5.24x 5.24x 7.79x
+3.21 nan 3.26 3.23 3.98 3.38 48.21
+2.77 2.78 2.80 3.08 2.87 42.42
+38.34 0 38.30 38.41 35.02 37.07 1.59
+40.54 39.78 40.25 37.92 39.59 2.81
+1.94 0.50 0.50 0.50 0.37 0.37 0.25
+6.69 1.69 1.69 1.28 1.28 0.86
+1x 3.91x 3.91x 3.91x 5.17x 5.17x 7.64x
+1x 3.95x
+3.95x 5.24x 5.24x 7.79x
+Table 2 : Performance of our quantization method on the WMT14 EN - DE and WMT14 EN - FR test set for a ﬁxed number of training steps .
+Model Method
+Precision
+EN - CS
+RU - EN PPL BLEU PPL BLEU PPL BLEU
+ES - EN
+Base
+Big
+Baseline FullyQT
+Baseline FullyQT
+32 - bit 8 - bit
+32 - bit 8 - bit
+6.90 6.81
+7.41 7.17
+22.71 23.06
+22.22 22.49
+3.56 3.53
+3.57 3.66
+32.62 33.08
+32.22 31.74
+5.59 5.60
+5.32 5.35
+29.99 29.88
+30.06 30.15
+Table 3 : Evaluation of our quantization method on the WMT14 EN - CS , WMT14 RU - EN and WMT14 ES - EN translation datasets .
+Results on additional translation datasets can be found in Table 3 .
+All models were trained following the same setup as WMT14 EN - FR and WMT14 EN - DE .
+Vocabulary size is set to 32k for all models .
+Since there is no test set for WMT14 ES - EN , we used the validation set as a test set and omitted computing any validation epochs during training .
+Looking at all conducted experiments , including section 5.3 , translation quality of the 8 - bit FullyQT models seems to be on par with full - precision .
+Most of the time , the highest BLEU was scored by the quantized model .
+For example in the case of WMT14 EN - DE , the maximum BLEU FullyQT base 8 - bit obtained was 26.98 , while the baseline ’s
+highest was 26.64 .
+As for the big models , the max FullyQT scored was 27.95 , whereas the baseline ’s was 27.43 .
+We looked at training and validation curves to see if quantization had any effect , but saw no discernible difference .
+All models use full - precision biases , s and xmin .
+This amounts to 11.61 Mb in the base models and 23.15 Mb in the big models .
+In the case of 8 - bit , these represent less than 2.35 % of the total size .
+Without bucketing , this would amount to 2.18 Mb and 4.35 Mb respectively .
+We believe the small increase in model size to be worth it .
+Indeed , in section 5.2 , we show that training without bucketing leads to poorer translation .
+5  Although 6 - bit quantization seems to perform well , the compression advantage over 8 - bit is usually lost .
+Most hardware store INT6 using either 8 or 32 bits .
+Dedicated hardware is needed to get the full compression advantage .
+Unless 6 - bit quantization results in better models , 8 - bit seems like the best choice for most hardware .
+5.2 Ablation Studies
+To better understand which operations are more sensitive to quantization , we evaluate such effect on single operations of the Transformer .
+By this , we mean quantizing the operation of a module for all Transformer layers .
+Table 4 shows results on the WMT14 EN - FR translation task for 8 - bit precision .
+The effect of bucketing was also evaluated .
+BLEU was computed on the test set after 100k steps of training .
+In 24 out of 27 experiments , performance was better than our full - precision baseline of 38.34 BLEU .
+Solely quantizing the LayerNorm ’s denominator with no bucketing results in poor performance .
+The latter also can not be bucketed since all dimensions of the variance tensor vary per batch .
+To successfully quantize this element without causing any loss in performance , we suspect quantizing other elements in the network helps .
+To further validate our quantization scheme , we evaluated four models trained with alterations to our design choices .
+Results on the WMT14 EN - FR task are presented in Table 5 .
+All models are 8 - bit quantized base Transformers .
+Training procedure is the same as in section 5.1 .
+5.3 Delaying Quantization
+Our method ’s goal is to increase computational efﬁciency when inferring with the Transformer .
+To this end , our quantization scheme only requires us to learn s and xmin .
+Although we do so throughout the whole training , this is not a necessity .
+Quantization could also be applied later during training .
+Results for different starting points are compared in Table 6 .
+The earliest we start quantizing is at 100 steps , since we need at least a few steps to assess the running estimates .
+All models were evaluated on the WMT14 EN - DE and WMT14 EN - FR translation tasks .
+BLEU was measured on the test set using the checkpoint which scored the highest accuracy on the validation set during training .
+Validation was computed every 100 training steps towards the end of training .
+From our observed results , quantizing the model early on seems preferable .
+Learning quantization parameters adds a signiﬁcant computational cost during training .
+A major advantage to delaying quantization is to perform more training steps in the same given amount of time .
+Therefore , when training time is a constraint , a possible strategy is to train a model without quantization , perform more training steps and ﬁnally post - quantize the model .
+By the latter , we mean keeping all weights ﬁxed and compute the s and xmin over a few hundred steps .
+This is another advantage , since many trials can be performed in search of the best performing candidate .
+We found post - quantization BLEU scores to vary by about 0.2 BLEU .
+5.4 Language Modeling
+To evaluate if our quantization scheme generalizes well to other tasks , we evaluate it on two language modeling datasets : WikiText-2 and WikiText-103 .
+As the setup , we use PyTorch ’s language modeling toy example3 .
+The task consists of predicting the sequence { xt+1 , · · · , xt+n+1 } from the input sequence { xt , · · · , xt+n } .
+We trained four Transformer models , each with different precision .
+All models consist of two Transformer encoder layers , with the embedding and hidden size set to 200 .
+Multi - Head Attention has two heads with key and value size 64 .
+The ﬁnal word projection layer ’s weights are shared with the embedding layer .
+Models were trained for 10 epochs with a batch size of 20 and sequence length of 35 .
+Learning rate is set to 5 , dropout to 0.2 and gradient clipping to 0.25 .
+Loss is computed on every element of the output sequence .
+Results are presented in Table 7 .
+Validation was computed every epoch to determine the best candidate .
+Loss and perplexity are computed on the test set and averaged over 10 trials for WikiText-2 and 3 trials for WikiText-3 .
+See footnote 3 for any extra details .
+6 Pruning Useless Nodes
+We experiment with node pruning our Transformer models .
+Once the model is fully trained and quantized , we can further compress it by removing useless nodes .
+By useless , we mean nodes which do not cause any loss in translation quality when removed .
+We choose to prune nodes instead of independently pruning weights .
+The latter method usually requires special hardware or software to
+3https://github.com/pytorch/examples/
+tree / master / word_language_model
+6  Module
+Quantized Activation
+No Bucketing PPL BLEU PPL BLEU
+Bucketing
+Encoder
+( Input Embedding + Positional Encoding )
+3.20
+38.61
+3.20
+39.08
+Decoder
+( Input Embedding + Positional Encoding )
+3.20
+39.35
+3.20
+39.36
+Multi - Head Attention
+Input ( Q , K , V ) LayerNorm Output
+Scaled Dot - Product Attention
+Feed - forward
+Softmax Numerator Softmax Denominator Softmax Output Output
+ReLU Output Feed - forward Output LayerNorm Output
+LayerNorm
+Numerator Denominator Quotient
+3.21 3.21
+3.20 3.21 3.22 3.21
+3.21 3.54 3.21
+3.53 1748 3.22
+39.06 39.09
+39.32 39.35 39.41 38.73
+39.43 38.03 38.67
+37.75 0 38.97
+3.21 3.20
+3.21 3.21 3.22 3.21
+3.22 3.20 3.21
+3.21 3.21
+39.29 38.78
+39.01 39.11 38.87 39.02
+38.93 39.27 39.04
+38.86 39.02
+Method
+PPL
+BLEU
+No Bucketing No Gradient Clipping No LayerNorm Denominator Quantization 8 - bit Quantized Weights , Full - precision Activations
+3.49 2549.30 3.22 3.20
+37.14 0 38.29 38.36
+Table 4 : Effect of quantizing single activations of the Transformer .
+Results are on the WMT14 EN - FR test set .
+Table 5 : Variations to our quantization scheme evaluated on the WMT14 EN - FR translation task .
+Quantization Start ( training step )
+EN - DE
+EN - FR
+PPL BLEU PPL BLEU
+Never quantized 100 10000 50000 80000 Post - Quantization
+4.95 4.67 4.99 4.98 5.03 4.45
+26.46 26.98 26.63 26.84 26.41 25.50
+3.21 3.23 3.21 3.21 3.21 3.22
+38.34 38.55 38.62 38.50 38.43 37.96
+Table 6 : on the WMT14 EN - DE and WMT14 EN - FR test set .
+Impact of delaying quantization .
+Results are
+leverage sparse weight matrices .
+Pruning nodes results in concretely shrunken models .
+When getting rid of a node , we remove its corresponding set of weights from the layer outputting it and the following layer receiving the node as input .
+The only nodes of the Transformer which can be removed without causing alterations to other components of the network are the nodes in between the two layers of each feed - forward network .
+Fortunately , these consist of a substantial portion of the model ’s weights .
+In the case of the base Transformer , for a respective vocabulary of size 37000 and 32000 , 39.96 % and 41.65 % of the total weights are owned by the feed - foward networks .
+This number grows to 47.03 % and 48.18 % in the big Transformer .
+To evaluate which nodes can be safely pruned without affecting translation quality , we estimate xmax for each node of the ReLU output over a few hundred steps .
+This is done on the training set , using the fully trained model and keeping all other weights frozen .
+These xmax are computed before quantizing the ReLU output and do not replace the ones used by the quantization process .
+Figure 3 in the appendix shows the histogram of these running estimates for one ReLU layer in the encoder and one in the decoder .
+All other ReLU layers share the same pattern , where in the encoder there are always multiple xmax close to 0 .
+This does not happen in the decoder .
+Once the running estimates are computed , we prune its corresponding node if xmax < zσ where z is a hyperparameter and σ the standard deviation of the layer ’s xmax .
+We empirically found z = 0.025 to work well , with higher thresholds causing BLEU to quickly decay .
+No retraining of the model is performed after pruning nodes .
+Using this method , we can further compress the Transformer without affecting BLEU scores .
+Our approach has the advantage of being adaptive ,
+7  Precision Size ( Mb ) Compression
+32 - bit 8 - bit 6 - bit 4 - bit
+243.04 61.93 46.75 31.57
+1x 3.92x 5.20x 7.70x
+WikiText-2 WikiText-103 PPL
+Loss
+PPL
+Loss
+5.65 5.64 5.64 5.65
+284.15 282.67 281.48 284.26
+5.91 5.94 5.93 5.94
+369.20 377.79 376.44 378.67
+Table 7 : Evaluation of our quantization method on the WikiText-2 and WikiText-103 language modeling tasks .
+Model Precision
+Method
+Base
+8 - bit
+PPL BLEU
+PPL BLEU
+EN - DE Nodes Pruned Total in Encoder FF Compr .
+EN - FR Nodes Pruned Total in Encoder FF Compr .
+No pruning L1 - norm ﬁxed xmax ﬁxed xmax adaptive
+No pruning L1 - norm ﬁxed xmax ﬁxed xmax adaptive
+No pruning L1 - norm ﬁxed xmax ﬁxed xmax adaptive
+No pruning L1 - norm ﬁxed xmax ﬁxed xmax adaptive
+4.39 5.57 4.57 4.40
+5.09 6.97 5.41 5.09
+4.24 5.80 4.47 4.25
+4.78 7.73 4.92 4.78
+27.60 23.99 27.33 27.60
+26.98 20.81 26.20 26.98
+27.95 22.65 27.43 27.95
+26.76 17.32 26.86 26.76
+0 % 13.57 % 13.57 % 13.57 %
+0 % 12.06 % 12.06 % 12.06 %
+0 % 26.39 % 26.39 % 26.39 %
+0 % 29.96 % 29.96 % 29.96 %
+3.95x 4.02x 4.02x 4.02x
+5.25x 5.31x 5.31x 5.31x
+3.97x 4.21x 4.21x 4.21x
+5.28x 5.64x 5.64x 5.64x
+2.90 4.38 3.18 2.90
+3.38 4.19 3.68 3.38
+2.80 4.16 2.91 2.80
+2.87 7.88 2.91 2.87
+39.91 29.01 39.40 39.91
+37.07 31.64 36.91 37.07
+40.17 28.85 39.40 40.17
+39.59 15.09 39.25 39.59
+0 % 9.47 % 9.47 % 9.47 %
+0 % 9.62 % 9.62 % 9.62 %
+0 % 28.41 % 28.41 % 28.41 %
+0 % 22.66 % 22.66 % 22.66 %
+3.95x 3.99x 3.99x 3.99x
+5.24x 5.28x 5.28x 5.28x
+3.97x 4.24x 4.24x 4.24x
+5.28x 5.54x 5.54x 5.54x
+Big
+8 - bit
+6 - bit
+6 - bit
+Table 8 : Comparison of our adaptive pruning scheme versus ﬁxed rate pruning methods for equal pruning proportions .
+Total compression accounts for quantization combined with pruning .
+meaning the number of nodes pruned per layer will differ as opposed to a ﬁxed pruning ratio method .
+For example , in the case of the big Transformer trained on WMT14 EN - FR , 169 nodes were pruned in the ﬁrst ReLU of the encoder , while in the second , 1226 were pruned .
+Nodes in the decoder rarely got pruned , at most 4 in the whole decoder .
+Results are presented in Table 8 .
+Reported results are averaged on the test set over a few trials .
+BLEU varied by about 0.01−0.02 .
+Other approaches usually decide the ratio ﬁrst and then prune .
+We compared with two such methods .
+For each task , we ﬁx their ratio to the average percentage of nodes pruned by our method and only prune nodes in the encoder .
+The ﬁrst ﬁxed pruning method uses L1 - norm to sort nodes in ascending weight order , while the second sorts the xmax , also in ascending order .
+7 Conclusion
+We proposed a full quantization strategy for the Transformer architecture .
+Our objective was to exploit hardware resources as efﬁciently as possible , quantizing all operations which could provide a computational speed gain .
+With FullyQT , we achieve higher BLEU scores than all other quantization methods for the Transformer on multiple translation tasks and avoid any loss in BLEU compared to full - precision .
+Specifically , out of 35 experiments , 8 - bit quantization performed better than full - precision in 21 cases .
+If instead of minimizing inference time , one wants to maximize translation accuracy , then applying quantization to only certain components of the Transformer seems to be the best option .
+Indeed , our ablation study showed than BLEU score could increase even more when only speciﬁc elements of the Transformer were quantized .
+Further gains might be possible , but supplementary experiments would be necessary to determine the best combination .
+We plan on extending our work to variations of the Transformer , as well as further exploring the compression of these networks .
+8  References
+Karim Ahmed , Nitish Shirish Keskar , and Richard Socher . 2017 .
+Weighted Transformer Network arXiv e
+-
+prints , page for Machine Translation . arXiv:1711.02132 .
+Dan Alistarh , Demjan Grubic , Jerry Li , Ryota Tomioka , and Milan Vojnovic . 2016 .
+QSGD : CommunicationEfﬁcient SGD via Gradient Quantization and Encoding .
+arXiv e - prints , page arXiv:1610.02132 .
+Dzmitry Bahdanau , Kyunghyun Cho , and Yoshua Bengio .
+2014 .
+Neural Machine Translation by Jointly arXiv e - prints , Learning to Align and Translate .
+page arXiv:1409.0473 .
+Aishwarya Bhandare , Vamsi Sripathi , Deepthi Karkada , Vivek Menon , Sun Choi , Kushal Datta , and Vikram Saletore .
+2019 .
+Efﬁcient 8 - Bit Quantization of Transformer Neural Machine Language Translation Model .
+arXiv e
+-
+prints , page arXiv:1906.00532 .
+Patrick Chen , Si Si , Yang Li , Ciprian Chelba , and Cho - Jui Hsieh . 2018 .
+Groupreduce : Block - wise low - rank approximation for neural language model shrinking .
+In S. Bengio , H. Wallach , H. Larochelle , K. Grauman , N. Cesa - Bianchi , and R. Garnett , editors , Advances in Neural Information Processing Systems 31 , pages 10988–10998 .
+Curran Associates , Inc.
+Jianpeng Cheng , Li Dong , and Mirella Lapata .
+2016 .
+Long Short - Term Memory - Networks for Machine Reading .
+arXiv e
+-
+prints , page arXiv:1601.06733 .
+Robin Cheong and Robel Daniel . 2019 .
+transformers.zip : Compressing Transformers with Pruning and Quantization .
+Technical report , Stanford University , Stanford , California .
+Kyunghyun Cho , Bart van Merrienboer , Dzmitry Bahdanau , and Yoshua Bengio .
+2014 .
+On the properties of neural machine translation : Encoder – decoder approaches .
+In Proceedings of SSST-8 , Eighth Workshop on Syntax , Semantics and Structure in Statistical Translation , pages 103–111 , Doha , Qatar .
+Association for Computational Linguistics .
+Kyunghyun Cho , Bart van Merrienboer , Caglar Gulcehre , Dzmitry Bahdanau , Fethi Bougares , Holger Schwenk , and Yoshua Bengio .
+2014 .
+Learning Phrase Representations using RNN EncoderDecoder for Statistical Machine Translation .
+arXiv e - prints , page arXiv:1406.1078 .
+Matthieu Courbariaux , Itay Hubara , Daniel Soudry , Ran El - Yaniv , and Yoshua Bengio .
+2016 .
+Binarized Neural Networks : Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1 .
+arXiv e - prints , page arXiv:1602.02830 .
+of Deep Bidirectional Transformers guage Understanding .
+arXiv:1810.04805 .
+for LanarXiv e - prints , page
+Sergey Edunov , Myle Ott , Michael Auli , and David Grangier . 2018 .
+Understanding Back - Translation at Scale .
+arXiv e - prints , page arXiv:1808.09381 .
+Chaofei Fan . 2019 .
+Quantized Transformer .
+Technical report , Stanford University , Stanford , California .
+Yunchao Gong , Liu Liu , Ming Yang , and Lubomir Bourdev . 2014 .
+Compressing Deep Convolutional Networks using Vector Quantization .
+arXiv e
+- prints , page arXiv:1412.6115 .
+Song Han , Huizi Mao ,
+and William J. Dally .
+2015 .
+Deep Compression : Compressing Deep Neural Networks with Pruning , Trained QuantizaarXiv e - prints , page tion and Huffman Coding .
+arXiv:1510.00149 .
+Babak Hassibi , David G. Stork , and Gregory Wolff . 1994 .
+Optimal brain surgeon : Extensions and performance comparisons .
+In J. D. Cowan , G. Tesauro , and J. Alspector , editors , Advances in Neural Information Processing Systems 6 , pages 263–270 .
+Morgan - Kaufmann .
+Qinyao He , He Wen , Shuchang Zhou , Yuxin Wu , Cong Yao , Xinyu Zhou , and Yuheng Zou .
+2016 .
+Effective Quantization Methods for Recurrent Neural Networks .
+arXiv e
+- prints , page arXiv:1611.10176 .
+Geoffrey Hinton .
+2012 .
+Neural networks for machine
+learning .
+Coursera , video lectures .
+Geoffrey Hinton , Oriol Vinyals , and Jeff Dean . 2015 .
+Distilling the Knowledge in a Neural Network .
+arXiv e - prints , page arXiv:1503.02531 .
+Sepp Hochreiter and J¨urgen Schmidhuber .
+1997 .
+Long short - term memory .
+Neural computation , 9:1735 – 80 .
+Itay Hubara , Matthieu Courbariaux , Daniel Soudry , Ran El - Yaniv , and Yoshua Bengio . 2016 .
+Quantized Neural Networks : Training Neural Networks with Low Precision Weights and Activations .
+arXiv eprints , page arXiv:1609.07061 .
+Benoit Jacob , Skirmantas Kligys , Bo Chen , Menglong Zhu , Matthew Tang , Andrew Howard , Hartwig Adam , and Dmitry Kalenichenko . 2017 .
+Quantization and Training of Neural Networks for Efﬁcient Integer - Arithmetic - Only Inference .
+arXiv e
+- prints , page arXiv:1712.05877 .
+Michael I. Jordan .
+1990 .
+Artiﬁcial neural networks .
+chapter Attractor Dynamics and Parallelism in a Connectionist Sequential Machine , pages 112–127 .
+IEEE Press , Piscataway , NJ , USA .
+Jacob Devlin , Ming - Wei Chang , Kenton Lee , and BERT : Pre - training
+Kristina Toutanova . 2018 .
+Nal Kalchbrenner and Phil Blunsom .
+2013 .
+Recurrent In Proceedings of
+continuous translation models .
+9  the 2013 Conference on Empirical Methods in Natural Language Processing , pages 1700–1709 , Seattle , Washington , USA . Association for Computational Linguistics .
+Alex Krizhevsky , Ilya Sutskever , and Geoffrey E HinImagenet classiﬁcation with deep conton .
+2012 .
+volutional neural networks .
+In F. Pereira , C. J. C. Burges , L. Bottou , and K. Q. Weinberger , editors , Advances in Neural Information Processing Systems 25 , pages 1097–1105 .
+Curran Associates , Inc.
+Y. LeCun , B. Boser , J. S. Denker , D. Henderson , R. E. Howard , W. Hubbard , and L. D. Jackel .
+1989 .
+Backpropagation applied to handwritten zip code recognition .
+Neural Computation , 1(4):541–551 .
+Yann LeCun , John S. Denker , and Sara A. Solla .
+1990 .
+Optimal brain damage .
+In D. S. Touretzky , editor , Advances in Neural Information Processing Systems 2 , pages 598–605 .
+Morgan - Kaufmann .
+Fengfu Li , Bo Zhang , and Bin Liu . 2016 .
+Ternary page
+e - prints ,
+arXiv
+Weight Networks .
+arXiv:1605.04711 .
+Zhouhan Lin , Matthieu Courbariaux , Roland Memisevic , and Yoshua Bengio . 2015 .
+Neural Networks arXiv e - prints , page with Few Multiplications .
+arXiv:1510.03009 .
+Zhouhan Lin , Minwei Feng , Cicero Nogueira dos Santos , Mo Yu , Bing Xiang , Bowen Zhou , and Yoshua Bengio .
+2017 .
+A Structured Self - attentive arXiv e - prints , page Sentence Embedding .
+arXiv:1703.03130 .
+Baoyuan Liu , Min Wang , Hassan Foroosh , Marshall Tappen , and Marianna Pensky . 2015 .
+Sparse conIn
+The IEEE Confervolutional neural networks .
+ence on Computer Vision and Pattern Recognition ( CVPR ) .
+Xiaodong Liu , Pengcheng He , Weizhu Chen , and Jianfeng Gao . 2019 .
+Multi - Task Deep Neural Networks for Natural Language Understanding .
+arXiv e - prints , page arXiv:1901.11504 .
+Zhuang Liu ,
+Jianguo Li , Zhiqiang Shen , Gao Huang , Shoumeng Yan , and Changshui Zhang . 2017 .
+Learning Efﬁcient Convolutional Networks through Network Slimming .
+arXiv e - prints , page arXiv:1708.06519 .
+Minh - Thang Luong , Hieu Pham , and Christopher D. Manning .
+2015 .
+Effective Approaches to Attentionbased Neural Machine Translation .
+arXiv e - prints , page arXiv:1508.04025 .
+M. Marchesi , G. Orlandi , F. Piazza , and A. Uncini .
+1993 .
+Fast neural networks without multipliers .
+IEEE Transactions on Neural Networks , 4(1):53–62 .
+Sharan Narang , Erich Elsen , Gregory Diamos , and Shubho Sengupta .
+2017a .
+Exploring Sparsity in Recurrent Neural Networks .
+arXiv e
+- prints , page arXiv:1704.05119 .
+Sharan Narang , Eric Undersander , and Gregory Diamos .
+2017b .
+Block - Sparse Recurrent Neural Networks .
+arXiv e
+- prints , page arXiv:1711.02782 .
+Joachim Ott , Zhouhan Lin , Ying Zhang , Shih - Chii Liu , and Yoshua Bengio .
+2016 .
+Recurrent Neural Networks With Limited Numerical Precision .
+arXiv eprints , page arXiv:1608.06902 .
+Myle Ott , Sergey Edunov , David Grangier , and Michael Auli .
+2018 .
+Scaling Neural Machine Translation .
+arXiv e - prints , page arXiv:1806.00187 .
+Jinhwan Park , Yoonho Boo , Iksoo Choi , Sungho Shin , and Wonyong Sung .
+2018 .
+Fully neural network based speech recognition on mobile and embedded devices .
+In S. Bengio , H. Wallach , H. Larochelle , K. Grauman , N. Cesa - Bianchi , and R. Garnett , editors , Advances in Neural Information Processing Systems 31 , pages 10620–10630 .
+Curran Associates , Inc.
+Antonio Polino , Razvan Pascanu , and Dan Alistarh .
+2018 .
+Model compression via distillation and quantization .
+arXiv e
+- prints , page arXiv:1802.05668 .
+Mohammad Rastegari , Vicente Ordonez , Joseph Redmon , and Ali Farhadi . 2016 .
+XNOR - Net : ImageNet Classiﬁcation Using Binary Convolutional Neural Networks .
+arXiv e
+- prints , page arXiv:1603.05279 .
+Abigail See , Minh - Thang Luong , and Christopher D. Manning .
+2016 .
+Compression of Neural Machine arXiv e - prints , Translation Models via Pruning .
+page arXiv:1606.09274 .
+Ilya Sutskever , Oriol Vinyals , and Quoc V Le . 2014 .
+Sequence to sequence learning with neural networks .
+In Z. Ghahramani , M. Welling , C. Cortes , N. D. Lawrence , and K. Q. Weinberger , editors , Advances in Neural Information Processing Systems 27 , pages 3104–3112 .
+Curran Associates , Inc.
+C. Z. Tang and H. K. Kwan .
+1993 .
+Multilayer feedforward neural networks with single powers - of - two IEEE Transactions on Signal Processing , weights .
+41(8):2724–2727 .
+Andrew Tierno .
+2019 .
+Quantized Transformer .
+Technical report , Stanford University , Stanford , California .
+Ashish Vaswani , Noam Shazeer , Niki Parmar , Jakob Uszkoreit , Llion Jones , Aidan N. Gomez , Lukasz Kaiser , and Illia Polosukhin . 2017 .
+Attention Is All You Need .
+arXiv e - prints , page arXiv:1706.03762 .
+Peiqi Wang , Xinfeng Xie , Lei Deng , Guoqi Li , Dongsheng Wang , and Yuan Xie . 2018 .
+Hitnet :
+Hybrid ternary recurrent neural network .
+In S. Bengio , H. Wallach , H. Larochelle , K. Grauman , N. CesaBianchi , and R. Garnett , editors , Advances in Neural Information Processing Systems 31 , pages 604–614 .
+Curran Associates , Inc.
+10  Wei Wen , Yuxiong He , Samyam Rajbhandari , Minjia Zhang , Wenhan Wang , Fang Liu , Bin Hu , Yiran Chen , and Hai Li . 2017 .
+Learning Intrinsic Sparse Structures within Long Short - Term Memory .
+arXiv e - prints , page arXiv:1709.05027 .
+Jiaxiang Wu , Cong Leng , Yuhang Wang , Qinghao Hu , and Jian Cheng . 2015 .
+Quantized Convolutional arXiv eNeural Networks for Mobile Devices .
+prints , page arXiv:1512.06473 .
+Yonghui Wu , Mike Schuster , Zhifeng Chen , Quoc V. Le , Mohammad Norouzi , Wolfgang Macherey , Maxim Krikun , Yuan Cao , Qin Gao , Klaus Macherey , Jeff Klingner , Apurva Shah , Melvin Johnson , Xiaobing Liu , Łukasz Kaiser , Stephan Gouws , Yoshikiyo Kato , Taku Kudo , Hideto Kazawa , Keith Stevens , George Kurian , Nishant Patil , Wei Wang , Cliff Young , Jason Smith , Jason Riesa , Alex Rudnick , Oriol Vinyals , Greg Corrado , Macduff Hughes , and Jeffrey Dean .
+2016 .
+Google ’s Neural Machine Translation System : Bridging the Gap between Human and Machine Translation .
+arXiv e - prints , page arXiv:1609.08144 .
+Oﬁr Zafrir , Guy Boudoukh , Peter Izsak , and Moshe Wasserblat .
+2019 .
+Q8BERT : Quantized 8Bit BERT .
+arXiv e - prints , page arXiv:1910.06188 .
+Dongqing Zhang , Jiaolong Yang , Dongqiangzi Ye , and Gang Hua . 2018 .
+LQ - Nets : Learned Quantization for Highly Accurate and Compact Deep Neural Networks .
+arXiv e
+-
+prints , page arXiv:1807.10029 .
+Shuchang Zhou , Yuxin Wu , Zekun Ni , Xinyu Zhou , He Wen , and Yuheng Zou . 2016 .
+DoReFa - Net : Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients .
+arXiv e
+- prints , page arXiv:1606.06160 .
+Michael Zhu and Suyog Gupta . 2017 .
+To prune , or not to prune : exploring the efﬁcacy of pruning for model compression .
+arXiv e - prints , page arXiv:1710.01878 .
+11  A FullyQT Visual Guide
+Figure 1 and 2 .
+B Node Pruning Running Estimate
+Figure 3 .
+12  Figure 1 : ( left ) Fully Quantized Transformer , ( right ) Feed - forward .
+Figure 2 : ( left )
+Scaled Dot - Product Attention , ( right ) Multi - Head Attention .
+13Multi - HeadAttentionAdd & NormFeedForwardInputEmbeddingAdd & NormPositionalEncodingN×InputsMaskedMulti - HeadAttentionAdd & NormFeedForwardOutputEmbeddingAdd & NormPositionalEncodingN×Outputs(shifted right)Multi - HeadAttentionAdd & NormLinearSoftmaxOutputProbabilitiesQuantizeReLUXQuantizeLinearQuantizeLinearMatMulScaleMask ( opt.)SoftmaxMatMulQKVQuantizeQuantizeQuantizeQuantizeLinearLinearScaled Dot - ProductAttentionLinearLinearScaled Dot - ProductAttentionConcathKQVLinearLinearQuantizeLinearQuantizeQuantizeQuantize  Figure 3 : xmax histogram of a ReLU layer in the encoder ( left ) and decoder ( right ) , one xmax per output node .
+14

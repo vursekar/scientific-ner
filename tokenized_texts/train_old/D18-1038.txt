@@ -1,0 +1,339 @@
+Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 414–424 Brussels , Belgium , October 31 - November 4 , 2018 .
+c  2018 Association for Computational Linguistics414XL - NBT : A Cross - lingual Neural Belief Tracking Framework Wenhu Chen1 , Jianshu Chen2 , Yu Su3 , Xin Wang1 , Dong Yu2
+Xifeng Yan1and William Wang1 University of California , Santa Barbara , CA , USA1 Tencent AI Lab , Bellevue , WA , USA2 The Ohio State University , Columbus , Ohio3 fwenhuchen , xwang , xyan , william g@cs.ucsb.edu , su.809@osu.edu jianshuchen@tencent.com , dongyu@ieee.org Abstract Task - oriented dialog systems are becoming pervasive , and many companies heavily rely on them to complement human agents for customer service in call centers .
+With globalization , the need for providing cross - lingual customer support becomes more urgent than ever .
+However , cross - lingual support poses great challenges — it requires a large amount of additional annotated data from native speakers .
+In order to bypass the expensive human annotation and achieve the ﬁrst step towards the ultimate goal of building a universal dialog system , we set out to build a cross - lingual state tracking framework .
+Speciﬁcally , we assume that there exists a source language with dialog belief tracking annotations while the target languages have no annotated dialog data of any form .
+Then , we pre - train a state tracker for the source language as a teacher , which is able to exploit easy - to - access parallel data .
+We then distill and transfer its own knowledge to the student state tracker in target languages .
+We speciﬁcally discuss two types of common parallel resources : bilingual corpus and bilingual dictionary , and design different transfer learning strategies accordingly .
+Experimentally , we successfully use English state tracker as the teacher to transfer its knowledge to both Italian and German trackers and achieve promising results .
+1 Introduction Over the past few years , we have witnessed the burgeoning of real - world applications of dialog systems , with many academic , industrial , and startup efforts racing to lead the widely - believed next - generation human - machine interfaces .
+As a result , numerous task - oriented dialog systems such as virtual assistants and customer conversation services were developed ( Wen et al . , 2015 ; Rojas - Barahona et
+al . , 2017 ; Bordes and Weston,2017 ; Williams et al . , 2017 ; Li et al . , 2017 ) , with Google Duplexbeing the most recent example .
+With the rapid process of globalization , more countries have observed growing populations of immigrants , and more companies have moved forward to develop their overseas business sectors .
+To provide better customer service and bring down the cost of labor at call centers , the development of universal dialog systems has become a practical issue .
+A straightforward strategy is to separately collect training data and train dialog systems for each language .
+However , it is not only tedious but also expensive .
+Two settings naturally arise for more efﬁcient usage of the training data : ( 1 ) Multi - lingual setting : we annotate data for multiple languages and train a single model , with possible innovations on joint training .
+( 2 ) Crosslingual setting : we annotate data and train a model for only one ( popular ) language , and transfer the learned knowledge to other languages .
+Here we are interested in the second case , and the important research question we ask is : How can we build cross - lingual dialog systems that can support less popular , low- or even zero - resource languages ?
+As an initial step towards cross - lingual dialog systems , we focus on the cornerstone of dialog systems – dialog state tracking ( DST ) , or belief tracking , a key component for understanding user inputs and updating belief state , i.e. , a system ’s internal representation of the state of conversation ( Young et al . , 2010 ) .
+Based on the perceived belief state , the dialog manager can decide which action to take , and what verbal response to generate ( Precup and Teh , 2017 ; Bordes and Weston , 2017 ) .
+DST models require a considerable amount of annotated data for training ( Henderson et al . , 2014b ; Mrksic et al . , 2015 , 2017 ) .
+For a common dialog shown in Figure 1 , a typical data acquisition process ( Rojas - Barahona et al . , 2017 ) not only requires two human users to converse for multiple
+415turns but also requires annotators to identify user ’s intention in each turn .
+Such two - step annotation is very expensive , especially for rare languages .
+We study the novel problem of cross - lingual DST , where one leverages the annotated data of a source language to train DST for a target language with zero annotated data ( Figure 1 ) ; no conversation dialog or dialog state annotation is available for the target language .
+In order to deal with this zero - resource challenging scenario , we ﬁrst decouple the state - of - the - art neural belief tracker framework ( Mrksic et al . , 2017 ) into sub - modules , namely utterance encoder , context gate , and slotvalue decoder .
+By introducing a teacher - student framework , we are able to transfer knowledge across languages module by module , following the divide - and - conquer philosophy .
+Requiring no target - side dialog data , our method relies on other easy - to - access parallel resources to understand the connection between languages .
+Depending on the popularity and availability of target language resources , we study two kinds of parallel data : bilingual corpus and bilingual dictionary , and we respectively design two transfer learning strategies .
+We use the popular Wizard - of - Oz ( RojasBarahona et al . , 2017 ) dataset as our DST benchmark to evaluate the effectiveness of our crosslingual transfer learning .
+We specify English as the source ( primary ) language and two different European languages ( German and Italian ) as our zero - annotation target languages .
+Compared with an array of alternative transfer learning strategies , our cross - lingual DST models consistently achieve promising results in both scenarios for both zero - annotation languages .
+To ensure reproducibility , we release our code , training data and parallel resources in the github1 .
+Our main contributions are three - fold : Towards building cross - lingual dialog systems , we are the ﬁrst to study the crosslingual dialog state tracking problem .
+We systematically study different scenarios for this problem based on the availability of parallel data and propose novel transfer learning methods to tackle the problem .
+We empirically demonstrate the efﬁcacy of the proposed methods , showing that our methods can accurately track dialog states for 1https://github.com/wenhuchen/ Cross - Lingual - NBTlanguages with zero annotated data .
+2 Related Work 2.1 Dialog State Tracking Broadly speaking , the dialog belief tracking algorithms can be divided into three families : 1 ) hand - crafted rules 2 ) generative models , and 3 ) maximum - entropy model ( Metallinou et al . , 2013 ) .
+Later on , many deep learning based discriminative models have surged to replace the traditional strategies ( Henderson et al . , 2014a ; Mrksic et al . , 2017 ; Williams et al . , 2016 ) and achieved state - of - the - art results on various datasets .
+Though the discriminative models are reported to achieve fairly high accuracy , their applications are heavily restricted by the domain , ontology , and language .
+Recently , a pointer network based algorithm ( Xu and Hu , 2018 ) and another multi - domain algorithm ( Rastogi et al . , 2017 ) have been proposed to break the ontology and domain boundary .
+Besides , ( Mrk ˇsi´c et al . , 2017 ) has proposed an algorithm to train a uniﬁed framework to deal with multiple languages with annotated datasets .
+In contrast , our paper focuses on breaking the language boundary and transfer DST knowledge from one language into other zeroannotation languages .
+2.2 Cross - Lingual Transfer Learning Cross - lingual transfer learning has been a very popular topic during the years , which can be seen as a transductive process .
+In such process , the input domains of the source and target are different ( Pan and Yang , 2010 ) since each language has its own distinct lexicon .
+By discovering the underlying connections between the source and target domain , we could design transfer algorithms for different tasks .
+Recently , algorithms have been successfully designed for POS tagging ( Zhang et al . , 2016 ;
+Kim et al . , 2017 ) , NER ( Pan et al . , 2017 ; Ni et al . , 2017 ) as well as image captioning ( Miyazaki and Shimizu , 2016 ) .
+These methods ﬁrst aim at discovering the relatedness between two languages and separate languagecommon modules from language - speciﬁc modules , then resort to external resources to transfer the knowledge across the language boundary .
+Our method addresses the transfer learning using a teacher - student framework and proposes to use the teacher to gradually guide the student to make more proper decisions .
+416 RestaurantPrice(Preis)Food(Essen)Area 	 ( Bereich)Location(Ort)Telephone(Telefon)The 	 HouseCheap(Billig)Thai(Thailändisch)Center(Center)106 	 Regent 	 Street000 - 00000AladdinExpensive(Teuer)Greek(Griechisch)North(Norden)Mesa 	 Road 	 100000 - 00000User : 	 I ’m 	 looking 	 for 	 a 	 cheaperRestaurantInform(price = cheap)System : 	 Sure , 	 What 	 kind 	 – and 	 where?User : 	 Thaifood , 	 somewhere 	 downtownInform(price = cheap , food = Thai , area = center)System : 	 The 	 House 	 serves 	 cheap 	 Thai 	 foodUser : 		 Whereis 	 it?Inform(price = cheap , food = Thai , area = center)Request(location)System : 	 The 	 House 	 is 	 at 	 106 	 Regent 	 StreetUser : 	 IchsucheeinteuresRestaurantInform(preis= ? )
+System : 	 Sicher , 	 welche 	 Art 	 und 	 wann?User : 	 griechischesEssen , 	 irgendwo 	 i m 	 NordenInform(preis=?,essen=?,ort=?)System : 	 The 	 House 	 serviertsehrbilliges 	 thailändisches 	 Essen 	 User : 		 Woistdas?Inform(preis=?,essen=?,ort=?);Request(?)System : 	 Aladdin 	 befindetsichin 	 der 	 Mesa 	 RoadTransferEnglish training datasetGerman test datasetFigure 1 : Cross - lingual transfer learning for dialog state tracking , where the underlying database ( the table above ) is shared across languages .
+The source language has annotated dialogs and the ground truth states , but the target language has neither dialogs nor ground truth states ( only a testing dataset for evaluation ) .
+3 Problem Deﬁnition Figure 2 : Cross - lingual DST structure , the ontology and database between multiple languages are shared .
+The dialog states are deﬁned as a set of search constraints ( i.e. informable slots or goals ) that the user speciﬁed through the dialog and a set of attribute questions regarding the search results ( i.e. requestable slots or requests ) .
+The objective of dialog state tracking ( DST ) is to predict and track the user intention ( i.e. , the values of the aforementioned slots ) at each time step based on the current user utterance and the entire dialog history .
+As shown in Figure 2 , for each slot , the DST computes an output distribution of the candidate values using three inputs : ( i ) system response at , which is the sentence generated by the system , ( ii ) utteranceut , which is the sentence from the user , and ( iii ) previous state , which denotes the selected slot - value pairs .
+We deﬁne the ontology of the dialog system to be the set of all the possible words the dialog slot and value can take .
+In this paper , we are interested in learning a cross - lingual DST .
+Speciﬁcally , we assume that the DST for the source language has access to a human - annotated training dataset Dwhile the DSTs for the targetlanguages do not have access to annotated data in other languages except for testing data .
+We here mainly consider two different types of parallel resources to assist the transfer learning : ( 1 ) Bilingual Corpus , where abundant bilingual corpora exist between the source and the target languages .
+This is often the case for common language pairs like German , Italian , and French , etc . ( 2 ) Bilingual Dictionary , where public bilingual dictionaries exist between the source and the target languages , but large - scaled parallel corpus are harder to obtain .
+This can be the case for rarer languages like Finnish , Bulgarian , etc .
+Furthermore , we assume that all the languages share a common multi - lingual database , whose column / row names and entry values are stored via multiple languages ( see the database in Figure 1 ) .
+That is , the ontology of dialog among different languages is known with a one - to - one mapping between them ( e.g. , greek = griechisch = greco , food = essen = cibo ) .
+Based on that , we could construct a mapping function Mto associate the ontology terms from different languages with predesigned language - agnostic concepts : for example , M(foods )
+= M(Essen ) = M(Cibo)= FOOD .
+We illustrate our problem deﬁnition in Figure 2 . 4 Decoupled Neural Belief Tracker We design our cross - lingual DST on top of the state - of - the - art Neural Belief Tracker ( NBT ) ( Mrksic et al . , 2017 ) , which demonstrates many advantages ( no hand - crafted lexicons , no linguistic knowledge required , etc ) .
+These nice properties are essential for our cross - lingual DST design because we are pursuing a general and simple framework regardless of the language properties .
+In short , NBT consists of a neural
+417network that computes the matching score for every candidate slot - value pair ( cs;cv)based on the following three inputs : ( i ) the system dialog actsat= ( tq;ts;tv),2(ii ) the user utterance ut , and ( iii ) the candidate slot - value pair .
+And it identiﬁes the user intents by evaluating the scores for all the slot - value pairs ( see Figure 3 ) .
+With a slight abuse of notation , we still use cs;cv;ts;tv;tq2RHto denote the vector representations of themselves , where His the embedding dimension .
+We will use pre - trained embedding vectors in our cross - lingual NBT , just like the original NBT and they will be ﬁxed during training .
+To enable cross - lingual transfer learning , we ﬁrst re - interpret the architecture of the original NBT by decomposing it into three components :
+Utterance Encoding The ﬁrst component is an utterance encoder , which maps the utterance ut= fw1;w2;;wNgof a particular language into a semantic representation vector r(ut)2RH , wherewi2RHis the word vector for the i - th token andNis the length of the utterance .
+Note that the dimension of the semantic vector r(ut)is the same as that of the word vector .
+We implement 𝑟𝑔𝑦𝑤%𝑤&𝑤'𝑤(Utterance𝑐*𝑐+Candidate 𝑡*𝑡+𝑡-System acts Utterance EncodingSlot - value DecodingAggregationGateScoreRequestgate 𝑔&Candidategate 𝑔%Confirmgate 𝑔'CNN / RNN Figure 3 : Our implementation of baseline NBT , slightly modiﬁed from ( Mrksic et al . , 2017 ) .
+the encoder using the same convolutional neural network ( CNN ) as the original NBT , with a slight modiﬁcation of adding a top batch normalization layer .
+We will explain this change in section 5 .
+Context Gate
+The second part is the context gate , which takes the system acts at= ( tq;ts;tv ) 2tqrepresents the system request , ts;tvrepresents the system conﬁrmation .
+If the system wants to request some information from the user by asking “ what ’s your favorite area ? ” , then NBT sets tq=“AREA ” .
+If the system wants to conﬁrm some information from a user by asking “ should I try Persian restaurants in the north ? ”
+then NBT sets ts;tv=“area , north”.and the candidate slot - value pair ( cs;cv)as its inputs and ﬁlter out the desired information from the encoded utterance .
+The context gate gis a sum of three separate gates : g(cs;cv;at )
+= g1+g2+g3 ( 1 ) where the individual gates are deﬁned as : g1=(Ws c(cs+cv ) + bs c ) g2= ( csWq ttq ) 
+[ 1;;1]H g3= ( csWs tts)(cvWv ttv ) 
+[ 1;;1]H(2 ) whereWs c;Wq t;Ws t;Wv t2RHHare the weight matrices , and  anddenote the Hadamard product and the inner product , respectively .
+The three gatesg12RH;g22RH;g32RHmodel the relevance between the candidate slot and value , the system request and the system conﬁrms , respectively .
+The transformation matrices Wq t;Ws t;Wv t are added to the original NBT to increase the model ﬂexibility of the gates .
+Slot - Value Decoding The ﬁnal component is a slot - value decoder , which predicts the score yof a given slot - value pair using the ﬁltered information from the utterance representation ras : y(cs;cv;ut;at ) = WT y[r(ut )  g(cs;cv;at)](3 ) whereWy2RH1is the weight vector .
+The above expression computes the score for the slotvalue pair based on the information from the current turn .
+We combine it with the information from previous turns to get the ﬁnal score : ^y(cvjut;at;cs ) = y(cs;cv;ut;at)+ ( 1 )^y(cs;cv;ut 1;at 1)(4 )
+hereis a combination weight .
+For each given slotcs , NBT selects the single highest value for informable slots and selects all values above a certain threshold for request slots .
+Here we replace the multi - layer perceptron in the orginal NBT by a linear output layer ( to be explained in section 5 ) .
+5 Cross - lingual Neural Belief Tracker In this section , we develop a cross - lingual Neural Belief Tracker ( XL - NBT ) that distills knowledge from one NBT to another using a teacherstudent framework .
+We assume the ontology mappingMis known a priori ( see Figure 3 ) .
+XLNBT uses language - speciﬁc utterance encoder and context gate for each input language while sharing a common ( language - agnostic ) slot - value decoder across different languages ( see Figure 3 ) .
+418The key idea is to optimize the language - speciﬁc components of the student network ( NBT of the target language ) so that their outputs are languageagnostic .
+This is achieved by making these outputs close to that of the teacher network ( NBT of the source language ) , as we detail below .
+5.1 Teacher - Student Framework We are given a well - trained NBT for a source languagee , and we want to learn an NBT for a target language fwithout any annotated training data .
+Therefore , we can not learn the target - side NBT from standard supervised learning .
+Instead , we use a teacher - student framework to distill the knowledge from the source - side NBT ( teacher network ) into the target - side NBT ( student network ) ( see Figure 4 ) .
+Let xe,(ce s;ce v;ue t;ae
+t)be the input to the teacher network and let xf , ( cf s;cf v;uf t;af t)be the associated input to the student network .
+The standard teacher - student framework trains the student network by minimizing ^J1 = X xe;xfjjy(ce s;ce
+v;ue t;ae t) y(cf s;cf v;uf t;af t)jj2 ( 5 ) wherey(ce s;ce v;ue t;ae t)andy(cf s;cf v;uf t;af t)denote the scores by the teacher and the student networks , respectively , and the slot - value pairs satisfy M(cf v )
+= M(ce v)andM(cf s ) = M(ce s ) .
+However , the target - side inputs ( cf s;cf v;uf t;af t)parallel to(ce s;ce v;ue t;ae t)are usually not available in crosslingual DST , and , even worse , the target - side utteranceue tis not available .
+We may have to generate synthetic input data for the student network or leverage external data sources .
+It is relatively easy to use the mapping M()to generate ( cf s;cf v;af t ) ) ( i.e. , the inputs of the target - side context gate ) from the ( ce s;ce v;ae t ) .
+But it is more challenging to obtain the parallel utterance data uf tfromue t ) .
+Therefore , we have to leverage external bilingual data sources to alleviate the problem .
+However , the external bilingual data are usually not in the same domain as the utterance , and hence they are not aligned with the slot - value pair and system acts ( i.e. ,(ce s;ce v;ae t)or(cf s;cf v;af t ) ) .
+For this reason , we can not perform the knowledge transfer by minimizing the cost ( 5 ) .
+Instead , we need to develop a new cost function where the utterance is not required to be aligned with the slot - value pair and the system acts .
+To this end , let ge = ge(ce s;ce v;ae t ) andgf = gf(cf s;cf v;af t ) .
+And we substitute ( 3)into ( 5 ) and get : ^J1jjWyjj2X cf v;cevjjre  ge rf  gfjj2
+= jjWyjj2X cf v;cevjjge  ( re rf ) + rf  ( ge gf)jj2 jjWyjj2X cf v;cevjjgejj2jjre rfjj2+jjrfjj2jjge gfjj2 wherere = re(ue t)andrf = rf(uf t ) .
+As we mentioned earlier , the weight Wyin the slotvalue decoder is shared between the student and the teacher networks and will not be updated .
+The teacher - student optimization only adjusts the weights related to the language - speciﬁc parts in Figure 3 ( i.e. , utterance encoding and context gating ) .
+Therefore , the shared weight jjWyjjis seen as a constant .
+Furthermore , P cf v;cevjjgejj2can be seen as a constant since the teacher gate is ﬁxed .
+Since we use batch normalization layer to normalize the encoder output ( described in Figure 3 ) , jjrf(uf t)jj2can also be treated as a constant C2 .
+Therefore , we formally write the upper bound of ^J1as our surrogate cost function J : J = C1jjre(ue t) rf(uf t)jj2+C2X cf v;cevjjge gfjj2 ( 6 ) The surrogate cost has successfully decoupled utterance encoder with context gate , and we use Jr andJgto measure the encoder matching cost and the gate matching cost , respectively .
+Jr = jjre(ue t) rf(uf t)jj2 Jg = X cf v;cevjjge gfjj2 ( 7 ) The encoder cost Jris optimized to distill the knowledge from the teacher encoder to student encoder while gate cost Jgis optimized to distill the knowledge from teacher gate to student gate .
+This objective function successfully decouplesthe optimization of encoder and gate , thus we are able to optimize JrandJgseparately from different data sources .
+Recall that we can easily simulate the target - side system acts , slot - value pairs ( cf s;cf v;af)by using the ontology mapping M. Therefore , optimizing Jgis relatively easy .
+Formally , we write the gate matching cost as follows : Jg = X ae t;ce s;ce v af t;cf s;cf vjjge(ce s;ce v;ae t) gf(cf s;cf v;af t)jj2 ( 8)
+419 I 	 want 	 to 	 order 	 Greek 	 foodWhat 	 kind 	 of 	 food 	 do 	 you 	 want?greekchinesethaijapanese𝑲𝑳(𝒑𝒆(𝒄𝒗|𝐮𝐭,𝐚𝐭,𝒄𝒔)||𝒑𝒇(𝒄𝒗|𝐮𝐭,𝐚𝐭,𝒄𝒔 ) ) 𝒕𝒒:𝑭𝑶𝑶𝑫 					 𝒕𝒔,𝒕𝒔 : 	 None , 	 None 	 𝒄𝒔𝒆,𝒄𝒗𝒆 : 	 ( FOOD , 	 greek)||𝒓𝒖𝒕𝒆−𝒓(𝒖𝒕𝒇)||IchmöchtegriechischesEssenWelcheArt 	 von 	 Essen 	 willstdu?𝒕𝒒:𝑬𝑺𝑺𝑬𝑵𝒕𝒔,𝒕𝒔 : 	 None , 	 None 	 𝒄𝒔𝒇,𝒄𝒗𝒇 : 	 ( ESSEN , 	 grieschisch)𝒂𝒕𝒇𝒖𝒕𝒇grieschischChinesischthailändischjapanisch𝒂𝒕𝒆𝒖𝒕𝒆||𝒈(𝒂𝒕𝒇,𝒄𝒔𝒇,𝒄𝒗𝒇)−𝒈(𝒂𝒕𝒆,𝒄𝒔𝒆,𝒄𝒗𝒆)||+Figure 4 : Teacher - Student Framework for cross - lingual transfer learning .
+The dotted line denotes the imaginary utterances , which expresses the same intention as the source side .
+In 	 birds , 	 life 	 gains 	 new 	 mobility .
+Bei 	 Vögeln 	 erhält 	 das 	 Leben 	 neue 	 Mobilität .
+I 	 can 	 take 	 a 	 look 	 at 	 your 	 records .
+Ich 	 kann 	 mir 	 deine 	 Unterlagen 	 ansehen .
+Parallel   Corpora 𝑫𝒑StudentEncoder||𝒓𝒖𝒕𝒆−𝒓(𝒖𝒕𝒇)||Teacher EncoderCNN / RNNCNN / RNNI 	 want 	 to 	 order 	 Greek 	 foodDialogue Corpora DIchwant 	
+to 	 bestellenGreek 	 food#sub=2 ; pos=0 , 3Mixed Language Corpora D’Bilingual 	 EmbeddingReplaceIchmirorderbestellenordnenBilingual Dictionary 𝑫𝑩I CNN / RNNCNN / RNNStudentEncoderTeacherEncoder Figure 5 : XL - NBT - C and XL - NBT - D for two scenarios However , exact optimization of Jris difﬁcult and we have to approximate it using external parallel data .
+We consider two kinds of external resources ( bilingual corpus and bilingual dictionary ) in the sections 5.2 - 5.3 ( see Figure 5 for the main idea ) .
+5.2 Bilingual Corpus ( XL - NBT - C )
+In our ﬁrst scenario , we assume there exists a parallel corpus Dpconsisting of sentence pairs from the source language and the target language .
+In this case , the cost function ( 6 ) is approximated by J= E ( me;mf)2Dpjjre(me) rf(mf)jj2 +  Jg ( 9 ) where  is the balancing factor and Jgis deﬁned in ( 6 ) .
+The cost function ( 9 ) is minimized by stochastic gradient descent .
+At test time , we switch the encoder to receive target language inputs.5.3 Bilingual Dictionary ( XL - NBT - D )
+In the second scenario , we assume there exists no parallel corpus but a bilingual dictionary DB that deﬁnes the correspondence between source words and target words ( a one - to - many mapping fw : MD(w)g ) .
+Likewise , it is infeasible to optimize the exact encoder cost Jrdue to the lack of target - side utterances .
+We propose a word replacement strategy ( to be described later ) to generate synthetic parallel sentence ^uf tof “ mixed ” language .
+Then , we use the generated target parallel sentences to approximate the cost ( 6 ) by Jr = E ut2Djjre(ue t) rf(^uf t)jj2 +  Jg ( 10 ) where  is the balancing factor .
+For word replacement , we ﬁrst decide the number of words Nwto be replaced , then we draw Nwpositions randomly from the source utterance and substitute the corresponding word wiwith their target word synonym fromMD(w)based on the context as follows :
+jp(Nw = i ) = exp( i=  ) P i0 < Nexp( i0=  ) p ( ^w ) = ^wh^wP w02M(wi)w0h^w(11 ) whereh^w = P2 k= 2 : k6=0wi+krepresents the context vector and Ndenotes the utterance length .
+The context similarity of context and the targetside synonym can better help us in choosing the most appropriate candidate from the list .
+In our following experiments , we adjust the temperature of  to control the aggressiveness of replacement .
+4206 Experiments 6.1 Dataset The Wizard of Oz ( WOZ ) ( Rojas - Barahona et al . , 2017 ) dataset is used for training and evaluation , which consists of user conversations with taskoriented dialog systems designed to help users ﬁnd suitable restaurants around Cambridge , UK .
+The corpus contains three informable ( i.e. goaltracking ) slots : FOOD , AREA , and PRICE .
+The users can specify values for these slots in order to ﬁnd which best meet their criteria .
+Once the system suggests a restaurant , the users can ask about the values of up to eight requestable slots ( PHONE NUMBER , ADDRESS , etc . ) .
+Multilingual WOZ 2.0 ( Mrksic et al . , 2017 ) has expanded this dataset to include more dialogs and more languages .
+The train , valid and test datasets for three different languages ( English , German , Italian ) are available online3 .
+We use the English as source language where 600 dialogs are used for training , 200 for validation and 400 for testing .
+We use the German and Italian as the target language to transfer our knowledge from English DST system .
+In the experiments , we do not have access to any training or validation dataset for German and Italian , and we only have access to their testing dataset which is composed of 400 dialogs .
+For external resource , we use the IWSLT2014 Ted Talk parallel corpus ( Mauro et al . , 2012 ) from the ofﬁcial website4for bilingual corpus scenario .
+In the IWSLT2014 parallel corpus , we only keep the sentences between 4 and 40 words and decrease the sentence pairs to around 150K.
+We use Panlex ( Kamholz et al . , 2014 ) as our data source and crawl translations for all the words appearing in the dialog datasets to build our bilingual dictionary .
+We speciﬁcally investigate two kinds of pretrained embedding , and we use Glove ( Pennington et al . , 2014 ) as the monolingual embedding and MUSE ( Conneau et al . , 2017 ) as the bilingual embedding to see their impacts on the DST performance .
+We split the raw DST corpus into turn - level examples .
+During training , we use the ground truth previous state Vt 1as inputs .
+At test time , we use the model searched states as the previous state to continue tracking intention until the end of the 3https://github.com/nmrksic/ neural - belief - tracker / tree / master / data 4https://wit3.fbk.eu/mt.php?release= 2014 - 01dialog .
+When the dialog terminates , we use two evaluation metrics introduced in Henderson et
+al . ( 2014a ) to evaluate the DST performance : ( 1 ) Goals : the proportion of dialog turns where all the users search goal constraints were correctly identiﬁed .
+( 2 ) Requests : similarly , the proportion of dialog turns where users requests for information were identiﬁed correctly .
+Our implementation is based on the NBT5 , the details of our system setting are described in the appendix .
+6.2 Results Here we highlight the baselines we use to compare with our cross - lingual algorithm as follows : ( 1 ) Supervised : this baseline algorithm assumes the existence of annotated dialog belief tracking datasets , and it determines the upper bound of the DST model .
+( 2 ) w/o Transfer : this algorithm trains an English NBT , and then directly feeds target language into the embedding level as inputs during test time to evaluate the performance .
+( 3 ) Ontology - match : this algorithm directly uses exact string matching against the utterance to discover the perceived slot - value pairs , it directly assigns a high score to the appearing candidates .
+( 4 ) Translation - based : this system pre - trains a translator on the external bilingual corpus and then translates the English dialog and ontology into target language as “ annotated ” data , which is used to train the NBT in the target language domain ( more details about the implementation , performance and examples are listed in the appendix ) .
+( 5 ) Word - By - Word ( WBW ) : this system transforms the English dialog corpus into target language word by word using the bilingual dictionary , which is used to train the NBT in target side .
+We demonstrate the results for our proposed algorithms and other competing algorithms in Table 2 , from which we can easily conclude that that ( i ) our Decoupled NBT does not affect the performance , and ( ii ) our cross - lingual NBT framework is able to achieve signiﬁcantly better accuracy for both languages in both parallel - resource scenarios .
+Compare with Translator / WBW .
+With bilingual corpus , XL - NBT - C with pre - trained bilingual embedding can signiﬁcantly outperform our Translator baseline ( Klein et al . , 2017 ) .
+This is intuitive because the translation model requires 5https://github.com/nmrksic/ neural - belief - tracker
+421Error Type Examples Modify FailureMachine : I have two options that ﬁt that description , golden wok Chinese restaurant and the Nirala which serves Indian food , do you have a preference ?
+User : How about Nirala , what s the address and phone of that ?
+Previous State : food = Chinese ; Prediction : food = none ; Groundtruth : food = Indian Maintain FailureMachine : there are $ num places with a moderate price range .
+can you please tell me what kind of food you would like ?
+User : well I want to eat in the north , what s up that way ?
+Previous State : food = expensive ; Prediction : food = none ; Groundtruth : food = expensive History FailureMachine : Anatolia is located at $ num bridge street city center .
+User : thank you goodbye !
+Previous State : food = Chinese ; Prediction : food = Chinese;,Groundtruth : food = Turkish Table 1 : Here we show the frequent error types , the examples are translated to English for better understanding .
+Language German ( student ) Italian ( student ) English ( teacher ) Models Goal Request Goal Request Goal Request w/ Supervised DialogNBT ( Mrksic et al . , 2017 ) - - - - 0.84 0.91 Decoupled NBT ( mono ) 0.79 0.83 0.86 0.91 0.82 0.89 Decoupled NBT ( bilingual ) 0.80 0.84 0.88 0.91 0.84 0.90 w/o Bilingual Dataw / o Transfer ( mono ) 0.15 0.10 0.15 0.11 - w/o Transfer ( bilingual ) 0.13 0.13 0.11 0.12 - Ontology Matching 0.24 0.21 0.23 0.21 - w/ Bilingual CorpusTranslate ( Klein et al . , 2017 ) 0.41 0.42 0.48 0.51 - XL - NBT - C ( mono ) 0.48 0.54 0.65 0.60 - XL - NBT - C ( bilingual ) 0.55 0.59 0.72 0.69 - w/ Bilingual DictionaryWord - by - Word 0.22 0.25 0.25 0.27 - XL - NBT - D ( mono ) 0.14 0.15 0.23 0.22 - XL - NBT - D ( bilingual ) 0.51 0.56 0.73 0.63 - Table 2 : Experimental results for cross - lingual NBT and other baseline algorithms .
+All results are averaged over 5 runs .
+Here we use “ mono ” to refer to the experiments with pre - trained monolingual embedding , “ bilingual ” to refer to the experiments with pre - trained bilingual embedding .
+both source - side encoding and target - side wordby - word decoding , while our XL - NBT only needs a bilingual source - encoding to align two vector space , which averts the compounded decoding errors .
+With the bilingual dictionary , the word - byword translator is very weak and leading to many broken target sentences , which poses challenges for DST training .
+In comparison , our XL - NBTD can control the replacement by adjusting its temperature to maintain the stability of utterance representation .
+Furthermore , for both cases , our teacher - student framework can make use of the knowledge learned in source - side NBT to assist its decision making , while translator - based methods learn from scratch .
+Bilingual Corpus vs. Bilingual Dictionary .
+From the table , we can easily observe that bilingual corpus is obviously a more informative parallel resource to perform cross - lingual transfer learning .
+The accuracy of XL - NBT - D is lower than XL - NBT - C. We conjecture that our replace - ment strategy to generate “ mixed ” language utterance can sometimes break the semantic coherence and cause additional noises during the transfer process , which remarkably degrades the DST performance .
+Monolingual vs. Bilingual embedding .
+From the table , we can observe that the bilingual embedding and monolingual embedding does not make much difference in supervised training .
+However , the gap in the bilingual corpus case is quite obvious .
+Monolingual embedding even causes the transfer to fail in a bilingual dictionary case .
+We conjecture that the bilingual word embedding already contain many alignment information between two languages , which largely eases the training of encoder matching objective .
+German vs. Italian As can be seen , the transfer learning results for Italian are remarkably higher than German , especially for the “ Goal ” accuracy .
+We conjecture that it is due to German declension , which can produce many word forms .
+The
+422very diverse word forms present great challenges for DST to understand its intention behind .
+Especially for the bilingual dictionary , German tends to have much longer replacement candidate lists than Italian , which introduces more noises to the replacement procedure .
+Error Analysis Here we showcase the most frequent error types in subsection 6.1 .
+From our observation , these three types of errors distribute evenly in the test dialogs .
+The error mainly comes from the unaligned utterance space , which leads to failure in understanding the intention of human utterance in the target language .
+This can lead the system to fail in modifying the dialog state or maintaining the previous dialog states .
+6.3 Discussion Here we want to further highlight the comparison between our transfer learning algorithm with the MT - based approach .
+Though our approach outperforms the standard Translator trained on IWSLT2014 , it does not necessarily claim that our transfer algorithm outperforms any translation methods on any parallel corpus .
+In our further ablation studies , we found that using Google Translator6can actually achieve a better score than our transfer algorithm , which is understandable considering the complexity of Google Translator and the much larger parallel corpus it leverages .
+By leveraging more close - to - domain corpus and comprehensive entity recognition / replacement strategy , the translator model is able to achieve a higher score .
+Apparently , we need to trade off the efﬁciency for the accuracy .
+For DST problem , it is an overkill to introduce a more complex translation algorithm , what we pursue is a simple yet efﬁcient algorithm to achieve promising scores .
+It is also worth mentioning that our XL - NBT algorithm only takes several hours to achieve the reported score , while the translator model takes much more time and memory to train depending on the complexity .
+Thus , the simplicity and efﬁciency makes our model a better ﬁt for rarelanguage and limited - budget scenarios .
+6.4 Ablation Test Here we investigate the effect ‘ of hyper - parameter  ;   on the evaluation results .
+The  is used to balance the optimization of encoder constraint and 6https://translate.google.com/gate constraint , where larger  means more optimization on gate constraint .
+The temperature  is used to control the aggressiveness of the replacement XL - NBT - D , where smaller  means more source words are replaced by target synonyms .
+From the table Table 3 , we can observe that the  ablation (  ﬁxed to 0.1 )  ablation (  ﬁxed to 1 ) value Goal Request value Goal Request  = 0 0.13 0.00  = 0 0.14 0.08  = 0.1 0.46 0.54  = 0.03 0.43 0.50 
+= 1 0.51 0.56  = 0.1 0.51 0.56 
+= 5 0.46 0.54  = 0.3 0.47 0.51  = 10 0.46 0.52  = 1 0.44 0.52  = 100 0.44 0.50  = 10 0.33 0.32 Table 3 : Ablation test for hyper - parameter  and  on English - to - German XL - NBT - D. experimental results are not very sensitive to  , a dramatic change of  will not harm the ﬁnal results too much , we simply choose  = 1 as the hyper - parameter .
+In contrast , the system is more sensitive to temperature .
+Too conservative replacement will lead to weak transfer , while too aggressive replacement will destroy the utterance representation .
+Therefore , we choose the a moderate temperature of  =
+0:1throughout our experiments .
+We also draw the learning curve ( Precision vs. Iteration ) in the Appendix for both XL - NBTC and XL - NBT - D. The learning curves show that our algorithm is stable and converges quickly , and the reported results are highly reproducible .
+7 Conclusion In our paper , we propose a novel teacher - student framework to perform cross - lingual transfer learning for DST .
+The key idea of our model is to decouple the current DST neural network into two separate modules and transfer them separately .
+We believe our method can be further extended into a general purpose multi - lingual transfer framework to resolve other NLP matching or classiﬁcation problems .
+8 Acknowledgement We are gratefully supported by a Tencent AI Lab Rhino - Bird Gift Fund .
+We are also very thankful for the public belief tracking code and multilingual state - tracking datasets released by Nikola Mrksic from the University of Cambridge .
+423References Antoine Bordes and Jason Weston .
+2017 .
+Learning end - to - end goal - oriented dialog .
+In Proceedings of the International Conference on Learning Representations ( ICLR ) .
+Alexis Conneau , Guillaume Lample , Marc’Aurelio Ranzato , Ludovic Denoyer , and Herv ´ e J´egou . 2017 .
+Word translation without parallel data .
+In Proceedings of the International Conference on Learning Representations ( ICLR ) .
+Matthew Henderson , Blaise Thomson , and Steve Young .
+2014a .
+Robust dialog state tracking using delexicalised recurrent neural networks and unsupervised adaptation .
+In Spoken Language Technology Workshop ( SLT ) , 2014 IEEE , pages 360–365 .
+IEEE .
+Matthew Henderson , Blaise Thomson , and Steve J. Young .
+2014b .
+Word - based dialog state tracking with recurrent neural networks .
+In Proceedings of the SIGDIAL 2014 Conference , The 15th Annual Meeting of the Special Interest Group on Discourse and Dialogue , 18 - 20 June 2014 , Philadelphia , PA , USA , pages 292–299 .
+David Kamholz , Jonathan Pool , and Susan M Colowick . 2014 .
+Panlex : Building a resource for panlingual lexical translation .
+In LREC , pages 3145–3150 .
+Joo - Kyung Kim , Young - Bum Kim , Ruhi Sarikaya , and Eric Fosler - Lussier .
+2017 .
+Cross - lingual transfer learning for pos tagging without cross - lingual resources .
+In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing , pages 2832–2838 .
+G. Klein , Y .
+Kim , Y .
+Deng , J. Senellart , and A. M. Rush .
+2017 .
+OpenNMT : Open - Source Toolkit for Neural Machine Translation .
+ArXiv e - prints .
+Xiujun Li , Yun - Nung Chen , Lihong Li , Jianfeng Gao , and Asli C ¸ elikyilmaz . 2017 .
+End - to - end taskcompletion neural dialogue systems .
+In Proceedings of the Eighth International Joint Conference on Natural Language Processing , IJCNLP 2017 , Taipei , Taiwan , November 27 - December 1 , 2017 - Volume 1 : Long Papers , pages 733–743 .
+Cettolo Mauro , Girardi Christian , and Federico Marcello . 2012 .
+Wit3 : Web inventory of transcribed and translated talks .
+In Conference of European Association for Machine Translation , pages 261–268 .
+Angeliki Metallinou , Dan Bohus , and Jason Williams .
+2013 .
+Discriminative state tracking for spoken dialog systems .
+In Proceedings of the 51st Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , volume 1 , pages 466–475.Takashi Miyazaki and Nobuyuki Shimizu .
+2016 .
+Cross - lingual image caption generation .
+In Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , volume 1 , pages 1780–1790 .
+Nikola Mrksic , Diarmuid ´ O S´eaghdha , Blaise Thomson , Milica Gasic , Pei - hao Su , David Vandyke , Tsung - Hsien Wen , and Steve J. Young .
+2015 .
+Multidomain dialog state tracking using recurrent neural networks .
+In Proceedings of the 53rd Annual Meeting of the Association for Computational Linguistics and the 7th International Joint Conference on Natural Language Processing of the Asian Federation of Natural Language Processing , ACL 2015 , July 2631 , 2015 , Beijing , China , Volume 2 : Short Papers , pages 794–799 .
+Nikola Mrksic , Diarmuid ´ O S´eaghdha , Tsung - Hsien Wen , Blaise Thomson , and Steve J. Young .
+2017 .
+Neural belief tracker : Data - driven dialogue state tracking .
+In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics , ACL 2017 , Vancouver , Canada , July 30 - August 4 , Volume 1 : Long Papers , pages 1777–1788 .
+Nikola Mrk ˇsi´c , Ivan Vuli ´ c , Diarmuid ´ O S´eaghdha , Ira Leviant , Roi Reichart , Milica Ga ˇsi´c , Anna Korhonen , and Steve Young . 2017 .
+Semantic specialisation of distributional word vector spaces using monolingual and cross - lingual constraints .
+arXiv preprint arXiv:1706.00374 .
+Jian Ni , Georgiana Dinu , and Radu Florian . 2017 .
+Weakly supervised cross - lingual named entity recognition via effective annotation and representation projection .
+In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics , ACL 2017 , Vancouver , Canada , July 30 August 4 , Volume 1 : Long Papers , pages 1470–1480 .
+Sinno Jialin Pan and Qiang Yang .
+2010 .
+A survey on transfer learning .
+IEEE Transactions on knowledge and data engineering , 22(10):1345–1359 .
+Xiaoman Pan , Boliang Zhang , Jonathan May , Joel Nothman , Kevin Knight , and Heng Ji . 2017 .
+Crosslingual name tagging and linking for 282 languages .
+InProceedings of the 55th Annual Meeting of the Association for Computational Linguistics ( Volume 1 : Long Papers ) , volume 1 , pages 1946–1958 .
+Jeffrey Pennington , Richard Socher , and Christopher Manning .
+2014 .
+Glove : Global vectors for word representation .
+In Proceedings of the 2014 conference on empirical methods in natural language processing ( EMNLP ) , pages 1532–1543 .
+Doina Precup and Yee Whye Teh , editors .
+2017 .
+Proceedings of the 34th International Conference on Machine Learning , ICML 2017 , Sydney , NSW , Australia , 6 - 11 August 2017 , volume 70 of Proceedings of Machine Learning Research .
+PMLR .
+424Abhinav Rastogi , Dilek Hakkani - T ¨ur , and Larry P. Heck . 2017 .
+Scalable multi - domain dialogue state tracking .
+In 2017 IEEE Automatic Speech Recognition and Understanding Workshop , ASRU 2017 , Okinawa , Japan , December 16 - 20 , 2017 , pages 561 – 568 .
+Lina Maria Rojas - Barahona , Milica Gasic , Nikola Mrksic , Pei - Hao Su , Stefan Ultes , Tsung - Hsien Wen , Steve J. Young , and David Vandyke . 2017 .
+A network - based end - to - end trainable task - oriented dialogue system .
+In Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics , EACL 2017 , Valencia , Spain , April 3 - 7 , 2017 , Volume 1 : Long Papers , pages 438–449 .
+Tsung - Hsien Wen , Milica Gasic , Nikola Mrksic , Peihao Su , David Vandyke , and Steve J. Young .
+2015 .
+Semantically conditioned lstm - based natural language generation for spoken dialogue systems .
+In Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing , EMNLP 2015 , Lisbon , Portugal , September 17 - 21 , 2015 , pages 1711–1721 .
+Jason Williams , Antoine Raux , and Matthew Henderson .
+2016 .
+The dialog state tracking challenge series : A review .
+Dialogue & Discourse , 7(3):4–33 .
+Jason D. Williams , Kavosh Asadi , and Geoffrey Zweig .
+2017 .
+Hybrid code networks : practical and efﬁcient end - to - end dialog control with supervised and reinforcement learning .
+In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics , ACL 2017 , Vancouver , Canada , July 30 - August 4 , Volume 1 : Long Papers , pages 665–677 .
+Puyang Xu and Qi Hu . 2018 .
+An end - to - end approach for handling unknown slot values in dialogue state tracking .
+In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics , ACL 2018 , Melbourne , Australia , July 15 - 20 , 2018 , Volume 1 : Long Papers , pages 1448–1457 .
+Steve Young , Milica Ga ˇsi´c , Simon Keizer , Franc ¸ois Mairesse , Jost Schatzmann , Blaise Thomson , and Kai Yu . 2010 .
+The hidden information state model : A practical framework for pomdp - based spoken dialogue management .
+Computer Speech & Language , 24(2):150–174 .
+Yuan Zhang , David Gaddy , Regina Barzilay , and Tommi S. Jaakkola .
+2016 .
+Ten pairs to tag - multilingual POS tagging via coarse mapping between embeddings .
+In NAACL HLT 2016 , The 2016 Conference of the North American Chapter of the Association for Computational Linguistics : Human Language Technologies , San Diego California , USA , June 12 - 17 , 2016 , pages 1307–1317 .

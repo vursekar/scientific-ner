@@ -1,0 +1,62 @@
+Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics ( Long Papers ) , pages 463–473 Melbourne , Australia , July 15 - 20 , 2018 .
+c  2018 Association for Computational Linguistics463Event2Mind : Commonsense Inference on Events , Intents , and Reactions Hannah Rashkin† ⇤ Maarten Sap† ⇤ Emily Allaway†Noah A. Smith†Yejin Choi†‡ †Paul G. Allen School of Computer Science & Engineering , University of Washington ‡Allen Institute for Artiﬁcial Intelligence { hrashkin , msap , eallaway , nasmith , yejin } @cs.washington.edu
+Abstract We investigate a new commonsense inference task : given an event described in a short free - form text ( “ X drinks coffee in the morning ” ) , a system reasons about the likely intents ( “ X wants to stay awake ” ) and reactions ( “ X feels alert ” ) of the event ’s participants .
+To support this study , we construct a new crowdsourced corpus of 25,000 event phrases covering a diverse range of everyday events and situations .
+We report baseline performance on this task , demonstrating that neural encoder - decoder models can successfully compose embedding representations of previously unseen events and reason about the likely intents and reactions of the event participants .
+In addition , we demonstrate how commonsense inference on people ’s intents and reactions can help unveil the implicit gender inequality prevalent in modern movie scripts .
+1 Introduction Understanding a narrative requires commonsense reasoning about the mental states of people in relation to events .
+For example , if “ Alex is dragging his feet at work ” , pragmatic implications about Alex ’s intent are that “ Alex wants to avoid doing things ” ( Figure 1 ) .
+We can also infer that Alex ’s emotional reaction might be feeling “ lazy ” or “ bored ” .
+Furthermore , while not explicitly mentioned , we can infer that people other than Alex are affected by the situation , and these people are likely to feel “ frustrated ” or “ impatient ” .
+This type of pragmatic inference can potentially be useful for a wide range of NLP applications ⇤ These two authors contributed equally .
+PersonX drags PersonX 's feetPersonX cooks thanksgivingdinner PersonX reads PersonY 's diaryto avoid doing thingslazy , boredfrustrated , impatientto impress their familytired , a sense of belongingimpressed to be nosey , know secretsguilty , curiousangry , violated , betrayedX 's intentX 's reactionY 's reactionX 's intentX 's reactionY 's reaction X 's intentX 's reactionY 's reactionFigure 1 : Examples of commonsense inference on mental states of event participants .
+In the third example event , common sense tells us that Y is likely to feel betrayed as a result of X reading their diary .
+that require accurate anticipation of people ’s intents and emotional reactions , even when they are not explicitly mentioned .
+For example , an ideal dialogue system should react in empathetic ways by reasoning about the human user ’s mental state based on the events the user has experienced , without the user explicitly stating how they are feeling .
+Similarly , advertisement systems on social media should be able to reason about the emotional reactions of people after events such as mass shootings and remove ads for guns which might increase social distress ( Goel and Isaac , 2016 ) .
+Also , pragmatic inference is a necessary step toward automatic narrative understanding and generation ( Tomai and Forbus , 2010 ; Ding and Riloff , 2016 ; Ding et al . , 2017 ) .
+However , this type of social commonsense reasoning goes far beyond the widely studied entailment tasks ( Bowman et al . , 2015 ; Dagan et al . , 2006 ) and thus falls outside the scope of existing benchmarks .
+In this paper , we introduce a new task , corpus ,
+464PersonX ’s Intent Event Phrase PersonX ’s Reaction Others ’ Reactions to express anger to vent their frustration to get PersonY ’s full attentionPersonX starts to yell at PersonYmad frustrated annoyedshocked humiliated mad at PersonX to communicate something without being rude to let the other person think for themselves to be subtlePersonX drops a hintsly secretive frustratedoblivious surprised grateful to catch the criminal to be civilized justicePersonX reports to the policeanxious worried nervoussad angry regret to wake up to feel more energizedPersonX drinks a cup of coffeealert awake refreshedNONE to be feared to be taken seriously to exact revengePersonX carries out PersonX ’s threatangry dangerous satisﬁedsad afraid angry NONEIt starts snowingNONEcalm peaceful cold Table 1 : Example annotations of intent and reactions for 6 event phrases .
+Each annotator could ﬁll in up to three free - responses for each mental state .
+and model , supporting commonsense inference on events with a speciﬁc focus on modeling stereotypical intents and reactions of people , described in short free - form text .
+Our study is in a similar spirit to recent efforts of Ding and Riloff ( 2016 )
+andZhang et al .
+( 2017 ) , in that we aim to model aspects of commonsense inference via natural language descriptions .
+Our new contributions are : ( 1 ) a new corpus that supports commonsense inference about people ’s intents and reactions over a diverse range of everyday events and situations , ( 2 ) inference about even those people who are not directly mentioned by the event phrase , and ( 3 ) a task formulation that aims to generate the textual descriptions of intents and reactions , instead of classifying their polarities or classifying the inference relations between two given textual descriptions .
+Our work establishes baseline performance on this new task , demonstrating that , given the phrase - level inference dataset , neural encoderdecoder models can successfully compose phrasal embeddings for previously unseen events and reason about the mental states of their participants .
+Furthermore , in order to showcase the practical implications of commonsense inference on events and people ’s mental states , we apply our model to modern movie scripts , which provide a new insight into the gender bias in modern ﬁlms beyond what previous studies have offered ( England et al . , 2011 ; Agarwal et al . , 2015 ; Ramakrishna et al . , 2017 ; Sap et al . , 2017 ) .
+The resulting corpus includes around 25,000 event phrases , which combine automatically extracted phrases from stories and blogs with all idiomatic verb phrases listed in the Wiktionary .
+Our corpus is publicly available.1 2 Dataset One goal of our investigation is to probe whether it is feasible to build computational models that can perform limited , but well - scoped commonsense inference on short free - form text , which we refer to as event phrases .
+While there has been much prior research on phrase - level paraphrases ( Pavlick et al . , 2015 ) and phrase - level entailment ( Dagan et al . , 2006 ) , relatively little prior work focused on phrase - level inference that requires prag1https://tinyurl.com/event2mind
+465matic or commonsense interpretation .
+We scope our study to two distinct types of inference : given a phrase that describes an event , we want to reason about the likely intents and emotional reactions of people who caused or affected by the event .
+This complements prior work on more general commonsense inference ( Speer and Havasi , 2012 ; Li et al . , 2016 ; Zhang et al . , 2017 ) , by focusing on the causal relations between events and people ’s mental states , which are not well covered by most existing resources .
+We collect a wide range of phrasal event descriptions from stories , blogs , and Wiktionary idioms .
+Compared to prior work on phrasal embeddings ( Wieting et al . , 2015 ; Pavlick et al . , 2015 ) , our work generalizes the phrases by introducing ( typed ) variables .
+In particular , we replace words that correspond to entity mentions or pronouns with typed variables such as PersonX orPersonY , as shown in examples in Table 1 .
+More formally , the phrases we extract are a combination of a verb predicate with partially instantiated arguments .
+We keep speciﬁc arguments together with the predicate , if they appear frequently enough ( e.g. , PersonX eats pasta for dinner ) .
+Otherwise , the arguments are replaced with an untyped blank ( e.g. , PersonX eats for dinner ) .
+In our work , only person mentions are replaced with typed variables , leaving other types to future research .
+Inference types The ﬁrst type of pragmatic inference is about intent .
+We deﬁne intent as an explanation of why the agent causes a volitional event to occur ( or “ none ” if the event phrase was unintentional ) .
+The intent can be considered a mental pre - condition of an action or an event .
+For example , if the event phrase is PersonX takes a stab at , the annotated intent might be that “ PersonX wants to solve a problem ” .
+The second type of pragmatic inference is about emotional reaction .
+We deﬁne reaction as an explanation of how the mental states of the agent and other people involved in the event would change as a result .
+The reaction can be considered a mental post - condition of an action or an event .
+For example , if the event phrase is that PersonX gives PersonY as a gift , PersonX might “ feel good about themselves ” as a result , and PersonY might “ feel grateful ” or “ feel thankful” .
+Source # Unique Events # Unique VerbsAverage  ROC Story 13,627 639 0.57 G. N - grams 7,066 789 0.39 Spinn3r 2,130 388 0.41 Idioms 1,916 442 0.42 Total 24,716 1,333 0.45 Table 2 : Data and annotation agreement statistics for our new phrasal inference corpus .
+Each event is annotated by three crowdworkers .
+2.1 Event Extraction We extract phrasal events from three different corpora for broad coverage : the ROC Story training set ( Mostafazadeh et al . , 2016 ) , the Google Syntactic N - grams ( Goldberg and Orwant , 2013 ) , and the Spinn3r corpus ( Gordon and Swanson , 2008 ) .
+We derive events from the set of verb phrases in our corpora , based on syntactic parses ( Klein and Manning , 2003 ) .
+We then replace the predicate subject and other entities with the typed variables ( e.g. , PersonX , PersonY ) , and selectively substitute verb arguments with blanks ( ) .
+We use frequency thresholds to select events to annotate ( for details , see Appendix A.1 ) .
+Additionally , we supplement the list of events with all 2,000 verb idioms found in Wiktionary , in order to cover events that are less compositional.2Our ﬁnal annotation corpus contains nearly 25,000 event phrases , spanning over 1,300 unique verb predicates ( Table 2 ) .
+2.2 Crowdsourcing We design an Amazon Mechanical Turk task to annotate the mental pre- and post - conditions of event phrases .
+A snippet of our MTurk HIT design is shown in Figure 2 .
+For each phrase , we ask three annotators whether the agent of the event , PersonX , intentionally causes the event , and if so , to provide up to three possible textual descriptions of their intents .
+We then ask annotators to provide up to three possible reactions that PersonX might experience as a result .
+We also ask annotators to provide up to three possible reactions of other people , when applicable .
+These other people can be either explicitly mentioned ( e.g. , “ PersonY ” in PersonX punches PersonY ’s lights out ) , or only implied 2We compiled the list of idiomatic verb phrases by crossreferencing between Wiktionary ’s English idioms category and the Wiktionary English verbs categories .
