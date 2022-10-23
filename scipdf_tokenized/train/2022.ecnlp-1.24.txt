@@ -1,0 +1,161 @@
+Investigating the Generative Approach for Question Answering in E - Commerce
+Many e - commerce websites provide Productrelated Question Answering ( PQA ) platform where potential customers can ask questions related to a product , and other consumers can post an answer to that question based on their experience .
+Recently , there has been a growing interest in providing automated responses to product questions .
+In this paper , we investigate the suitability of the generative approach for PQA .
+We use state - of - the - art generative models proposed by Deng et al ( 2020 ) and Lu et al ( 2020 ) for this purpose .
+On closer examination , we find several drawbacks in this approach : ( 1 ) input reviews are not always utilized significantly for answer generation , ( 2 ) the performance of the models is abysmal while answering the numerical questions , ( 3 ) many of the generated answers contain phrases like " I do not know " which are taken from the reference answer in training data , and these answers do not convey any information to the customer .
+Although these approaches achieve a high ROUGE score , it does not reflect upon these shortcomings of the generated answers .
+We hope that our analysis will lead to more rigorous PQA approaches , and future research will focus on addressing these shortcomings in PQA .
+With the increase in e - commerce shopping , customer - generated product queries are also growing .
+Manually answering the questions in real - time is infeasible , and also some questions go unanswered for an extended period .
+It is necessary to answer the user queries in the e - commerce business automatically .
+The user reviews are a vast source of information with diverse opinions , and they can be used to answer user queries .
+Earlier works on product question answering ( PQA ) focus on retrieval - based approaches and binary answer prediction tasks .
+McAuley and Yang ( 2016 ) ; Fan et al ( 2019 ) ; aim to predict the answer as " yes / no " based on the relevant reviews , customer ratings , aspects in the reviews , etc . Retrieval - based approaches try to find the most relevant review snippet as the answer ( Chen et al , 2019a ) and use a ranked list of review snippets as the response for a given question .
+With the success of machine translation ( Sutskever et al , 2014 ) and summarization ( See et al , 2017 ) , the PQA approaches are shifting towards natural answer generation from relevant product reviews ( Gao et al , 2019 ;
+Chen et al , 2019b ; Deng et al , 2020 ; Lu et al , 2020 ; Gao et al , 2021 ) .
+In this work , we analyse the answer generated from state - of - the - art generative models OAAG
+( Deng et al , 2020 ) and CHIME ( Lu et al , 2020 ) in detail beyond their traditional scores on popular metrics such as ROUGE ( Lin , 2004 ) .
+We find that despite achieving a good score on these metrics , generated answers have several drawbacks that can lead to user dissatisfaction .
+( Ni et al , 2019 ; He and McAuley , 2016 ) includes users ' reviews along with a rating of the product given by the same user .
+The Product ID is used to align the question with its reviews .
+We use Opinion - aware Answer Generation ( OAAG ) model ( Deng et al , 2020 ) and Crosspassage Hierarchical Memory Network ( CHIME ) model ( Lu et al , 2020 ) for our analysis .
+Following the generative approach , these two models achieve state - of - the - art performance on the Amazon Question Answering dataset .
+There are thousands of products in each category in the Amazon Product Review dataset , and each product has thousands of reviews .
+All the reviews may not be relevant for a particular query , and therefore , to answer a product - related question , models need to filter out the irrelevant reviews first .
+OAAG and CHIME use the BM25 algorithm to retrieve and rank all the review snippets of a product , and the top k relevant snippets ( we use top 10 reviews snippets ) for that question are taken as the premise of the answer .
+Upon retrieving the relevant reviews , OAAG uses an encoder - decoder model for answer generation .
+OAAG encodes the question and each review corresponding to that question using a Bi - LSTM ( Hochreiter and Schmidhuber , 1997 ) network .
+They apply a co - attention mechanism over these encodings to get the question and review representations .
+They utilize the ratings of the retrieved reviews to mine the general opinion about the question using the attention mechanism .
+Finally , they employ a multi - view pointer - generator network that copies words from the question as well as from the reviews and fuses the opinion by re - weighting the attention scores of the words in reviews to generate an opinionated answer .
+They report ROUGE - based scores to compare the model performance against the previous approaches ( Chen et al , 2019b ; Gao et al , 2019 ) .
+CHIME uses a transformer - based encoder - decoder model to generate the response .
+It extends pretrained XLNet
+( Yang et al , 2019 ) with an auxiliary memory module that consists of two components : the context memory , and the answer memory .
+Given a question with K review passages , it creates K training instances , each consisting of the question , a review passage , and the reference answer .
+Each training instance is fed into an XLNet encoder to get the hidden representations that are used to update the two memories .
+The context memory mechanism sequentially reads the review passages and gathers the cross - passage evidences to identify the most prominent opinion in reviews .
+The answer memory works as a buffer to gradually refine the generated answers after reading each ( question , review passage ) pair .
+After reading the last review , the answer memory is fed to the decoder to get a final response .
+We empirically analyse the OAAG model with dynamic fusion and CHIME model to answer the following research questions : RQ1 : Are the retrieved review snippets significantly utilized for generating the answers ?
+RQ2 : Is the model performing similarly for a heterogeneous group of questions ?
+RQ3 : Is the generative model biased towards more frequently occurring phrases ?
+RQ4 : Can ROUGE capture the correctness of generated answers ?
+We use two product categories , namely , Home&Kitchen and Sports&Outdoors for our analysis from the dataset mentioned in Section 2.1 after combining the question - answer and review dataset with the Product IDs .
+We will denote the two categories as Home and Sports , respectively .
+We use the same data split from OAAG 1 to retrain the models .
+Since there is no validation dataset , we take the 10 % of the train data as validation data .
+Table A.1 in the Appendix shows the details of training , validation , and test split .
+We keep all the hyper - parameters the same as the OAAG and CHIME .
+We train all the OAAG models for 20 epochs and CHIME models for 3 epochs , and the model that performs the best on the validation set is used to evaluate the test set .
+We evaluate the model with ROUGE metric and report the F1 scores for ROUGE - 1 ( R1 ) and ROUGE - L ( RL ) , which measure the word overlap and the longest common sequence between the reference answer and the generated answer , respectively .
+We obtain the ROUGE scores using rouge - score 2 package .
+Both the models use the BM25 algorithm to retrieve relevant reviews using the questions in the test dataset .
+We refer to this test setting as BM25Q.
+For answering RQ1 , at inference time , we replace these reviews with four sets of review snippets : ( i ) TrainA : We use BM25 to find the closest question to the test question in the train data , and we take the answer of it as the generated answer .
+( ii ) Ran - domOD : We randomly choose the review snippets from any other product of that category except the product for which the question is asked .
+( iii ) Ran - domID : We randomly select review snippets from the review sentences of that particular product .
+( iv ) BM25QA : We retrieve the review snippets using the BM25 algorithm that uses the question and reference answer in the test dataset .
+OAAG uses the opinion along with the reviews .
+We also select the opinion of the corresponding review sentence while replacing the reviews .
+Both the models utilize the top 10 reviews for training and evaluation .
+Table 1 shows the result of this experiment .
+The TrainA does not utilize either of the models to generate the answer .
+It shows the answer from the most similar train question , and its performance is competitive with other methods , especially in Home .
+In both the categories , the performance of both the models is almost similar in RandomOD and RandomID .
+RandomID shows marginally better performance than RandomOD for OAAG .
+For CHIME , BM25Q performs the best in both categories .
+For OAAG , BM25QA performs the best in Home while in Sports , BM25QA performs the best in R1 , and BM25Q performs the best in RL , but the difference is minute .
+The results are quite surprising : the performance of the models is very similar when the answers are generated with random reviews vs. when the answers are generated with the reviews obtained from BM25 .
+Hence , it is not clear if the model is effectively utilizing the retrieved review snippets .
+Different types of questions are asked on the Amazon product page like numerical , " yes / no " , descriptive .
+The generative model may not be suitable for answering all kinds of questions .
+So , we categorize the questions as template - based and descriptive .
+For template - based questions , the answer can be yes or no without any explanation .
+We filter the questions where the answer starts with ' yes ' , ' yeah ' , ' no ' , ' nope ' and mark these as templatebased questions .
+Both categories contain ∼75 % descriptive questions .
+Table 2 summarizes the result of the template - based and generative questions .
+Both models ' performance in descriptive questions is better than the template - based questions . 
+Furthermore , we categorized the questions into numerical and non - numerical questions .
+We consider a question to be numerical if there are numbers in the question or in the reference answer .
+The test datasets of both the categories have ∼19 % numerical questions .
+The OAAG model performs better in answering non - numerical questions , while CHIME performs better in answering numerical questions .
+Although the ROUGE scores are close in numerical and non - numerical questions for both the models , on analyzing the numerical answers , we find that the words in generated and reference answers might match , but the numbers generally do not match .
+3
+We present some examples of numerical questions with their answers in Table A.4 of Appendix .
+We observe that some phrases are frequently occurring in the reference answers as well as in the generated answers .
+We find that in the training data of both categories , ∼2.4 % of the reference answers start with the phrase " I do n't think so " , but 12.29 % of responses in Sports and 35.64 % responses in Home begin with this phrase .
+This ∼2.4 % repetition of the same phrase in the training data makes the generative model biased towards this phrase .
+Many of the reference answers in the training data contain " I do n't know " , " I have no idea " , " I ca n't say " .
+These kinds of answers do not give any meaningful information to the user .
+Together , we denote these phrases as IDK .
+On analysis of the dataset , we find that in Sports , there are 3.04 % , 2.9 % , and 6.9 % IDK phrases in train dataset answers , test dataset answers , and generated answers , respectively .
+In Home , the answers in the train and test dataset contain 3.64 % and 3.60 % IDK phrases , respectively , but 16.31 % of the answers are generated as IDK phrases .
+So , in the generated answers , the appearance of IDK phrases has increased by three to five folds which clearly shows that the model is biased towards these frequent phrases . 
+To see the effect of these phrases on the models , we remove the questions from the training dataset which have IDK in their reference answer 4 and retrain the models .
+We denote this model as BM25Q - IDK .
+Table 3 shows the result of BM25Q , the model trained on the original training data , and BM25Q - IDK .
+Home had 16.31 % and Sports had only 6.9 % IDK phrases , and consequently , when the IDK phrases are removed , it has more impact on Home which drops the bias towards these phrases and improves the ROUGE score , whereas , in Sports , BM25Q and BM25Q - IDK have close ROUGE scores due to lesser IDK phrases in the generated answer .
+For answering RQ4 , we look into the generated response with high R1 scores and check their correct - Question is this box made of polypropylene ?
+can photos and mementos be safely stored in it ?
+Ref .
+Ans . 
+i ca n't comment on the material it is made of , but the top does not stay on tight .
+it is not a decent storage container for anything requiring a top or to be airtight .
+OAAG . 
+it says " made in china " on the bottom of the box .
+it says " made in china " on the bottom of the box .
+hope that helps .
+( 26.22 ) CHIME . 
+yes , it is polypropylene and can be stored in the box if you want to store them in a safe environment that is not toxic to you and/or your pets or food they will be exposed ( 27.77 )
+What is the width at the base ?
+Ref .
+Ans . Width across the bottom / base is approximately 3 inches .
+OAAG . 
+The width of the top of the base is about 1.5 inches .
+the base of the pitcher is 9 inches .
+the top of the pitcher is about 1.5 inche . '
+( 25.00 ) CHIME . 
+itś about 12 " wide at the base and about 10.5 inches deep ( 26.08 ) ness with respect to the reference answer .
+In OAAG model , 15.36 % predictions in Home and 13.34 % predictions in Sports have R1 score above 20 .
+We manually analyse the reference and generated answers of randomly chosen 100 question - answers with a high ROUGE score ( > 20 ) , and we find that 54 % are answered incorrectly .
+In CHIME model , 46.87 % predictions in Home and 46.15 % predictions in Sports have R1 score above 20 and 56 % of 100 randomly chosen question - answer pairs ( whose ROUGE score > 20 ) turn out to be incorrect .
+Table 4 shows two examples where the generated responses result in high R1 scores , but the answers are incorrect .
+Both models predict irrelevant answers in the first question , and the predicted dimension is incorrect in the second question .
+It shows that it is not possible to infer from ROUGE scores if the generated answer is accurate to the reference answer , i.e. , the word count overlap is not an indicator of an accurate answer .
+We show some more cases with high R1 scores in Tables A.2 and A.3 in the Appendix .
+In this paper , we extensively analyze the generative approach of question - answering in e - commerce using a state - of - the - art OAAG model ( Deng et al , 2020 ) and CHIME model ( Lu et al , 2020 ) .
+We find many shortcomings which need to be addressed for a reliable PQA system .
+We try to address four re - search questions related to the generative approach for PQA , such as how the models utilize the reviews , how it performs on diverse question types , whether it is biased toward frequent phrases in training data , and the correctness of the generated response .
+We hope that our analysis will lead to more rigorous PQA research .
+A.2 Generated Answers with
+High R1
+Score
+R1 score .
+In Table A.2 , in the first and the second example , the generated answers are exactly the opposite of the reference answers .
+In the third example , the question was about sweating of the bottle and straw cover , but the answer does not address any of these .
+In the fourth example , the answer is ambivalent .
+The last example contains a frequently occurring phrase " I do n't know " with a very high R1 score .
+Similarly , in the case of Table A.3 , the second and the fifth examples have high R1 scores , but the generated answers are exactly opposite of the reference answers .
+In the first question , the model wrongly predicts that it would melt and bubble up a little in the microwave , and in the third question , it predicts an entirely different answer .
+The response to the fourth question is " I do n't know , " which is a frequently occurring phrase .
+it 's about 3 oz .
+and it 's just as strong as any other clip i ' ve seen OAAG : it 's about 7.5 ′′ long .
+it 's a great knife .
+it 's a great deal .
+it 's a great knife
+and i love it .
+it 's a great deal .
+CHIME : i 'm not sure about the exact weight but it is very light and is very easy to use with ease .
+Question : does this fit a 2 year old ?
+Ref .
+Ans . : it fit my two year old who has a pretty normal size head .
+the multiple thicknesses of pads that are included really make it a great long term helmet !
+OAAG : 
+yes it will , it 's a very tight fit .
+i do n't think it would be too big for a 2 ′′ 2 ′′ .
+it 's a great helmet .
+i bought this for my son and he loves it so much he bought another one for his 2 year - bean .
+We present some examples of numerical questions with their answers in Table A.4 .
+In the first example , the generated answer is right , but none of the answers are correct for the rest of the questions .

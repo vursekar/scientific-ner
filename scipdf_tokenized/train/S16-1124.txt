@@ -1,0 +1,150 @@
+UWB at SemEval -
+2016 Task 2 : Interpretable Semantic Textual Similarity with Distributional Semantics for Chunks
+We introduce a system focused on solving SemEval 2016 Task 2 - Interpretable Semantic Textual Similarity .
+The system explores machine learning and rule - based approaches to the task .
+We focus on machine learning and experiment with a wide variety of machine learning algorithms as well as with several types of features .
+The core of our system consists in exploiting distributional semantics to compare similarity of sentence chunks .
+The system won the competition in 2016 in the " Gold standard chunk scenario " .
+We have not participated in the " System chunk scenario " .
+The goal of the Interpretable Semantic Textual Similarity task is to go deeper with the assessment of semantic textual similarity of sentence pairs .
+It is requested to add an explanatory layer that offers a deeper insight into the sentence similarities .
+The sentences are split into chunks and the first goal is to find corresponding chunks ( with respect to their meanings ) among the compared sentences .
+When the corresponding chunks are known , the chunks are annotated with their similarity scores and their relation types ( e.g. equivalent , more specific , etc ) . 
+The task follows a pilot task from the preceding SemEval 2015 competition ( Agirre et al , 2015 ) .
+The best performing systems adopted various approaches , ( Banjade et al , 2015 ) relied on handcrafter rules , ( Karumuri et al , 2015 ) employed a classifier for relation types and they associated each relation with a precomputed similarity score and ( Hänig et al , 2015 ) extended their word alignment algorithm for the task .
+The data consist of sentence pairs S a i and S
+b i , where a denotes the first item of the pair , b denotes the second item of the pair and i indexes the sentences ( for simiplicity we further omit i for sentences ) .
+We perceive a sentence S a to be an ordered set of chunks CH a j S a and the chunks to be ordered sets of words w k CH a j ( and analogically for sentence S b ) . 
+Next we define two functions : sim ( CH a
+i
+, CH b j ) { 0 , 1 , 2 , 3 , 4 , 5 } for chunk similarity and rel ( CH a i , CH b j ) TYPE for chunk relation type . 
+The possible types are : TYPE = { EQUI , OPPO , SPE1 , SPE2 , SIMI , REL } .
+These are the main types .
+All these types can have two modifiers ( FACT , POL ) .
+The modifiers are optionally attached to the main types .
+For example , you can generate SPE1 FACT .
+For more information , please see the annotation guidelines 1 .
+As a first step of our approach we perform the following text preprocessing : Stopwords removal - we mark the words found in a predefined list of 32 stopwords .
+Special character removal we remove special characters that violate the tokenization .
+E.g. in one of the datasets , dots , commas , quotation marks and other punctuation characters were present in tokens . 
+Lowercasing - we remove casing from the words . 
+Lemmatization - we find lemmas with the Stanford CoreNLP tool . 
+Our preprocessing rather adds new information and does not modify the original information .
+Thus , the original word and all the generated variants are always available .
+In this way , we can generate the output file with identical words ( including the special characters ) from the input .
+The dataset are already tokenized .
+The core of our system is based upon computing semantic similarity of sentence chunks .
+More precisely , we are looking for the best estimation of sim ( CH a i , CH b j ) .
+The sim score should describe semantic similarity of a given chunk pairthe higher score the more easily both chunks can be replaced with each other without chaining the meaning of both sentences .
+The similarity score ranges from 0 to 5 , where 0 is the lowest similarity and 5 is the highest similarity .
+Eg .
+the sim ( " a new laptop " , " a new notebook " )
+= 5 and sim ( " a new laptop " , " an old rock " )
+= 0 .
+We use the chunk similarity as a feature in our machine learning approach ( Section 3 ) and as a metric in our unsupervised approach ( Section 4 ) . 
+Our attempts to estimate the sim function are based upon estimating semantic similarity of individual words and compiling them into one number for a given chunk pair .
+We experiment with Word2Vec ( Mikolov et al , 2013 ) and GloVe ( Pennington et al , 2014 ) for estimating similarity of words .
+We compile all the word similarities in one number that reflects semantic similarity of whole chunks via the following methods : 1 ) the vector composition method and 2 ) an adapted method for constructing vectors called lexical semantic vectors . 
+Vector composition requires that the semantics of words is described by vectors .
+E.g. we have vectors for all words m i : ∀w
+i CH a j and n i : ∀w i CH b k in two given chunks CH a j and CH b k .
+The vectors for words in each chunk are summed ( or averaged ) to obtain one vector for each chunk :
+m = i ( m i ) and n = j ( n j ) .
+The vectors are then compared with cosine distance : sim ( CH a j , CH b k ) = cos ( θ )
+= m n m | n | .
+Lexical semantic vectors were originally introduced in ( Li et al , 2006 ) .
+We have made two modifications .
+We do not weight words with their information content and we use methods for distributional semantics ( Word2Vec and GloVe ) rather than semantic networks .
+The modified method is explained here .
+First of all , we create a combined vocabulary of all unique words from chunks CH a k and CH b l : L = unique ( CH a k ∪ CH b l ) . 
+Then we take all words from vocabulary L : w i L and look for maximal similarities with words from chunks a and b , respectively .
+This way we get vectors m and n containing maximal similarities of chunk words and words from the combined vocabulary : m i = max j:1≤j≤ | CH a k | sim ( w i , w j ) : ∀w
+i L n i = max j:1≤j≤ | CH b l | sim ( w i , w j ) : ∀w
+i L ( 1 ) where m i and n i are elements of vectors m and n. In order to obtain similarity of a chunk pair we compare their respective vectors with the cosine similarity similarly to the previous approach .
+The principle of the method is illustrated by the example in figure 1 . iDF weighting .
+We assume that some words are more important than others .
+In order to reflect this assumption , we try to weight the vectors with iDF weighting .
+We compute the iDF weights on the articles from English wikipedia text data ( Wikipedia dump from March 7 , 2015 ) .
+The main effort of our team was focused on the machine learning approach to the task .
+We divided the task into to three classification / regression tasks :
+Alignment binary classification - we decide whether two given chunks should be aligned with each other . 
+Score classification / regression - we experiment with both classification and regression of the chunks similarity score . 
+Type classification - we classify all aligned pairs of chunks into a predefined set of types - see Section 1.1 .
+We experiment with the following classifiers : Maximum Entropy Classifier ( Berger et al , 1996 ) , Support Vector Machines Classifier ( Cortes and Vapnik , 1995 ) , Multilayer perceptron and Voted perceptron neural networks ( Freund and Schapire , 1999 ) and with Decision / regression tree learning ( Breiman et al , 1984 ) .
+We employ the following two frameworks : Brainy ( Konkol , 2014 ) and Weka ( Hall et al , 2009 ) .
+We divide the employed features into four categories : lexical , syntactic , semantic , external . 
+Lexical features consist of the following features : word base form overlap , word lemma overlap , chunk length difference , word sentence positions difference . 
+Syntactic features contains closest common parent comparison ( we compute the closest common parent of all words for each chunk in the parse tree and retrieve the name of the parent node ) , parse tree path comparison ( we compute the path from the root of the sentence to the chunk ) .
+POS ( Part Of Speech ) count difference ( e.g. differences in counts of nouns , adjectives , verbs , etc ) .
+POS tagging and syntactic parsing are performed with Stanford CoreNLP . 
+Semantic features are described in Section 2.2 .
+Additionally , some members of our team participated in the STS task ( task 1 ) of the SemEval 2016 ( Brychcín and Svoboda , 2016 ) and they annotated the semantic similarity of the whole sentences with their system for us .
+This score is used as one feature . 
+External features consist of the WordNet - Lin similarity metric ( Lin , 1998 ) and the paraphrase database ( Ganitkevitch et al , 2013 ) feature .
+The alignment of chunks is generated by the binary classification of all possible chunk pairs .
+If one chunk is aligned with multiple chunks in the other sentence , these chunks should be merged into one chunk .
+Also , impossible multiple chunks to multiple chunks alignments are generated in some cases ( e.g. two chunks from the first sentence belong a chunk in the second sentence but one of the two chunks from the first sentence belong also to a different chunk in the second sentence ) .
+These cases are resolved with few hand crafted rules .
+We attempt to solve the task with a rule - based approach as well .
+First , we define the similarity of chunks as described in Section 2.2 .
+The similarity is then used for the chunk alignment .
+We employ an algorithm inspired by the IBM word model II for machine translation ( Brown et al , 1993 ) .
+We iterate over all chunks from sentence S a and find the chunk with maximal similarity from sentence S b .
+More chunks from sentence S a can be aligned to one chunk in the sentence S b .
+In this way , we obtain N:1 mapping .
+Then , we do the same with the reversed order of sentences and get the 1 : M mapping .
+Then , we compare the mappings and take the one with the highest overall similarity .
+In this way , it is ensured that we generate only valid mappings ( unlike in the previous case of machine learning - see Section 3.3 ) . 
+The relation types are then determined by an extremely simple algorithm : If the similarity is 5 , then the relation type is EQUI .
+If the similarity is 4 or 3 and chunks contain the same amount of words , then the relation is SIMI .
+If the similarity is 4 or 3 , then chunk with more words is more specific . 
+If the similarity is 2 or 1 , then the relation is SIMI .
+If the similarity is 0 , then the relation type is NOALI .
+Machine learning approach We employ the following classifiers and classification frameworks : Alignment binary classification - Voted perceptron ( Weka ) .
+Score classification - Maximum entropy ( Brainy ) . 
+Type classification - Support vector machines ( Brainy ) . 
+These classifiers perform best on the evaluation datasets . 
+We achieved the best results for estimating chunk similarity with Word2Vec and the modified lexical semantic vectors - see Section 2.2 . 
+We experimented with reduced feature set ( word overlap , word positions difference , POS tags difference , semantic similarity , global semantic similarity , paraphrase database ) - run 1 and with all featuresrun 3 .
+The run 1 contains the optimal combination of features .
+Since this combination is established on evaluation datasets it does not need to be optimal for the test datasets .
+To increase our chances in the completion , we also run the system with all features - run 3 . 
+We use the provided annotated evaluation dataset ( Images , Headlines , Answer students ) for training the models .
+We train three models , each for one dataset .
+For development , we use the 10 - fold crossvalidation .
+For final test runs , we train the three models on evaluation datasets and run the system on the corresponding test datasets ( e.g. Images evaluation dataset based model is used to annotate Images test data ) .
+We do not neither modify the original datasets nor annotate any additional data . Rule - based approach There are little options in this approach .
+Again , we have achieved the best results for estimating chunk similarity with Word2Vec and the modified lexical semantic vectors - see Section 2.2 .
+We set the threshold for the similarity score to 2.5 .
+All lower values are set to 0 .
+This is the run 2 . 
+Individual setting for different dataset We restrained from setting individual configurations for different datasets .
+The setup is completely identical for all datasets .
+In this section , we summarize the official results for the SemEval 2016 competition - see table 1 .
+The results are calculated for the following dataset : Headlines , Images and Answer students .
+The results show F1 scores for chunk alignment ( Ali ) , determination of the relation type ( Type ) , chunk similarity score ( Score ) and combination of relation type and score similarity ( T+S ) .
+The bold numbers are the overall best scores .
+We participated only in the gold standard chunk scenario . 
+The results clearly show that the unsupervised run 2 perform much worse than the supervised runs 1 and 3 .
+We expected that .
+However , it is worth of noticing that the unsupervised alignment algorithm inspired by machine translation alignment placed quite well .
+In fact , it is newer looses more than 3 % from the best alignment score in all datasets .
+The overall rank of the run 2 places in the top half among all system with exception of the answer student dataset .
+The poor performance of the run 2 on this dataset is most likely caused by the fact that the hand - crafted rules were prepared for the images and headlines datasets and they are clearly not applicable on the answer student which is substantially different . 
+The runs 1 and 3 perform very similarly .
+The optimized feature set of the run 1 helps especially in the answer student dataset .
+However , the differences between these runs are too small and they can be caused by chance .
+It is worth of noticing that the run 1 is not the best one in any of the datasets and it still wins in the overall results table .
+The reason is that it provides the most consistent results among all other runs of all systems in the competition . 
+In order to provide additional information about the features effectiveness , we have evaluated them on the final test datasets .
+In many cases , the obtained results are not conclusive .
+On some datasets , the features help slightly on others they even decrease the performance .
+However , the following three features have significant influence on the final results : modified lexical semantic vectors ( +3 % of the mean of T+S F1 scores ) , shared words ( +2 % ) , POS tags difference ( +2 % ) .
+The modified lexical semantic vectors method performed better than vector composition by 1 % for the machine learning approach and by 2 % for the rule - based approach in average .
+By optimizing the feature set , we were able to increase the mean score to 0.6484 of T+S F1 measure .
+The machine learning approach with combination of methods for the distributional semantics ( Word2Vec and GloVe ) proved to be very capable of solving the advanced task of Interpretable Semantic Textual Similarity .
+We have chosen not to tune the system for individual datasets but to tune it for the task as a whole .
+The modified lexical semantic vectors approach seems to be an attractive alternative to the more traditional vector composition .
+This publication was supported by the project LO1506 of the Czech Ministry of Education , Youth and Sports and by Grant No .
+SGS - 2016 - 018 Data and Software Engineering for Advanced Applications .
+Computational resources were provided by the CESNET LM2015042 and the CERIT Scientific Cloud LM2015085 , provided under the programme " Projects of Large Research , Development , and Innovations Infrastructures " .

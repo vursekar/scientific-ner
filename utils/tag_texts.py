@@ -3,9 +3,13 @@ from spacy.matcher import PhraseMatcher
 import json
 import os
 
+path_to_tokenized = 'scipdf_tokenized/train/'
+path_to_tagged = 'scipdf_tagged_texts/train/'
 
-path_to_tokenized = 'tokenized_texts/train/'
-path_to_tagged = 'tagged_texts/train/'
+for subfolder in ['no_tag', 'metric_hp_plus_num_tag', 'rest']:
+    if not os.path.exists(os.path.join(path_to_tagged,subfolder)):
+        os.mkdir(os.path.join(path_to_tagged,subfolder))
+
 filenames = os.listdir(path_to_tokenized)
 
 with open('entity_corpus/pwc_entities.json') as f:

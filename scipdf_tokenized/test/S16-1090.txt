@@ -1,0 +1,165 @@
+HHU at SemEval -
+2016 Task 1 : Multiple Approaches to Measuring Semantic Textual Similarity
+This paper describes our participation in the SemEval - 2016 Task 1 : Semantic Textual Similarity ( STS ) .
+We developed three methods for the English subtask ( STS Core ) .
+The first method is unsupervised and uses WordNet and word2vec to measure a token - based overlap .
+In our second approach , we train a neural network on two features .
+The third method uses word2vec and LDA with regression splines .
+Measuring semantic textual similarity ( STS ) is the task of determining the similarity between two different text passages .
+The task is important for various natural language processing tasks like topic detection or automated text summarization because languages are versatile and authors can express similar content or even the same content with different words .
+Predicting semantic textual similarity has been a recurring task in SemEval challenges ( Agirre et al , 2015 ; Agirre et al , 2014 ; Agirre et al , 2013 ; Agirre et al , 2012 ) .
+As in previous years , the purpose of the STS task is the development of systems that automatically predict the semantic similarity of two sentences in the continuous interval [ 0 , 5 ] where 0 represents a complete dissimilarity and 5 denotes a complete semantic equivalence between the sentences ( Agirre et al , 2015 ) . 
+The organizers provide sentence pairs whose semantic similarities have to be predicted by the contestants .
+The quality of a system is determined by calculating the Pearson correlation between the predicted values and a human gold standard that has been created by crowdsourcing .
+The data from previous STS tasks can be used for training supervised methods . 
+The test data consists of text content from different sources .
+In this year 's shared task , the systems are tested on five different categories with different topics and varying textual characteristics like text length or spelling errors : answer - answer , plagiarism , postediting , headlines , and question - question The remainder of the paper is structured as follows : Section 2 discusses related approaches to automatically determining semantic textual similarity .
+Section 3 describes our three methods in detail .
+We discuss their results in section 4 .
+Finally , we conclude in chapter 5 and outline future work .
+In the last shared tasks , most of the teams used natural languages processing techniques like tokenization , part - of - speech tagging , lemmatization , named entity recognition and word embeddings .
+External resources like WordNet ( Miller , 1995 ) and word2vec ( Mikolov et al , 2013 ) are commonly used .
+In ( Agirre et al , 2012 ) and ( Agirre et al , 2013 ) , the organizers provide a list and a comparison of the tools and resources used by the participants in the first two years , respectively . 
+In each year , the organizers provide a baseline value by calculating the cosine similarity of the binary bag - of - words vectors from both sentences in each sample .
+Since 2013 , TakeLab ( Šarić et al , 2012 , the best ranked system in 2012 , has also been used as another baseline value . 
+Most of the teams used machine learning in 2015 ( Agirre et al , 2015 ) .
+In 2014 , the best two submitted runs were from unsupervised systems .
+The work most closely related to our Overlap method is ( Han et al , 2015 ) , which uses a twophased approach called Align - and - Differentiate .
+In the first phase , they compute an alignment score .
+Afterwards , they modify the alignment score in a differentiate phase by subtracting a penalty score for terms that can not be aligned .
+The idea behind the computation of our alignment scores is the same : For each sample , we average over the crosswise similarities between the sentences by aligning them , accumulating similarities between tokens and dividing by sentence lengths .
+The results of the alignment score in our Overlap method differ because ( i ) our alignment is different , ( ii ) we use another similarity function for tokens , and ( iii ) our preprocessing is different . 
+In ( Vu et al , 2015 ) , the similarity between LDA vectors calculated from documents is used together with syntactic and lexical similarity measures to compute the similarity between text fragments .
+This idea is also incorporated in our Deep LDA method .
+Moreover , both approaches use different flavors of regression analysis for the final model prediction .
+Regression analysis was also used in ( Sultan et al , 2015 ) , where the authors combine an unsupervised method with ridge regression analysis .
+Our approach differs in the sense that it introduces knearest neighbors as a lazy training layer before the regression analysis phase to decrease the effect of noisy data points .
+In this section , we describe our three system runs .
+The ideas behind our methods are independent of the word order in a sentence .
+Our first method is unsupervised , whereas the other two methods are supervised .
+The first and second method share the same preprocessing .
+Our first method is unsupervised .
+It measures the overlap between the tokens in sentence s 1 and the tokens in sentence s 2 .
+For preprocessing the input text , we first process each sentence with Stanford CoreNLP ( Manning et
+al , 2014 )
+.
+Afterwards , we use Hunspell 1 with the latest OpenOffice English dictionaries to suggest spelling corrections for tokens with at least two characters in length .
+For each token , we calculate the Levenshtein distance for all suggestions .
+If suggestions have the same lowest distance , we choose the longest word and replace the former misspelt word .
+Abbreviations are also replaced by their full forms .
+Afterwards , we process the corrected sentence with Stanford CoreNLP again .
+We use the WordnetStemmer from the Java Wordnet Interface ( Finlayson , 2014 ) to look up lemmas with the help of WordNet ( Miller , 1995 ) .
+If the WordnetStemmer can not provide a lemma for a token , we use the predicted lemma from the Stanford CoreNLP . 
+Instead of accessing all tokens in a sentence , we start from the root token and recursively follow outgoing dependency edges and add all visited tokens to a list .
+This approach improves our results slightly because some tokens will be ignored .
+Furthermore , the tokens are filtered for stopwords 2 .
+The Overlap method measures the token - based overlap between two sentences .
+Therefore , we need to define a similarity function for tokens : We first try to identify a textual similarity of 1 by comparing the lower case lemmas of both tokens or by checking if their most common WordNet synsets are the same .
+We assess their similarity as 0.5 if they share any synset .
+If this is not the case , we use word2vec
+( Mikolov et al , 2013 ) with the 300 - dimensional GoogleNews - vectors - negative300 model .
+We look up both words ( or their lemmas if the words are not present in the model ) and calculate the cosine similarity of their word embeddings .
+Otherwise , we return a default value .
+This yields the following similarity function for two tokens : sim ( t 1 , t 2 ) :
+=                         1 if t 1 .lemma
+= = t 2 .lemma 1 if t 1 and t 2 have the same most common synset 0.5 if t 1 and t 2 share any synset d ( t 1 , t 2 ) if t 1 and t 2 have word embeddings default otherwise where d ( t 1 , t 2 ) denotes the cosine similarity between the two word embeddings of the tokens . 
+Given a token t from one sentence , we calculate its similarity to another sentence S by taking the maximum similarity between t and all tokens of S : msim ( t , S ) : = max t 2 S sim ( t , t 2 ) 
+We define the similarity score between two sentences in [ 0 , 1 ] as follows : ssim ( s 1 , s 2 ) : = t s 1 msim ( t , s 2 ) 2 | s 1 | + t s 2 msim ( t , s 1 ) 2 | s 2 | To predict the semantic similarity score in [ 0 , 5 ] , we multiply ssim by 5 , however , this does not change our evaluation results because the Pearson correlation is scale invariant : 
+STS ( s 1 , s 2 ) : = 5 ssim ( s 1 , s 2 ) 
+We observed that some samples in the STS 2016 test data consist almost entirely of stopwords .
+For example , the STS 2016 evaluation data contained a sample with the sentences " I think you should do both . "
+and " You should do both . "
+before the final filtering .
+After filtering stop words , the first sentence would only contain the word " think " and the second sentence would be empty , which would result in a predicted score of zero .
+To avoid these extreme cases , we do not filter stop words if this would result in a sentence length of less than two tokens in both sentences .
+We train a neural network with 3 layers and a sigmoid activation function in Accord .
+NET ( de Souza , 2014 ) .
+Our network consists of 2 neurons in the input layer , 3 neurons in the hidden layer and 1 neuron in the output layer , as illustrated in Figure 1 .
+The layer weights are initialized by the Nguyen - Widrow function ( Nguyen and Widrow , 1990 ) .
+We use the Levenberg - Marquardt algorithm ( Levenberg , 1944 ; Marquardt , 1963 ) to train our network on the STS Core test data from 2015 and 2014 .
+Hidden layer Output layer All samples are preprocessed as described in section 3.1.1 .
+For each sample ( s 1 , s 2 , gs ) in the training set , we create a vocabulary list of the lowercase lemmas from both sentences .
+Lemmas that share a most common synset in WordNet are grouped together .
+Let n be the size of the vocabulary .
+We create two bag - of - words vectors bow s 1 and bow s 2 .
+For each lemma l , we calculate the minimum number of times l occurs in each sentence and the delta between the minimum and the maximum : 
+min i : = min ( bow s 1 [ i ] , bow s 2 [ i ] )
+| ∆
+i | : = | bow s 1 [ i ] − bow s 2 [ i ] | 
+As input vectors for the neural net , we build two sums per sample and use them as the two dimensional feature vector ( sameWords , notSameWords ) for the expected output gs : 1 shows an example of the same word neural network method for the two input sentences " Tim plays the guitar " and " Tim likes guitar songs " , which have the input vector ( 2 , 3 ) .
+We trained the neural net until the error rate between two iterations did not change more than ε = 10 −5 . 
+sameWords :
+= n i=1 min i notSameWords :
+= n i=1 | ∆
+i |
+Table i Lemma bow s 1 bow s 2 min
+i | ∆
+i | 1 tim 1 1 1 0 2 play 1 0 0 1 3 guitar 1 1 1 0 4 like 0 1 0 1 5 song 0 1 0 1 2 3
+We represent the semantic similarity between two documents s 1 and s 2 by means of a vector F
+= [ f 1 , f 2 , f 3 , f 4 ] R 4 , where each component of F is responsible for modelling a different aspect of the semantic similarity , namely the surface - level similarity , context similarity , and the topical similarity .
+The surface - level similarity can to some extent ( although not entirely ) capture the semantic similarity between documents .
+Let s 1 and s 2 be the reference and the candidate documents respectively .
+We compute the components f 1 , f 2 R as follows : f 1 ( s 1 , s 2 , N )
+= m
+N l s 1 N f 2 ( s 1 , s 2 , N )
+= N n=1 m N l s 2 n 1 N where m N is the number of matched N - grams between s 1 and s 2 , l s 1 N denotes the total number of Ngrams in s 1 and l s 2 n is the total number of n - grams in s 2 .
+f 1 is the common ROUGE ( Lin , 2004 ) metric used in automatic text summarization and f 2 is a modified version of the BLEU ( Papineni et
+al , 2002 ) metric ( standard machine translation metric ) where the brevity penalty is eliminated .
+Note that f 1 can be interpreted as the recall - oriented surface similarity and f 2 as the precision - oriented one .
+In order to model the context similarity between documents , we use word embeddings that learn semantically meaningful representations for words from local co - occurrences in sentences .
+More specifically we use word2vec
+( Mikolov et al , 2013 ) which seems to be a reasonable choice to model context similarity as the word vectors are trained to maximize the log probability of context words .
+We denote the context similarity of two documents s 1 and s 2 by f 3 R and compute it as follows : f 3 ( s 1 , s 2 ) = cos ( ṽ s 1 , ṽ s 2 ) = cos v s 1 v | s 1 | , v s 2 v | s 2 | where v is the dense vector representation of a token andṽ represents the centroid of the word vectors in a document .
+To model the topical similarity between two documents , we use Latent Dirichlet Allocation ( LDA ) ( Blei et al , 2003 ) to train models on the English Wikipedia .
+For both documents s 1 and s 2 , we compute the topic distributions θ 1 and θ 2 and use the Hellinger distance to measure the similarity between the documents .
+This can be formally written as f 4 ( s 1 , s 2 ) = 1 − 1 √ 2 k i=1 θ 1
+i − θ 2 i 2 where k represents the number of learned LDA topics .
+In order to predict the semantic similarity between two documents , we use a combination of k - NN and Multivariate Adaptive Regression Splines ( MARS ) ( Friedman , 1991 ) . 
+Let T = { ( s 1 , s 1 , gs 1 ) , . . .
+, ( s m , s m , gs m ) } be the training set consisting of m document pairs together with their corresponding gold standard semantic similarity and ( s i , s i ) /
+T be a document pair for which the semantic similarity has to be computed . 
+We construct a set F = { ( F 1 , gs 1 ) , . . .
+, ( F m , gs m ) } where each F j is the four - dimensional vector representation of the semantic similarity between s j and s j .
+Moreover , we Sentence 1 Sentence 2 gs STS
+Unfortunately the answer to your question is we simply do not know .
+Sorry , I do n't know the answer to your question .
+You should do it . 
+You can do it , too .
+1 4.39817 Unfortunately the answer to your question is we simply do not know . 
+My answer to your question is " Probably Not " .
+1 3.70982 P ( A | B ) is the conditional probability of A , given B. P ( B | A ) is the conditional probability of B given A.
+Table 2 : Examples for the results of the Overlap method with the corresponding gold standards compute the vector F i .
+Next , we construct a set F k containing the k - nearest neighbors to the vector F i .
+In order to calculate the distances between the vectors , we use the Euclidean distance .
+Finally , we construct a vector gs k containing the gold standard similarity values of the k - nearest neighbors and feed it into a MARS model to predict the semantic similarity of the pair ( s i , s i ) .
+The choice of MARS is due to its capability to automatically model non - linearities between variables .
+We report the results of our three approaches for the STS Core test from 2016 and 2015 .
+In this years shared task , 117 runs were submitted .
+We achieved weighted mean Pearson correlations of 0.71134 , 0.67502 and 0.62078 .
+In this year 's run , our best result was the Overlap method , followed by the Same Word Neural Network method and the Deep LDA approach .
+Table 2 shows examples of good and bad results of our Overlap method on the 2016 data .
+Detailed results of our runs are given in Table 3 per test set .
+Our three approaches achieved different results . 
+From a semantic point of view , the most obvious value for the default value in our Overlap method is 0 .
+However , we have discovered that a default value 0.15 returned better results on the STS Core test data from 2015 and also chose this default value for our submission . 
+In the Deep LDA approach , we set the parameter N = 2 , although the use of unigrams did not show any significant statistical difference in the results .
+We choose the number of topics in the LDA model to be 300 .
+In the prediction phase of the al - gorithm , we select k = 100 nearest neighbors from the data sets provided from 2012 to 2015 .
+We list the results of our methods for the 2015 test data in Table 3 to discuss the effect of different evaluation sets .
+It is interesting to see that the Deep LDA method performed best out of our three systems on 2015 .
+Its results on 2016 were surprisingly lower .
+We attribute this difference to the lack of domain specific training data for 2016 .
+As an unsupervised approach , the Overlap method has fewer problems with the domain change . 
+It should be noted that the gold standard of the 2015 test data was available during the development of our methods .
+For the training phase , the Same Word Neural Network method used the STS Core test from 2014 .
+The Deep LDA method was trained on the data from 2012 to 2014 .
+We have presented three approaches to measure textual semantic similarity .
+This year , our unsupervised method achieved the best result .
+By comparing our result for 2016 and 2015 , we showed that the approaches yielded different results in a different order . 
+In our future work , we will try to modify the Overlap method , by also using a penalty score and by applying certain similarity score shifters , for instance modifying the score by applying a date extraction with a specific distance function for dates .
+We tried to group words into phrases by using a sliding window approach with a shrinking window size and matching phrases in word2vec .
+In our initial attempt , this worsened the results for the Overlap method .
+We will adjust the similarity function to increase the weight of phrases in comparison to unigrams . 
+We aim to adapt the techniques for German and Spanish .
+This work was partially funded by the PhD program Online Participation , supported by the North Rhine - Westphalian funding scheme Fortschrittskollegs and by the German Federal Ministry of Economics and Technology under the ZIM program ( Grant No . KF2846504 ) .
+The authors want to thank the anonymous reviewers for their suggestions and comments .

@@ -1,0 +1,216 @@
+Self - Alignment Pretraining for Biomedical Entity Representations
+Despite the widespread success of selfsupervised learning via masked language models ( MLM ) , accurately capturing fine - grained semantic relationships in the biomedical domain remains a challenge .
+This is of paramount importance for entity - level tasks such as entity linking where the ability to model entity relations ( especially synonymy ) is pivotal .
+To address this challenge , we propose SAPBERT , a pretraining scheme that selfaligns the representation space of biomedical entities .
+We design a scalable metric learning framework that can leverage UMLS , a massive collection of biomedical ontologies with 4M+ concepts .
+In contrast with previous pipelinebased hybrid systems , SAPBERT offers an elegant one - model - for - all solution to the problem of medical entity linking ( MEL ) , achieving a new state - of - the - art ( SOTA ) on six MEL benchmarking datasets .
+In the scientific domain , we achieve SOTA even without taskspecific supervision .
+With substantial improvement over various domain - specific pretrained MLMs such as BIOBERT , SCIBERT and PUB - MEDBERT , our pretraining scheme proves to be both effective and robust .
+1
+Biomedical entity 2 representation is the foundation for a plethora of text mining systems in the medical domain , facilitating applications such as literature search ( Lee et al , 2016 ) , clinical decision making ( Roberts et al , 2015 ) and relational knowledge discovery ( e.g. chemical - disease , drug - drug and protein - protein relations , Wang et al 2018 ) .
+The heterogeneous naming of biomedical concepts * Work conducted prior to joining Amazon .
+1
+For code and pretrained models , please visit : https : //github.com / cambridgeltl / sapbert . 
+2 In this work , biomedical entity refers to the surface forms of biomedical concepts , which can be a single word ( e.g. fever ) , a compound ( e.g. sars - cov - 2 ) or a short phrase ( e.g. abnormal retinal vascular development ) .
+poses a major challenge to representation learning .
+For instance , the medication Hydroxychloroquine is often referred to as Oxichlorochine ( alternative name ) , HCQ ( in social media ) and Plaquenil ( brand name ) .
+PUBMEDBERT MEL addresses this problem by framing it as a task of mapping entity mentions to unified concepts in a medical knowledge graph .
+3
+The main bottleneck of MEL is the quality of the entity representations ( Basaldella et al , 2020 ) .
+Prior works in this domain have adopted very sophisticated text pre - processing heuristics ( D'Souza and Ng , 2015 ;
+Kim et al , 2019 ; Ji et al , 2020 ; Sung et al , 2020 ) which can hardly cover all the variations of biomedical names .
+In parallel , self - supervised learning has shown tremendous success in NLP via leveraging the masked language modelling ( MLM ) objective to learn semantics from distributional representations Liu et al , 2019 ) .
+Domain - specific pretraining on biomedical corpora ( e.g. BIOBERT , Lee et al 2020 and BIOMEGA - TRON , Shin et al 2020 ) have made much progress in biomedical text mining tasks .
+Nonetheless , representing medical entities with the existing SOTA pretrained MLMs ( e.g. PUBMEDBERT , Gu et al 2020 ) as suggested in Fig .
+1 ( left ) does not lead to a well - separated representation space . 
+To address the aforementioned issue , we propose to pretrain a Transformer - based language model on the biomedical knowledge graph of UMLS ( Bodenreider , 2004 ) , the largest interlingua of biomedical ontologies .
+UMLS contains a comprehensive collection of biomedical synonyms in various forms ( UMLS 2020AA has 4M+ concepts and 10M+ synonyms which stem from over 150 controlled vocabularies including MeSH , SNOMED CT , RxNorm , Gene Ontology and OMIM ) .
+4 We design a selfalignment objective that clusters synonyms of the same concept .
+To cope with the immense size of UMLS , we sample hard training pairs from the knowledge base and use a scalable metric learning loss .
+We name our model as Self - aligning pretrained BERT ( SAPBERT ) . 
+Being both simple and powerful , SAPBERT obtains new SOTA performances across all six MEL benchmark datasets .
+In contrast with the current systems which adopt complex pipelines and hybrid components ( Xu et al , 2020 ; Ji et al , 2020 ; Sung et al , 2020 ) , SAPBERT applies a much simpler training procedure without requiring any pre - or post - processing steps .
+At test time , a simple nearest neighbour 's search is sufficient for making a prediction .
+When compared with other domain - specific pretrained language models ( e.g. BIOBERT and SCIBERT ) , SAPBERT also brings substantial improvement by up to 20 % on accuracy across all tasks .
+The effectiveness of the pretraining in SAP - BERT is especially highlighted in the scientific language domain where SAPBERT outperforms previous SOTA even without fine - tuning on any MEL datasets .
+We also provide insights on pretraining 's impact across domains and explore pretraining with fewer model parameters by using a recently introduced ADAPTER module in our training scheme . 
+Figure 2 : The distribution of similarity scores for all sampled PUBMEDBERT representations in a minibatch .
+The left graph shows the distribution of + andpairs which are easy and already well - separated .
+The right graph illustrates larger overlap between the two groups generated by the online mining step , making them harder and more informative for learning .
+We design a metric learning framework that learns to self - align synonymous biomedical entities .
+The framework can be used as both pretraining on UMLS , and fine - tuning on task - specific datasets .
+We use an existing BERT model as our starting point .
+In the following , we introduce the key components of our framework . 
+Formal Definition .
+Let ( x , y ) X × Y denote a tuple of a name and its categorical label .
+For the self - alignment pretraining step , X × Y is the set of all ( name , CUI 5 ) pairs in UMLS , e.g. ( Remdesivir , C4726677 ) ; while for the finetuning step , it is formed as an entity mention and its corresponding mapping from the ontology , e.g. ( scratchy throat , 102618009 ) .
+Given any pair of tuples ( x i , y i ) , ( x j , y j ) X × Y , the goal of the self - alignment is to learn a function f ( ; θ ) : X R d parameterised by θ .
+Then , the similarity f ( x i ) , f ( x j ) ( in this work we use cosine similarity ) can be used to estimate the resemblance of x i and x j ( i.e. , high if
+x i , x j are synonyms and low otherwise ) .
+We model f by a BERT model with its output [ CLS ] token regarded as the representation of the input .
+6
+During the learning , a sampling procedure selects the informative pairs of training samples and uses them in the pairwise metric learning loss function ( introduced shortly ) . 
+Online Hard Pairs Mining .
+We use an online hard triplet mining condition to find the most informative training examples ( i.e. hard positive / negative pairs ) within a mini - batch for efficient training , Fig .
+2 . For biomedical entities , this step can be particularly useful as most examples can be easily classified while a small set of very hard ones cause the most challenge to representation learning .
+7 We start from constructing all possible triplets for all names within the mini - batch where each triplet is in the form of ( x a , x p , x n ) .
+Here x a is called anchor , an arbitrary name in the minibatch ; x p a positive match of x a ( i.e. y a = y p ) and x n a negative match of x a ( i.e. y a = y n ) .
+Among the constructed triplets , we select out all triplets that violate the following condition : f ( x a ) − f
+( x p ) 2 < f ( x a ) − f ( x n )
+2 + λ , ( 1 ) where λ is a pre - set margin .
+In other words , we only consider triplets with the negative sample closer to the positive sample by a margin of λ .
+These are the hard triplets as their original representations were very far from correct .
+Every hard triplet contributes one hard positive pair ( x a , x p ) and one hard negative pair ( x a , x n ) .
+We collect all such positive & negative pairs and denote them as P , N .
+A similar but not identical triplet mining condition was used by Schroff et al ( 2015 ) for face recognition to select hard negative samples .
+Switching - off this mining process , causes a drastic performance drop ( see Tab . 2 ) . 
+Loss Function .
+We compute the pairwise cosine similarity of all the BERT - produced name representations and obtain a similarity matrix S R | X b | × | X b | where each entry S ij corresponds to the cosine similarity between the i - th and j - th names in the mini - batch b.
+We adapted the Multi - Similarity loss ( MS loss , Wang et al 2019 ) , a SOTA metric learning objective on visual recognition , for learning from the positive and negative pairs : L = 1 | X b | | X b | i=1 1
+α log 1 + n N i
+e α ( S in − )
++ 1 β log 1 + p P
+i e −β ( S ip − ) , ( 2 ) where α , β are temperature scales ; is an offset applied on the similarity matrix ;
+P i , N
+i are indices of positive and negative samples of the anchor i. 8
+While the first term in Eq . 2 pushes negative pairs away from each other , the second term pulls positive pairs together .
+This dynamic allows for a re - calibration of the alignment space using the semantic biases of synonymy relations .
+The MS loss leverages similarities among and between positive and negative pairs to re - weight the importance of the samples .
+The most informative pairs will receive more gradient signals during training and thus can better use the information stored in data .
+Data Preparation Details for UMLS Pretraining .
+We download the full release of UMLS 2020AA version .
+9 We then extract all English entries from the MRCONSO.RFF raw file and convert all entity names into lowercase ( duplicates are removed ) .
+Besides synonyms defined in MRCONSO.RFF , we also include tradenames of drugs as synonyms ( extracted from MRREL.RRF ) .
+After pre - processing , a list of 9 , 712 , 959 ( name , CUI ) entries is obtained .
+However , random batching on this list can lead to very few ( if not none ) positive pairs within a mini - batch .
+To ensure sufficient positives present in each mini - batch , we generate offline positive pairs in the format of ( name 1 , name 2 , CUI ) where name 1 and name 2 have the same CUI label .
+This can be achieved by enumerating all possible combinations of synonym pairs with common CUIs .
+For balanced training , any concepts with more than 50 positive pairs are randomly trimmed to 50 pairs .
+In the end we obtain a training list with 11 , 792 , 953 pairwise entries .
+During training , we use AdamW ( Loshchilov and Hutter , 2018 ) with a learning rate of 2e - 5 and weight decay rate of 1e - 2 .
+Models are trained on the prepared pairwise UMLS data for 1 epoch ( approximately 50k iterations ) with a batch size of 512 ( i.e. , 256 pairs per mini - batch ) .
+We train with Automatic Mixed Precision ( AMP ) 10 provided in PyTorch 1.7.0 .
+This takes approximately 5 hours on our machine ( con - 4231 scientific language social media language model
+NCBI BC5CDR - d BC5CDR -
+c MedMentions AskAPatient COMETA @1 @5 @1 @5 @1 @5 @1 @5 @1 @5 @1 @5 the improvement comparing to the base model ( the deeper the more ) .
+Bottom : SAPBERT vs. SOTA results .
+Blue and red denote unsupervised and supervised models .
+Bold and underline denote the best and second best results in the column . "
+† " denotes statistically significant better than supervised SOTA ( T - test , ρ < 0.05 ) .
+On COMETA , the results inside the parentheses added the supervised SOTA 's dictionary back - off technique ( Basaldella et al , 2020 ) . "
+- " : not reported in the SOTA paper .
+" OOM " : out - of - memory ( 192GB+ ) . 
+figurations specified in App .
+B.4 ) .
+For other hyperparameters used , please view App .
+C.2 . 
+Evaluation Data and Protocol .
+We experiment on 6 different English MEL datasets : 4 in the scientific domain ( NCBI , Dogan et al 2014 ; BC5CDR - c and BC5CDR - d , Li
+et al 2016 ; MedMentions , Mohan and Li 2018 ) and 2 in the social media domain ( COMETA , Basaldella et al 2020 andAskAPatient , Limsopatham andCollier 2016 ) .
+Descriptions of the datasets and their statistics are provided in App .
+A.
+We report Acc @1 and Acc @5 ( denoted as @1 and @5 ) for evaluating performance .
+In all experiments , SAPBERT denotes further pretraining with our self - alignment method on UMLS .
+At the test phase , for all SAPBERT models we use nearest neighbour search without further fine - tuning on task data ( unless stated otherwise ) .
+Except for numbers reported in previous papers , all results are the average of five runs with different random seeds . 
+Fine - Tuning on Task Data .
+The red rows in Tab . 1 are results of models ( further ) fine - tuned on the training sets of the six MEL datasets .
+Similar to pretraining , a positive pair list is generated through traversing the combinations of mention and all ground truth synonyms where mentions are from the training set and ground truth synonyms are from the reference ontology .
+We use the same optimiser and learning rates but train with a batch size of 256 ( to accommodate the memory of 1 GPU ) .
+On scientific language datasets , we train for 3 epochs while on AskAPatient and COMETA we train for 15 and 10 epochs respectively .
+For BIOSYN on social media language datasets , we empirically found that 10 epochs work the best .
+Other configurations are the same as the original BIOSYN paper .
+* BERT + SAPBERT ( Tab . 1 , top ) .
+We illustrate the impact of SAPBERT pretraining over 7 existing BERT - based models ( * BERT = { BIOBERT , PUBMEDBERT , ... } ) .
+SAPBERT obtains consistent improvement over all * BERT models across all datasets , with larger gains ( by up to 31.0 % absolute Acc @1 increase ) observed in the social media domain .
+While SCIBERT is the leading model before applying SAPBERT , PUBMEDBERT+SAPBERT performs the best afterwards . 
+SAPBERT vs. SOTA ( Tab . 1 , bottom ) .
+We take PUBMEDBERT+SAPBERT ( w / wo fine - tuning ) and compare against various published SOTA results ( see App .
+C.1 for a full listing of 10 baselines ) which all require task supervision .
+For the scientific language domain , the SOTA is BIOSYN ( Sung et al , 2020 ) .
+For the social media domain , the SOTA are Basaldella et al ( 2020 ) and GEN - RANK ( Xu et al , 2020 ) on COMETA and AskAPatient respectively .
+All these SOTA methods combine BERT with heuristic modules such as tf - idf , string matching and information retrieval system ( i.e. Apache Lucene ) in a multi - stage manner . 
+Measured by Acc @1 , SAPBERT achieves new SOTA with statistical significance on 5 of the 6 datasets and for the dataset ( BC5CDR - c ) where SAPBERT is not significantly better , it performs on par with SOTA ( 96.5 vs. 96.6 ) .
+Interestingly , on scientific language datasets , SAPBERT outperforms SOTA without any task supervision ( fine - tuning mostly leads to overfitting and performance drops ) .
+On social media language datasets , unsupervised SAPBERT lags behind supervised SOTA by large margins , highlighting the well - documented complex nature of social media language ( Baldwin et al , 2013 ; Collier , 2015 , 2016 ; Basaldella et al , 2020 ; Tutubalina et al , 2020 ) .
+However , after fine - tuning on the social media datasets ( using the MS loss introduced earlier ) , SAPBERT outperforms SOTA significantly , indicating that knowledge acquired during the selfaligning pretraining can be adapted to a shifted domain without much effort . 
+The ADAPTER Variant .
+As an option for parameter efficient pretraining , we explore a variant of SAPBERT using a recently introduced training module named ADAPTER ( Houlsby et al , 2019 ) .
+While maintaining the same pretraining scheme with the same SAPBERT online mining + MS loss , instead of training from the full model of PUBMEDBERT , we insert new ADAPTER layers between Transformer layers of the fixed PUBMEDBERT , and only train the weights of these ADAPTER layers .
+In our experiments , we use the enhanced ADAPTER configuration by Pfeiffer et al ( 2020 ) .
+We include two variants where trained parameters are 13.22 % and 1.09 % of the full SAPBERT variant .
+The ADAPTER variant of SAPBERT achieves comparable performance to full - model - tuning in scientific datasets but lags behind in social media datasets , Tab .
+1 .
+The results indicate that more parameters are needed in pretraining for knowledge transfer to a shifted domain , in our case , the social media datasets . 
+The Impact of Online Mining ( Eq .
+( 1 ) ) .
+As suggested in Tab . 2 , switching off the online hard pairs mining procedure causes a large performance drop in @1 and a smaller but still significant drop in @5 .
+This is due to the presence of many easy and already well - separated samples in the mini - batches .
+These uninformative training examples dominated the gradients and harmed the learning process .
+Integrating SAPBERT in Existing Systems .
+SAPBERT can be easily inserted into existing BERT - based MEL systems by initialising the systems with SAPBERT pretrained weights .
+We use the SOTA scientific language system , BIOSYN ( originally initialised with BIOBERT weights ) , as an example and show the performance is boosted across all datasets ( last two rows , Tab . 1 ) .
+We present SAPBERT , a self - alignment pretraining scheme for learning biomedical entity representations .
+We highlight the consistent performance boost achieved by SAPBERT , obtaining new SOTA in all six widely used MEL benchmarking datasets .
+Strikingly , without any fine - tuning on task - specific labelled data , SAPBERT already outperforms the previous supervised SOTA ( sophisticated hybrid entity linking systems ) on multiple datasets in the scientific language domain .
+Our work opens new avenues to explore for general domain self - alignment ( e.g. by leveraging knowledge graphs such as DBpedia ) .
+We plan to incorporate other types of relations ( i.e. , hypernymy and hyponymy ) and extend our model to sentence - level representation learning .
+In particular , our ongoing work using a combination of SAPBERT and ADAPTER is a promising direction for tackling sentence - level tasks .
+We divide our experimental datasets into two categories ( 1 ) scientific language datasests where the data is extracted from scientific papers and ( 2 ) social media language datasets where the data is coming from social media forums like Reddit.com . 
+For an overview of the key statistics , see Tab . 3 .
+NCBI disease ( Dogan et al , 2014 ) is a corpus containing 793 fully annotated PubMed abstracts and 6 , 881 mentions .
+The mentions are mapped into the MEDIC dictionary ( Davis et al , 2012 ) .
+We denote this dataset as " NCBI " in our experiments . BC5CDR
+( Li et al , 2016 ) consists of 1 , 500 PubMed articles with 4 , 409 annotated chemicals , 5 , 818 diseases and 3 , 116 chemical - disease interactions .
+The disease mentions are mapped into the MEDIC dictionary like the NCBI disease corpus . 
+The chemical mentions are mapped into the Comparative Toxicogenomics Database ( CTD ) ( Davis et al , 2019 ) chemical dictionary .
+We denote the disease and chemical mention sets as " BC5CDRd " and " BC5CDR - c " respectively .
+For NCBI and BC5CDR we use the same data and evaluation protocol by Sung et al ( 2020 ) .
+11 MedMentions ( Mohan and Li , 2018 ) is a verylarge - scale entity linking dataset containing over 4 , 000 abstracts and over 350 , 000 mentions linked to UMLS 2017AA .
+According to Mohan and Li ( 2018 ) , training TAGGERONE , a very popular MEL system , on a subset of MedMentions require > 900 GB of RAM .
+Its massive number of mentions and more importantly the used reference ontology ( UMLS 2017AA has 3M+ concepts ) make the application of most MEL systems infeasible .
+However , through our metric learning formulation , SAPBERT can be applied on MedMentions with minimal effort .
+AskAPatient ( Limsopatham and Collier , 2016 ) includes 17 , 324 adverse drug reaction ( ADR ) annotations collected from askapatient.com blog posts .
+The mentions are mapped to 1 , 036 medical concepts grounded onto SNOMED - CT ( Donnelly , 2006 ) and AMT ( the Australian Medicines Terminology ) .
+For this dataset , we follow the 10 - fold evaluation protocol stated in the original paper .
+12 COMETA ( Basaldella et al , 2020 ) is a recently released large - scale MEL dataset that specifically focuses on MEL in the social media domain , containing around 20k medical mentions extracted from health - related discussions on reddit.com . 
+Mentions are mapped to SNOMED - CT .
+We use the " stratified ( general ) " split and follow the evaluation protocol of the original paper .
+13
+We list all the versions of BERT models used in this study , linking to the specific versions in Tab . 5 .
+Note that we exhaustively tried all official variants of the selected models and the best performing ones are chosen .
+All BERT models refer to the BERT Base architecture in this paper .
+S denotes the set of all surface forms / synonyms of all concepts in C ; M denotes the set of mentions / queries .
+COMETA ( s.g . ) and ( z.g . ) are the stratified ( general ) and zeroshot ( general ) split respectively .
+model NCBI BC5CDR - d BC5CDR -
+c MedMentions AskAPatient COMETA @1 @5 @1 @5 @1 @5 @1 @5 @1 @5 @1 @5 SIEVE - BASED ( D'Souza and Ng , 2015 ) 84.7 - 84.1 - 90.7 - - - WORDCNN ( Limsopatham and Collier , 2016 ) - - - - - - - - 81.4 - - - WORDGRU+TF - IDF ( Tutubalina et al , 2018 ) - - - - - - - - 85.7 - - - TAGGERONE 87.7 - 88.9 - 94.1 - OOM OOM - - - - NORMCO ( Wright et al , 2019 ) 87.8 - 88.0 - - - - - - - - - BNE ( Phan et al , 2019 ) 87.7 - 90.6 - 95.8 - - - - - - - BERTRANK
+( Ji et al , 2020 ) 89 .
+We use COMETA ( zeroshot general ) as a benchmark for selecting learning objectives .
+Note that this split of COMETA is different from the stratified - general split used in Tab .
+4 .
+It is very challenging ( so easy to see the difference of the performance ) and also does not directly affect the model 's performance on other datasets .
+The results are listed in Tab .
+6 . Note that online mining is switched on for all models here .
+( Basaldella et al , 2020 ) 64.6 74.6 NCA loss ( Goldberger et al , 2005 ) 65.2 77.0 Lifted - Structure loss ( Oh Song et
+al , 2016 ) 62.0 72.1 InfoNCE ( Oord et al , 2018 ; He et al , 2020 ) 63.3 74.2 Circle loss ( Sun et al , 2020 ) 66.7 78.7 Multi - Similarity loss ( Wang et al , 2019 ) 67.2 80.3 Schumacher et al ( 2020 ) for clinical concept linking .
+InfoNCE has been very popular in selfsupervised learning and contrastive learning ( Oord et al , 2018 ; He et al , 2020 ) .
+Lifted - Structure loss ( Oh Song et al , 2016 ) and NCA loss ( Goldberger et al , 2005 ) are two very classic metric learning objectives .
+Multi - Similarity loss ( Wang et al , 2019 ) and Circle loss ( Sun et al , 2020 ) are two recently proposed metric learning objectives and have been considered as SOTA on large - scale visual recognition benchmarks .
+In Tab . 7 we list number of parameters trained in the three ADAPTER variants along with full - modeltuning for easy comparison . BIOBERT ( Lee et al , 2020 ) https://huggingface.co/dmis - lab / biobert - v1.1 BLUEBERT ( Peng et al , 2019 ) https://huggingface.co/bionlp/bluebert_pubmed_mimic_uncased_L - 12_H - 768_A - 12 CLINICALBERT ( Alsentzer et al , 2019 )
+https://huggingface.co/emilyalsentzer/Bio_ClinicalBERT SCIBERT ( Beltagy et al , 2019 ) https://huggingface.co/allenai/scibert_scivocab_uncased UMLSBERT ( Michalopoulos et al , 2020 ) https://www.dropbox.com/s/qaoq5gfen69xdcc/umlsbert.tar.xz?dl=0 PUBMEDBERT ( Gu et al , 2020 ) https://huggingface.co/microsoft/BiomedNLP - PubMedBERT - base - uncased - abstract - fulltext
+All our experiments are conducted on a server with specifications listed in Tab . 8 .
+C Other Details
+The full table of supervised baseline models is provided in Tab .
+4 .
+Tab . 9 lists hyper - parameter search space for obtaining the set of used numbers .
+Note that the chosen hyper - parameters yield the overall best performance but might be sub - optimal on any single dataset .
+Also , we balanced the memory limit and model performance . 
+C.3
+A High - Resolution Version of Fig .
+1 We show a clearer version of t - SNE embedding visualisation in Fig .
+3 .
+PUDMEDBERT Figure 3 : Same as Fig .
+1 in the main text , but generated with a higher resolution .
+We thank the three reviewers and the Area Chair for their insightful comments and suggestions .
+FL is supported by Grace & Thomas C.H. Chan Cambridge Scholarship .
+NC and MB would like to

@@ -1,0 +1,137 @@
+Left - to - Right Dependency Parsing with Pointer Networks
+We propose a novel transition - based algorithm that straightforwardly parses sentences from left to right by building n attachments , with n being the length of the input sentence .
+Similarly to the recent stack - pointer parser by Ma et al ( 2018 ) , we use the pointer network framework that , given a word , can directly point to a position from the sentence .
+However , our left - to - right approach is simpler than the original top - down stack - pointer parser ( not requiring a stack ) and reduces transition sequence length in half , from 2n − 1 actions to n. This results in a quadratic non - projective parser that runs twice as fast as the original while achieving the best accuracy to date on the English PTB dataset ( 96.04 % UAS , 94.43 % LAS ) among fully - supervised singlemodel dependency parsers , and improves over the former top - down transition system in the majority of languages tested .
+Dependency parsing , the task of automatically obtaining the grammatical structure of a sentence expressed as a dependency tree , has been widely studied by natural language processing ( NLP ) researchers in the last decades .
+Most of the models providing competitive accuracies fall into two broad families of approaches : graph - based ( Mc - Donald et al , 2005a , b ) and transition - based ( Yamada and Matsumoto , 2003 ; Nivre , 2003 ) dependency parsers . 
+Given an input sentence , a graph - based parser scores trees by decomposing them into factors , and performs a search for the highest - scoring tree . 
+In the past two years , this kind of dependency parsers have been ahead in terms of accuracy thanks to the graph - based neural architecture developed by Dozat and Manning ( 2016 ) , which not only achieved state - of - the - art accuracies on the Stanford Dependencies conversion of the English Penn Treebank ( hereinafter , PTB - SD ) , but also obtained the best results in the majority of languages in the CoNLL 2017 Shared Task ( Dozat et al , 2017 ) .
+This tendency recently changed , since a transition - based parser developed by Ma et al ( 2018 ) managed to outperform the best graphbased model in the majority of datasets tested . 
+Transition - based parsers incrementally build a dependency graph for an input sentence by applying a sequence of transitions .
+This results in more efficient parsers with linear time complexity for parsing projective sentences , or quadratic for handling non - projective structures , when implemented with greedy or beam search .
+However , their main weakness is the lack of access to global context information when transitions are greedily chosen .
+This favours error propagation , mainly affecting long dependencies that require a larger number of transitions to be built ( McDonald and Nivre , 2011 ) . 
+Many attempts have been made to alleviate the impact of error propagation in transition - based dependency parsing , but the latest and most successful approach was developed by Ma et al ( 2018 ) .
+In particular , they make use of pointer networks ( Vinyals et al , 2015 ) to implement a new neural network architecture called stack - pointer network . 
+The proposed framework provides a global view of the input sentence by capturing information from the whole sentence and all the arcs previously built , crucial for reducing the effect of error propagation ; and , thanks to an attention mechanism ( Bahdanau et al , 2014 ; Luong et al , 2015 ) , is able to return a position in that sentence that corresponds to a word related to the word currently on top of the stack .
+They take advantage of this and propose a novel transition system that follows a top - down depth - first strategy to perform the syntactic analysis .
+Concretely , it considers the word pointed by the neural network as the child of the word on top of the stack , and builds the corresponding dependency relation between them .
+This results in a transition - based algorithm that can process unrestricted non - projective sentences in O ( n 2 ) time complexity and requires 2n - 1 actions to successfully parse a sentence with n words . 
+We also take advantage of pointer network capabilities and use the neural network architecture introduced by Ma et al ( 2018 ) to design a nonprojective left - to - right transition - based algorithm , where the position value pointed by the network has the opposite meaning : it denotes the index that corresponds to the head node of the current focus word .
+This results in a straightforward transition system that can parse a sentence in just n actions , without the need of any additional data structure and by just attaching each word from the sentence to another word ( including the root node ) .
+Apart from increasing the parsing speed twofold ( while keeping the same quadratic time complexity ) , it achieves the best accuracy to date among fully - supervised single - model dependency parsers on the PTB - SD , and obtains competitive accuracies on twelve different languages in comparison to the original top - down version . 
+2 Preliminaries Ma et al ( 2018 ) propose a novel neural network architecture whose main backbone is a pointer network ( Vinyals et al , 2015 ) .
+This kind of neural networks are able to learn the conditional probability of a sequence of discrete numbers that correspond to positions in an input sequence ( in this case , indexes of words in a sentence ) and , by means of attention ( Bahdanau et al , 2014 ; Luong et al , 2015 ) , implement a pointer that selects a position from the input at decoding time . 
+Their approach initially reads the whole sentence , composed of the n words w 1 , . . .
+,
+w n , and encodes each
+w i one by one into an encoder hidden state e i .
+As encoder , they employ a combination of CNNs and bi - directional LSTMs ( Chiu and Nichols , 2016 ; Ma and Hovy , 2016 ) .
+For each word , CNNs are used to obtain its character - level representation that is concatenated to the word and PoS embeddings to finally be fed into BiLSTMs that encode word context information . 
+As decoder they present a top - down transition system , where parsing configurations use the classic data structures ( Nivre , 2008 ) : a buffer ( that contains unattached words ) and a stack ( that holds partially processed words ) . 
+The available parser actions are two transitions that we call Shift - Attach - p and Reduce .
+Given a configuration with word
+w i on top of the stack , as the pointer network just returns a position p from a given sentence , they proceed as follows to determine which transition should be applied : 
+If p
+= i , then the pointed word w p is considered as a child of w i ; so the parser chooses a Shift - Attach - p transition to move w p from the buffer to the stack and build an arc
+w i
+w p .
+On the other hand , if p = i , then w i is considered to have found all its children , and a Reduce transition is applied to pop the stack .
+The parsing process starts with a dummy root $ on the stack and , by applying 2n - 1 transitions , a dependency tree is built for the input in a top - down depth - first fashion , where multiple children of a same word are forced during training to be created in an inside - out manner .
+More in detail , for each parsing configuration c t , the decoder ( implemented as a uni - directional LSTM ) receives the encoder hidden state e i of the word
+w i on top of the stack to generate a decoder hidden state d t .
+After that , d t , together with the sequence s i of encoder hidden states from words still in the buffer plus e i , are used to compute the attention vector a t as follows : 
+v t
+i = score ( d t , s i ) ( 1 ) a t = sof tmax ( v t ) ( 2 ) 
+As attention scoring function ( score ( ) ) , they adopt the biaffine attention mechanism described in ( Luong et al , 2015 ; Dozat and Manning , 2016 ) .
+Finally , the attention vector a t will be used to return the highest - scoring position p and choose the next transition .
+The parsing process ends when only the root remains on the stack .
+As extra high - order features , Ma et al ( 2018 ) add grandparent and sibling information , whose encoder hidden states are added to that of the word on top of the stack to generate the corresponding decoder hidden state d t .
+They prove that these additions improve final accuracy , especially when children are attached in an inside - out fashion . 
+According to the authors , the original stackpointer network is trained to maximize the likelihood of choosing the correct word for each possible top - down path from the root to a leaf .
+More in detail , a dependency tree can be represented as a sequence of top - down paths p 1 , . . .
+, p k ,
+where each path p i corresponds to a sequence of words $ , w i , 1 ,
+w i , 2 , . . .
+, w i , l i from the root to a leaf .
+Thus , the conditional probability P θ ( y | x ) of the dependency tree y for an input sentence x can be factorized according to this top - down structure as : P θ ( y | x )
+= k i=1 P
+θ ( p i |
+p
+< i , x )
+=
+k i=1 l i j=1 P θ ( w i , j |
+w i , < j , p < i , x ) where θ represents model parameters , p < i stands for previous paths already explored , w i , j denotes the jth word in path
+p i and w i , < j represents all the previous words on p i . 
+For more thorough details of the stack - pointer network architecture and the top - down transition system , please read the original work by Ma et al ( 2018 ) .
+We take advantage of the neural network architecture designed by Ma et al ( 2018 ) and introduce a simpler left - to - right transition system that requires neither a stack nor a buffer to process the input sentence and where , instead of selecting a child of the word on top of the stack , the network points to the parent of the current focus word . 
+In particular , in our proposed approach , the parsing configuration just corresponds to a focus word pointer i , that is used to point to the word currently being processed .
+The decoding process starts with i pointing at the first word of the sentence and , at each parsing configuration , only one action is available : the parameterized Attach - p transition , that links the focus word w i to the head word w p in position p of the sentence ( producing the dependency arc w p w i ) and moves i one position to the right .
+Note that , in our algorithm , p can equal 0 , attaching , in that case , w i to the dummy root node .
+The parsing process ends when the last word from the sentence is attached .
+This can be easily represented as a loop that traverses the input sentence from left to right , linking each word to another from the same sentence or to the dummy root .
+Therefore , we just need n steps to process the n words of a given sentence and build a dependency tree . 
+While our novel transition system intrinsically holds the single - head constraint ( since , after attaching the word w
+i , i points to the next word w i+1
+in the sentence ) , it can produce an output with cycles .
+1
+Therefore , in order to build a wellformed dependency tree during decoding , attachments that generate cycles in the already - built dependency graph must be forbidden .
+Please note that the need of a cycle - checking extension does not increase the overall quadratic runtime complexity of the original implementation by Ma et al ( 2018 ) since , as in other transition - based parsers such as ( Covington , 2001 ; Gómez - Rodríguez and Nivre , 2010 ) , cycles can be incrementally identified in amortized constant time by keeping track of connected components using path compression and union by rank .
+Therefore , the left - to - right algorithm requires n steps to produce a parse .
+In addition , at each step , the attention vector a t needs to be computed and cycles must be checked , both in O ( n )
++ O ( n )
+= O ( n ) runtime .
+This results in a O ( n 2 ) time complexity for decoding .
+2 On the other hand , while in the top - down decoding only available words in the buffer ( plus the word on top of the stack ) can be pointed to by the network and they are reduced as arcs are created ( basically to keep the single - head constraint ) ; our proposed approach is less rigid : all words from the sentence ( including the root node and excluding w i ) can be pointed to , as long as they satisfy the acyclicity constraint .
+This is necessary because two different words might be attached to the same head node and the latter can be located in the sentence either before or after w i .
+Therefore , the sequence s i , required by the attention score function ( Eq .
+( 1 ) ) , is composed of the encoder hidden states of all words from the input , excluding e i , and prepending a special vector representation denoting the root node . 
+We also add extra features to represent the current focus word .
+Instead of using grandparent and sibling information ( more beneficial for a topdown approach ) , we just add the encoder hidden states of the previous and next words in the sentence to generate d t , which seems to be more suitable for a left - to - right decoding . 
+In dependency parsing , a tree for an input sentence of length n can be represented as a set of n directed and binary links l 1 , . . .
+, l n .
+Each link l
+i is characterized by the word
+w i in position i in the sentence and its head word w h , resulting in a pair ( w i , w h ) .
+Therefore , to train this novel variant , we factorize the conditional probability P θ ( y | x ) to a set of head - dependent pairs as follows : P θ ( y | x )
+=
+n i=1 P θ ( l i |
+l
+< i , x )
+=
+n i=1 P θ ( w h
+| w i ,
+l < i , x ) 
+Therefore , the left - to - right parser is trained by maximizing the likelihood of choosing the correct head word w h for the word w
+i in position i , given the previous predicted links l < i . 
+Finally , following a widely - used approach ( also implemented in ( Ma et al , 2018 ) ) , dependency labels are predicted by a multiclass classifier , which is trained in parallel with the parser by optimizing the sum of their objectives .
+We use the same implementation as Ma et al ( 2018 ) and conduct experiments on the Stanford Dependencies ( de Marneffe and Manning , 2008 ) conversion ( using the Stanford parser v3.3.0 ) 3 of the English Penn Treebank ( Marcus et al , 1993 ) , with standard splits and predicted PoS tags .
+In addition , we compare our approach to the original top - down parser on the same twelve languages from the Universal Dependency Treebanks 4 ( UD ) that were used by Ma et al ( 2018 ) .
+5 Following standard practice , we just exclude punctuation for evaluating on PTB - SD and , for each experiment , we report the average Labelled and Unlabelled Attachment Scores ( LAS and UAS ) over 3 and 5 repetitions for UD and PTB - SD , respectively . 
+3 https://nlp.stanford.edu/software/ lex - parser.shtml 4 http://universaldependencies.org 5 Please note that , since they used a former version of UD datasets , we reran also the top - down algorithm on the latest treebank version ( 2.2 ) in order to perform a fair comparison .
+UAS LAS Chen and Manning ( 2014 ) 91.8 89.6
+Dyer et al ( 2015 ) 93.1 90.9 93.99 92.05 93.56 91.42 Kiperwasser and Goldberg ( 2016 ) 93.9 91.9 94.23 92.36 94.3 92.2 Fernández - G and Gómez - R ( 2018 ) Systems marked with * , including the improved variant described in ( Ma et al , 2018 ) of the graph - based parser by ( Dozat and Manning , 2016 ) , are implemented under the same framework as our approach and use the same training settings .
+Like ( Ma et al , 2018 ) , we report the average accuracy over 5 repetitions . 
+Finally , we use the same hyper - parameter values , pre - trained word embeddings and beam size ( 10 for PTB - SD and 5 for UD ) as Ma et al ( 2018 ) .
+By outperforming the two current state - of - theart graph - based ( Dozat and Manning , 2016 ) and transition - based ( Ma et al , 2018 ) models on the PTB - SD , our approach becomes the most accurate fully - supervised dependency parser developed so far , as shown in Table 1 . 6
+In addition , in Table 2 we can see how , under the exactly same conditions , the left - to - right algorithm improves over the original top - down variant in nine out of twelve languages in terms of LAS , obtaining competitive results in the remaining three datasets . 
+Finally , in spite of requiring a cycle - checking procedure , our approach proves to be twice as fast as the top - down alternative in decoding time , achieving , under the exact same conditions , a 23.08 - sentences - per - second speed on the PTB - SD compared to 10.24 of the original system .
+7
+There is previous work that proposes to implement dependency parsing by independently selecting the head of each word in a sentence , using neural networks .
+In particular , Zhang et al ( 2017 ) make use of a BiLSTM - based neural architecture to compute the probability of attaching each word to one of the other input words , in a similar way as pointer networks do .
+During decoding , a postprocessing step is needed to produce well - formed trees by means of a maximum spanning tree algorithm .
+Our approach does not need this postprocessing , as cycles are forbidden during parsing instead , and achieves a higher accuracy thanks to the pointer network architecture and the use of information about previous dependencies . 
+Before Ma et al ( 2018 ) presented their topdown parser , Chorowski et al ( 2017 ) had already employed pointer networks ( Vinyals et al , 2015 ) for dependency parsing .
+Concretely , they developed a pointer - network - based neural architecture with multitask learning able to perform preprocessing , tagging and dependency parsing exclusively by reading tokens from an input sen - tence , without needing POS tags or pre - trained word embeddings .
+Like our approach , they also use the capabilities provided by pointer networks to undertake the parsing task as a simple process of attaching each word as dependent of another .
+They also try to improve the network performance with POS tag prediction as auxiliary task and with different approaches to perform label prediction .
+They do not exclude cycles , neither by forbidding them at parsing time or by removing them by post - processing , as they report that their system produces parses with a negligible amount of cycles , even with greedy decoding ( matching our observation for our own system , in our case with beam - search decoding ) .
+Finally , the system developed by Chorowski et al ( 2017 ) is constrained to projective dependencies , while our approach can handle unrestricted non - projective structures .
+We present a novel left - to - right dependency parser based on pointer networks .
+We follow the same neural network architecture as the stack - pointerbased approach developed by Ma et al ( 2018 ) , but just using a focus word index instead of a buffer and a stack .
+Apart from doubling their system 's speed , our approach proves to be a competitive alternative on a variety of languages and achieves the best accuracy to date on the PTB - SD . 
+The good performance of our algorithm can be explained by the shortening of the transition sequence length .
+In fact , it has been proved by several studies ( Fernández - González and Gómez - Rodríguez , 2012 ; Fernández - González and Gómez - Rodríguez , 2018 ) that by reducing the number of applied transitions , the impact of error propagation is alleviated , yielding more accurate parsers . 
+Our system 's source code is freely available at https://github.com/danifg/ Left2Right - Pointer - Parser .
+This work has received funding from the European Research Council ( ERC ) , under the European Union 's Horizon 2020 research and innovation programme ( FASTPARSE , grant agreement
+No 714150 ) , from MINECO ( FFI2014 - 51978 - C2 - 2 - R , TIN2017 - 85160 - C2 - 1 - R ) and from Xunta de Galicia ( ED431B 2017/01 ) .

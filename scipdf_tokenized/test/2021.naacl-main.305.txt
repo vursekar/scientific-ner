@@ -1,0 +1,392 @@
+Double Perturbation : On the Robustness of Robustness and Counterfactual Bias Evaluation
+Robustness and counterfactual bias are usually evaluated on a test dataset .
+However , are these evaluations robust ?
+If the test dataset is perturbed slightly , will the evaluation results keep the same ?
+In this paper , we propose a " double perturbation " framework to uncover model weaknesses beyond the test dataset .
+The framework first perturbs the test dataset to construct abundant natural sentences similar to the test data , and then diagnoses the prediction change regarding a single - word substitution .
+We apply this framework to study two perturbation - based approaches that are used to analyze models ' robustness and counterfactual bias in English .
+( 1 ) For robustness , we focus on synonym substitutions and identify vulnerable examples where prediction can be altered .
+Our proposed attack attains high success rates ( 96.0 % - 99.8 % ) in finding vulnerable examples on both original and robustly trained CNNs and Transformers .
+( 2 ) For counterfactual bias , we focus on substituting demographic tokens ( e.g. , gender , race ) and measure the shift of the expected prediction among constructed sentences .
+Our method is able to reveal the hidden model biases not directly shown in the test dataset .
+Our code is available at https://github.com/chong - z/ nlp - second - order - attack .
+Recent studies show that NLP models are vulnerable to adversarial perturbations .
+A seemingly " invariance transformation " ( a.k.a . adversarial perturbation ) such as synonym substitutions ( Alzantot et al , 2018 ; Zang et al , 2020 ) or syntax - guided paraphrasing ( Iyyer et al , 2018 ; Huang and Chang , 2021 ) can alter the prediction .
+To mitigate the model vulnerability , robust training methods have been proposed and shown effective ( Miyato et al , 2017 ;
+Jia et al , 2019 ; Huang et al , 2019 ; Zhou et
+al , 2020 ) . 
+x 0
+= " a deep and meaningful film ( movie ) . "
+x 0
+= " a short and moving film ( movie ) . "
+73 % positive ( 70 % negative ) ( 99 % positive ) 99 % positive perturb
+Figure 1 : A vulnerable example beyond the test dataset .
+Numbers on the bottom right are the sentiment predictions for film and movie .
+Blue x 0 comes from the test dataset and its prediction can not be altered by the substitution film movie ( robust ) .
+Yellow examplex 0 is slightly perturbed but remains natural .
+Its prediction can be altered by the substitution ( vulnerable ) . 
+In most studies , model robustness is evaluated based on a given test dataset or synthetic sentences constructed from templates ( Ribeiro et al , 2020 ) .
+Specifically , the robustness of a model is often evaluated by the ratio of test examples where the model prediction can not be altered by semantic - invariant perturbation .
+We refer to this type of evaluations as the first - order robustness evaluation .
+However , even if a model is first - order robust on an input sentence x 0 , it is possible that the model is not robust on a natural sentencex 0 that is slightly modified from x 0 .
+In that case , adversarial examples still exist even if first - order attacks can not find any of them from the given test dataset .
+Throughout this paper , we callx 0 a vulnerable example .
+The existence of such examples exposes weaknesses in models ' understanding and presents challenges for model deployment .
+Fig .
+1 illustrates an example . 
+In this paper , we propose the double perturbation framework for evaluating a stronger notion of second - order robustness .
+Given a test dataset , we consider a model to be second - order robust if there is no vulnerable example that can be identified in the neighborhood of given test instances ( 2.2 ) .
+In particular , our framework first perturbs the test set to construct the neighborhood , and then diagnoses the robustness regarding a single - word synonym substitution .
+Taking Fig .
+2 as an example , the model is first - order robust on the input sentence x 0
+( the prediction can not be altered ) , but it is not second - order robust due to the existence of the vulnerable examplex 0 .
+Our framework is designed to identifyx 0 . 
+We apply the proposed framework and quantify second - order robustness through two second - order attacks ( 3 ) .
+We experiment with English sentiment classification on the SST - 2 dataset ( Socher et al , 2013 ) across various model architectures .
+Surprisingly , although robustly trained CNN ( Jia et al , 2019 ) and Transformer ( Xu et
+al , 2020 ) can achieve high robustness under strong attacks ( Alzantot et al , 2018 ; Garg and Ramakrishnan , 2020 )
+( 23.0 % - 71.6 % success rates ) , for around 96.0 % of the test examples our attacks can find a vulnerable example by perturbing 1.3 words on average .
+This finding indicates that these robustly trained models , despite being first - order robust , are not second - order robust .
+Furthermore , we extend the double perturbation framework to evaluate counterfactual biases ( Kusner et al , 2017 ) ( 4 ) in English .
+When the test dataset is small , our framework can help improve the evaluation robustness by revealing the hidden biases not directly shown in the test dataset .
+Intuitively , a fair model should make the same prediction for nearly identical examples referencing different groups ( Garg et al , 2019 ) with different protected attributes ( e.g. , gender , race ) .
+In our evaluation , we consider a model biased if substituting tokens associated with protected attributes changes the expected prediction , which is the average prediction among all examples within the neighborhood .
+For instance , a toxicity classifier is biased if it tends to increase the toxicity if we substitute straight gay in an input sentence ( Dixon et al , 2018 ) .
+In the experiments , we evaluate the expected sentiment predictions on pairs of protected tokens ( e.g. , ( he , she ) , ( gay , straight ) ) , and demonstrate that our method is able to reveal the hidden model biases . 
+Our main contributions are : ( 1 ) We propose the double perturbation framework to diagnose the robustness of existing robustness and fairness evaluation methods .
+( 2 ) We propose two second - order attacks to quantify the stronger notion of second - x 0x 0 x 0 x 1 negative positive Figure 2 : An illustration of the decision boundary .
+Diamond area denotes invariance transformations .
+Blue x 0 is a robust input example ( the entire diamond is green ) .
+Yellowx 0 is a vulnerable example in the neighborhood of x 0 .
+Redx 0 is an adversarial example tox 0 .
+Note : x 0 is not an adversarial example to x 0 since they have different meanings to human ( outside the diamond ) . 
+order robustness and reveal the models ' vulnerabilities that can not be identified by previous attacks . 
+( 3 ) We propose a counterfactual bias evaluation method to reveal the hidden model bias based on our double perturbation framework .
+In this section , we describe the double perturbation framework which focuses on identifying vulnerable examples within a small neighborhood of the test dataset .
+The framework consists of a neighborhood perturbation and a word substitution .
+We start with defining word substitutions .
+We focus our study on word - level substitution , where existing works evaluate robustness and counterfactual bias by directly perturbing the test dataset .
+For instance , adversarial attacks alter the prediction by making synonym substitutions , and the fairness literature evaluates counterfactual fairness by substituting protected tokens .
+We integrate the word substitution strategy into our framework as the component for evaluating robustness and fairness . 
+For simplicity , we consider a single - word substitution and denote it with the operator .
+Let X ⊆ V l be the input space where V is the vocabulary and l is the sentence length ,
+p = ( p ( 1 ) , p ( 2 ) )
+V 2 be a pair of synonyms ( called patch words ) , X p ⊆ X denotes sentences with a single occurrence of p ( 1 ) ( for simplicity we skip other sentences ) , x 0 X p be an input sentence , then x 0
+p means " substitute p ( 1 ) p ( 2 ) in x 0 " .
+The result after substitution is : x 0
+= x 0
+p. 
+Taking Fig .
+1 as an example ,
+where p = ( film , movie ) and x 0 = a deep and meaningful film , the perturbed sentence is x 0
+= a deep and meaningful movie .
+Now we introduce other components in our framework .
+Instead of applying the aforementioned word substitutions directly to the original test dataset , our framework perturbs the test dataset within a small neighborhood to construct similar natural sentences .
+This is to identify vulnerable examples with respect to the model .
+Note that examples in the neighborhood are not required to have the same meaning as the original example , since we only study the prediction difference caused by applying synonym substitution p ( 2.1 ) . 
+Constraints on the neighborhood .
+We limit the neighborhood sentences within a small 0 norm ball ( regarding the test instance ) to ensure syntactic similarity , and empirically ensure the naturalness through a language model .
+The neighborhood of an input sentence x 0 X is : Neighbor k ( x 0 ) ⊆
+Ball k ( x 0 ) ∩
+X natural , ( 1 ) 
+where Ball k
+(
+x 0 )
+= { x
+|
+x − x 0 0 ≤ k , x X } is the 0 norm ball around x 0
+( i.e. , at most k different tokens ) , and X natural denotes natural sentences that satisfy a certain language model score which will be discussed next . 
+Construction with masked language model .
+We construct neighborhood sentences from x 0 by substituting at most k tokens .
+As shown in Algorithm 1 , the construction employs a recursive approach and replaces one token at a time .
+For each recursion , the algorithm first masks each token of the input sentence ( may be the original x 0 or thex from last recursion ) separately and predicts likely replacements with a masked language model ( e.g. , DistilBERT , Sanh et al 2019 ) .
+To ensure the naturalness , we keep the top 20 tokens for each mask with the largest logit ( subject to a threshold , Line 9 ) .
+Then , the algorithm constructs neighborhood sentences by replacing the mask with found tokens .
+We use the notationx in the following sections to denote the constructed sentences within the neighborhood .
+lmin max { L ( κ ) , L ( 0 ) − δ } ; ( i ) denotes the ith element .
+We empirically set κ 20 and δ 3 . 
+L 10 Tnew { t | l > lmin , ( t , l ) T × L } ; 11 Xnew { x0 |
+x ( i ) 0
+t , t Tnew } ; Construct new sentences by replacing the ith token . 
+12 Xneighbor Xneighbor ∪ Xnew ; 13 return Xneighbor ;
+With the proposed double perturbation framework , we design two black - box attacks 1 to identify vulnerable examples within the neighborhood of the test set .
+We aim at evaluating the robustness for inputs beyond the test set .
+Adversarial attacks search for small and invariant perturbations on the model input that can alter the prediction .
+To simplify the discussion , in the following , we take a binary classifier f
+( x ) : X { 0 , 1 } as an example to describe our framework .
+Let x 0 be the sentence from the test set with label y 0 , then the smallest perturbation δ * under 0 norm distance is : 2 δ * : = argmin δ
+δ 0 s.t . f
+( x 0 δ )
+= y 0 . 
+Here
+δ
+= p 1 p l denotes a series of substitutions .
+In contrast , our second - order attacks fix δ = p and search for the vulnerable x 0 .
+Second - order attacks study the prediction difference caused by applying p.
+For notation convenience we define the prediction difference F ( x ; p ) : 
+x0 = a deep and meaningful film .
+p = film , movie 
+x
+( i = 2 ) a short and moving film ( movie ) .
+a slow and moving film ( movie ) .
+a dramatic or meaningful film ( movie ) . 
+p alters the prediction . x0
+= " a short and moving film ( movie ) . "
+( 70 % negative )
+73 % positive Figure 3 : The attack flow for SO - Beam ( Algorithm 2 ) .
+Blue x 0 is the input sentence and yellowx 0 is our constructed vulnerable example ( the prediction can be altered by substituting film movie ) .
+Green boxes in the middle show intermediate sentences , and f soft ( x ) denotes the probability outputs for film and movie . 
+X × V 2 { −1 , 0 , 1 } by : 3 F ( x ; p ) :
+= f
+( x p ) − f ( x ) . 
+( 2 ) Taking Fig .
+1 as an example , the prediction difference forx 0
+on p is F ( x 0 ; p )
+= f ( ... moving movie . )
+− f ( ... moving film . )
+= −1 . 
+Given an input sentence x 0 , we want to find patch words p and a vulnerable examplex 0 such that f ( x 0 p )
+= f
+( x 0 ) .
+Follow Alzantot
+et al ( 2018 ) , we choose p from a predefined list of counter - fitted synonyms ( Mrkšić et al , 2016 ) that maximizes |
+f soft ( p ( 2 ) )
+− f soft ( p ( 1 ) )
+| .
+Here f soft ( x ) :
+X [ 0 , 1 ] denotes probability output ( e.g. , after the softmax layer but before the final argmax ) , f soft ( p ( 1 ) ) and f soft ( p ( 2 ) ) denote the predictions for the single word , and we enumerate through all possible p for x 0 .
+Let k be the neighborhood distance , then the attack is equivalent to solving : x 0
+= argmax x
+Neighbor k ( x 0 ) | F ( x ; p ) | . 
+( 3 )
+A naive approach for solving Eq .
+( 3 ) is to enumerate through Neighbor k ( x 0 ) .
+The enumeration finds the smallest perturbation , but is only applicable for small k ( e.g. , k ≤ 2 ) given the exponential complexity .
+Beam - search attack ( SO - Beam ) .
+The efficiency can be improved by utilizing the probability output , where we solve Eq .
+( 3 ) by minimizing the crossentropy loss with regard to x
+Neighbor k ( x 0 ) : L ( x ; p ) :
+= − log ( 1 − f min ) − log ( f max ) , ( 4 ) where f min and f max are the smaller and the larger output probability between f soft ( x ) and f soft ( x 3 We assume a binary classification task , but our framework is general and can be extended to multi - class classification . p ) , respectively .
+Minimizing Eq .
+( 4 ) effectively leads to f min 0 and f max 1 , and we use a beam search to find the best x. At each iteration , we construct sentences through Neighbor 1 ( x ) and only keep the top 20 sentences with the smallest L ( x ; p ) .
+We run at most k iterations , and stop earlier if we find a vulnerable example .
+We provide the detailed implementation in Algorithm 2 and a flowchart in Fig .
+3 . 4 for i 1 , . . .
+, k do 5 Xnew x X beam Neighbor 1 ( x ) ; 6x0 argmax x Xnew | F ( x ; p ) | ; 7 if F ( x0 ; p )
+= 0
+then returnx0 ; 8 Xnew SortIncreasing ( Xnew , L ) ; 9 Xbeam { X ( 0 ) new , . . .
+, X ( β−1 ) new } ; Keep the best beam .
+We set β 20 . 10 return None ;
+In this section , we evaluate the second - order robustness of existing models and show the quality of our constructed vulnerable examples .
+We follow the setup from the robust training literature ( Jia et al , 2019 ;
+Xu et
+al , 2020 ) and experiment with both the base ( non - robust ) and robustly trained models .
+We train the binary sentiment classifiers on the SST - 2 dataset with bag - ofwords ( BoW ) , CNN , LSTM , and attention - based Original : 70 % Negative Input Example : in its best moments , resembles a bad high school production of grease , without benefit of song . 
+Genetic : 56 % Positive Adversarial Example : in its best moment , recalling a naughty high school production of lubrication , unless benefit of song . 
+BAE : 56 % Positive Adversarial Example : in its best moments , resembles a great high school production of grease , without benefit of song . 
+SO - Enum and SO - Beam ( ours ) :
+60 % Negative ( 67 % Positive )
+Vulnerable Example : in its best moments , resembles a bad ( unhealthy ) high school production of musicals , without benefit of song . 
+Table 1 : Sampled attack results on the robust BoW.
+For Genetic and BAE the goal is to find an adversarial example that alters the original prediction , whereas for SO - Enum and SO - Beam the goal is to find a vulnerable example beyond the test set such that the prediction can be altered by substituting bad unhealthy .
+Base models .
+For BoW , CNN , and LSTM , all models use pre - trained GloVe embeddings ( Pennington et al , 2014 ) , and have one hidden layer of the corresponding type with 100 hidden size .
+Similar to the baseline performance reported in GLUE , our trained models have an evaluation accuracy of 81.4 % , 82.5 % , and 81.7 % , respectively .
+For attention - based models , we train a 3 - layer Transformer ( the largest size in ) and fine - tune a pre - trained bertbase - uncased from HuggingFace ( Wolf et al , 2020 ( Morris et al , 2020 ) . 
+Attack success rate ( second - order ) .
+We also quantify second - order robustness through attack success rate , which measures the ratio of test examples that a vulnerable example can be found . 
+To evaluate the impact of neighborhood size , we experiment with two configurations : ( 1 ) For the small neighborhood ( k = 2 ) , we use SO - Enum that finds the most similar vulnerable example . 
+( 2 ) For the large neighborhood ( k = 6 ) , SO - Enum is not applicable and we use SO - Beam to find vulnerable examples .
+We consider the most challenging setup and use patch words p from the same set of counter - fitted synonyms as robust models ( they are provably robust to these synonyms on the test set ) .
+We also provide a random baseline to validate the effectiveness of minimizing Eq .
+( 4 ) ( Appendix A.1 ) .
+We
+We experiment with the validation split ( 872 examples ) on a single RTX 3090 .
+The average running time per example ( in seconds ) on base LSTM is 31.9 for Genetic , 1.1 for BAE , 7.0 for SO - Enum
+( k = 2 ) , and 1.9 for SO - Beam ( k = 6 ) .
+We provide additional running time results in Appendix A.3 .
+Table 1 provides an example of the attack result where all attacks are successful ( additional examples in Appendix A.5 ) .
+As shown , our secondorder attacks find a vulnerable example by replacing grease musicals , and the vulnerable example has different predictions for bad and unhealthy .
+Note that , Genetic and BAE have different objectives from second - order attacks and focus on finding the adversarial example .
+Next we discuss the results from two perspectives .
+Second - order robustness .
+We observe that existing robustly trained models are not second - order robust .
+As shown in Furthermore , applying existing attacks on the vulnerable examples constructed by our method will lead to much smaller perturbations .
+As a reference , on the robustly trained CNN , Genetic attack constructs adversarial examples by perturbing 2.7 words on average ( starting from the input examples ) .
+However , if Genetic starts from our vulnerable examples , it would only need to perturb a single word ( i.e. , the patch words p ) to alter the prediction .
+These results demonstrate the weakness of the models ( even robustly trained ) for those inputs beyond the test set .
+We perform human evaluation on the examples constructed by SO - Beam .
+Specifically , we randomly
+In addition to evaluating second - order robustness , we further extend the double perturbation framework ( 2 ) to evaluate counterfactual biases by setting p to pairs of protected tokens .
+We show that our method can reveal the hidden model bias .
+In contrast to second - order robustness , where we consider the model vulnerable as long as there exists one vulnerable example , counterfactual bias focuses on the expected prediction , which is the average prediction among all examples within the neighborhood .
+We consider a model biased if the expected predictions for protected groups are different ( assuming the model is not intended to discriminate between these groups ) .
+For instance , a sentiment classifier is biased if the expected prediction for inputs containing woman is more positive ( or negative ) than inputs containing man .
+Such bias is harmful as they may make unfair decisions based on protected attributes , for example in situations such as hiring and college admission . 
+Counterfactual token bias .
+We study a narrow case of counterfactual bias , where counterfactual examples are constructed by substituting protected tokens in the input .
+A naive approach of measuring this bias is to construct counterfactual examples directly from the test set , however such evaluation may not be robust since test examples are only a small subset of natural sentences .
+Formally , let p be a pair of protected tokens such as ( he , she ) or ( Asian , American ) , X test ⊆ X p be a test set ( as in 2.1 ) , we define counterfactual token bias by : B p , k :
+= E x Neighbor k ( Xtest ) F soft ( x ; p ) .
+( 5 ) We calculate Eq .
+( 5 ) through an enumeration across all natural sentences within the neighborhood .
+7 Here Neighbor k ( X test )
+= x Xtest Neighbor k ( x ) denotes the union of neighborhood examples ( of distance k ) around the test set , and F soft ( x ; p ) : X × V 2 [ −1 , 1 ] denotes the difference between probability outputs f soft ( similar to Eq .
+( 2 ) )
+: F soft ( x ; p ) :
+= f soft ( x p )
+− f soft ( x ) .
+( 6 ( k = 3 ) in X filter . 
+The model is unbiased on p if B p ,
+k ≈ 0 , whereas a positive or negative B p , k indicates that the model shows preference or against to p ( 2 ) , respectively .
+Fig .
+4 illustrates the distribution of ( x , x p ) for both an unbiased model and a biased model .
+The aforementioned neighborhood construction does not introduce additional bias .
+For instance , let x 0 be a sentence containing he , even though it is possible for Neighbor 1 ( x 0 ) to contain many stereotyping sentences ( e.g. , contains tokens such as doctor and driving ) that affect the distribution of f soft ( x ) , but it does not bias Eq .
+( 6 ) as we only care about the prediction difference of replacing he she .
+The construction has no information about the model objective , thus it would be difficult to bias f soft ( x ) and f soft ( x p ) differently .
+In this section , we use gender bias as a running example , and demonstrate the effectiveness of our method by revealing the hidden model bias .
+We provide additional results in Appendix A.4 .
+We evaluate counterfactual token bias on the SST - 2 dataset with both the base and debiased models .
+We focus on binary gender bias and set p to pairs of gendered pronouns from Zhao et al ( 2018a ) .
+Base Model .
+We train a single layer LSTM with pre - trained GloVe embeddings and 75 hidden size ( from TextAttack , Morris et al 2020 ) .
+The model has 82.9 % accuracy similar to the baseline performance reported in GLUE .
+Debiased Model .
+Data - augmentation with gender swapping has been shown effective in mitigating gender bias ( Zhao et al , 2018a .
+We augment the training split by swapping all male entities with the corresponding female entities and vice - versa .
+We use the same setup as the base LSTM and attain 82.45 % accuracy .
+Here " original " is equivalent to k = 0 , " perturbed " is equivalent to k = 3 , p is in the form of ( male , female ) . 
+Metrics .
+We evaluate model bias through the proposed B p , k for k = 0 , . . .
+, 3 .
+Here the bias for k = 0 is effectively measured on the original test set , and the bias for k ≥ 1 is measured on our constructed neighborhood .
+We randomly sample a subset of constructed examples when k = 3 due to the exponential complexity .
+Filtered test set .
+To investigate whether our method is able to reveal model bias that was hidden in the test set , we construct a filtered test set on which the bias can not be observed directly .
+Let X test be the original validation split , we construct X filter by the equation below and empirically set = 0.005 .
+We provide statistics in Table 5 . X filter :
+= { x
+| | F soft ( x ; p ) | <
+, x X test } .
+Our method is able to reveal the hidden model bias on X filter , which is not visible with naive measurements .
+In Fig . 5 , the naive approach ( k = 0 ) observes very small biases on most tokens ( as constructed ) .
+In contrast , when evaluated by our double perturbation framework ( k = 3 ) , we are able to observe noticeable bias , where most p has a positive bias on the base model .
+This observed bias is in line with the measurements on the original X test ( Appendix A.4 ) , indicating that we reveal the correct model bias .
+Furthermore , we observe mitigated biases in the debiased model , which demonstrates the effectiveness of data augmentation . 
+To demonstrate how our method reveals hidden bias , we conduct a case study with p = ( actor , actress ) and show the relationship between the bias B p , k and the neighborhood distance k.
+We present the histograms for F soft ( x ; p ) in Fig .
+6 and plot the corresponding B p , k vs. k in the right - most panel .
+Surprisingly , for the base model , the bias is Figure 6 : Left and Middle : Histograms for F soft
+( x ; p ) ( x - axis ) with p = ( actor , actress ) .
+Right :
+The plot for the average F soft ( x ; p ) ( i.e. , counterfactual token bias ) vs. neighborhood distance k. Results show that the counterfactual bias on p can be revealed when increasing k. negative when k = 0 , but becomes positive when k = 3 .
+This is because the naive approach only has two test examples ( Table 5 ) thus the measurement is not robust .
+In contrast , our method is able to construct 141 , 780 similar natural sentences when k = 3 and shifts the distribution to the right ( positive ) .
+As shown in the right - most panel , the bias is small when k = 1 , and becomes more significant as k increases ( larger neighborhood ) .
+As discussed in 4.1 , the neighborhood construction does not introduce additional bias , and these results demonstrate the effectiveness of our method in revealing hidden model bias .
+First - order robustness evaluation . 
+A line of work has been proposed to study the vulnerability of natural language models , through transformations such as character - level perturbations ( Ebrahimi et al , 2018 ) , word - level perturbations ( Jin et al , 2019 ;
+Ren et al , 2019 ; Cheng et al , 2020 ; Li et al , 2020 ) , prepending or appending a sequence ( Jia and Liang , 2017 ; Wallace et al , 2019a ) , and generative models ( Zhao et al , 2018b ) .
+They focus on constructing adversarial examples from the test set that alter the prediction , whereas our methods focus on finding vulnerable examples beyond the test set whose prediction can be altered .
+Robustness beyond the test set .
+Several works have studied model robustness beyond test sets but mostly focused on computer vision tasks .
+Zhang et al ( 2019 ) demonstrate that a robustly trained model could still be vulnerable to small perturbations if the input comes from a distribution only slightly different than a normal test set ( e.g. , images with slightly different contrasts ) .
+Hendrycks and Dietterich ( 2019 ) study more sources of common corruptions such as brightness , motion blur and fog .
+Unlike in computer vision where simple image transformations can be used , in our natural language setting , generating a valid example beyond test set is more challenging because language semantics and grammar must be maintained .
+Counterfactual fairness .
+Kusner et al ( 2017 ) propose counterfactual fairness and consider a model fair if changing the protected attributes does not affect the distribution of prediction .
+We follow the definition and focus on evaluating the counterfactual bias between pairs of protected tokens .
+Existing literature quantifies fairness on a test dataset or through templates ( Feldman et al , 2015 ;
+Kiritchenko and Mohammad , 2018 ; May et al , 2019 ; .
+For instance , Garg et al ( 2019 ) quantify the absolute counterfactual token fairness gap on the test set ; Prabhakaran et al ( 2019 ) study perturbation sensitivity for named entities on a given set of corpus .
+Wallace et
+al ( 2019b ) ; Sheng et al ( 2019Sheng et al ( , 2020 study how language generation models respond differently to prompt sentences containing mentions of different demographic groups .
+In contrast , our method quantifies the bias on the constructed neighborhood .
+This work proposes the double perturbation framework to identify model weaknesses beyond the test dataset , and study a stronger notion of robustness and counterfactual bias .
+We hope that our work can stimulate the research on further improving the robustness and fairness of natural language models .
+Intended use .
+One primary goal of NLP models is the generalization to real - world inputs .
+However , existing test datasets and templates are often not comprehensive , and thus it is difficult to evaluate real - world performance ( Recht et al , 2019 ;
+Ribeiro et al , 2020 ) .
+Our work sheds a light on quantifying performance for inputs beyond the test dataset and help uncover model weaknesses prior to the realworld deployment .
+Misuse potential .
+Similar to other existing adversarial attack methods ( Ebrahimi et al , 2018 ; Jin et al , 2019 ; Zhao et al , 2018b ) , our second - order attacks can be used for finding vulnerable examples to a NLP system .
+Therefore , it is essential to study how to improve the robustness of NLP models against second - order attacks .
+Limitations .
+While the core idea about the double perturbation framework is general , in 4 , we consider only binary gender in the analysis of counterfactual fairness due to the restriction of the English corpus we used , which only have words associated with binary gender such as he / she , waiter / waitress , etc .
+To validate the effectiveness of minimizing Eq .
+( 4 ) , we also experiment on a second - order baseline that constructs vulnerable examples by randomly replacing up to 6 words .
+We use the same masked language model and threshold as SO - Beam such that they share a similar neighborhood .
+We perform the attack on the same models as Table 2 , and the attack success rates on robustly trained BoW , CNN , LSTM , and Transformers are 18.8 % , 22.3 % , 15.2 % , and 25.1 % , respectively .
+Despite being a second - order attack , the random baseline has low attack success rates thus demonstrates the effectiveness of SO - Beam .
+We randomly select 100 successful attacks from SO - Beam and consider four types of examples ( for a total of 400 examples ) :
+The original examples with and without synonym substitution p , and the vulnerable examples with and without synonym substitution p.
+For each example , we annotate the naturalness and sentiment separately as described below . 
+Naturalness of vulnerable examples .
+We ask the annotators to score the likelihood of being an original example ( i.e. , not altered by computer ) based on grammar correctness and naturalness , with a Likert scale of 1 - 5 : ( 1 ) Sure adversarial example .
+( 2 ) Likely an adversarial example .
+( 3 ) Neutral .
+( 4 ) Likely an original example .
+( 5 ) Sure original example .
+Semantic similarity after the synonym substitution .
+We first ask the annotators to predict the sentiment on a Likert scale of 1 - 5 , and then map the prediction to three categories : negative , neutral , and positive .
+We consider two examples to have the same semantic meaning if and only if they are both positive or negative .
+We experiment with the validation split on a single RTX 3090 , and measure the average running time per example .
+As shown in A.4 Additional Results on Protected Tokens Fig .
+7 presents the experimental results with additional protected tokens such as nationality , religion , and sexual orientation ( from Ribeiro et al ( 2020 ) ) .
+We use the same base LSTM as described in 4.2 .
+One interesting observation is when p = ( gay , straight ) where the bias is negative , indicating that the sentiment classifier tends to give more negative prediction when substituting gay straight in the input .
+This phenomenon is opposite to the behavior of toxicity classifiers ( Dixon et al , 2018 )
+In Fig . 8 , we measure the bias on X test and observe positive bias on most tokens for both k = 0 and k = 3 , which indicates that the model " tends " to make more positive predictions for examples containing certain female pronouns than male pro - nouns .
+Notice that even though gender swap mitigates the bias to some extent , it is still difficult to fully eliminate the bias .
+This is probably caused by tuples like ( him , his , her ) which can not be swapped perfectly , and requires additional processing such as part - of - speech resolving ( Zhao et al , 2018a ) .
+To help evaluate the naturalness of our constructed examples used in 4 , we provide sample sentences in Table 9 and Table 10 .
+Bold words are the corresponding patch words p , taken from the predefined list of gendered pronouns .
+Distance k = 1 97 % Negative ( 97 % Negative )
+it 's hampered by a lifetime - channel kind of plot and lone lead actor ( actress ) who is out of their depth .
+56 % Negative ( 55 % Positive )
+it 's hampered by a lifetime - channel kind of plot and a lead actor ( actress ) who is out of creative depth .
+89 % Negative ( 84 % Negative )
+it 's hampered by a lifetime - channel kind of plot and a lead actor ( actress ) who talks out of their depth .
+98 % Negative ( 98 % Negative )
+it 's hampered by a lifetime - channel kind of plot and a lead actor ( actress ) who is out of production depth .
+96 % Negative ( 96 % Negative )
+it 's hampered by a lifetime - channel kind of plot and a lead actor ( actress ) that is out of their depth .
+Distance k = 2 88 % Negative ( 87 % Negative )
+it 's hampered by a lifetime - channel cast of stars and a lead actor ( actress ) who is out of their depth .
+96 % Negative ( 95 % Negative )
+it 's hampered by a simple set of plot and a lead actor ( actress ) who is out of their depth .
+54 % Negative ( 54 % Negative )
+it 's framed about a lifetime - channel kind of plot and a lead actor ( actress ) who is out of their depth .
+90 % Negative ( 88 % Negative )
+it 's hampered by a lifetime - channel mix between plot and a lead actor ( actress ) who is out of their depth .
+78 % Negative ( 68 % Negative )
+it 's hampered by a lifetime - channel kind of plot and a lead actor ( actress ) who storms out of their mind . 
+Distance k = 3 52 % Positive ( 64 % Positive )
+it 's characterized by a lifetime - channel combination comedy plot and a lead actor ( actress ) who is out of their depth .
+93 % Negative ( 93 % Negative )
+it 's hampered by a lifetime - channel kind of star and a lead actor ( actress ) who falls out of their depth .
+58 % Negative ( 57 % Negative )
+it 's hampered by a tough kind of singer and a lead actor ( actress ) who is out of their teens .
+70 % Negative ( 52 % Negative )
+it 's hampered with a lifetime - channel kind of plot and a lead actor ( actress ) who operates regardless of their depth .
+58 % Negative ( 53 % Positive )
+it 's hampered with a lifetime - channel cast of plot and a lead actor ( actress ) who is out of creative depth .
+We thank anonymous reviewers for their helpful feedback .
+We thank UCLA - NLP group for the valuable discussions and comments .
+The research is supported NSF # 1927554 , # 1901527 , # 2008173 and # 2048280 and an Amazon Research Award .
+Original 54 % Positive ( 69 % Positive ) for the most part , director anne - sophie birot 's first feature is a sensitive , overly ( extraordinarily ) well - acted drama .
+Vulnerable 53 % Negative ( 62 % Positive ) for the most part , director anne - sophie benoit 's first feature is a sensitive , overly ( extraordinarily ) well - acted drama .
+Original 73 % Negative ( 56 % Negative ) the cold ( colder ) turkey would ' ve been a far better title .
+Vulnerable 61 % Negative ( 62 % Positive ) the cold ( colder ) turkey might ' ve been a far better title .
+70 % Negative ( 65 % Negative )
+it 's just disappointingly superficial - a movie that has all the elements necessary to be a fascinating , involving character study , but never does more than scratch the shallow ( surface ) .
+Vulnerable 52 % Negative ( 55 % Positive )
+it 's just disappointingly short - a movie that has all the elements necessary to be a fascinating , involving character study , but never does more than scratch the shallow ( surface ) . 
+Original 79 % Negative ( 72 % Negative ) schaeffer has to find some hook on which to hang his persistently useless movies , and it might as well be the resuscitation ( revival ) of the middleaged character .
+Vulnerable 57 % Negative ( 57 % Positive ) schaeffer has to find some hook on which to hang his persistently entertaining movies , and it might as well be the resuscitation ( revival ) of the middleaged character . 
+Original 64 % Positive ( 58 % Positive ) the primitive force of this film seems to bubble up from the vast collective memory of the combatants ( militants ) .
+Vulnerable 52 % Positive ( 53 % Negative ) the primitive force of this film seems to bubble down from the vast collective memory of the combatants ( militants ) . 
+Original 64 % Positive ( 74 % Positive ) on this troublesome ( tricky ) topic , tadpole is very much a step in the right direction , with its blend of frankness , civility and compassion .
+Vulnerable 55 % Negative ( 56 % Positive ) on this troublesome ( tricky ) topic , tadpole is very much a step in the right direction , losing its blend of frankness , civility and compassion .

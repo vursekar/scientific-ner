@@ -1,0 +1,53 @@
+IIT DHANBAD CODECHAMPS at SemEval - 2022 Task 5 : MAMI - Multimedia Automatic Misogyny Identification
+With the growth of the internet , the use of social media based on images has drastically increased like Twitter , Instagram , etc .
+In these social media , women have a very high contribution as of 75 % women use social media multiple times compared to men which is only 65 % of men uses social media multiple times a day .
+However , with this much contribution , it also increases systematic inequality and discrimination offline is replicated in online spaces in the form of MEMEs .
+A meme is essentially an image characterized by pictorial content with an overlaying text a posteriori introduced by humans , with the main goal of being funny and/or ironic .
+Although most of them are created with the intent of making funny jokes , in a short time people started to use them as a form of hate and prejudice against women , landing to sexist and aggressive messages in online environments that subsequently amplify the sexual stereotyping and gender inequality of the offline world .
+This leads to the need for automatic detection of Misogyny MEMEs .
+Specifically , I described the model submitted for the shared task on Multimedia Automatic Misogyny Identification ( MAMI ( Fersini et al , 2022 ) ) and my team name is IIT DHANBAD CODECHAMPS .
+With the growth of the internet , social media becomes a crucial part of everyone 's life .
+As every coin has two side positive and negative , social media also comes with a number of problems .
+The challenge of identifying misogyny ( Srivastava et al , 2017 ) in different social media specially in forms of meme which contains both image and text is very complicated .
+Misogyny meme highly affected the life of women 's as its spread hate and prejudice behaviour against women 's .
+Social media like twitter , Instagram , etc have handled by their own ways .
+However , detecting such memes is highly challenging .
+Due to this challenge , it attracts the researcher 's attention .
+According to one social media Instagram , more than 1 million users shared memes daily .
+So , with this huge amount of data in social medias and internet it is impossible to detect every misogyny meme by man power .
+So , we need machine learning , deep learning and artificial intelligence techniques to detect automatically misogyny memes in social media .
+In this paper , we have explored various Machine Learning ( ML ) and Deep Learning ( DL ) algorithms for misogyny identification in shared task MAMI ( Fersini et al , 2022 ) challenge and my team 's name is IIT DHANBAD CODECHAMPS .
+As per requirement of MAMI , I have submitted 4 runs for Subtask - A.
+My best run in Subtask - A has achieved Macro - F1 score of 0.656 .
+Many works related to automatic detection of misogyny , hate , sexism on social media and web have been proposed .
+Abir Rahali ( Rahali et al , 2021 ) proposed a approach for automatic misogyny detection in social media using attention based bidirectional LSTM .
+Endang Wahyu Pamungkas ( Pamungkas et al , 2020 ) proposed a method for Automatic Identification of Misogyny in English and Italian Tweets at EVALITA 2018 with a Multilingual Hate Lexicon .
+Mario Anzovino , Elisabetta Fersini ( Anzovino et al , 2018 ) proposed a method for Automatic Identification and Classification of Misogynistic Language on Twitter .
+The main contribution of this paper is two - fold : ( 1 ) a corpus of misogynous tweets , labelled from different perspective and ( 2 ) an exploratory investigation on NLP features and ML models for detecting and classifying misogynistic language .
+Rachael Fulper ( Fulper et al , 2014 ) proposed a relation between misogynistic language in twitter and sexual Violence .
+In their paper they consider all 50 states in Washington DC .
+Lakes Goenaga , Aitziber ( Goenaga et al , 2018 )
+Atutxa proposed a Automatic misogyny identification using neural networks .
+In this paper they focus on recurrent neural network ( RNN ) approach using a Bidirectional Long Short Term Memory ( Bi - LSTM ) .
+Here we have described the dataset and task provided by Multimedia Automatic Misogyny Identification ( MAMI ( Fersini et al , 2022 ) ) challenge .
+Multimedia Automatic Misogyny Identification ( MAMI ) task is divided into two sub task .
+Sub - task A : a basic task about misogynous meme identification , where a meme should be categorized either as misogynous or not misogynous ( shown in Table 1 ) . 
+Sub - task B : an advanced task , where the type of misogyny should be recognized among potential overlapping categories such as stereotype , shaming , objectification and violence .
+e.g. umn represent Text Transcription of the meme .
+First , we removed all the punctuations , numbers , links and stop words .
+We have used lemmatization for grouping together the different forms of a word into a single word .
+NLTK wordnet ( Loper and Bird , 2002 ) is used for lemmatization .
+TfidfVectorizer ( Kumar and Subba , 2020 ) is used for converting the text into numerical features .
+Pipeline 1 is used for doing TfidfVectorizer and classification in pipelined manner .
+Tokenizer by keras library is used for LSTM and Bert .
+For Logistic regression and SVM we have used TfidfVectorizer from scikit - learn library .
+For Subtask - A , we have submitted 4 runs based on four different algorithms , namely - Logistic Regression ( Sammut and Webb , 2010 ) , SVM ( Noble , 2006 ) , LSTM ( Hochreiter and Schmidhuber , 1997 ) , Bert ( Devlin et al , 2018 ) with different parameters like batch size , epochs , number of perceptron etc .
+We have used the scikit - learn library for logistic regression based models and SVM ( support vector machines ) models .
+Keras is used for LSTM and BERT .
+We scored maximum F1 score 0.656 using BERT .
+We have used the following value of parameters : - 1.For TfidfVectorizer , we have used mindf=20 , maxfeatures=2000 and maxdf=0.6 .
+2 . For LSTM and BERT , we have used batch size = 2 , epochs = 3 and number of layers = 2 .
+The results of Subtask - A are represented in terms of Macro - F1 ( shown in Table 2 ) .
+The best score as Macro - F1 for Subtask - A we get is 0.656 .
+Table 2 shows the score of our submissions based on different algorithms on MAMI challenge official ranking .
+For Subtask - A BERT performs better than all other models with the parameters batch size = 2 , epochs = 3 , number of hidden layers = 2 and number of perceptron 's is 128 in first layer and 64 in second layer .

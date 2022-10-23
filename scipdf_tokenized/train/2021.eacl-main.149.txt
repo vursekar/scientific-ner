@@ -1,0 +1,149 @@
+BERT Prescriptions to Avoid Unwanted Headaches : A Comparison of Transformer Architectures for Adverse Drug Event Detection
+Pretrained transformer - based models , such as BERT and its variants , have become a common choice to obtain state - of - the - art performances in NLP tasks .
+In the identification of Adverse Drug Events ( ADE ) from social media texts , for example , BERT architectures rank first in the leaderboard .
+However , a systematic comparison between these models has not yet been done .
+In this paper , we aim at shedding light on the differences between their performance analyzing the results of 12 models , tested on two standard benchmarks .
+SpanBERT and PubMedBERT emerged as the best models in our evaluation : this result clearly shows that span - based pretraining gives a decisive advantage in the precise recognition of ADEs , and that in - domain language pretraining is particularly useful when the transformer model is trained just on biomedical text from scratch .
+The identification of Adverse Drug Events ( ADEs ) from text recently attracted a lot of attention in the NLP community .
+On the one hand , it represents a challenge even for the most advanced NLP technologies , since mentions of ADEs can be found in different varieties of online text and present unconventional linguistic features ( they may involve specialized language , or consist of discontinuous spans of tokens etc . )
+( Dai , 2018 ) .
+On the other hand , the task has an industrial application of primary importance in the field of digital pharmacovigilance Karimi et al , 2015b ) . 
+This raising interest is attested , for example , by the ACL workshop series on Social Media Health Mining ( SMM4H ) , in which shared tasks on ADE detection have been regularly organized since 2016 ( Paul et al , 2016 ; Sarker and Gonzalez - Hernandez , 2017 ;
+Weissenbacher et
+al , 2018Weissenbacher et al , , 2019 .
+With the recent introduction of Transformers architectures and their impressive achievements in NLP ( Vaswani et al , 2017 ; Devlin et al , 2019 ) , it is not surprising that these tools have become a common choice for the researchers working in the area . 
+The contribution of this paper is a comparison between different Transformers on ADE detection , in order to understand which one is the most appropriate for tackling the task .
+Shared tasks are not the best scenario for addressing this question , since the wide range of differences in the architectures ( which could include , for example , ensembles of Transformers and other types of networks ) does not allow a comparison on the same grounds .
+In our view , two key questions deserve a particular attention in this evaluation .
+First , whether there is an advantage in using a model with some form of in - domain language pretraining , given the wide availability of Transformers for the biomedical domain ( Lee et al , 2020 ; Gu et al , 2020 ) .
+Second , whether a model trained to predict coherent spans of text instead of single words can achieve a better performance ( Joshi et al , 2019 ) , since our goal is to identify the groups of tokens corresponding to ADEs as precisely as possible . 
+Two models that we introduce for the first time in this task , SpanBERT and PubMedBERT , achieved the top performance .
+The former takes advantage of a span - based pretraining objective , while the latter shows that in - domain language data are better used for training the model from scratch , without any general - domain pretraining .
+Automatic extraction of ADE in social media started receiving more attention in the last few years , given the increasing number of users that discuss their drug - related experiences on Twitter and similar platforms .
+Studies like ; ; Daniulaityte et al ( 2016 ) were among the first to propose machine learning systems for the detection of ADE in social media texts , using traditional feature engineering and word embeddings - based approaches . 
+With the introduction of the SMM4H shared task , methods based on neural networks became a more and more common choice for tackling the task ( Wu et al , 2018 ; Nikhil and Mundra , 2018 ) , and finally , it was the turn of Transformer - based models such as BERT ( Devlin et al , 2019 ) and BioBERT ( Lee et al , 2020 ) , which are the building blocks of most of the top performing systems in the recent competitions Mahata et al , 2019 ; Miftahutdinov et al , 2019 ) . 
+At the same time , the task has been independently tackled also by researchers in Named Entity Recognition , since ADE detection represents a classical case of a challenging task where the entities can be composed by discontinuous spans of text ( Stanovsky et al , 2017 ; Dai et al , 2020 ; Wunnava et al , 2020 ) .
+There is little doubt that Transformers ( Vaswani et al , 2017 ) have been the dominant class of NLP systems in the last few years .
+The " golden child " of this revolution is BERT ( Devlin et al , 2019 ) , which was the first system to apply the bidirectional training of a Transformer to a language modeling task .
+More specifically , BERT is trained with a Masked Language Modeling objective : random words in the input sentences are replaced by a [ MASK ] token and the model attempts to predict the masked token based on the surrounding context .
+Following BERT 's success , several similar architectures have been introduced in biomedical NLP , proposing different forms of in - domain training or using different corpora ( Beltagy et al , 2019 ; Alsentzer et al , 2019 ; Lee et al , 2020 ;
+Gu et al , 2020 ) .
+Some of them already proved to be efficient for ADE detection : for example , the top system of the SMM4H shared task 2019 is based on an ensemble of BioBERTs ( Weissenbacher et al , 2019 ) . 
+Another potentially interesting addition to the library of BERTs for ADE detection is SpanBERT ( Joshi et al , 2019 ) .
+During the training of Span - BERT , random contiguous spans of tokens are masked , rather than individual words , forcing the model to predict the full span from the tokens at its boundaries .
+We decided to introduce SpanBERT in our experiments because longer spans and relations between multiple spans of text are a key factor in ADE detection , and thus encoding such information is potentially an advantage . 
+3 Experimental Settings
+The datasets chosen for the experiments are two widely used benchmarks .
+They are annotated for the presence of ADEs at character level : each document is accompanied by list of start and end indices for the ADEs contained in it .
+We convert these annotations using the IOB annotation scheme for the tokens : B marks the start of a mention , I and O the tokens inside and outside a mention respectively . 
+CADEC ( Karimi et al , 2015a ) contains 1250 posts from the health - related forum " AskaPatient " , annotated for the presence of ADEs .
+We use the splits made publicly available by Dai et al ( 2020 ) . 
+SMM4H is the training dataset for Task 2 of the SMM4H shared task 2019 ( Weissenbacher et
+al , 2019 )
+.
+It contains 2276 tweets which mention at least one drug name , 1300 of which are positive for the presence of ADEs while the other 976 are negative samples .
+The competition includes a blind test set , but in order to perform a deeper analysis on the results , we use the training set only .
+As far as we know there is no official split for the training set al ne , so we partitioned it into training , validation and test sets ( 60:20:20 ) , maintaining the proportions of positive and negative samples .
+This split and the code for all the experiments are available at https://github.com/AilabUdineGit/ADE . 
+The datasets correspond to different text genres : the tweets of SMM4H are mostly short messages , containing informal language , while the texts of CADEC are longer and structured descriptions .
+To verify this point , we used the TEXTSTAT Python package to extract some statistics from the texts of the two datasets ( see Appendix A ) .
+As evaluation metrics we use the Strict F1 score , which is commonly adopted for this task ( Segura - Bedmar et al , 2013 ) .
+It is computed at the entity level , and assigns a hit only in case of perfect match between the labels assigned by the model and the labels in the gold annotation . 
+In CADEC around 10 % of mentions are discontinuous ( Dai et al , 2020 ) and it is possible to have overlaps and intersections of discontinuous spans .
+We performed data tidying by merging overlapping ADE mentions , keeping only the longer span ( as it is customary in the literature ) and splitting discontinuous spans in multiple continuous spans .
+Apart from the original BERT , we experimented with SpanBERT , for its peculiar pretraining procedure which focuses on predicting and encoding spans instead of single words , and with four BERT variants with in - domain knowledge , which differ from each other both for the corpus they were trained on and for the kind of pretraining . 
+BERT Standard model , pretrained on general purpose texts ( Wikipedia and BookCorpus ) . 
+SpanBERT
+This model is pretrained using the same corpus as the original BERT , so it comes with no in - domain knowledge .
+But the pretraining procedure makes its embeddings more appropriate for NER - like tasks .
+as it introduces an additional loss called Span Boundary Objective ( SBO ) , alongside the traditional Masked Language Modelling ( MLM ) used for BERT .
+Let us consider a sentence S
+= [
+w 1 , w 2 , . .
+.
+, w k ] and its substring S m :
+n = [ w m , . . .
+, w n ] .
+w m−1 and w n+1 are the boundaries of S m : n ( the words immediately preceding and following it ) .
+We mask S by replacing all the words in S m : n with the [ MASK ] token .
+SpanBERT reads the masked version of S and returns an embedding for each word .
+The MLM loss measures if it is possible to reconstruct each original word
+w i S m : n from the corresponding embedding .
+The SBO loss measures if it is possible to reconstruct each w i S m : n using the embeddings of the boundary words w m−1 and w n+1 . BioBERT ( Lee et al , 2020 ) , pretrained from a BERT checkpoint , on PubMed abstracts .
+The authors of BioBERT provide different versions of the model , pretrained on different corpora .
+We selected the version which seemed to have the greatest advantage on this task , according to the results by Lee et al ( 2020 ) .
+We chose BioBERT v1.1 ( + PubMed ) , which outperformed other BioBERT v1.0 versions ( including the ones trained on full texts ) in NER tasks involving Diseases and Drugs .
+Preliminary experiments against BioBERT v.1.0 ( + PubMed+PMC ) confirmed this behaviour ( see Appendix D ) . 
+BioClinicalBERT ( Alsentzer et al , 2019 ) , pretrained from a BioBERT checkpoint , on clinical texts from the MIMIC - III database . 
+SciBERT ( Beltagy et al , 2019 ) , pretrained from scratch , on papers retrieved from Semantic Scholar ( 82 % of medical domain ) . 
+PubMedBERT ( Gu et al , 2020 ) , pretrained from scratch , on PubMed abstracts and full text articles from PubMed Central .
+This model was created to prove that pretraining from scratch on a single domain produces substantial gains on in - domain downstream tasks .
+Gu et al ( 2020 ) compared it with various other models pretrained on either general texts , mixed - domain texts or in - domain texts starting from a general - purpose checkpoint ( e.g. BioBERT ) , showing that PubMedBERT outperforms them on several tasks based on medical language .
+The vocabulary of PubMedBERT contains more in - domain medical words than any other model under consideration .
+However , it should be kept in mind that ADE detection requires an understanding of both medical terms and colloquial language , as both can occur in social media text . 
+Notice that two in - domain architectures were pretrained from scratch ( SciBERT and PubMed - BERT ) , meaning that they have a unique vocabulary tailored on their pretraining corpus , and include specific embeddings for in - domain words .
+BioBERT and BioClinicalBERT were instead pretrained starting from a BERT and BioBERT checkpoint , respectively .
+This means that the vocabularies are built from general - domain texts ( similarly to BERT ) and the embeddings are initialized likewise .
+For all of the BERT variants , we take into account two versions .
+The first one simply uses the model to generate a sequence of embeddings ( one for each sub - word token ) , which are then passed to a Linear Layer + Softmax to project them to the output space ( one value for each output label ) and turn them into a probability distribution over the labels . 
+The second version combines the Transformerbased model with a Conditional Random Field ( CRF ) classifier ( Lafferty et al , 2001 ; Papay et al , 2020 ) .
+The outputs generated by the first version become the input of a CRF module , producing another sequence of subword - level IOB labels .
+This step aims at denoising the output labels produced by the previous components . 
+The output labels are calculated for sub - word tokens , then we aggregate each set of sub - word labels { i } into a word label L using the first rule that applies : ( i ) if i =
+O for all
+i , then L = O ; ( ii ) if i = B for any
+i , then L = B ; ( iii ) if i = I for any
+i , then L = I. The aggregated output is a sequence of word - level IOB labels .
+As a strong baseline , we used the TMRLeiden architecture ( Dirkson and Verberne , 2019 ) , which achieved the 2nd best Strict F1 - Score in the latest SMM4H shared task ( Weissenbacher et al , 2019 ) and is composed of a BiLSTM taking as input a concatenation of BERT and Flair embeddings ( Akbik et al , 2019 ) .
+We chose this baseline since the TMRLeiden code is publicly available .
+TMRLeiden was re - implemented starting from its the original code 1 and trained according to the details in the paper .
+As for the Transformers , all experiments were performed using the TRANSFORMERS library ( Wolf et al , 2019 ) ( see Appendix C ) .
+Parameter - tuning was done via grid - search , using different learning rates ( [ 5e−4 , 5e−5 , 5e−6 ] ) and dropout rates ( from 0.15 to 0.30 , increments of 0.05 ) .
+All the architectures were trained for 50 epochs on the training set .
+Learning rate , dropout rate and maximum epoch were chosen evaluating the models on the validation set . 
+During evaluation all the models were then trained using the best hyperparameters on the concatenation of the training set and the validation set , and tested on the test set .
+This procedure was repeated five times with different random seeds , and finally we averaged the results over the five runs .
+The results for the two datasets are shown in Table 1 ( we focus on the F1 - score , but Precision and Recall are reported in Appendix D ) .
+For reference , we reported the scores of the best architecture by Dai et al ( 2020 ) , which is the state - of - the - art system on CADEC .
+At a glance , all systems perform better on CADEC , whose texts belong to a more standardized variety of language .
+SpanBERT and PubMedBERT emerge as the top performing models , with close F1 - scores , and in particular , the SpanBERT models achieve the top score on both datasets , proving that modeling spans gives an important advantage for the identification of ADEs . 
+For both models , the addition of CRF generally determines a slight improvement on CADEC , while it is detrimental on SMM4H. On SMM4H , the F1 - scores of BioBERT , SciBERT and Bio - ClinicalBERT consistently improve over the standard BERT , but they are outperformed by its CRFaugmented version , while on CADEC they perform closely to the standard model .
+The results suggest that in - domain knowledge is consistently useful only when training is done on in - domain text from scratch , instead of using general domain text first .
+SciBERT is also trained from scratch , but on a corpus that is less specific for the biomedical domain than the PubMedBERT one ( Gu et al , 2020 ) . 
+The models are also being compared with TM - RLeiden : we can notice that both versions of SpanBERT and PubMedBERT outperform it on CADEC ( the differences are also statistically significant for the McNemar test at p < 0.001 ) , while only the basic versions of the same models retain an advantage on it on SMM4H ( also in this case , the difference is significant at p < 0.001 ) .
+We analyzed the differences between the ADE entities correctly identified by the models and those that were missed , using the text statistics that we previously extracted with TEXTSTAT .
+As it was 1 @hospitalpatient have been on humira 2years now n get on off chest infections that sometimes need 2diff pills 2sort out should i b worried ?
+4 i have had no side effects been taking arthrotec a little over a year , have not noticed any side effects .
+it does help alot i noticed that when there are times when i forget to take it i ca n't stand or walk for any lengths of time . 
+2 had a great few hours on my bike but exercise drives my olanzapine # munchies .
+getting fed up with not being able to fit into summer wardrobe 5 works just fine .
+if there are any side effects , they are definitely not noticeable .
+what 's with all these older people ( 70 's ) complaining about the lack of sex drive ?
+how much of what you are complaining about is simply related to getting older ?
+3 this new baccy is just making my cough so much worse but ahh well need my nicotine 6 what a great store @walmart is : i loss iq points , gained weight & got addicted to nicotine - all in under 15 min from going in ! !
+SpanBERT ( underlined in red ) .
+Actual ADEs in bold with gray background .
+The Samples belong to SMM4H ( 1 - 3 , 6 ) and CADEC ( 4 - 5 ) . 
+predictable , it turns out that longer ADE spans are more difficult to identify : for all models , we extracted the average word length of correct and missed spans and we compared them with a twotailed Mann - Whitney U test , finding that the latter are significantly longer ( Z = - 6.176 , p < 0.001 ) . 
+We also extracted the average number of difficult words in the correct and in the missed spans , defined as words with more than two syllables that are not included in the TEXTSTAT list of words of common usage in standard English .
+We took this as an approximation of the number of " technical " terms in the dataset instances .
+However , the average values for correct and missed instances do not differ ( Z = 0.109 , p > 0.1 ) , suggesting that the presence of difficult or technical words in a given instance does not represent an inherent factor of difficulty or facilitation .
+Still , for some of the models - including SpanBERT , PubMedBERT and TMRLeiden - this difference reaches a marginal significance ( p < 0.05 ) exclusively on the SMM4H dataset , where correctly identified spans have more difficult words .
+A possible interpretation is that , as the tweets ' language is more informal , such words represent a stronger ADE cue , compared to the more technical language of the CADEC dataset . 
+Finally , we performed a qualitative analysis , comparing the predictions of SpanBERT and Pub - MedBERT .
+We selected the samples on which one of the architectures performed significantly better than the other one in terms of F1 - Score , and analyzed them manually .
+Some significant samples can be found in Table 2 .
+We observed that most of the samples in which PubMedBERT performed better than SpanBERT contained medical terms , which SpanBERT had completely ignored ( e.g. Sample 1 ) .
+The samples in which SpanBERT outperformed the in - domain model contained instead long ADE mentions , often associated with informal descriptions ( e.g. Samples 2 , 3 ) .
+As regards false positives , both models make similar errors , which fit into two broad categories : ( 1 ) extracting diseases or symptoms of a disease ( e.g. Samples 4 , 6 ) ; ( 2 ) not being able to handle general mentions , hypothetical language , negations and similar linguistic constructs ( e.g. Sample 5 ) .
+While the second kind of error requires a deeper reflection , the first one might be addressed by training the model to extract multiple kinds of entities ( e.g. both ADEs and Diseases ) .
+We presented a comparison between 12 transformers - based models , with the goal of " prescribing " the best option to the researchers working in the field .
+We also wanted to test whether the span - based objective of SpanBERT and in - domain language pretraining were useful for the task .
+We can positively answer to the first question , since SpanBERT turned out to be the best performing model on both datasets .
+As for the in - domain models , PubMedBERT came as a close second after SpanBERT , suggesting that pretraining from scratch with no general domain data is the best strategy , at least for this task . 
+We have been the first , to our knowledge , to test these two models in a systematic comparison on ADE detection , and they delivered promising results for future research .
+For the next step , a possible direction would be to combine the strengths of their respective representations : the accurate modeling of text spans on the one side , and deep biomedical knowledge on the other one .
+Some statistics for the texts of the two datasets have been extracted with the TEXTSTAT Python package and reported reported in Table A : we extracted the counts of syllables , lexicon ( how many different word types are being used ) , sentences and characters .
+Difficult words refers to the number of polysyllabic words with Syllable Count > 2 that are not included in the list of words of common usage in English .
+Table 5 is a summary of the information about the version of all Transformer - based models used and their pretraining methods . 
+D Detailed metrics of all the models ( Weissenbacher et al , 2019 ) and take into account " partial"matches , in which it is sufficient for a system prediction to partially overlap with the gold annotation to be considered as a true match .

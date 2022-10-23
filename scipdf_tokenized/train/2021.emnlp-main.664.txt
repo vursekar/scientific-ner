@@ -1,0 +1,118 @@
+An Empirical Investigation of Word Alignment Supervision for Zero - Shot Multilingual Neural Machine Translation
+Zero - shot translations is a fascinating feature of Multilingual Neural Machine Translation ( MNMT ) systems .
+These MNMT models are usually trained on English - centric data , i.e. English either as the source or target language , and with a language label prepended to the input indicating the target language .
+However , recent work has highlighted several flaws of these models in zero - shot scenarios where language labels are ignored and the wrong language is generated or different runs show highly unstable results .
+In this paper , we investigate the benefits of an explicit alignment to language labels in Transformer - based MNMT models in the zero - shot context , by jointly training one cross attention head with word alignment supervision to stress the focus on the target language label .
+We compare and evaluate several MNMT systems on three multilingual MT benchmarks of different sizes , showing that simply supervising one cross attention head to focus both on word alignments and language labels reduces the bias towards translating into the wrong language , improving the zero - shot performance overall .
+Moreover , as an additional advantage , we find that our alignment supervision leads to more stable results across different training runs .
+Multilingual Neural Machine Translation ( MNMT ) focuses on translation between multiple language pairs through a single optimized neural model , and has been explored from different angles witnessing a rapid progress in recent years ( Arivazhagan et al , 2019b ; Dabre et al , 2020 ; Lin et al , 2021 ) .
+Besides the great flexibility MNMT models offer , they are also highlighted by their so called zero - shot translation capabilities , i.e. , translating between all combinations of languages available in the training data , including those with no parallel data seen at training time ( Ha et al , 2016 ;
+Firat et al , 2016 ; Johnson et al , 2017 ) .
+Many studies have investigated this feature , focusing on the impact of both , the model architecture design ( Arivazhagan et al , 2019a ; and data pre - processing ( Lee et al , 2017 ; Wang et al , 2019 ; Rios et al , 2020 ; .
+Broadly speaking , MNMT architectures are categorized according to their degree of parameter sharing , from fully shared ( Johnson et al , 2017 ) to the use of language - specific components ( Vázquez et al , 2020 ; Escolano et al , 2021 ; Zhang et al , 2021 ) .
+The Johnson et al ( 2017 ) MNMT model is widely used , due to its simplicity and good translation quality .
+It uses the fully shared parameters setting , and relies on appending an artificial language label to each input sentence to indicate the target language .
+While this method allows for zeroshot translation , several works have highlighted two major flaws : i ) its failure to reliably generalize to unseen language pairs , ending up with the so called off - target issue , where the language label is ignored and the wrong target language is produced as a result , ii ) its lack of stability in translation results between different training runs ( Rios et al , 2020 ) . 
+In this work , we investigate the role of guided alignment in the Johnson et al ( 2017 ) setting , by jointly training one cross attention head to explicitly focus on the target language label .
+We show that alignment supervision mitigates the off - target translation issue in the zero - shot case .
+Our method improves the zero - shot translation performance and results in more stable results across different training runs .
+Alignment Methods .
+Given a bitext B src = ( s 1 , ... , s j , ... , s N ) and B trg = ( t 1 , ... , t i , ... , t M ) where B src is a sentence in the source language and B trg is its translation in the target language , an alignment A is a mapping of words between B src and B trg ( Tiedemann , 2011 ) , formally defined as A ⊆ { ( j , i ) :
+j = 1 , ... , N ; i = 1 , ... , M } ( 1 ) 
+We study three different settings : ( a ) standard word alignment between corresponding words , ( b ) alignments between all target words and the language label in the input string , and ( c ) the union between the former two .
+Figure 1 shows an example of those approaches .
+To produce word alignments between parallel sentences , i.e. , Figure 1 ( a ) , we use the awesome - align tool ( Dou and Neubig , 2021 ) , a recent work that leverages multilingual BERT ( Devlin et al , 2019 ) to extract the links .
+1 Models .
+To train Many - to - Many MNMT models , we use a 6 - layer Transformer architecture ( Vaswani et al , 2017 ) , prepending a language label in the input to indicate the target language ( Johnson et al , 2017 ) .
+Following Garg et al ( 2019 ) , given an alignment matrix AM M , N and an attention matrix computed by a cross attention head AH M , N , for each target word i , we use the following cross - entropy loss L a to minimize the Kullback - Leibler divergence between AH and AM : L a ( AH , AM )
+= − 1 M M i=1
+N j=1 AM i , j log ( AH i , j ) ( 2 )
+The overall loss L is : L = L t + γL a ( AH , AM ) ( 3 ) where L t is the standard NLL translation loss , and γ is a hyperparameter .
+We use γ = 0.05 , supervising only one cross attention head at the third last layer .
+2 Given the sparse nature of the alignments , we replace the softmax operator in the cross attention head with the α - entmax function ( Peters et al , 2019 ; Correia et al , 2019 ) .
+Entmax allows sparse attention weights for any α > 1 .
+Following Peters et al ( 2019 ) , we use α=1.5 .
+We use three highly multilingual MT benchmarks : TED Talks ( Qi et al , 2018 ) .
+An Englishcentric parallel corpus with 10 M training sentences across 116 translation directions .
+Following Aharoni et al ( 2019 ) , we evaluate on a total of 16 language directions , while as zeroshot test we evaluate on 4 language pairs .
+WMT - 2018 ( Bojar et al , 2018 ) .
+3
+A parallel dataset provided by the WMT - 2018 shared task on news translation .
+We use all available language pairs , i.e. 14 , up to 5 M training sentences for each language pair .
+We evaluate the models on the test sets of the shared task , i.e. newstest2018 .
+As there are no zero - shot test sets provided by the competition , we use the test portion from the Tatoeba - challenge ( Tiedemann , 2020 ) , 4 in all possible language pair combinations included in the challenge . 
+OPUS - 100 ) .
+An Englishcentric multi - domain benchmark , built upon the OPUS parallel text collection ( Tiedemann , 2012 )
+Aharoni et al ( 2019 ) , and 2 its variant with a 1.5 - entmax function on the cross attention heads as in Correia et al ( 2019 ) .
+The labels ( a ) , ( b ) , ( c ) denote the use of different alignment supervision ( see Section 2 ) .
+" # Param . " : trainable parameter number .
+" EN - > X ( 16 ) " and " X - > EN ( 16 ) " : average BLEU scores for English to Non - English languages and for Non - English languages to English on 16 language pairs respectively .
+" BLEU zero ( 4 ) " and " ACC zero ( 4 ) " : average BLEU scores and target language identification accuracy over 4 zero - shot language directions .
+We report average BLEU and accuracy scores , plus the standard deviation over 3 training runs with different random seeds . 
+language pair .
+It provides supervised translation test data for 188 language pairs , and zero - shot evaluation data for 30 pairs . 
+Following related work ( Aharoni et al , 2019 ; , we apply joint Byte - Pair Encoding ( BPE ) segmentation ( Sennrich et al , 2016 ; Kudo and Richardson , 2018 ) , with a shared vocabulary size of 32 K symbols for TED Talks and 64 K for WMT - 2018 and OPUS - 100 .
+As evaluation measure , we use tokenized BLEU
+( Papineni et al , 2002 ) to be comparable with Aharoni et al ( 2019 ) for the TED Talks benchmark , and SACREBLEU 5 ( Post , 2018 ) for WMT - 2018 and OPUS - 100 .
+6 As an additional evaluation , we report the target language identification accuracy score for the zeroshot cases , called ACC zero .
+We use fasttext as a language identification tool ( Joulin et al , 2017 ) , counting how many times the translation language matches the reference target language . 
+The Transformer models follow the base setting of Vaswani et
+al ( 2017 ) , with three different random seeds in each run .
+All of them are trained on the Many - to - Many English - centric scenario , i.e. , on the concatenation of the training data having English either as the source or target language .
+Details about data and model settings in the Appendix . 
+5 Signature : BLEU+case.mixed+numrefs.1+smooth.exp+ tok . { 13a , ja - mecab - 0.996 - IPA , zh } + version.1.5.0 6 We report average BLEU over all test sets .
+Scores for each language pair are available in the supplementary material .
+Throughout this section we refer to our baseline MNMT models by the labels 1 and 2 , while 3 , 4 , and 5 mark the models trained with the auxiliary alignment supervision task , ( a ) , ( b ) , ( c ) from Figure 1 respectively ( see Section 2 ) .
+TED Talks .
+Table 1 shows the results on the TED Talks benchmark .
+Regarding translation quality on the language pairs seen during training ( EN X and X EN columns ) , average BLEU scores from all models end up in the same ballpark .
+In contrast , zero - shot results vary across the board , with 5 attaining the best performance , with almost 2 BLEU points better than its baseline 2 .
+Moreover , 5 considerably improves target language identification accuracy ( ACC zero ) , with more stable results , i.e. lower standard deviation , than counterparts .
+Surprisingly , the addition of alignment supervision ( a ) and ( b ) as an auxiliary task has an overall detrimental effect on the zero - shot performance , even though model 4 results in more stable results than 2 . WMT - 2018 .
+Table 2 reports the results on the WMT - 2018 benchmark .
+As expected , in a highresource scenario bilingual baselines are hard to beat .
+Among multilingual models , the overall performance follows a similar trend as before .
+Enriching the model with alignment supervision ( c ) results in the best system overall , with an improvement of more than 3 BLEU points in the zero - shot ( 2020 ) .
+MATT denotes the use of merged attention ( Zhang et al , 2019 ) .
+LALN and LALT indicate the use of language - aware components .
+Average BLEU , target language identification accuracy and standard deviation of 3 training runs . testbed compared to baseline 2 , and with stable results across three training runs ( standard deviations of 0.12 and 0.82 ) .
+As one can see from Table 3 , we confirm the positive effect of adding the alignment strategy ( c ) both as translation quality and as a mechanism to produce stable results even in a highly multilingual setup , i.e. , training on 198 language directions .
+The average score over 30 zeroshot language pairs is low but the individual results range from 0.3 to 17.5 BLEU showing the potentials of multilingual models in this challenging data set as well .
+7 Even though the results from our best model still lag behind models with languagespecific components , i.e. MATT+LALN+LALT from , we note that our results demonstrate the positive effect of alignment on zero - shot translation .
+8
+Overall , our experiments show consistent results across different benchmarks , providing quantitative evidence on the utility of guided alignment in highly multilingual MT scenarios .
+Supervising a single cross attention head with the alignment method ( c ) substantially reduces the instability between training runs , mitigating the off - target translation issue in the zero - shot evaluation .
+Zero - shot improvements , i.e. BLEU zero and ACC zero , are large in two benchmarks out of three , i.e. Ted Talks and WMT - 2018 , and with a similar trend in OPUS - 100 .
+We also note that performance differences may be related to the different data sizes ( see Appendix A ) .
+TED Talks is a rather small and imbalanced multilingual dataset with 116 language directions with a total of 10 M training sentences , while WMT - 2018 and OPUS - 100 comprise 14 language pairs for a total of 47.8 M training sentences , and 110 M training sentences for 198 language pairs , respectively .
+We plan on investigating the impact of the training size and the resulting alignments on the zero - shot test sets further in future work . 
+Limitations Finally , we highlight that we have focused on a quantitative evaluation on Englishcentric MNMT benchmarks only , therefore we lack a comprehensive evaluation on complete MNMT benchmarks including training data without English as source and target language ( Freitag and Firat , 2020 ;
+Rios et al , 2020 ; Tiedemann , 2020 ; Goyal et al , 2021 ) .
+In this work we present an empirical comparative evaluation of integrating different alignment methods in Transformer - based models for highly multilingual English - centric MT setups .
+Our extensive evaluation over three alignment variants shows that adding alignment supervision between corresponding words and the language label consistently improves the stability of the models , resulting in stable performance across different runs and mitigating the off - target translation issue in the zero - shot scenario .
+We believe that our work will pave the way for designing new and better multilingual MT models to improve their generalization in zero - shot setups . 
+As future work , we intend to analyze the quality of the learned alignments and their effect on the other attention weights in both supervised and zeroshot evaluation data ( Raganato and Tiedemann , 2018 ; Tang et al , 2018 ; Mareček and Rosa , 2019 ; Voita et al , 2019 ) .
+Finally , we plan to explore other mechanisms to inject prior knowledge to better handle zero - shot translations ( Deshpande and Narasimhan , 2020 ; Song et al , 2020 ) .
+A.1 Data TED Talks ( Qi et al , 2018 ) .
+This parallel corpus includes 59 language pairs from and to English .
+It is a highly imbalanced benchmark , ranging from less than 4 K up to 215 K training sentences .
+We use the same languages as Aharoni et al ( 2019 ) for both supervised testing and zero - shot evaluation .
+As supervised test sets , we use { Azerbeijani , Belarusian , Galician , Slovak , Arabic , German , Hebrew , Italian } ↔English .
+As zero - shot test sets , we use Arabic↔French , and Ukrainian↔Russian . 
+WMT - 2018 ( Bojar et al , 2018 ) .
+We use training and testing data as provided by the WMT 2018 news translation task organizers .
+The benchmark contains a total of 14 language pairs : { Chinese , Czech , Estonian , Finnish , German , Russian , Turkish } ↔English .
+For training , we use up to 5 M parallel sentences per language pair , with Turkish↔English , Estonian↔English , and Finnish↔English , having only 200 K , 1 M , and 2.7 M training sentences , respectively .
+For zeroshot test sets , we use the test data from Tiedemann ( 2020 ) , using the following 24 language directions : Czech ↔ German , German ↔ Russian , German ↔ Chinese , Finnish ↔ German , Finnish ↔ Turkish , Russian ↔ Finnish , Russian ↔ Chinese , Turkish ↔ Chinese , Czech ↔ Russian , German ↔ Turkish , Estonian ↔ Russian , Russian ↔ Turkish OPUS - 100 .
+OPUS - 100 is a recent benchmark consisting of 55 M Englishcentric sentence pairs covering 100 languages .
+The data is collected from movie subtitles , GNOME documentation , and the Bible .
+Out of 99 language pairs , 44 have 1 M sentences , 73 have at least 100 K sentences , and 95 at least 10K. It provides also zero - shot test sets , pairing the following languages :
+Arabic , Chinese , Dutch , French , German , and Russian .
+We use the OpenNMT - py framework ( Klein et al , 2017 ) , and the Transformer base model setting ( Vaswani et al , 2017 ) .
+Specifically , we use 6 layers for the encoder and the decoder , 512 as model dimension , and 2048 as hidden dimension .
+We applied 0.1 as dropout for both residual layers and attention weights , using the Adam optimizer ( Kingma and Ba , 2015 ) with β1 = 0.9 , and β2 = 0.998 , with learning rate set at 3 and 40 K warmup steps as in Aharoni et al ( 2019 ) .
+We train the models with three random seeds each , for 200 K training steps for the TED Talks and WMT - 2018 benchmarks , while for 500 K training steps for the OPUS - 100 .
+To speed up training , we use halfprecision , i.e. , FP16 .
+This work is part of the FoTran project , funded by the European Research Council ( ERC ) under the European Union 's Horizon 2020 research and innovation programme ( grant agreement No 771113 ) .
+The authors gratefully acknowledge the support of the CSC - IT Center for Science , Finland , for computational resources .
+Finally , We would also like to acknowledge NVIDIA and their GPU grant .

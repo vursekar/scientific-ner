@@ -1,0 +1,437 @@
+De - Biased Court 's View Generation with Causality
+Court 's view generation is a novel but essential task for legal AI , aiming at improving the interpretability of judgment prediction results and enabling automatic legal document generation .
+While prior text - to - text natural language generation ( NLG ) approaches can be used to address this problem , neglecting the confounding bias from the data generation mechanism can limit the model performance , and the bias may pollute the learning outcomes .
+In this paper , we propose a novel Attentional and Counterfactual based Natural Language Generation ( AC - NLG ) method , consisting of an attentional encoder and a pair of innovative counterfactual decoders .
+The attentional encoder leverages the plaintiff 's claim and fact description as input to learn a claim - aware encoder from which the claim - related information in fact description can be emphasized .
+The counterfactual decoders are employed to eliminate the confounding bias in data and generate judgmentdiscriminative court 's views ( both supportive and non - supportive views ) by incorporating with a synergistic judgment predictive model .
+Comprehensive experiments show the effectiveness of our method under both quantitative and qualitative evaluation metrics .
+Owing to the prosperity of machine learning , especially the natural language processing ( NLP ) techniques , many legal assistant systems have been proposed to improve the effectiveness and efficiency of a judge from different aspects , such as relevant case retrieval ( Chen et al , 2013 ) , applicable law articles recommendation ( Chen et al , 2019 ) , controversy focus mining ( Duan et al , 2019 ) , and judgment prediction ( Lin et al , 2012 ; Zhong et al , 2018 ; Hu et al , 2018 ; Jiang et al , 2018 ; Chalkidis et al , * Corresponding Authors .
+Figure 1 : Confounding bias from the data generation mechanism .
+u refers to the unobserved mechanism ( i.e. , plaintiffs sue when they have a high probability to be supported ) that causes the judgment in dataset D ( J ) to be imbalanced .
+D ( J ) I denotes that the imbalanced data D ( J ) has a causal effect on the representation of input I ( i.e. , plaintiff 's claim and fact description ) , and D ( J ) V denotes that D ( J ) has a causal effect on the representation of court 's view V .
+Such imbalance in D ( J ) leads to the confounding bias that the representations of I and V tend to be supportive , and blind the conventional training on P ( V | I ) . 2019 ) .
+Court 's view can be regarded as the interpretation for the sentence of a case .
+Being an important portion of verdict , court 's view is difficult to generate due to its logic reasoning in the content .
+Therefore court 's view generation is regarded as one of the most critical functions in a legal assistant system .
+Court 's view consists of two main parts , including the judgment and the rationales , where the judgment is a response to the plaintiff 's claims in civil cases or charges in criminal cases , and the rationales are summarized from the fact description to derive and explain the judgment . 
+Recently , Ye et al ( 2018 ) investigated the problem of court 's view generation for the criminal cases , but it focused on the generation of rationales in the court 's view based on the given criminal charge and fact description of a case .
+Such an experimental scenario is not applicable to the practical situation since the rationales should be concluded before reaching the final judgment .
+Moreover , dif - Figure 2 : An example of plaintiff 's claim , fact description , and court 's view from a legal document in a civil case .
+The judgment is non - support since there exists a rejection on one of the plaintiff 's claims in the court 's view .
+ferent from the criminal cases , in civil cases , the judgment depends not only on the facts recognized but also on the claims that the plaintiff declared . 
+In this paper , we focus on the problem of automatically generating the court 's view in civil cases by injecting the plaintiff 's claim and fact description , as shown in Fig .
+2 . In such a context , the problem of the court 's view generation can be formulated as a text - to - text natural language generation ( NLG ) problem , where the input is the plaintiff 's claim and the fact description , and the output is the corresponding court 's view that contains the judgment and the rationales 1 .
+Although classical text generative models ( e.g. , sequence - tosequence model Sutskever et al , 2014 , attentionbased model , andpointer - generator networks See et al , 2017 ) have been applied to many text generation tasks , yet , in the task of the court 's view generation , such techniques can not be simply applied for the following reasons : ( 1 ) There exists " no claim , no trial " principle in civil legal systems : The judgment in the real court 's view is the response to the claims declared by the plaintiff , where its rationales summarize the corresponding facts .
+In other words , there exists a correspondence relationship between the input ( claims and facts ) and the generated text ( court 's view ) .
+For example , the plaintiff 's claims shown in Fig .
+2 mentioned the principal and the interest , respectively .
+Hence , the court 's view of this case would and might only focus on the facts about the principal and the interest .
+( 2 ) The imbalance of judgment in civil cases : The distribution of judgment results of civil cases is very imbalanced .
+For example , over 76 % of cases were supported in private lending , which is the most frequent category in civil cases .
+Such an imbalance of judgment would blind the training of the model by focusing on the supported cases while ignoring the non - supported cases , leading to incorrect judgment generation of court 's view . 
+From the perspective of causality ( Pearl , 2009 ; Kuang et al , 2020 ) , the imbalance of judgment reveals the confounding bias induced by the data generation mechanism that plaintiffs sue when they have a high probability to be supported .
+Such imbalanced data would cause the learned representation of both inputs ( claims and recognized facts ) and output ( court 's view ) to be supported , leading to confounding bias between inputs and output , and blinding the training process of conventional NLG models as we demonstrated in Fig .
+1 . To address these challenges , we propose an Attentional and Counterfactual based Natural Language Generation ( AC - NLG ) method by jointly optimizing a claim - aware encoder , a pair of counterfactual decoders to generate judgmentdiscriminative court 's views ( both supportive and non - supportive views ) and a synergistic judgment predictive model .
+Specifically , the claim - aware encoder is designed to represent the fact description which emphasizes on the declared claims .
+The counterfactual decoder is inspired by the backdoor adjustment in causal inference ( Pearl et al , 2016 ; Kuang et al , 2020 ) to address the confounding bias and the imbalance problem in judgment .
+To determine the judgment result of each case , a judgment predictive model is jointly learned with the two decoders and decides which output to be selected as the final generated court 's view .
+We validate the effectiveness of our AC - NLG method with extensive experiments on real legal documents .
+Comprehensive experiments show the effectiveness of our method under both quantitative and qualitative evaluation metrics . 
+Since legal AI is a sensitive field , we make ethical discussion in the penultimate section ( Sec . 6 ) . 
+The main contributions of this paper can be sum - marized as follows : We investigate the problem of de - biased court 's view generation in civil cases from a causal perspective , considering the issue of confounding bias from judgment imbalance .
+We propose a novel AC - NLG model to jointly optimize a claim - aware encoder and a pair of counterfactual decoders for generating a judgment - discriminative court 's view by incorporating with a judgment predictive model .
+We construct a dataset based on raw civil legal documents , where each case is objectively split into three parts : plaintiff 's claim , fact description , and court 's view with human annotation on the judgment .
+To motivate other scholars to investigate this novel but important problem , we make the experiment dataset publicly available 2 . 
+We validate the superior performance of the proposed method with extensive experiments .
+Our method can be applied to other natural language generation tasks with confounding bias or data imbalance . 
+2 Related Work
+In recent years , many researchers from both law and computer science fields have been exploring the potential and methods to perform judicial decisions and auxiliary tasks , aiming at helping lawyers and lower court judges .
+In recent work , judicial intelligence is also applied to various tasks of natural language processing .
+Since most of the legal documents appear in textual form , many NLP technologies have been brought into the legal field to improve the efficiency of legal work .
+Charge prediction is a common task of judgment prediction , considered as a text classification problem ( Lin et al , 2012 ; Zhong et al , 2018 ;
+Hu et al , 2018 ; Jiang et al , 2018 ; Chalkidis et al , 2019 ) .
+Besides , there are also works on legal questions classification ( Xiao et al , 2017 ) , law articles recommendation ( Chen et al , 2019 ) , controversy focus mining ( Duan et al , 2019 ) and relevant case retrieval ( Chen et al , 2013 ) .
+Ye et
+al ( 2018 ) explored the court 's view generation in criminal cases , where the input is only fact description , and the court 's view generation is conditioned on the known judgment results , which is not applicable in real cases . 
+2 https://github.com/wuyiquan/AC - NLG
+Our task aims at generating the court 's view based on the plaintiff 's claim and the fact description , which can be regarded as a NLG task .
+NLG has been widely studied and applied to many tasks , such as machine translation ( Wu et al , 2016 ) , question answering ( McCann et al , 2018 ; Bagchi and Wynter , 2013 ) and text summarization ( Rush et al , 2015 ) .
+The recent success of sequence - to - sequence models ( Sutskever et al , 2014 ) , in which recurrent neural networks ( RNNs ) reading and generating text simultaneously , has made the generation task feasible .
+Bahdanau et al ( 2014 )
+Causal Inference ( Pearl , 2009 ; Kuang et al , 2020 ) is a powerful statistical modeling tool for explanatory analysis by removing confounding bias in data .
+That bias might bring a spurious correlation or confounding effect among variables .
+Recently , many methods have been proposed to remove confounding bias in the literature of causal inference , including do - operation based on structure causal model ( Pearl , 2009 ) and counterfactual outcome prediction based on potential outcome framework ( Imbens and Rubin , 2015 ) .
+With dooperation , the backdoor adjustment ( Pearl et al , 2016 ) have been proposed for data de - bias .
+In this paper , we sketch the causal structure model of our problem , as shown in Fig .
+1 , and adopt backdoor for confounding bias reduction .
+In this work , we focus on the problem of the court 's view generation in civil cases , where the input is the plaintiff 's claim and the fact description , and the output is the corresponding court 's view .
+We formulate our problem with the definition of the plaintiff 's claim , the fact description , and the court 's view , as shown in Fig .
+2 . Plaintiff 's claim ( C ) is a descriptive sentence that depicts the claims from the plaintiff .
+In a civil case , it often appears multiple claims from the plaintiff .
+For example , the plaintiff 's claim demonstrated in Fig .
+2 contains the principal claim and the interest claim .
+Here , we denote the plaintiff 's claim in a case as a sentence form c = { w c t } m t=1 , where w c t represents one word , and m is the number of words in plaintiff 's claim . 
+Fact description ( F ) is also a descriptive sentence , which describes the identified facts ( relevant events that have happened ) in a case , as Fig .
+2 shows .
+Here , we denote the fact description in a case as f = { w f t } n t=1 , where n is the length .
+Court 's view ( V ) contains two main components , judgment and rationales , where the judgment is to respond the plaintiff 's claims , and the rationales are the claim - related summarization on the fact description to determine and interpret the judgment .
+Here , we denote the court 's view as v = { w v t } l t=1 , where l is the length .
+Moreover , we use a variable j to denote the judgment in the court 's view .
+For simplicity , we set j = 1 to denote supported judgment ( all the claims are judged to be accepted ) , and j = 0 to denote non - supported judgment . 
+Then , the problem of court 's view generation can be denoted as follow : Problem 1 ( Court 's View Generation ) .
+Given the plaintiff 's claim c = { w c t } m t=1 and the fact de - scription f = { w f t } n t=1 , our task is to generate the court 's view v = { w v t } l t=1 .
+In this section , we first introduce the effect of mechanism confounding bias on the court 's view generation and propose a backdoor - inspired method to eliminate that bias .
+Then , we describe our Attentional and Counterfactual based Natural Language Generation ( AC - NLG ) model in detail .
+Fig .
+3 shows the overall framework .
+As shown in Fig .
+1 , the confounding bias from the data generation mechanism would blind the conventional training on P ( V | I ) , and current sequenceto - sequence models struggle to solve this problem . 
+Here , we see through why these models fail mathematically .
+For a certain case , given the input I = ( c , f ) , using Bayes rule , we would train the model to generate the court 's view V as follow : P ( V | I )
+= j P ( V | I , j ) P ( j | I ) ( 1 ) 
+If the supported cases dominate our training data , e.g. , P ( j = 1 | I ) ≈ 1 .
+Thus , P ( V | I ) degrades to P ( V | I , j = 1 ) , which would ignore the representation of non - supported cases , leading to the learned representations of inputs I and output V tend to be supported .
+Thus , the model tends to build a strong connection between inputs and the supported court 's view , even for the cases that are non - supported .
+In this way , the representation of input I is contaminated by the confounding bias from I D ( J ) V . 
+Backdoor adjustment is a main de - confounding technique in causal inference ( Pearl et al , 2016 ; Pearl , 2009 ) .
+De - confounding seeks the exact causal effect of one variable on another , which appeals for our court 's view generation task since the court 's view should be faithful only to the content of the plaintiff 's claims and fact descriptions . 
+The backdoor adjustment makes a do - operation on I , which promotes the posterior probability from passive observation to active intervention . 
+The backdoor adjustment addresses the confounding bias by computing the interventional posterior P ( V | do ( I ) ) and controlling the confounder as : P ( V | do ( I ) )
+= j P ( V | I , j ) P ( j ) ( 2 ) 
+In our problem , the variable j is a binary variable ( support or non - support ) , hence , P ( V | do ( I ) )
+= P ( V | I , j = 0 ) P ( j = 0 )
++ P ( V | I , j = 1 ) P ( j = 1 ) 
+The main difference between traditional posterior in Eq . 1 and interventional posterior in Eq . 2 is that P ( j | I ) is changed to P ( j ) .
+Since the backdooor adjustment help to cut the dependence between D ( J ) and I , we can eliminate the confounding bias from data generation mechanism and learn a interventional model for de - biased court 's view generation .
+As shown in Fig .
+3 , to optimize Eq .
+3 , we use a pair of counterfactual decoders to learn the likelihood P ( V | I , j ) for each j. At inference , we propose to use a predictor to approximate P ( j ) .
+Note that our implementation on backdoor - adjustment can be easily applied for multi - valued confounding with multiple counterfactual decoders .
+Our model is conducted in a multi - task learning manner which consists of a shared encoder , a predictor , and a pair of counterfactual decoders .
+The predictor and the decoders take the output of the encoder as input .
+Our model looks like SHAPED ( Zhang et al , 2018 ) ( several decoders with a classifier ) , but the motivations and mechanisms behind the model are different . 
+Claim - aware Encoder Intuitively , the plaintiff 's claim c and the fact description f are sequences of words .
+Therefore , the encoder firstly transforms the words to embeddings .
+Then the embedding sequences are fed to the Bi - LSTM , producing two sequences of hidden states h c , h f corresponding to the plaintiff 's claim and the fact description respectively . 
+After that , we use a claim - aware attention mechanism to fuse h c and h f .
+For each hidden state h f i in h f , e i k is its attention weight on h c k , and the attention distribution
+q i is calculated as follow : 
+e i k = v T tanh
+( W c h c k + W f h
+f i + b attn )
+( 4 ) q i = sof tmax ( e i ) ( 5 ) 
+where v , W c , W f , b attn are learnable parameters . 
+The attention distribution can be regarded as the importance of each word in the plaintiff 's claim for a word in fact description .
+Next , the new representation of fact description is produced as follows : h
+f
+*
+i
+=
+h
+f
+i
++
+k q
+i k h c k ( 6 ) After feeding to another Bi - LSTM layer , we get the claim - aware representation of fact h. Judgment Predictor Given the claim - aware representation of fact h , the judgment predictor produces the probability of support P sup through a fully connected layer and a sigmoid operation .
+The prediction result j is obtained as follow : j = 1 P sup > 0.5 0 P sup < = 0.5 ( 7 ) where 1 means support , and 0 means non - support . 
+Counterfactual Decoder To eliminate the effect of data bias , here we use a pair of counterfactual decoders , which contains two decoders , one is for supported cases , and the other is for non - supported cases .
+The two decoders have the same structure but aim to generate the court 's view with different judgments .
+We name them as counterfactual decoders because every time there is only one of the two generated court 's views correct .
+Still , we apply the attention - mechanism .
+At each step t , given the encoder 's output h , and the decode state s t , the attention distribution a t is calculated the same way as q i in Eq . 5 , but with different parameters .
+The context vector h * t is then a weighted sum of h : h * t
+= i
+a t
+i h i ( 8 ) 
+The context vector h * t , which can be regarded as a representation of the input for this step , is concatenated with the decode state s t and fed to linear layers to produce the vocabulary distribution p vocab : p vocab = sof tmax ( V ( V [ s t , h * t ] )
++ b ) + b ) ( 9 ) where V , V , b , b are all learnable parameters .
+Then we add a generation probability ( See et al , 2017 ) to solve the OOV problem .
+Given the context h * t , the decode state s t and the decoder 's input ( the word embedding of the previous word ) x t , the generation probability p gen can be calculated : P gen = σ ( w T h * h * t + w T s s t + w T x x t + b ptr ) ( 10 ) 
+where w h * , w s , w x and b ptr are learnable , and σ is the sigmoid function .
+The final probability for a word w in time step is obtained : Training For predictor , we use cross - entropy as the loss function : P ( w ) = P gen * p vocab ( w )
++ ( 1 − P gen ) i : w i = w a t i ( L pred = −ĵlog ( P sup )
+− ( 1 −ĵ ) log ( 1 − P sup ) ( 12 ) whereĵ is the real judgment . 
+For decoders , the previous word in training is the word in real court 's view , and the loss for timestep t is the negative log - likelihood of the target word w * t : L t = −logP ( w * t ) ( 13 ) and the overall generation loss is : L gen = 1 T T t=0 L t ( 14 ) where T is the length of real court 's view .
+Since we aim to make the two decoders generate two different court 's views , we take a mask operation when calculating the loss of each decoder .
+The exact loss for the support decoder is : L sup = L genĵ = 1 0ĵ = 0 ( 15 ) the loss for the non - support decoder L nsup is obtained by the opposite way .
+Thus , the total loss is : L total = L sup + L nsup + λL pred ( 16 ) where we set λ to 0.1 in our model . 
+Inference In inference , the counterfactual decoders apply beam search to generate two court 's views , and one of them will be selected as the final output , depending on the result of the predictor j.
+Since there is no publicly available court 's view generation dataset in civil cases , we build a dataset based on raw civil legal documents 3 .
+Specifically , we choose private lending , which is the most frequent category in civil cases , to construct the dataset .
+We process the legal documents as following steps : 1 ) Split legal documents into three parts : plaintiff 's claim , facts description , and court 's view , which can be objectively split by keywords ( subtitles ) .
+2 ) Human annotation .
+We employ experts with legal backgrounds to annotate the judgment ( defined in Sec . 3 ) on the court 's view .
+3 ) Annotation verification .
+We use random sampling test to ensure that the annotation accuracy is over 95 % . 
+After that , we get the dataset as shown in Tab .
+1 .
+We randomly separate the dataset into a training set , a validation set , and a test set according to a ratio of 8 : 1 : 1 , the ratio of supported cases is about 76 % in each set .
+We implement the following baselines for comparison : S2S Sequence - to - sequence model ( Sutskever et al , 2014 ) is a classic model for NLG task .
+We concatenate the plaintiff claims and facts descriptions as input . 
+PGN Pointer Generator Networks ( See et al , 2017 ) utilizes a pointer network to solve the outof - vocabulary ( OOV ) problem , which is essential for the court 's view generation since many nouns occur there . 
+Oversampling is a common method to alleviate data imbalance .
+We oversample the non - supported cases so that the ratio between supported cases and non - supported cases become 1 : 1 . S2SwS Apply oversampling to S2S. PGNwS Apply oversampling to PGN . 
+AC - NLGwS Apply oversampling to AC - NLG . 
+We do ablation experiments as follows : AC - NLGw / oD
+We remove the decoder and train the remaining model ( encoder and predictor ) as a classification task for judgment prediction . 
+AC - NLGw / oBA
+We remove the backdoor adjustment by replacing the pair of counterfactual decoders and predictor with a single decoder , but keep the claim - aware attention mechanism . 
+AC - NLGw / oCA We remove the claim - aware attention , and concatenate the claims and the facts instead .
+ROUGE 4 is a set of metrics used in the NLP task .
+We keep the results of ROUGE - 1 , ROUGE - 2 , and ROUGE - L. ROUGE - 1 and ROUGE - 2 refer to the overlap of unigram and bigram between the generated and reference documents , respectively .
+ROUGE - L is a Longest Common Subsequence ( LCS ) based statistics .
+BLEU 5
+( Papineni et al , 2002 ) is a method of au - tomatic text - generation evaluation that highly correlates with human evaluation .
+We use BLEU - 1 , BLEU - 2 to evaluate from the perspectives of unigram , bigram .
+BLEU - N is an average of BLEU - 1 , BLEU2 , BLEU - 3 ,
+BLEU - 4 .
+BERT SCORE 6 ( Zhang et al , 2019 ) computes a similarity score by using contextual embedding of the tokens .
+We calculate the precision ( p ) , recall ( r ) and f 1 - score to evaluate the information matching degree . 
+Accuracy of judgment prediction To evaluate the performance of the predictor , we calculate the precision ( p ) , recall ( r ) and , f 1 - score of supported and non - supported cases , respectively .
+We conduct a human evaluation to better analyze the quality of the generated court 's view .
+First , we randomly sample 500 test cases , where the ratio of the supported and nonsupported cases are 1:1 .
+For each case , we present the generated court 's views from each method 7 with the ground truth to 5 human annotators with legal backgrounds .
+The evaluation is conducted following three perspectives : ( 1 ) Judgment level .
+Annotators are asked to give a score ( 1 - 5 ) on the judgment in the generated court 's view .
+1 for totally wrong and 5 for totally correct .
+( 2 ) Rational level .
+Annotators are asked to give a score ( 1 - 5 ) on the rationals in the generated court 's view .
+1 for the worst and 5 for the best .
+( 3 ) Fluency level .
+Annotators are asked to give a score ( 1 - 5 ) on the fluency of the generated court 's view .
+1 for the worst and 5 for the best .
+Tab . 2 demonstrates the results of court 's view generation with ROUGE , BLEU , and BERT SCORE . 
+Also , we report the results on the judgment prediction of our predictor component with precision
+The defendant B return the loan of $ 495 , 000 .
+The defendant C return the loan together .
+After the hearing , the court held the facts as follows : From November 20 , 2010 to March 23 , 2011 , the defendant B successively borrowed a total of $ 495 , 000 from the plaintiff A and issued four separate borrowings .
+The defendant B has not repaid the above loan .
+The court concluded that : The private lending relationship between Plaintiff A and Defendant B , where the subject was appropriate , the content was legitimate , and the meaning was true , should be confirmed to be legal and valid .
+The two sides did not agreed in writing on a loan period , so the defendant should return the plaintiff 's loan in a timely manner within a reasonable period after the plaintiff urged .
+The defendant 's failure to return the loan timely constituted a breach of contract and should bear corresponding civil liabilities .
+Therefore , the plaintiff 's claim was reasonable and legal , and the court supported it Acceptance .
+The court concluded that the subject of the private lending relationship between Plaintiff A and Defendant B was qualified , the content was legal , and the meaning was true .
+It should be deemed valid .
+The two sides did not agreed in writing on a loan period , the defendant shall return the loan within a reasonable period after the plaintiff urged .
+The plaintiff 's claim requesting the defendant to return the loan of $ 495 , 000 was in compliance with the law and the court supported it Acceptance .
+However , the court did not support the claim requesting the defendant C to bear the guarantee liability because the evidence was insufficient
+.
+The court concluded that : The subject of the private lending relationship between Plaintiff A and Defendant B was qualified , the content was legal , and the meaning was true .
+It should be deemed valid .
+Defendant should repay the plaintiff 's loan within a reasonable period after the plaintiff urged .
+Therefore , Defendant B should bear the civil liability of returning the plaintiff 's loan of $ 495 , 000 and paying overdue interest Acceptance .
+The court did not support the plaintiff 's claim requesting the defendant C to return the loan together because the evidence was insufficient ( p ) , recall ( r ) , and f 1 - score ( f1 ) in Tab .
+3 . To demonstrate that our method is de - biased on judgment generation , we report the result of human evaluation in Tab .
+4 . Results of court 's view generation : From Tab . 2 , we can conclude that : ( 1 ) S2S tends to repeat words , which makes it get high BLEU but low BERT SCORE .
+( 2 ) Oversampling strategy does n't benefit the models , hence , it can not address the confounding bias .
+( 3 ) With claim - aware encoder and backdoor - inspired counterfactual decoders , our AC - NLG achieves better performance on court 's view generation compared with baselines .
+( 4 ) The performance gap between AC - NLGw / oCA and AC - NLG demonstrates the effectiveness of our proposed claim - aware encoder , and the gap between AC - NLGw / oBA and AC - NLG illustrates the superiority of our counterfactual decoders . 
+Results of judgment prediction : From Tab . 3 , we have the following observations : ( 1 ) The counterfactual decoders in our model can significantly eliminate the confounding bias , hence , achieve remarkable improvement on the non - supported cases , for example boosting f 1 from 49.8 % to 76.9 % .
+( 2 ) The proposed claim - aware encoder has a limited effect on judgment prediction since it 's designed for improving the quality of generation as shown in Tab .
+2 . ( 3 ) Still , oversampling brings no improvement to the model . 
+Results of human evaluation : From Tab . 4 , we have the following observations : ( 1 ) due to the confounding bias in data , the performance of judgment generation in PGN is poor for non - supported cases , and its performance gap between supported and non - supported cases is huge ( 1.56 ) .
+( 2 ) By debiasing with backdoor - inspired counterfactual decoders , our AC - NLG significantly improves the performance of judgment generation , especially for non - supported cases , and achieves a smaller performance gap ( only 0.28 ) between the supported and non - supported cases .
+( 3 ) With a claim - aware encoder , our AC - NLG also achieves better performance on the generation of rational and generated court 's view fluency .
+( 4 ) Kappa coefficient κ is more than 0.8 between any two judges , which proves the validation of human evaluation . 
+Overall , thanks to the proposed claim - aware encoder , counterfactual decoders , and a synergistic judgment predictor , our model achieves better performance than single - task baselines on the task of judgment prediction , judgment generation in court 's view and court 's view generation .
+We use Gensim ( Řehůřek and Sojka , 2010 ) with a large - scale generic corpus to train a language model as the pre - trained model , then use it to initialize the word embeddings , which is in the dimension of 300 . 8
+Figure 4 shows three court 's views for a certain case : the court 's view generated by PGN , by the proposed AC - NLG method , and the real court 's view .
+We find that the one generated by PGN accepts the claim for principal , but ignores other claims such as issue related to guarantee .
+Compared with the real court 's view , our model accu - rately responds to both claims and produces the correct judgment .
+While AI is gaining adoption in legal justice ( Lin et al , 2012 ; Zhong et al , 2018 ; Hu et al , 2018 ; Jiang et al , 2018 ; Chalkidis et al , 2019 ) , any subtle statistical miscalculation may trigger serious consequences .
+From a fairness perspective , prior studies suggested that global ( statistical ) optimization = individual ( demographic ) fairness ( Zemel et al , 2013 ) , and this ethical concern should be further investigated .
+In this section , we explore the following ethical issues . 
+Target User :
+According to the report of statistics , a typical active trial judge closed around 250 cases in a year .
+Trial judges suffering from ' daunting workload ' is becoming an critical issue ( Duan et al , 2019 ) .
+The proposed algorithm is designed for generating the court 's view draft for assisting the trial judges for decision making .
+This work is an algorithmic investigation , but such algorithm should never ' replace ' human judges .
+Human knowledge / judgment should be the final safeguard to protect social justice and individual fairness . 
+Potential Error : The potential error would be as follows : a ) generating a wrong judgment and b ) generating a wrong rationale .
+The goal of our algorithm is to generate a draft of court 's view for trail judge as a reference , and judges need to proofread the content generated from algorithm . 
+Demographic Bias : In this paper , we focus on addressing the bias problem from the data generation by treating the variable of data generation as confounder in back - door adjustment .
+The model adoption can face potential demographic bias / unfairness challenges , such as gender and race bias in the training data .
+To further ensure the model fairness , in the future , algorithm adoption should be empowered with de - biased legal content pretraining , which could avoid potential demographic bias .
+For instance , in order to remove gender / race bias , system could use ( Bolukbasi et al , 2016 ) algorithm to debias the sensitive gender / race information , e.g. , replace ' he / she ' and ' asian / hispanic ' with gender / race neutral words for pretraining , which can be vital for legal domain .
+In this paper , we propose a novel Attentional and Counterfactual based Natural Language Genera - tion ( AC - NLG ) method to solve the task of court 's view generation in civil cases and ensure the fairness of the judgment .
+We design a claim - aware encoder to represent the fact description which emphasizes on the plaintiff 's claim , as well as a pair of backdoor - inspired counterfactual decoders to generate judgment - discriminative court 's views ( both supportive and non - supportive views ) and to eliminate the bias that arose from the data generation mechanism by connecting with a synergistic judgment predictive model .
+The experimental results show the effectiveness of our method . 
+Based on the AC - NLG method , in the future , we can explore the following directions : ( 1 ) Improve the accuracy of judgment on a claim - level .
+( 2 ) Add external knowledge ( e.g. a logic graph ) to the predictor for the interpretability of the model .
+The defendant B should return to the defendant $ 20 , 000 and pay litigation costs of this case , and the defendant C shall undertake joint and several liability .
+After the hearing , the court held the facts as follows : Plaintiff A supported the facts of his claim and provided the court with a receipt of the loan issued by the defendant B on September 22 , 2008 .
+Although the evidence was not cross - examined by the two defendants in court , it was considered by the court that the evidence was legal , true and relevant to the facts of this case , so the validity of the evidence was confirmed . 
+The facts confirmed by the court are consistent with the facts claimed by the plaintiff A.
+The court concluded that : The loan relationship between the plaintiff and the defendant is legal and effective , it should be protected by law .
+The defendant did not return the loan within the agreed time limit , which constituted a breach of contract and should bear the corresponding liability .
+The plaintiff is now claiming the defendant to return the loan of $ 20 , 000 , which complies with the law and the court will support it Acceptance .
+The defendant was legally summoned by the court and failed to appear in court without justifiable reasons .
+The court concluded that : The loan relationship between the plaintiff and the defendant is legal and valid .
+The defendant still owes the plaintiff a loan of $ 20 , 000 and has not returned .
+The plaintiff 's request for the defendant to return the money complies with the law and the court supports it Acceptance .
+The defendant B was legally summoned by the court and failed to appear in court without justifiable reasons .
+It was deemed to have waived his right to defend the facts and claims by the plaintiff .
+The court concluded that : The guaranteed loan relationship between the plaintiff and the defendant is legal and effective .
+The defendant B still owes the plaintiff a loan of $ 20 , 000 and has not returned .
+The plaintiff 's claim for the defendant B to return the loan complies with the law and the court supports it Acceptance .
+Defendant C voluntarily provided guarantee for this loan and did not stipulate the guarantee method and period .
+According to law , he should bear joint and several liability for the above debt within six months from the date of maturity of the main debt .
+The main contract in this case did not stipulate the time limit for the performance of the main debt , and the guarantee period should be calculated from the date when the plaintiff claimed the rights .
+The plaintiff 's claim that the defendant C bears joint and several liability for the settlement of the above debts complies with the law , and the court also supports it Acceptance .
+The two defendants were legally summoned by the court and failed to appear in court without justifiable reasons .
+It was deemed to have waived his right to defend the facts and claims by the plaintiff .
+This work was supported by National Natural Science Foundation of China ( No . 62006207 , 61625107 ) , National Key R&D Program of China ( No . 2018AAA0101900 , 2018YFC0830200 , 2018YFC0830206 , 2020YFC0832500 ) , the Fundamental Research Funds for the Central Universities . 
+Finally , we would like to thank the anonymous reviewers for their helpful feedback and suggestions .
+Alexander M Rush , Sumit Chopra , and Jason Weston .
+2015 .
+A neural attention model for abstractive sentence summarization .
+arXiv preprint arXiv:1509.00685 . 
+Abigail See , Peter J Liu , and Christopher D Manning .
+2017 .
+Get to the point : Summarization with pointer - generator networks .
+arXiv preprint arXiv:1704.04368 .
+All models are trained on 2 V100 GPU ( 16 GB ) .
+1.The defendant B shall return the plaintiff 's loan of $ 30 , 000 and pay the overdue interest at the interest rate of 2.4 % per month from the date of prosecution to the date of repayment .
+2 . The defendant B shall pay the litigation costs of this case .
+After the hearing , the court held the facts as follows : On December 11 , 2013 , the defendant B borrowed $ 30 , 000 from the plaintiff A.
+The defendant B received the loan and gave a receipt of this loan .
+Note : I have borrowed $ 30 , 000 from A today .
+The court concluded that : The facts that defendant B borrowed $ 30 , 000 from the plaintiff A are clear .
+The private lending relationship between Plaintiff A and Defendant B is legitimate and valid , it shall be protected by the law .
+The plaintiff now demands that the defendant repay the loan of $ 30 , 000 .
+This demand is justified and should be supported Acceptance .
+Defendant B refused to appear in court without justification after being legally summoned by the court .
+The court concluded that : The legitimate private lending relationships are protected by law .
+The act of borrowing between the plaintiff A and the defendant B did not violate the prohibitive provisions of state laws and regulations , so it should be valid .
+The fact that the defendant B owed the plaintiff A a loan of $ 30 , 000 is clear , and the evidence is sufficient .
+The defendant was supposed to repay the loan in time , and his failure to repay in time constituted a breach of contract , and he shall assume corresponding civil liabilities according to law Acceptance .
+The receipt of this loan provided by the plaintiff A does not have agreed interest , as not to pay interest .
+So the court does not support the claim that the plaintiff A asked the defendant B to calculate the interest from the date of the loan
+.
+The defendant was summoned by the court and refused to appear in court without justification .
+The court concluded that : the lending agreement between the plaintiff A and the defendant B contains the true meaning and does not violate the prohibitive provisions of state laws and regulations , it is legal and valid .
+Although the plaintiff and the defendant did not specifically agree on the time for repayment , after the defendant received the loan , it shall be returned within a reasonable period after being appealed by the plaintiff .
+If the defendant fails to return it within a reasonable period after being called , the defendant shall be responsible to pay the overdue interest from the date of prosecution Acceptance .
+For the calculation standard for overdue interest , the plaintiff claimed that the monthly interest rate was 2.4 % , but it did not provide a corresponding evidence .
+Therefore , the court does not support this claim of overdue interest
+.
+With reference to the loan interest rate announced by the People 's Bank of China for the same period , the court determined that overdue interest is calculated at an annual interest rate of 5.6 % .
+The fact that the defendant has not returned the loan of $ 30 , 000 is clear .
+So the court supports the reasonable part of the plaintiff 's claim requesting the defendant to return the loan and pay the overdue interest .
+Defendant B refused to appear in court without justification after being legally summoned by the court .
+The two defendants B and C return the loan principal of $ 2 , 000 , 000 and interest ( The interest will be calculated as four times the interest rate of similar loans of the bank from February 28 , 2014 to the date when the judgment is confirmed , it is $ 40 , 000 temporarily calculated to the date of prosecution ) .
+After the hearing , the court held the facts as follows : The two defendants B and C have spousal relationship .
+On February 28 , 2014 , the defendant B borrowed $ 2 , 000 , 000 from the plaintiff A and signed a loan contract , stipulating that the defendant borrowed 2 million ( $ 2 , 000 , 000.00 ) from the plaintiff , and the loan period is from the date of signing to March 27 , 2014 , the interest is calculated at four times the interest rate of similar loans of the People 's Bank of China over the same period .
+The loan period has expired and the defendant refused to return the loan .
+For this reason , the plaintiff A claimed in court .
+The court concluded that : The legal loan relationship is protected by law .
+The fact that the defendant B borrowed $ 2 , 000 , 000 from the plaintiff A is clear , and the evidence is indeed sufficient .
+The defendant B did not return the loan in time according to the contract , which was a breach of contract and should assume the corresponding liabilities for breach of contract according to law .
+The plaintiff 's claim was accepted and the court supports it Acceptance .
+The defendants failed to appear in court after being legally summoned by the court .
+The court can judge the case in absentia according to law .
+The court concluded that : The civil loan relationship formed by the defendant B borrowing money from the plaintiff A and the act of giving a receipt of this loan are based on the true intention of them , they did not violate the mandatory provisions of the laws and regulations , it is legal and valid , and it should be protected by law .
+The defendant B did not repay the plaintiff 's loan of $ 2 million , which constituted a breach of contract , and he should assume the civil liabilities for returning the loan and paying interest .
+The defendant B and C have spousal relationship .
+The debt in this case occurred during the marriage , so it should be treated as joint debts and paid by the two defendants together .
+In summary , the plaintiff 's claim is supported by law , and the court supports it Acceptance .
+The defendants B and C was legally summoned by the court and refused to appear in court without justifiable reasons .
+The court concluded that : The defendant B has not repaid the loan of $ 2 million from the plaintiff A , and should return it in time and pay interest according to the agreed time limit .
+The debt occurred during the marriage of the defendants B and C , so it should be treated as joint debts , the two defendants should jointly take the responsibility for repayment .
+The plaintiff A 's claim is legal , and the court supports it Acceptance .
+The defendants B and C were legally summoned by the court and refused to appear in court without justifiable reasons .
+After the hearing , the court held the facts as follows : On June 28 , 2013 , the defendant B gave a receipt of loan .
+The defendant needed a loan of $ 50 , 000 .
+The loan period was from June 28 , 2013 to July 27 , 2013 . 
+There was no agreed interest on the loan .
+After the due date , the defendant agreed to calculate the interest on the unrefunded principal at four times the bank 's loan interest during the same period .
+On the same day , the plaintiff A made a payment of $ 50 , 000 from his bank account to the defendant B 's bank account .
+Then the defendant B issued a receipt confirming that the loan of $ 50 , 000 was received .
+However , the defendant B has not returned the loan principal and interest .
+The court concluded that : The loan relationship between the plaintiff and the defendant does not violate the compulsory provisions of state laws and administrative regulations , and should be deemed as legal and effective .
+The defendant B failed to repay the interest according to the receipt , and the plaintiff 's claim to return the principal and pay the overdue interest should be supported according to law Acceptance .
+Defendant B refused to appear in court without justification after being legally summoned by the court , and is deemed to have waived his right to litigation .
+The court can judge the case in absentia according to law .
+The court concluded that : The loan relationship between the plaintiff A and the defendant B is legal and effective .
+After the defendant borrowed money , he should take the responsibility to return the loan and pay legal interest .
+If the borrower and the lender have not agreed on the interest on the loan , it shall be deemed as non - payment of interest Acceptance .
+However , the plaintiff has the right to claim the interest to be calculated from the benchmark interest rate of the same grade of loans issued by the People 's Bank of China at the same period when the loan occurred since the date of the prosecution Rejection .
+The court concluded that : The loan between the plaintiff A and the defendant B did not violate the legal provisions , and was based on the true intentions of them , and this case has the loan agreement , receipt and bank statement issued by the defendant .
+The loan relationship is legal and valid .
+The plaintiff requested the defendant to return the loan principal of $ 50 , 000 in compliance with the law , and the court will support it .
+Acceptance .
+In this case , the interest was not agreed during the loan period , the court does not support the interest during the loan period in the plaintiff 's claim
+.
+But the court supports the calculation of the overdue interest from July 28 , 2013 to March 31 , 2014 based on the four times bank 's loan interest rate during the same period .
+1 .
+The defendants B and C jointly repaid the loan principal of $ 20 , 000 and the interest loss ( calculated from the bank 's loan interest rate at the same period from the date of prosecution to the date when the judgment is confirmed ) .
+2.The litigation costs in this case are paid by the two defendants .
+After the hearing , the court held the facts as follows : On November 3 , 2011 , the defendant B borrowed $ 20 , 000 from the plaintiff A , and the defendant B issued a receipt for this loan of $ 20 , 000 to the plaintiff .
+The loan receipt did not specify the loan interest and repayment date .
+The plaintiff stated in court that the defendant B paid about $ 500 but less than $ 1 , 000 .
+It was also found that the defendant B and the defendant C registered their marriage on September 1 , 2006 .
+The court concluded that : The legal loan relationship is protected by law .
+The defendant B borrowed $ 20 , 000 from the plaintiff A.
+This case has the evidence of the loan receipt and the plaintiff 's statement in court .
+The facts were clear and the evidence was true and sufficient .
+The legal loan relationship is protected by law , and the loan principal and interest should be repaid Acceptance .
+The court concluded that : The legal loan relationship is protected by law .
+The fact that the defendant B owed the plaintiff A a loan of $ 20 , 000 was based on a loan receipt and the plaintiff 's statement in court . 
+The facts are clear and the evidence is true and sufficient .
+The loan repayment period does not stipulate the repayment period , the plaintiff can urge the defendant to repay within a reasonable period .
+Now the plaintiff claims that the defendants repay the loan principal of $ 20 , 000 , it complies with the law and the court supports it .
+The defendant B and the defendant C have spousal relationship .
+In this case , the debt in this case occurred during the marriage , so it should be treated as joint debts and paid by the two defendants together Acceptance .
+The court concluded that : The legal loan relationship is protected by law .
+The fact that the defendant B borrowed money from the plaintiff A was based on a loan receipt and the plaintiff 's statement .
+The facts are clear , and the evidence is true and sufficient .
+The loan interest rate is not agreed on the receipt , it shall be deemed as non - payment of interest .
+The plaintiff 's opinion that the amount paid by the defendant B is interest has no factual basis and the court will not approve it .
+Because the plaintiff could not determine the specific amount paid by the defendant B , the court determined the amount paid by the defendant B as $ 500 at his discretion , and the $ 500 should be deducted from the loan principal .
+If the loan does not agree on the repayment period , the debtor shall return the loan if the creditor requests it to be returned according to trading habits .
+The defendant B and the defendant C registered their marriage on September 1 , 2006 .
+The debt in this case occurred during their marriage , so it is the joint debt of the two defendants and should be repaid together Acceptance .
+The defendants B and C were legally summoned by the court and refused to appear in court without justifiable reasons .
+The two defendants B and C are required to return the loan of $ 180 , 000 and pay the overdue interest of the loan of $ 100 , 000 ( from March 9 , 2013 , the monthly interest rate is calculated at 1.87 % to the date that the judgment is confirmed )
+After the hearing , the court held the facts as follows : In support of the facts claimed by the plaintiff , the following evidence materials were provided to this court within the proof period : 1 . Two loan agreements to prove the fact that the defendant B borrowed $ 180 , 000 from the plaintiff .
+2 . One piece of marriage registration information , to prove that the loan in the case occurred during the marriage of the two defendants , and should be the joint debts of the two defendants .
+Although the evidence provided by the plaintiff has not been cross - examined by the two defendants , the court found that the content of the abovementioned evidence was objective and clear , the source form was legal , and was related to the facts of the case , so it was accepted .
+Based on the evidence adopted above and the court investigation , the facts confirmed by the court are consistent with the facts claimed by the plaintiff .
+The court concluded that : The private lending relationship between the plaintiff and the defendant B is established and legally valid .
+As the borrower , the defendant B failed to repay the loan , which constituted a breach of contract and should bear corresponding civil liabilities .
+The plaintiff 's claim has sufficient evidence and complies with the law , and the court supports it Acceptance .
+The two defendants were legally summoned by the court and failed to appear in court without justifiable reasons .
+It was deemed to have waived his right to defend the facts and claims by the plaintiff .
+The court concluded that : The private lending relationship between the plaintiff and the defendant B is established and legally valid .
+As the borrower , the defendant B failed to perform the repayment obligations in time and should bear corresponding civil liabilities .
+The plaintiff 's changed claim has sufficient evidence and complies with the law , and the court will support it Acceptance .
+The two defendants were legally summon by the court and failed to appear in court without justifiable reasons .
+It was deemed to have waived his right to defend the facts and claims by the plaintiff .
+The court concluded that : The civil lending relationship between the plaintiff A and the defendant B was established and legally valid .
+As the borrower , the defendant B failed to fully perform the repayment obligations as agreed , which constituted a breach of contract and should bear corresponding civil liabilities .
+Because the loan in this case was formed during the marriage of the two defendants , in view of the fact that the defendant C did not respond to the claim and did not appear in court to participate in the litigation , the debt owned by the defendant B personally should be regarded as the joint debts of the defendant B and C.
+The plaintiff 's changed claim has sufficient evidence and complies with the law , and the court will support it Acceptance .
+The two defendants were legally summon by the court and failed to appear in court without justifiable reasons .
+It was deemed to have waived his right to defend the facts and claims by the plaintiff .
+After the hearing , the court held the facts as follows : On September 30 , 2013 and August 25 , 2014 , the defendant B borrowed $ 10 , 000 each time from the plaintiff A.
+The defendant issued a loan receipt to the plaintiff for each of the two loans .
+There was no written agreement on the interest and loan period .
+Later , the defendant did not return the loan , then it caused a dispute .
+The above facts are proved by two receipts of the loan provided by the plaintiff and the plaintiff 's statement in the court .
+The court concluded that : The private lending relationship between the plaintiff and the defendant is established according to law , and is effective from the date the plaintiff provides the defendant with the loan .
+After the plaintiff provided the loan to the defendant , the defendant failed to return the loan as agreed , it was obviously a breach of contract .
+Therefore , the plaintiff 's claim requesting the defendant to return the loan principal of $ 28 , 000 was justified , and the court supports it Acceptance .
+The defendant was legally summoned by the court and refused to appear in court without justifiable reasons to participate in the proceedings .
+The court concluded that : The private lending relationship between the plaintiff and defendant is established according to law and should be protected by law .
+The defendant borrowed $ 10 , 000 from the plaintiff .
+The facts were clear and the evidence was sufficient .
+The plaintiff now requires the defendant to repay the loan of $ 10 , 000 .
+The reasons are justified , and the court supports it Acceptance .
+But the court does not support the plaintiff 's claim requesting the defendant to pay interest on the loan because the plaintiff failed to provide evidence to prove the fact that both of them agreed on the interest of the loan
+.
+The defendant was legally summoned by this court and refused to appear in court without justifiable reasons to participate in the proceedings .
+The court concluded that : The private lending relationship between the plaintiff and the defendant is established and effective , and shall be protected according to law .
+The defendant should repay the loan after receiving it , but now he did not repay , it is obviously a breach of contract .
+Therefore , this court supports the claim of the plaintiff that the defendant should return the loan of $ 20 , 000 and the corresponding loss of interest Acceptance .
+The plaintiff claimed that the defendant should pay interest , but did not provide evidence to prove that both of them clearly agreed on the interest , so the court does not support the plaintiff 's claim for interest Rejection .
+The plaintiff withdrew some of the claims in the court hearing , and this court permitted it .

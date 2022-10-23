@@ -1,0 +1,10 @@
+The W - NUT 2022 workshop focuses on a core set of natural language processing tasks on top of noisy user - generated text , such as that found on social media , web forums and online reviews .
+Recent years have seen a significant increase of interest in these areas .
+The internet has democratized content creation leading to an explosion of informal user - generated text , publicly available in electronic format , motivating the need for NLP on noisy text to enable new data analytics applications . 
+We have received 39 main workshop submissions ( 22 long and 17 short papers ) .
+The workshop will be held in hybrid in - person and virtual modes .
+We have two invited speakers Yulia Tsvetkov ( University of Washington ) and David Jurgens ( University of Michigan ) who will talk about their work .
+We 're very thankful to have them in our workshop . 
+We have the best paper award ( s ) sponsored by Megagon Labs this year , for which we are thankful .
+We would like to thank the Program Committee members who reviewed the papers .
+We would also like to thank the workshop participants .
