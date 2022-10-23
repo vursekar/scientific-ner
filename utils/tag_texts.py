@@ -2,13 +2,14 @@ import spacy
 from spacy.matcher import PhraseMatcher
 import json
 import os
+from tqdm import tqdm
 
-path_to_tokenized = 'scipdf_tokenized/train/'
-path_to_tagged = 'scipdf_tagged_texts/train/'
+path_to_tokenized = 'scipdf_tokenized/test/'
+path_to_tagged = 'scipdf_tagged_texts/test/'
 
-for subfolder in ['no_tag', 'metric_hp_plus_num_tag', 'rest']:
-    if not os.path.exists(os.path.join(path_to_tagged,subfolder)):
-        os.mkdir(os.path.join(path_to_tagged,subfolder))
+for file in ['no_tag', 'metric_hp_plus_num_tag', 'rest']:
+    if not os.path.exists(os.path.join(path_to_tagged,file+'.json')):
+        open(os.path.join(path_to_tagged,file+'.json'), 'w').close()
 
 filenames = os.listdir(path_to_tokenized)
 
@@ -59,14 +60,16 @@ for entity_type in entity_type_map_cased:
     case_sensitive_matcher.add(entity_type, patterns)
 
 
-for filename in filenames:
+files = {}
+for key in ['no_tag', 'metric_hp_plus_num_tag', 'rest']:
+    files[key] = open(os.path.join(path_to_tagged,key+'.json'), 'a')
+
+for i in tqdm(range(len(filenames))):
+
+    filename = filenames[i]
 
     if '.txt' not in filename:
         continue
-
-    print(filename)
-
-    data = []
 
     with open(os.path.join(path_to_tokenized,filename)) as f:
         sentences = []
@@ -74,13 +77,36 @@ for filename in filenames:
             line = line.strip()
             sentences.append(line)
 
-    with open(os.path.join(path_to_tagged,filename[:-4]+'.json'), 'w') as f:
-        for sentence in sentences:
-            doc = nlp(sentence)
-            matches = case_insensitive_matcher(doc, as_spans=True) + case_sensitive_matcher(doc, as_spans=True)
-            matches = [(span.start, span.end, span.label_, span.text) for span in spacy.util.filter_spans(matches)]
+    for sentence in sentences:
+        doc = nlp(sentence)
+        matches = case_insensitive_matcher(doc, as_spans=True) + case_sensitive_matcher(doc, as_spans=True)
+        matches = [(span.start, span.end, span.label_, span.text) for span in spacy.util.filter_spans(matches)]
+        sample = {'text': sentence, 'entities': matches}
 
-            sample = {'text': sentence, 'entities': matches}
-            data.append(sample)
+        contains_hp_metric = False
+        contains_number = False
 
-        json.dump(data, f)
+        for _, _, et, _ in matches:
+            if et in ['HyperparameterName', 'MetricName']:
+                contains_hp_metric = True
+
+        for token in sample['text'].split(" "):
+            try:
+                float(token)
+                is_number = True
+            except ValueError:
+                is_number = False
+
+            if is_number:
+                contains_number = True
+                break
+
+        if len(matches)==0:
+            json.dump(sample, files['no_tag'])
+            files['no_tag'].write('\n')
+        elif contains_hp_metric and contains_number:
+            json.dump(sample, files['metric_hp_plus_num_tag'])
+            files['metric_hp_plus_num_tag'].write('\n')
+        else:
+            json.dump(sample, files['rest'])
+            files['rest'].write('\n')
