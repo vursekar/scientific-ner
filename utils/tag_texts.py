@@ -4,8 +4,8 @@ import json
 import os
 from tqdm import tqdm
 
-path_to_tokenized = 'scipdf_tokenized/train/'
-path_to_tagged = 'scipdf_tagged/train/'
+path_to_tokenized = 'data/scipdf_tokenized/train/'
+path_to_tagged = 'data/scipdf_tagged/train/'
 
 if not os.path.exists(path_to_tagged):
     os.makedirs(path_to_tagged)

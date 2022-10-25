@@ -3,8 +3,8 @@ import scipdf
 import json
 from tqdm import tqdm
 
-path_to_pdfs = 'scraped_train_pdfs/train/'
-path_to_output = 'parsed_pdfs/train/'
+path_to_pdfs = 'data/scraped_pdfs/train/'
+path_to_output = 'data/parsed_pdfs/train/'
 filenames = os.listdir(path_to_pdfs)
 
 for i in tqdm(range(len(filenames))):

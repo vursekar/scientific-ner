@@ -14,4 +14,5 @@
 *.data
 
 # Ignore large files
-paperswithcode_corpus/test.json
+data/scierc_data/
+data/full_cs_ner_data/
