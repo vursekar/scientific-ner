@@ -16,3 +16,4 @@
 # Ignore large files
 data/scierc_data/
 data/full_cs_ner_data/
+data/label_studio_data/
