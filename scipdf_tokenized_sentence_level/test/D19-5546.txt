@@ -1,0 +1,95 @@
+Minimally - Augmented Grammatical Error Correction
+There has been an increased interest in lowresource approaches to automatic grammatical error correction .
+We introduce Minimally - Augmented Grammatical Error Correction ( MAGEC ) that does not require any errorlabelled data .
+Our unsupervised approach is based on a simple but effective synthetic error generation method based on confusion sets from inverted spell - checkers .
+In low - resource settings , we outperform the current state - ofthe - art results for German and Russian GEC tasks by a large margin without using any real error - annotated training data .
+When combined with labelled data , our method can serve as an efficient pre - training technique .
+Most neural approaches to automatic grammatical error correction ( GEC ) require error - labelled training data to achieve their best performance .
+Unfortunately , such resources are not easily available , particularly for languages other than English .
+This has lead to an increased interest in unsupervised and low - resource GEC ( Rozovskaya et al , 2017 ; Bryant and Briscoe , 2018 ; Boyd , 2018 ; Rozovskaya and Roth , 2019 ) , which recently culminated in the low - resource track of the Building Educational Application ( BEA ) shared task .
+1
+We present Minimally - Augmented Grammatical Error Correction ( MAGEC ) , a simple but effective approach to unsupervised and low - resource GEC which does not require any authentic error - labelled training data .
+A neural sequence - to - sequence model is trained on clean and synthetically noised sentences alone .
+The noise is automatically created from confusion sets .
+Additionally , if labelled data 1 https://www.cl.cam.ac.uk/research/nl/ bea2019st is available for fine - tuning ( Hinton and Salakhutdinov , 2006 ) , MAGEC can also serve as an efficient pre - training technique . 
+The proposed unsupervised synthetic error generation method does not require a seed corpus with example errors as most other methods based on statistical error injection ( Felice and Yuan , 2014 ) or back - translation models ( Rei et al , 2017 ; Kasewa et al , 2018 ; Htut and Tetreault , 2019 ) .
+It also outperforms noising techniques that rely on random word replacements ( Xie et al , 2018 ; Zhao et al , 2019 ) .
+Contrary to Ge et al ( 2018 ) or Lichtarge et
+al ( 2018 ) , our approach can be easily used for effective pre - training of full encoder - decoder models as it is model - independent and only requires clean monolingual data and potentially an available spell - checker dictionary .
+2
+In comparison to pretraining with BERT ( Devlin et al , 2019 ) , synthetic errors provide more task - specific training examples than masking .
+As an unsupervised approach , MAGEC is an alternative to recently proposed language model ( LM ) based approaches ( Bryant and Briscoe , 2018 ; Stahlberg et al , 2019 ) , but it does not require any amount of annotated sentences for tuning .
+Our minimally - augmented GEC approach uses synthetic noise as its primary source of training data .
+We generate erroneous sentences from monolingual texts via random word perturbations selected from automatically created confusion sets .
+These are traditionally defined as sets of frequently confused words ( Rozovskaya and Roth , 2010 ) .
+We experiment with three unsupervised methods for generating confusion sets : Edit distance Confusion sets consist of words with the shortest Levenshtein distance ( Levenshtein , 1966 ) to the selected confused word . 
+Word embeddings Confusion sets contain the most similar words to the confused word based on the cosine similarity of their word embedding vectors ( Mikolov et al , 2013 ) . 
+Spell - breaking Confusion sets are composed of suggestions from a spell - checker ; a suggestion list is extracted for the confused word regardless of its actual correctness . 
+These methods can be used to build confusion sets for any alphabetic language .
+3 We find that confusion sets constructed via spell - breaking perform best ( Section 4 ) .
+Most context - free spell - checkers combine a weighted edit distance and phonetic algorithms to order suggestions , which produces reliable confusion sets ( Table 1 ) . 
+We synthesize erroneous sentences as follows : given a confusion set
+C
+i = { c i 1 , c i 2 , c i 3 , ... } , and the vocabulary V , we sample word w j V from the input sentence with a probability approximated with a normal distribution N ( p WER , 0.2 ) , and perform one of the following operations : ( 1 ) substitution of w j with a random word c j k from its confusion set with probability p sub , ( 2 ) deletion of w j with p del , ( 3 ) insertion of a random word w k V at j + 1 with p ins , and ( 4 ) swapping w j and w j+1 with p swp .
+When making a substitution , words within confusion sets are sampled uniformly . 
+To improve the model 's capability of correcting spelling errors , inspired by Lichtarge et al ( 2018 ) ; Xie et al ( 2018 ) , we randomly perturb 10 % of characters using the same edit operations as above .
+Character - level noise is introduced on top of the synthetic errors generated via confusion sets .
+A MAGEC model is trained solely on the synthetically noised data and then ensembled with a language model .
+Being limited only by the amount of clean monolingual data , this large - scale unsupervised approach can perform better than training on small authentic error corpora .
+A large amount of training examples increases the chance that synthetic errors resemble real error patterns and results in better language modelling properties . 
+If any small amount of error - annotated learner data is available , it can be used to fine - tune the pre - trained model and further boost its performance .
+Pre - training of decoders of GEC models from language models has been introduced by Junczys - Dowmunt et al ( 2018b ) , we pretrain the full encoder - decoder models instead , as proposed by Grundkiewicz et al ( 2019 ) .
+Data and evaluation Our approach requires a large amount of monolingual data that is used for generating synthetic training pairs .
+We use the publicly available News crawl data 5 released for the WMT shared tasks ( Bojar et al , 2018 ) .
+For English and German , we limit the size of the data to 100 million sentences ; for Russian , we use all the available 80.5 million sentences . 
+As primary development and test data , we use the following learner corpora ( Table 2 ) : English : the new W&I+LOCNESS corpus Granger , 1998 ) released for the BEA 2019 shared task and representing a diverse cross - section of English language ; German : the Falko - MERLIN GEC corpus ( Boyd , 2018 )
+Russian : the recently introduced RULEC - GEC dataset (
+Alsufieva et al , 2012 ; Rozovskaya and Roth , 2019 ) containing Russian texts from foreign and heritage speakers . 
+Unless explicitly stated , we do not use the training parts of those datasets .
+For each language we follow the originally proposed preprocessing and evaluation settings .
+English and German data are tokenized with Spacy 6 , while Russian is preprocessed with Mystem ( Segalovich , 2003 ) .
+We additionally normalise punctuation in monolingual data using Moses scripts ( Koehn et al , 2007 ) .
+During training , we limit the vocabulary size to 32 , 000 subwords computed with SentencePiece using the unigram method ( Kudo and Richardson , 2018 ) . 
+English models are evaluated with ERRANT ( Bryant et al , 2017 ) using F 0.5 ; for German and Russian , the M2Scorer with the MaxMatch metric ( Dahlmeier and Ng , 2012 ) is used . 
+Synthetic data Confusion sets are created for each language for V = 96 , 000 most frequent lexical word forms from monolingual data .
+We use the Levenshtein distance to generate edit - distance based confusion sets .
+The maximum considered distance is 2 .
+Word embeddings are computed with word2vec 7 from monolingual data .
+To generate spell - broken confusion sets we use Enchant 8 with Aspell dictionaries .
+9 The size of confusion sets is limited to top 20 words . 
+Synthetic errors are introduced into monolingual texts to mimic word error rate ( WER ) of about 15 % , i.e. p WER = 0.15 , which resembles error frequency in common ESL error corpora .
+When confusing a word , the probability p sub is set to 0.7 , other probabilities are set to 0.1 .
+Training settings We adapt the recent state - ofthe - art GEC system by Junczys - Dowmunt et al ( 2018b ) , an ensemble of sequence - to - sequence Transformer models ( Vaswani et al , 2017 ) and a neural language model .
+10 We use the training setting proposed by the authors 11 , but introduce stronger regularization : we increase dropout probabilities of source words to 0.3 , add dropout on transformer self - attention and filter layers of 0.1 , and use larger mini - batches with 2 , 500 sentences .
+We do not pre - train the decoder parameters with a language model and train directly on the synthetic data .
+We increase the size of language model used for ensembling to match the Transformer - big configuration ( Vaswani et al , 2017 ) with 16 - head self - attention , embeddings size of 1024 and feed - forward filter size size of 4096 .
+In experiments with fine - tuning , the training hyperparameters remain unchanged . 
+All models are trained with Marian ( Junczys - Dowmunt et al , 2018a ) .
+The training is continued for at most 5 epochs or until early - stopping is triggered after 5 stalled validation steps .
+We found that using 10 , 000 synthetic sentences as validation sets , i.e. a fully unsupervised approach , is as effective as using the development parts of error corpora and does not decrease the final performance .
+Confusion sets On English data , all proposed confusion set generation methods perform better than random word substitution ( Table 3 ) .Confusion sets based on word embeddings are the least effective , while spell - broken sets perform best at 26.66 F 0.5 .
+We observe further gains of +1.04 from keeping out - of - vocabulary spell - checker suggestions ( OOV ) and preserving consistent letter casing within confusion sets ( Case ) . 
+The word error rate of error corpora is an useful statistic that can be used to balance precision / recall ratios ( Rozovskaya and Roth , 2010 ; Junczys - Dowmunt et al , 2018b ; Hotate et al , 2019 ) .
+Increasing WER in the synthetic data from 15 % to 25 % increases recall at the expense of precision , but no overall improvement is observed .
+A noticeable recall gain that transfers to a higher F - score of 28.99 is achieved by increasing the importance of edited fragments with the edit - weighted MLE objective from Junczys - Dowmunt et al ( 2018b ) with Λ = 2 .
+We use this setting for the rest of our experiments .
+We first compare the GEC systems with simple baselines using a greedy and context spell - checking ( Table 4 ) ; the latter selects the best correction suggestion based on the sentence perplexity from a Transformer language model .
+All systems outperform the spell - checker baselines . 
+On German and Russian test sets , single MAGEC models without ensembling with a language model already achieve better performance than reported by Boyd ( 2018 ) Roth ( 2019 ) for their systems that use authentic error - annotated data for training ( Table 4b and 4c ) .
+Our best unsupervised ensemble systems that combine three Transformer models and a LM 12 outperform the state - of - the - art results for these languages by
++7.0 and +11.4 F 0.5 . 
+Our English models do not compete with the top systems ( Grundkiewicz et al , 2019 ) from the BEA shared task trained on publicly available errorannotated corpora ( Table 4a ) .
+It is difficult to compare with the top low - resource system from the shared task , because it uses additional parallel data from Wikipedia ( Grundkiewicz and Junczys - Dowmunt , 2014 ) , larger ensemble , and n - best list re - ranking with right - to - left models , which can be also implemented in this work . 
+MAGEC systems are generally on par with the results achieved by a recent unsupervised contribution based on finite state transducers by Stahlberg et al ( 2019 ) on the CoNLL - 2014 ( Dahlmeier et al , 2013 ) and JFLEG test sets ( Napoles et al , 2017 All unsupervised systems benefit from domainadaptation via fine - tuning on authentic labelled data ( Miceli Barone et al , 2017 ) .
+The more authentic high - quality and in - domain training data is used , the greater the improvement , but even as few as~2 , 000 sentences are helpful ( Fig . 1 ) .
+We found that fine - tuning on a 2:1 mixture of synthetic and oversampled authentic data prevents the model from over - fitting .
+This is particularly visible for English which has the largest fine - tuning set ( 34 K sentences ) , and the difference of 5.2 F 0.5 between finetuning with and without synthetic data is largest .
+The GEC task involves detection and correction of all types of error in written texts , including grammatical , lexical and orthographical errors .
+Spelling and punctuation errors are among the most frequent error types and also the easiest to synthesize . 
+To counter the argument that - mostly due to the introduced character - level noise and strong language modelling - MAGEC can only correct these " simple " errors , we evaluate it against test sets that contain either spelling and punctuation errors or all other error types ; with the complement errors corrected ( Table 6 ) .
+Our systems indeed perform best on misspellings and punctuation errors , but are capable of correcting various error types .
+The disparity for Russian can be explained by the fact that it is a morphologically - rich language and we suffer from generally lower performance .
+We have presented Minimally - Augmented Grammatical Error Correction ( MAGEC ) , which can be effectively used in both unsupervised and lowresource scenarios .
+The method is model independent , requires easily available resources , and can be used for creating reliable baselines for supervised techniques or as an efficient pre - training method for neural GEC models with labelled data .
+We have demonstrated the effectiveness of our method and outperformed state - of - the - art results for German and Russian benchmarks , trained with labelled data , by a large margin . 
+For future work , we plan to evaluate MAGEC on more languages and experiment with more diversified confusion sets created with additional unsupervised generation methods .

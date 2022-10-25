@@ -1,0 +1,61 @@
+Preface : General Chair
+Welcome to ACL 2017 in Vancouver , Canada !
+This is the 55th annual meeting of the Association for Computational Linguistics .
+A tremendous amount of knowledge has been presented at more than half a century 's worth of our conferences .
+Hopefully , some of it is still relevant now that deep learning has solved language .
+We are anticipating one of the largest ACL conferences ever .
+We had a record number of papers submitted to the conference , and a record number of industry partners joining us as sponsors of the conference .
+We are on track to be one of the best attended ACL conferences to date .
+I hope that this year 's conference is intellectually stimulating and that you take home many new ideas and techniques that will help extend your own research .
+In addition , oral presentations were shortened to fourteen ( twelve ) minutes for long ( short ) papers , plus time for questions .
+While this places a greater demand on speakers to be concise , we believe it is worth the effort , allowing far more work to be presented orally .
+We also took advantage of the many halls available and expanded the number of parallel talks to five during most of the conference sessions . 
+In keeping with changes introduced in the ACL community from last year , we continued the practice of recognizing outstanding papers at ACL .
+The 22 outstanding papers ( 15 long , 7 short , 1.6 % of submissions ) represent a broad spectrum of exciting contributions and have been specially placed on the final day of the main conference where the program is focused into two parallel sessions of these outstanding contributions .
+From these , a best paper and a best short paper those will be announced in the awards session on Wednesday afternoon . 
+Chris has already mentioned our introduction of the chairs ' blog 2 , where we strove to make the selection process of the internal workings of the scientific committee more transparent .
+We have publicly documented our calls for area chairs , reviewers and accepted papers selection process .
+Via the blog , we communicated several innovations in the conference organization workflow , of which we would call attention to two key ones here . 
+In the review process , we pioneered the use of the Toronto Paper Matching System , a topic model based approach to the assignment of reviewers to papers .
+We hope this decision will spur other program chairs to adopt the system , as increased coverage will better the reviewer / submission matching process , ultimately leading to a higher quality program . 
+For posterity , we also introduced the usage of hyperlinks in the bibliography reference sections of papers , 1
+These numbers exclude papers that were not reviewed due to formatting , anonymity , or double submission violations or that were withdrawn prior to review , which was unfortunately a substantial number . 
+2 https://chairs - blog.acl2017.org/ viii and have worked with the ACL Anthology to ensure that digital object identifiers ( DOIs ) appear in the footer of each paper .
+These steps will help broaden the long - term impact of the work that our community has on the scientific world at large . 
+There are many individuals we wish to thank for their contributions to ACL 2017 , some multiple times : The 61 area chairs who volunteered for our extra duty .
+They recruited reviewers , led discussions on each paper , replied to authors ' direct comments to them and carefully assessed each submission . 
+Their input was instrumental in guiding the final decisions on papers and selecting the outstanding papers .
+Our full program committee of BUG hard - working individuals who reviewed the conference 's 1 , 318 submissions ( including secondary reviewers ) . 
+TACL editors - in - chief Mark Johnson , Lillian Lee , and Kristina Toutanova , for coordinating with us on TACL presentations at ACL . 
+Noah Smith and Katrin Erk , program co - chairs of ACL 2016 and Ani Nenkova and Owen Rambow , program co - chairs of NAACL 2016 , who we consulted several times on short order for help and advice . 
+Wei Lu and Sameer Singh , our well - organized publication chairs , with direction and oversight from publication chair mentor Meg Mitchell .
+Also , Christian Federmann who helped with the local handbook . 
+The responsive team at Softconf led by Rich Gerber , who worked quickly to resolve problems and who strove to integrate the use of the Toronto Paper Matching System ( TPMS ) for our use . 
+Priscilla Rasmussen and Anoop Sarkar and the local organization team , especially webmaster Nitin Madnani . 
+Christopher Calliston - Burch , our general chair , who kept us coordinated with the rest of the ACL 2017 team and helped us free our time to concentrate on the key duty of organizing the scientific program . 
+Key - Sun Choi , Jing Jiang , Graham Neubig , Emily Pitler , and Bonnie Webber who carefully reviewed papers under consideration for best paper recognition .
+Our senior correspondents for the blog , who contributed guest posts and advice for writing and reviewing : Waleed Ammar , Yoav Artzi , Tim Baldwin , Marco Baroni , Claire Cardie , Xavier Carreras , Hal Daumé , Kevin Duh , Chris Dyer , Marti Hearst , Mirella Lapata , Emily M. Bender , Aurélien Max , Kathy McKeown , Ray Mooney , Ani Nenkova , Joakim Nivre , Philip Resnik , and Joel Tetreault .
+Without them , the participation of the community through the productive comments , and without you the readership , our blog for disseminating information about the decision processes would not have been possible and a success .
+With twin upward trends in the interest in computational linguistics and natural language processing and the size of our annual meeting , ACL has begun the practice of recognizing outstanding papers that represent a select cross - section of the entire field , as nominated by reviewers and vetted by the area chairs and program co - chairs .
+These papers have been centrally located in the program , on the last day of our meeting , in a more focused two parallel tracks format . 
+This year , we have nominated 15 long papers and 7 short papers , representing 1.8 % of all submissions and approximately 5 % of the accepted ACL program .
+Congratulations , authors !
+( in alphabetical order by first author surname ) Long Papers Jan Buys and Phil Blunsom .
+Robust Incremental Neural Semantic Graph Parsing . 
+Xinchi Chen , Zhan Shi , Xipeng Qiu and Xuanjing Huang .
+Adversarial Multi - Criteria Learning for Chinese Word Segmentation . 
+The computational linguistics and natural language processing community is experiencing an episode of deep fascination with representation learning .
+Like many other presenters at this conference , I will describe new ways to use representation learning in models of natural language . 
+Noting that a data - driven model always assumes a theory ( not necessarily a good one ) , I will argue for the benefits of language - appropriate inductive bias for representation - learning - infused models of language .
+Such bias often comes in the form of assumptions baked into a model , constraints on an inference algorithm , or linguistic analysis applied to data .
+Indeed , many decades of research in linguistics ( including computational linguistics ) put our community in a strong position to identify promising inductive biases .
+The new models , in turn , may allow us to explore previously unavailable forms of bias , and to produce findings of interest to linguistics .
+I will focus on new models of documents and of sentential semantic structures , and I will emphasize abstract , reusable components and their assumptions rather than applications .
+In this talk I will argue that in order to render electronic data more accessible to individuals and computers alike , new types of translation models need to be developed .
+I will focus on three examples , text simplification , source code generation , and movie summarization .
+I will illustrate how recent advances in deep learning can be extended in order to induce general representations for different modalities and learn how to translate between these and natural language .
+Mirella Lapata is professor of natural language processing in the School of Informatics at the University of Edinburgh .
+Her research focuses on getting computers to understand , reason with , and generate .
+She is as an associate editor of the Journal of Artificial Intelligence Research and has served on the editorial boards of Transactions of the ACL and Computational Linguistics .
+She was the first recipient of the Karen Sparck Jones award of the British Computer Society , recognizing key contributions to NLP and information retrieval .
+She received two EMNLP best paper awards and currently holds a prestigious Consolidator Grant from the European Research Council . xxiii

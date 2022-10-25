@@ -1,0 +1,248 @@
+Learning CNF Blocking for Large - scale Author Name Disambiguation
+Author name disambiguation ( AND ) algorithms identify a unique author entity record from all similar or same publication records in scholarly or similar databases .
+Typically , a clustering method is used that requires calculation of similarities between each possible record pair .
+However , the total number of pairs grows quadratically with the size of the author database making such clustering difficult for millions of records .
+One remedy is a blocking function that reduces the number of pairwise similarity calculations .
+Here , we introduce a new way of learning blocking schemes by using a conjunctive normal form ( CNF ) in contrast to the disjunctive normal form ( DNF ) .
+We demonstrate on PubMed author records that CNF blocking reduces more pairs while preserving high pairs completeness compared to the previous methods that use a DNF and that the computation time is significantly reduced .
+In addition , we also show how to ensure that the method produces disjoint blocks so that much of the AND algorithm can be efficiently paralleled .
+Our CNF blocking method is tested on the entire PubMed database of 80 million author mentions and efficiently removes 82.17 % of all author record pairs in 10 minutes .
+Author name disambiguation ( AND ) refers to the problem of identifying each unique author entity record from all publication records in scholarly databases ( Ferreira et al , 2012 ) .
+It is also an important preprocessing step for a variety of problems .
+One example is processing author - related queries properly ( e.g. , identify all of a particular author 's publications ) in a digital library search engine .
+Another is to calculate author - related statistics such as an h - index , and collaboration relationships between authors . 
+Typically , a clustering method is used to calculate AND .
+Such clustering calculates pairwise similarities between each possible pairs of records that then determines whether each pair should be in the same cluster .
+Since the number of possible pairs in a database with the number of records n is n ( n − 1 ) /2 , it grows as O ( n 2 ) .
+Since n can be millions of authors in some databases such as PubMed , AND algorithms need methods that scale , such as a blocking function ( Christen , 2012 ) .
+The blocking function produces a reduced list of candidate pairs , and only the pairs on the list are considered for clustering . 
+Blocking usually consists of blocking predicates .
+Each predicate is a logical binary function with a combination of an attribute and a similarity criterion .
+One example can be exact match of the last name .
+A simple but effective way of blocking involves manually selecting the predicates , with respect to the data characteristics .
+Much recent work on large - scale AND uses a heuristic that is the initial match of first name and exact match of last name ( Torvik and Smalheiser , 2009 ; Liu et al , 2014 ; Levin et al , 2012 ; Kim et al , 2016 ) .
+Although this gives reasonable completeness , it can be problematic when the database is extremely large , such as the author mentions in CiteSeerX ( 10 M publications , 32 M authors ) , PubMed ( 24 M publications , 88 M authors ) , and Web of Science ( 45 M publications , 163 M authors )
+1 . 
+The blocking results on PubMed using this heuristic are shown in Table 1 .
+Note that most of the block sizes are less than 100 names , but a few blocks are extremely large .
+Since the number ( Kim et al , 2016 ) . 
+To make matters worse , this problem increases in time , since the growth rates of publication records are rapidly increasing . 
+To improve the blocking , there has been work on learning the blocking ( Bilenko et al , 2006 ; Michelson and Knoblock , 2006 ; Cao et al , 2011 ; Kejriwal and Miranker , 2013 ; Das Sarma et al , 2012 ; Fisher et al , 2015 ) .
+These can be categorized into two different methods .
+One is a disjoint blocking , where each block is separated so each record belongs to a single block .
+Another is non - disjoint blocking , where some blocks have shared records .
+Each has advantages .
+Disjoint blocking can make the clustering step easily parallelized , while non - disjoint blocking often produces smaller blocks .
+and also has more degrees of freedom from which to select the similarity criterion . 
+Here , we propose to learn a non - disjoint blocking with a conjunctive normal form ( CNF ) .
+Our main contributions are : Propose a CNF blocking , which reduces more pairs compared to DNF blocking , in order to achieve a large number of pairs completeness .
+This also reduces the processing time , which benefits various applications such as online disambiguation , author search , etc . Extend the method to produce disjoint blocks , so that the AND clustering step can be easily parallelized . 
+Compare different gain functions , which are used to find the best blocking predicates for each step of learning . 
+Previous work is discussed in the next session .
+This is followed by problem definition .
+Next , we describe learning of CNF blocking and how to use it to ensure the production of disjoint blocks .
+Next , we evaluate our methods on the PubMed dataset .
+Finally , the last section consists of a summary work with possible future directions .
+Blocking has been widely studied for record linkage and entity disambiguation .
+Standard blocking is the simplest but most widely used method ( Fellegi and Sunter , 1969 ) .
+It is done by considering only pairs that meet al blocking predicates .
+Another is the sorted neighborhood approach ( Hernández and Stolfo , 1995 ) which sorts the data by a certain blocking predicate , and forms blocks with pairs of those records within a certain window .
+Yan et
+al ( 2007 ) further improved this method to adaptively select the size of the window .
+Aizawa and Oyama ( 2005 ) introduced a suffix array - based indexing method , which uses an inverted index of suffixes to generate candidate pairs .
+Canopy clustering ( McCallum et al , 2000 ) generates blocks by clustering with a simple similarity measure and use loose & tight thresholds to generate overlapping clusters .
+Recent surveys ( Christen , 2012 ; Papadakis et al , 2016Papadakis et
+al , , 2020 imply that there are no clear winners and proper parameter tuning is required for a specific task . 
+Much work optimized the blocking function for standard blocking .
+The blocking function is typically presented with a logical formula with blocking predicates .
+Two studies focused on learning a disjunctive normal form ( DNF ) blocking ( Bilenko et al , 2006 ; Michelson and Knoblock , 2006 ) were published in the same year .
+Making use of manually labeled record pairs , they used a sequential covering algorithm to find the optimal blocking predicates in a greedy manner .
+Additional unlabeled data was used to estimate the reduction ratio of their cost function ( Cao et al , 2011 ) while an unsupervised algorithm was used to automatically generate labeled pairs with rule - based heuristics used to learn DNF blocking ( Kejriwal and Miranker , 2013 ) . 
+All the work above proposed to learn nondisjoint blocking because of the logical OR terms in the DNF .
+However , other work learns the blocking function with a pure conjunction , to ensure the generation of disjoint blocks .
+Das et al ( 2012 ) learns a conjunctive blocking tree , which has different blocking predicates for each branch of the tree .
+Fisher et al ( 2015 ) produces blocks with respect to a size restriction , by generating candidate blocks with a list of predefined blocking predicates and then performs a merge and split to generate the block with the desired size . 
+Our work proposes a method for learning a nondisjoint blocking function in a conjunctive normal form ( CNF ) .
+Our method is based on a previous CNF learner ( Mooney , 1995 ) , which uses the fact that a CNF can be a logical dual of a DNF .
+Our work tackles the same problem with baseline DNF blocking ( Bilenko et al , 2006 ; Michelson and Knoblock , 2006 ) , but in a different way to get the optimized blocking function .
+Let R = { r 1 , r 2 , , r n } be the set of records in the database , where n is the number of records .
+Each record r has k attributes , and A be the attribute set A = { a 1 .a 2 , , a k } . 
+A blocking predicate p is a combination of an attribute a and a similarity function s defined to a. An example of s is exact string match of a. A blocking predicate can be seen as a logical binary function applied to each pair of records , so p ( r x , r y )
+= { 0 , 1 } , where r x , r y R. A blocking function f is a boolean logic formula consisting with blocking predicates p 1 , p 2 , , p n , and each predicate is connected with either conjunction or disjunction ∨.
+An example is f example
+= ( p 1 p 2 ) ∨ p 3 .
+Since it is made up of blocking predicates , f ( r x , r y ) = { 0 , 1 } for all r x , r y R. 
+The goal is to find an optimal blocking function f * that covers a minimum number of record pairs while missing up to a fraction ε of total number of matching record pairs .
+To formalize it , f
+* = argmin f ( rx , ry ) R f ( r x , r y ) such that ≥ ( 1 − ε )
+× |
+R + | ( 1 ) where R + is set of matching record pairs .
+Here , we first briefly review DNF blocking and then introduce our CNF blocking function .
+This section describes the gain functions that select an optimal predicate term for each step in the CNF learner .
+Finally , we discuss an extension that ensures the production of disjunctive blocks . 
+Algorithm 1 DNF Blocking 1 : function LEARNCONJTERMS ( L , P , p , k )
+Let P os be set of positive samples in L 3 : Let N eg be set of negative samples in L 4 : T erms { p } 5 : 
+CurT erm p 6 : i 1 7 : while i <
+k do 8 : Find p
+i P that maximizes gain function CALCGAIN
+( P os , N eg , CurT erm p
+i ) 9 : 
+CurT erm
+CurT erm p
+i 10 : Add CurT erm to T erms 11 : Let P osCov be all l P os that satisfies T 
+i
+i +
+Let N egCov be all l N eg that satisfies T ( Bilenko et al , 2006 ; Michelson and Knoblock , 2006 ) .
+Given labeled pairs , these methods attempt to learn the blocking function in the form of a DNF , the disjunction ( logical OR ) of conjunction ( logical AN D ) terms .
+Learning DNFs is known to be a NP - hard problem ( Bilenko et al , 2006 ) .
+Thus , an approximation algorithm was used to learn k - DNF blocking by using a sequential covering algorithm .
+k - DNF means each conjunction term has , at most , k predicates .
+Algorithm 1 shows the process of DNF blocking .
+Function LEARNDNF in lines 16 - 38 is the main part of the algorithm .
+It has 3 inputs which are the L labeled sample pairs , P blocking predicates , and k parameters of maximum predicates considered for each conjunction term . 
+First , the algorithm selects a set of candidate conjunction terms with at most k predicates .
+For each predicate p , it generates k candidate conjunction terms with the highest gain function .
+Using the candidate terms , the algorithm learns the blocking function by using a sequential covering algorithm .
+It sequentially selects a conjunction term , from the set of candidates , that has the maximum gain value on the remaining samples , and attaches it with logical OR to the DNF term .
+In each step , all samples covered by the selected conjunction term are removed .
+This process repeats until it covers the desired minimum amount of positive samples , or there is no candidate term that can further be improved .
+CNF blocking can be learned with a small modification to DNF blocking .
+CNF can be presented as the entire negation of a corresponding DNF and vice versa based on De Morgan 's laws .
+Using this , Mooney proposed CNF learning ( Mooney , 1995 ) , which is a logical dual of DNF learning .
+This motivated our CNF blocking method . 
+Algorithm 2 illustrates the proposed CNF blocking and has a similar structure to algorithm 1 .
+Instead of running a sequential covering algorithm to cover all positive samples , CNF blocking tries to cover all negative samples using negated blocking predicates .
+In other words , a DNF formula is learned that is consistent with a negated predicate , which we designate negated DNF ( N egDN F ) .
+N egP is the negation of each predicate p in P .
+LEARNCNF gets 3 inputs , where L are labeled Find T CandN egT erms that maximizes gain function
+CALCNEG - GAIN
+( P os , N eg , T erm ) 28 : if CALCNEGGAIN ( P os , N eg , T ) > 0
+then 29 : N egDN F N egDN F ∨ T 30 : Let P osCov be all l in P os that satisfies T
+Let N egCov be all l in N eg that satisfies T return CN F 40 : end function sample pairs , P are blocking predicates , and k is maximum number of predicates in each term . 
+The algorithm first generates a set of negated candidate conjunction term T erms from all p in N egP ( line 19 - 22 ) .
+A dual of the original gain function CALCNEGGAIN selects a predicate for generating a negated candidate conjunction .
+Then , as in DNF blocking , the sequential covering algorithm is used to learn the negated DNF formula ( line 26 - 37 ) , which iteratively adds a negated conjunction term until it covers the desired number of samples .
+We select a negated conjunction term with a gain function , CALCNEGGAIN .
+Also , note that the termination condition of the loop ( line 26 ) is when ε of total positive samples are covered with the learned N egDN F .
+This ensures that we miss less than ε of the total number of positive samples in the final CNF formula .
+After getting the final N egDN F , it is negated to get the desired CNF .
+The gain function estimates the benefit of adding a specific term to the learned formula .
+It is used in two different places in the algorithm - when choosing the conjunction candidates ( line 8 ) and when choosing a term from the candidates for each iteration ( line 27 - 28 ) .
+Previous methods have proposed different gain functions .
+Here we describe each and compare the results in the experiments .
+P , N is the total number of positive and negative samples , and p , n is the number of remaining positive and negative samples covered by the term .
+Originally from Mooney 's CNF learner ( 1995 ) , it is the dual of the information gain of a DNF learner gain CN F = n× log n n + p −log N N + P . 
+( Conj LEARNCNF ( L , P disjoint , 1 )
+Let L be set of l L satisfies Conj
+CN F LEARNCNF ( L remain , P f ull , k )
+Blocks Apply Conj to whole data 6 : for Block Blocks do 7 : Let L be l Block that satisfies CN F
+Consider pairs in L only for clustering 9 : end for 10 : end function they filter out all terms with pairwise completeness ( PC ) below threshold t. We use the dual of the original function used as a CNF , which is now gain CN F = p+n P + N if n N > t 0 otherwise .
+( 4 )
+Disjoint blocking functions generate blocks for each record that resides in a single block ; thus such blocks are mutually exclusive .
+It has the advantage that parallelization can be performed efficiently after applying the blocking by running processes for each blocks separately .
+A blocking function is disjoint if and only if it satisfies the following conditions : 1 ) it only consists of pure conjunction ( logical AND ) , 2 ) all predicates use non - relative similarity measures .
+That is , measures that compare the absolute value of blocking key , e.g. exact match of first n characters .
+DNF and CNF blocking are both non - disjoint blocking due to the condition 1 above .
+We introduce a simple extension to ensure our CNF blocking can produce disjoint blocks .
+This is done by first producing two blocking functions .
+The first function learns a blocking function with only conjunctions based on our CNF blocking method using k = 1 and a limited set of predicates with nonrelative similarity measures .
+Then , CNF blocking is learned with our k - CNF method with the whole set of predicates for pairs remaining after applying 1 - CNF ( conjunction of single attributes ) . 
+We first apply the 1 - CNF to the whole database to produce disjoint blocks .
+Then for each block , we apply the second k - CNF blocking function to filter out pairs not satisfies the k - CNF function .
+This is similar to applying a filter as in Gu and Baxter Khabsa et al ( 2015 ) .
+While they use a heuristic , our method automatically learns the optimal one .
+Note that this method still produces a CNF since it combines conjunction terms and k - CNF with logical AND .
+We use the PubMed to evaluate these methods . 
+PubMed is a public large - scale scholarly database maintained by the National Center for Biotechnology Information
+( NCBI ) at the National Library of Medicine ( NLM ) .
+We use NIH principal investigator ( PI ) data for evaluation , which include PI IDs and corresponding publications .
+We randomly picked 10 names from the most frequent ones in the dataset and manually verified that all publications belong to each PI .
+The set of names include C * Lee , J * Chen , J * Smith , M * Johnson , M * Miller , R * Jones , S * Kim , X * Yang , Y * Li , Y * Wang , where C * means any name starts with C. Table 2 shows the statistics of the dataset .
+Experiments are done with 5 - fold cross validation .
+We evaluate our CNF blocking with reduction ratio ( RR ) , pairs completeness ( PC ) , and F - measure .
+These metrics are often used to evaluate blocking methods .
+Those metrics can be calculated as follows : 
+RR = 1 − p + n P + N , ( 5 ) P C = p P , ( 6 ) 
+F = 2 × RR × P C RR + P C .
+( 7 ) where P , N are the numbers of positive and negative samples , and p , n are the numbers of positive and negative samples covered with the blocking function .
+RR measures the efficiency of the blocking function , PC measures the quality of the blocking function .
+F is the harmonic mean of RR and PC .
+We first define the similarity criterion used for the experiments .
+We observed an important characteristic of the data : some attributes are empty ( e.g. year : 7.8 % , affiliation : 81.1 % ) or have only partial information ( 54.5 % has only initials for the first name ) .
+To deal with this , we add compatible to those blocking keys .
+Below is brief explanation of each similarity criterion . 
+exact : Exact match .
+f irst ( n ) , last ( n ) :
+First / Last n character match , where n is an integer .
+We check { 1 , 3 , 5 , 7 } for name attributes .
+ order : Assigns T rue if both records are first authors , last authors , or non - first and non - last authors . 
+digit ( n ) :
+First n digit match .
+We check { 1 , 2 , 3 } for year .
+compatible : T rue if at least one of the records are empty ( Eq . 8 ) .
+If the key is name , it also checks if the initial matches if one of the records has only initial . 
+compatible ( A , B )
+= T rue if at least one is empty exact ( A , B )
+otherwise ( 8 ) 
+cos : Cosine distance of TF - IDF bag - ofwords vector .
+We check with threshold { 0.2 , 0.4 , 0.6 , 0.8 } . 
+dif f :
+Year difference .
+We use the threshold { 2 , 5 , 10 } . 
+Using those similarity measures , We define two different sets of blocking predicates .
+blocking predicates used for non - disjoint blocking .
+Disjoint blocking requires the use of predicates with non - relative similarity measures to ensure blocks are mutually exclusive .
+For disjoint blocking , we use the set of blocking predicates excluding the ones with the relative similarity measures ( exact , compatible , dif f ) in Table 3 .
+The parameter ε is used to vary the PC .
+We tested values in [ 0 , 1 ] to get the PC - RR curve .
+k is selected experimentally to calculate the maximum reachable F - measure .
+We use k = 3 for further experiments .
+Figure 1 shows the PC - RR curve tested on three different gain functions .
+Blocking usually requires a high PC , so that we do not lose matched pairs after it is applied .
+As such , we focused on experiments with high PC values .
+As we can see from the results , information gain has highest RR overall .
+Thus , we use it as the gain function for the rest of the experiments .
+We compare non - disjoint CNF blocking with the DNF blocking ( Bilenko et al , 2006 ; Michelson and Knoblock , 2006 ) and canopy clustering ( McCallum et al , 2000 ) .
+We used the set of Jaro - Winkler distance attributes for canopy clustering .
+Figure 2 shows the PC - RR curve for each method .
+Both CNF and DNF were better than canopy clustering , as was shown in Bilenko et
+al ( 2006 in ( Khabsa et al , 2015 ) .
+For PC=0.99 , RR for CNF blocking was 0.882 while DNF blocking was 0.745 .
+We believe this is due to certain characteristics of scholarly databases .
+As discussed on the previous section , some attributes are empty for some records .
+DNF learns a blocking function by adding conjunction terms to gradually cover positive pairs .
+Although the proposed similarity criterion compatible could catch positive pairs with empty attributes , it allows many negative pairs to pass the criterion , which makes the RR low .
+On the other hand , CNF learns a blocking function to cover ( and filter out ) negative pairs gradually .
+Negative pairs are much more obvious to define ( pairs with different values ) , which makes the CNF more effective . 
+Another advantage of using CNF is the processing time .
+Fast processing time to apply blocking is important for some applications , one example is when we do a online disambiguation ( Khabsa et al , 2015 ) , another is to do an author search which requires to find the relevant cluster quickly ( Kim et al , 2018 ) .
+We measured the average processing time of applying each blocking method at high PC ( PC=0.99 ) , CNF blocking , DNF blocking , canopy clustering took 1.39s , 2.09s , 0.44s respectively .
+Canopy clustering was the fastest but generally we saw from the Figure 2 that its RR is much lower in high PC .
+CNF blocking has a faster processing time compared to DNF blocking .
+This is because CNF is composed with conjunctions , so it can quickly reject pairs that are not consistent with any terms .
+On the other hand , DNF consists of disjunction terms , so each pair should check all terms to make the decision .
+Learned CNF is also simpler than DNF .
+Learned CNF at this level is as below ( fn , mn , ln is first , middle , last name respectively ) :
+In addition , we observed that proposed compatible predicate was frequently used in our result .
+This shows the effectiveness of compatible in dealing with the empty value .
+We evaluate our extension to disjoint blocks with CNF blocking .
+We compare the blocking learned with a pure conjunction , our proposed method , and the method of Fisher et al ( 2015 ) . 
+Figure 3 shows the reduction ratio pair completion ( RR - PC ) curve for each method .
+We also plot the original non - disjoint CNF blocking for comparison .
+We see that our proposed disjoint CNF blocking is the best amongst all disjoint methods .
+Fisher 's method produced nearly uniformsized blocks , but had limitations in reaching a high PC and had a generally lower RR compared to our method .
+Disjoint CNF did n't perform as well when compared to non - disjoint CNF because it is forced to use a pure conjunction on its first step .
+However , this simple extension easily helps parallelize the clustering process , so that the algorithm scales better .
+Testing our method to all of PubMed , 82.17 % of the pairs are created in 10.5 min with 24 threads .
+Parallelization is important for disambiguation algorithms to scale to PubMed size scholarly databases ( Khabsa et al , 2014 ) . 
+Processing time for disjoint CNF blocking comparable to the original non - disjoint CNF blocking .
+The learned disjoint CNF is : { ( fn , first ( 1 ) ) } { ( ln , exact ) } { ( fn , compatible ) ∨ ( coauth , cos ( 0.8 ) ) } { ( mn , compatible ) } 
+First two terms are from 1 - CNF , and others from 3 - CNF learner .
+We also tested this function to the whole PubMed .
+We show how to learn an efficient blocking function with a conjunctive normal form ( CNF ) of blocking predicates .
+Using CNF as a negation of the corresponding disjunctive normal form ( DNF ) of predicates ( Mooney , 1995 ) , our method is a logical dual of existing DNF blocking methods ( Bilenko et al , 2006 ; Michelson and Knoblock , 2006 ) .
+We find that our method reduces more pairs for a large number of target pairs completeness and has a faster run time .
+We devise an extension that ensures that our CNF blocking produces disjoint blocks .
+Thus , the clustering process can be efficiently parallelized . 
+Future work could use multiple levels of blocking functions for processing each block ( Das Sarma et al , 2012 ) and using linear programming to find an optimal CNF ( Su et al , 2016 ) .
+We gratefully acknowledge partial support from the National Science Foundation and the National Bureau of Economic Research and useful discussions with Bruce Weinberg .

@@ -1,0 +1,226 @@
+A Multi - Type Multi - Span Network for Reading Comprehension that Requires Discrete Reasoning
+Rapid progress has been made in the field of reading comprehension and question answering , where several systems have achieved human parity in some simplified settings .
+However , the performance of these models degrades significantly when they are applied to more realistic scenarios , where answers are involved with various types , multiple text strings are correct answers , or discrete reasoning abilities are required .
+In this paper , we introduce the Multi - Type Multi - Span Network ( MTMSN ) , a neural reading comprehension model that combines a multi - type answer predictor designed to support various answer types ( e.g. , span , count , negation , and arithmetic expression ) with a multi - span extraction method for dynamically producing one or multiple text spans .
+In addition , an arithmetic expression reranking mechanism is proposed to rank expression candidates for further confirming the prediction .
+Experiments show that our model achieves 79.9 F1 on the DROP hidden test set , creating new state - of - the - art results .
+Source code 1 is released to facilitate future work .
+This paper considers the reading comprehension task in which some discrete - reasoning abilities are needed to correctly answer questions .
+Specifically , we focus on a new reading comprehension dataset called DROP ( Dua et al , 2019 ) , which requires Discrete Reasoning Over the content of Paragraphs to obtain the final answer .
+Unlike previous benchmarks such as CNN / DM ( Hermann et al , 2015 ) and SQuAD ( Rajpurkar et al , 2016 ) that have been well solved Devlin et al , 2019 ) , DROP is substantially more challenging in three ways .
+First , the answers to the questions involve a wide range of types such as numbers , dates , or text strings .
+Therefore , various kinds of prediction strategies are required to successfully find the answers .
+Second , rather than restricting the answer to be a span of text , DROP loosens the constraint so that answers may be a set of multiple text strings .
+Third , for questions that require discrete reasoning , a system must have a more comprehensive understanding of the context and be able to perform numerical operations such as addition , counting , or sorting . 
+Existing approaches , when applied to this more realistic scenario , have three problems .
+First , to produce various answer types , Dua et al ( 2019 ) extend previous one - type answer prediction ( Seo et al , 2017 ) to multi - type prediction that supports span extraction , counting , and addition / subtraction .
+However , they have not fully considered all potential types .
+Take the question " What percent are not non - families ? " and the passage snippet " 39.9 % were non - families " as an example , a negation operation is required to infer the answer .
+Second , previous reading comprehension models ( Wang et al , 2017 ; Yu et al , 2018 ; Hu et al , 2018 ) are designed to produce one single span as the answer .
+But for some questions such as " Which ancestral groups are smaller than 11 % ? " , there may exist several spans as correct answers ( e.g. , " Italian " , " English " , and " Polish " ) , which can not be well handled by these works .
+Third , to support numerical reasoning , prior work ( Dua et al , 2019 ) learns to predict signed numbers for obtaining an arithmetic expression that can be executed by a symbolic system .
+Nevertheless , the prediction of each signed number is isolated , and the expression 's context information has not been considered .
+As a result , obviously - wrong expressions , such as all predicted signs are either minus or zero , are likely produced . 
+To address the above issues , we introduce the Multi - Type Multi - Span Network ( MTMSN ) , a neural reading comprehension model for predicting various types of answers as well as dynamically extracting one or multiple spans .
+MTMSN utilizes a series of pre - trained Transformer blocks ( Devlin et al , 2019 ) to obtain a deep bidirectional context representation .
+On top of it , a multi - type answer predictor is proposed to not only support previous prediction strategies such as span , count number , and arithmetic expression , but also add a new type of logical negation .
+This results in a wider range of coverage of answer types , which turns out to be crucial to performance .
+Besides , rather than always producing one single span , we present a multi - span extraction method to produce multiple answers .
+The model first predicts the number of answers , and then extracts non - overlapped spans to the specific amount .
+In this way , the model can learn to dynamically extract one or multiple spans , thus being beneficial for multi - answer cases .
+In addition , we propose an arithmetic expression reranking mechanism to rank expression candidates that are decoded by beam search , so that their context information can be considered during reranking to further confirm the prediction . 
+Our MTMSN model outperforms all existing approaches on the DROP hidden test set by achieving 79.9 F1 score , a 32.9 % absolute gain over prior best work at the time of submission .
+To make a fair comparison , we also construct a baseline that uses the same BERT - based encoder .
+Again , MTMSN surpasses it by obtaining a 13.2 F1 increase on the development set .
+We also provide an in - depth ablation study to show the effectiveness of our proposed methods , analyze performance breakdown by different answer types , and give some qualitative examples as well as error analysis .
+In the reading comprehension task that requires discrete reasoning , a passage and a question are given .
+The goal is to predict an answer to the question by reading and understanding the passage .
+Unlike previous dataset such as SQuAD ( Rajpurkar et al , 2016 ) where the answer is limited to be a single span of text , DROP loosens the constraint so that the answer involves various types such as number , date , or span of text ( Figure 1 ) .
+Moreover , the answer can be multiple text strings instead of single continuous span ( A 2 ) .
+To suc - Passage : As of the census of 2000 , there were 218 , 590 people , 79 , 667 households , ... 22.5 % were of German people , 13.1 % Irish people , 9.8 % Italian people , ...
+Q1 : Which group from the census is larger : German or Irish ?
+A1 : German Q2 : Which ancestral groups are at least 10 % ?
+A2 : German , Irish Q3 : How many more people are there than households ?
+A3 : 138 , 923 Q4 : How many percent were not German ?
+A4 : 77.5 Figure 1 : Question - answer pairs along with a passage from the DROP dataset . 
+cessfully find the answer , some discrete reasoning abilities , such as sorting ( A 1 ) , subtraction ( A 3 ) , and negation ( A 4 ) , are required .
+Figure 2 gives an overview of our model that aims to combine neural reading comprehension with numerical reasoning .
+Our model uses BERT ( Devlin et al , 2019 ) as encoder : we map word embeddings into contextualized representations using pre - trained Transformer blocks ( Vaswani et al , 2017 ) ( 3.1 ) .
+Based on the representations , we employ a multi - type answer predictor that is able to produce four answer types : ( 1 ) span from the text ; ( 2 ) arithmetic expression ; ( 3 ) count number ; ( 4 ) negation on numbers ( 3.2 ) .
+Following Dua et al ( 2019 ) , we first predict the answer type of a given passage - question pair , and then adopt individual prediction strategies .
+To support multispan extraction ( 3.3 ) , the model explicitly predicts the number of answer spans .
+It then outputs non - overlapped spans until the specific amount is reached .
+Moreover , we do not directly use the arithmetic expression that possesses the maximum probability , but instead re - rank several expression candidates that are decoded by beam search to further confirm the prediction ( 3.4 ) .
+Finally , the model is trained under weakly - supervised signals to maximize the marginal likelihood over all possible annotations ( 3.5 ) .
+To obtain a universal representation for both the question and the passage , we utilize BERT ( Devlin et al , 2019 ) , a pre - trained deep bidirectional Transformer model that achieves state - of - the - art performance across various tasks , as the encoder . 
+Specifically , we first tokenize the question and The multi - type answer predictor supports four kinds of answer types including span , addition / subtraction , count , and negation .
+A multi - span extraction method is proposed to dynamically produce one or several spans .
+The arithmetic expression reranking mechanism aims to rank expression candidates that are decoded by beam search for further validating the prediction . 
+the passage using the WordPiece vocabulary ( Wu et al , 2016 ) , and then generate the input sequence by concatenating a [ CLS ] token , the tokenized question , a [ SEP ] token , the tokenized passage , and a final [ SEP ] token .
+For each token in the sequence , its input representation is the elementwise addition of WordPiece embeddings , positional embeddings , and segment embeddings ( Devlin et al , 2019 ) .
+As a result , a list of input embeddings H 0 2 R T ⇥ D can be obtained , where D is the hidden size and T is the sequence length .
+A series of L pre - trained Transformer blocks are then used to project the input embeddings into contextualized representations
+H i as : 
+H i = TransformerBlock ( H i 1 ) , 8i 2 [ 1 , L ] Here , we omit a detailed introduction of the block architecture and refer readers to Vaswani et
+al ( 2017 ) for more details .
+Rather than restricting the answer to always be a span of text , the discrete - reasoning reading comprehension task involves different answer types ( e.g. , number , date , span of text ) .
+Following Dua et al ( 2019 ) , we design a multi - type answer predictor to selectively produce different kinds of answers such as span , count number , and arithmetic expression .
+To further increase answer coverage , we propose adding a new answer type to support logical negation .
+Moreover , unlike prior work that separately predicts passage spans and question spans , our approach directly extracts spans from the input sequence . 
+Answer type prediction Inspired by the Augmented QANet model ( Dua et al , 2019 ) , we use the contextualized token representations from the last four blocks ( H L 3 , ... , H L ) as the inputs to our answer predictor , which are denoted as M 0 , M 1 , M 2 , M 3 , respectively . 
+To predict the answer type , we first split the representation M 2 into a question representation Q 2 and a passage representation P 2 according to the index of intermediate [ SEP ] token .
+Then the model computes two vectors h Q 2 and h P 2 that summarize the question and passage information respectively : ↵ Q = softmax ( W Q Q 2 ) , h Q 2 = ↵ Q Q 2 where h P 2 is computed in a similar way over P 2 . 
+Next , we calculate a probability distribution to represent the choices of different answer types as : p type = softmax ( FFN ( [ h Q 2 ; h P 2 ; h CLS ] ) ) 
+Here , h CLS is the first vector in the final contextualized representation M 3 , and FFN denotes a feed - forward network consisting of two linear projections with a GeLU activation ( Hendrycks and Gimpel , 2016 ) followed by a layer normalization ( Lei Ba et
+al , 2016 )
+Span To extract the answer either from the passage or from the question , we combine the gating mechanism of Wang et al ( 2017 ) with the standard decoding strategy of Seo et al ( 2017 ) to predict the starting and ending positions across the entire sequence .
+Specifically , we first compute three vectors , namely g Q 0 , g Q 1 , g Q 2 , that summarize the question information among different levels of question representations : Q = softmax ( FFN ( Q 2 ) ,
+g Q 2 = Q Q 2 where g Q 0 and g Q 1 are computed over Q 0 and Q 1 respectively , in a similar way as described above . 
+Then we compute the probabilities of the starting and ending indices of the answer span from the input sequence as : M start
+=
+[ M 2 ; M 0 ; g Q 2 ⌦ M 2 ; g Q 0 ⌦ M 0 ] , M end = [ M 2 ; M 1 ; g Q 2 ⌦ M 2 ; g Q 1 ⌦ M 1 ] , p start = softmax ( W SMstart ) , p end = softmax ( W EMend ) where ⌦ denotes the outer product between the vector g and each token representation in M.
+In order to model the process of performing addition or subtraction among multiple numbers mentioned in the passage , we assign a three - way categorical variable ( plus , minus , or zero ) for each number to indicate its sign , similar to Dua et al ( 2019 ) .
+As a result , an arithmetic expression that has a number as the final answer can be obtained and easily evaluated . 
+Specifically , for each number mentioned in the passage , we gather its corresponding representation from the concatenation of M 2 and M 3 , eventually yielding U
+= ( u 1 , ... , u N ) 2 R N ⇥ 2 ⇤ D where N numbers exist .
+Then the probabilities of the i - th number being assigned a plus , minus or zero is computed as : p sign i = softmax ( FFN ( [ u i ; h Q 2 ; h P 2 ; h CLS ] ) ) 
+Count We consider the ability of counting entities and model it as a multi - class classification problem .
+To achieve this , the model first produces a vector h U that summarizes the important information among all mentioned numbers , and then computes a counting probability distribution as : ↵ U = softmax ( W U U ) , h U = ↵ U U , p count = softmax ( FFN ( [ h U ; h Q 2 ; h P 2 ; h CLS ] ) ) 
+Negation One obvious but important linguistic phenomenon that prior work fails to capture is negation .
+We find there are many cases in DROP that require to perform logical negation on numbers .
+The question ( Q 4 ) in Figure 1 gives a qualitative example of this phenomenon .
+To model this phenomenon , we assign a two - way categorical variable for each number to indicate whether a negation operation should be performed .
+Then we compute the probabilities of logical negation on the i - th number as : p negation i = softmax ( FFN ( [ u i ; h Q 2 ; h P 2 ;
+h CLS ] ) )
+Although existing reading comprehension tasks focus exclusively on finding one span of text as the final answer , DROP loosens the restriction so that the answer to the question may be several text spans .
+Therefore , specific adaption should be made to extend previous single - span extraction to multi - span scenario . 
+To do this , we propose directly predicting the number of spans and model it as a classification problem .
+This is achieved by computing a probability distribution on span amount as p span = softmax ( FFN ( [ h Q 2 ; h P 2 ; h CLS ] ) ) 
+To extract non - overlapped spans to the specific amount , we adopt the non - maximum suppression ( NMS ) algorithm ( Rosenfeld and Thurston , 1971 ) that is widely used in computer vision for pruning redundant bounding boxes , as shown in Algorithm 1 .
+Concretely , the model first proposes a set of top - K spans S according to the descending order of the span score , which is computed as p start k p end l for the span ( k , l ) .
+It also predicts the amount of extracted spans t from p span , and initializes a new setS. Next , we add the span s i that possesses the maximum span score to the setS , and remove it from S.
+We also delete any remaining span s j that overlaps with s i , where the degree of overlap is measured using the text - level F1 function .
+This process is repeated for remaining spans in S , until S is empty or the size ofS reaches t.
+As discussed in 3.2 , we model the phenomenon of discrete reasoning on numbers by learning to predict a plus , minus , or zero for each number in the passage .
+In this way , an arithmetic expression composed of signed numbers can be obtained , where the final answer can be deduced by performing simple arithmetic computation .
+However , since the sign of each number is only determined by the number representation and some coarsegrained global representations , the context information of the expression itself has not been considered .
+As a result , the model may predict some Algorithm 1 Multi - span extraction Input : p start ; p end ; p span 1 : Generate the set S by extracting top - K spans 2 : Sort S in descending order of span scores 3 : t = arg max p span + 1 4 : InitializeS = { } 5 : while S 6 = { } and | S
+| < t do 6 : for si in S do 7 : 
+Add span si toS 8 : Remove span si from S 9 : for sj in S do 10 : if f1 ( si , sj ) > 0
+then 11 : Remove span sj from S 12 : returnS obviously wrong expressions ( e.g. , the signs that have maximum probabilities are either minus or zero , resulting in a large negative value ) .
+Therefore , in order to further validate the prediction , it is necessary to rank several highly confident expression candidates using the representation summarized from the expression 's context . 
+Specifically , we use beam search to produce top - ranked arithmetic expressions , which are sent back to the network for reranking .
+Since each expression consists of several signed numbers , we construct an expression representation by taking both the numbers and the signs into account .
+For each number in the expression , we gather its corresponding vector from the representation U.
+As for the signs , we initialize an embedding matrix E 2 R 3 ⇥ 2 ⇤ D , and find the sign embeddings for each signed number .
+In this way , given the i - th expression that contains M signed numbers at most , we can obtain number vectors
+V i 2 R M ⇥ 2 ⇤ D as well as sign embeddings C i 2 R M ⇥ 2 ⇤ D .
+Then the expression representation along with the reranking probability can be calculated as : ↵ V i = softmax ( W V ( V i + C i ) ) ,
+h V i = ↵ V i ( V i + C i ) , p arith i = softmax ( FFN ( [ h V i ; h Q 2 ; h P 2 ; h CLS ] ) )
+3 .
+Since DROP does not indicate the answer type but only provides the answer string , we therefore adopt the weakly supervised annotation scheme , as suggested in Berant et al ( 2013 ) ;
+Dua et al ( 2019 ) .
+We find all possible annotations that point to the gold answer , including matching spans , arithmetic expressions , correct count numbers , negation operations , and the number of spans .
+We use simple rules to search over all mentioned numbers to find potential negations .
+That is , if 100 minus a number is equal to the answer , then a negation occurs on this number .
+Besides , we only search the addition / subtraction of three numbers at most due to the exponential search space . 
+To train our model , we propose using a twostep training method composed of an inference step and a training step .
+In the first step , we use the model to predict the probabilities of sign assignments for numbers .
+If there exists any annotation of arithmetic expressions , we run beam search to produce expression candidates and label them as either correct or wrong , which are later used for supervising the reranking component .
+In the second step , we adopt the marginal likelihood objective function ( Clark and Gardner , 2018 ) , which sums over the probabilities of all possible annotations including the above labeled expressions .
+Notice that there are two objective functions for the multi - span component : one is a distantly - supervised loss that maximizes the probabilities of all matching spans , and the other is a classification loss that maximizes the probability on span amount . 
+At test time , the model first chooses the answer type and then performs specific prediction strategies .
+For the span type , we use Algorithm 1 for decoding .
+If the type is addition / subtraction , arithmetic expression candidates will be proposed and further reranked .
+The expression with the maximum product of cumulative sign probability and reranking probability is chosen .
+As for the counting type , we choose the number that has the maximum counting probability .
+Finally , if the type is negation , we find the number that possesses the largest negation probability , and then output the answer as 100 minus this number .
+Dataset We consider the reading comprehension benchmark that requires Discrete Reasoning Over Paragraphs ( DROP ) ( Dua et al , 2019 ) prehensive understanding of the context as well as the ability of numerical reasoning are required . 
+Model settings We build our model upon two publicly available uncased versions of BERT : BERT BASE and BERT LARGE 2 , and refer readers to Devlin et al ( 2019 ) for details on model sizes .
+We use Adam optimizer with a learning rate of 3e - 5 and warmup over the first 5 % steps to train .
+The maximum number of epochs is set to 10 for base models and 5 for large models , while the batch size is 12 or 24 respectively .
+A dropout probability of 0.1 is used unless stated otherwise .
+The number of counting class is set to 10 , and the maximum number of spans is 8 .
+The beam size is 3 by default , while the maximum amount of signed numbers M is set to 4 .
+All texts are tokenized using Word - Piece vocabulary ( Wu et al , 2016 ) , and truncated to sequences no longer than 512 tokens . 
+Baselines Following the implementation of Augmented QANet ( NAQANet ) ( Dua et al , 2019 ) , we introduce a similar baseline called Augmented BERT ( NABERT ) .
+The main difference is that we replace the encoder of QANet ( Yu et al , 2018 ) with the pre - trained Transformer blocks ( Devlin et al , 2019 ) .
+Moreover , it also supports the prediction of various answer types such as span , arithmetic expression , and count number .
+Two metrics , namely Exact Match ( EM ) and F1 score , are utilized to evaluate models .
+We use the official script to compute these scores .
+Since the test set is hidden , we only submit the best single model to obtain test results . 
+Table 1 shows the performance of our model and other competitive approaches on the develop -
+Component ablation To analyze the effect of the proposed components , we conduct ablation studies on the development set .
+As illustrated in Table 2 , the use of addition and subtraction is extremely crucial : the EM / F1 performance of both the base and large models drop drastically by more than 20 points if it is removed .
+Predicting count numbers is also an important component that contributes nearly 5 % gain on both metrics .
+Moreover , enhancing the model with the negation type significantly increases the F1 by roughly 9 percent on both models .
+In brief , the above results show that multi - type answer prediction is vitally important for handling different forms of answers , especially in cases where discrete reasoning abilities are required .
+We also report the performance after removing the multi - span extraction method .
+The results reveal that it has a more negative impact on the F1 score .
+We interpret this phenomenon as follows : producing multiple spans that are partially matched with ground - truth answers is much easier than generating an exactly - matched set of multiple answers .
+Hence for multi - span scenarios , the gain of our method on F1 is relatively easier to obtain than the one on EM .
+Finally , to ablate arithmetic expression reranking , we simply use the arithmetic expression that has the maximum cumulative sign probability instead .
+We find that our reranking mechanism gives 1.8 % gain on both metrics for the large model .
+This confirms that validating expression candidates with their context information is beneficial for filtering out highly - confident but wrong predictions . 
+Architecture ablation We further conduct a detailed ablation in Table 3 to evaluate our architecture designs .
+First , we investigate the effects of some " global vectors " used in our model .
+Specifically , we find that removing the question and passage vectors from all involved computation leads to 1.3 % drop on F1 .
+Ablating the representation of [ CLS ] token leads to even worse results .
+We also try to use the last hidden representation ( denoted as M 3 ) to calculate question and passage vectors , but find that does not work .
+Next , we remove the gating mechanism used during span prediction , and observe a nearly 0.8 % decline on both metrics .
+Finally , we share parameters between the arithmetic expression component and the negation component , and find the performance drops by 1.1 % on F1 .
+Performance breakdown We now provide a quantitative analysis by showing performance breakdown on the development set .
+Table 4 shows that our gains mainly come from the most frequent number type , which requires various types of symbolic , discrete reasoning operations .
+Moreover , significant improvements are also obtained in the multi - span category , where the F1 score increases by more than 40 points .
+This result further proves the validity of our multi - span extraction method .
+We also give the performance statistics that are categorized according to the predicted answer types in Table 5 .
+As shown in the Table , the main improvements are due to the addition / subtraction and negation types .
+We conjecture that there are two reasons for these improvements .
+First , our proposed expression reranking mechanism helps validate candidate expressions .
+Second , a new inductive bias that enables the model to perform logical negation has been introduced .
+The impressive performance on the negation type confirms our judgement , and suggests that the model is able to find most of negation operations .
+In addition , we also observe promising gains brought by the span and count types .
+We think the gains are mainly due to the multi - span extraction method as well as architecture designs . 
+Effect of maximum number of spans To investigate the effect of maximum number of spans on multi - span extraction , we conduct an experiment on the dev set and show the curves in Figure 3 .
+We vary the value from 2 to 12 , increased by 2 , and also include the extreme value 1 .
+According to the Figure , the best results are obtained at 8 .
+A higher value could potentially increase the answer recall but damage the precision by making more predictions , and a smaller value may force the model to produce limited number of answers , resulting in high precision but low recall .
+Therefore , a value of 8 turns out to be a good trade - off between recall and precision .
+Moreover , when the value decreases to 1 , the multi - span extraction degrades to previous single - span scenario , and the performance drops significantly .
+Effect of beam size and M We further investigate the effect of beam size and maximum amount of signed numbers in Figure 4 .
+As we can see , a beam size of 3 leads to the best performance , likely because a larger beam size might confuse the model as too many candidates are ranked , on the other hand , a small size could be not sufficient to cover the correct expression .
+In addition , we find that the performance constantly decreases as the maximum threshold M increases , suggesting that most of expressions only contain two or three signed numbers , and setting a larger threshold could bring in additional distractions .
+We list the annotation statistics on the DROP train set in Table 6 .
+As we can see , only annotating matching spans results in a labeled ratio of 56.4 % , indicating that DROP includes various answer types beyond text spans .
+By further considering the arithmetic expression , the ratio increase sharply to 91.7 % , suggesting more than 35 % answers need to be inferred with numeral reasoning .
+Continuing adding counting leads to a percentage of 94.4 % , and a final 97.9 % coverage is achieved by additionally taking negation into account .
+More importantly , the F1 score constantly increases as more answer types are considered .
+This result is consistent with our observations in ablation study . 
+Error analysis Finally , to better understand the remaining challenges , we randomly sample 100 incorrectly predicted examples based on EM and categorize them into 7 classes .
+38 % of errors are incorrect arithmetic computations , 18 % require sorting over multiple entities , 13 % are due to mistakes on multi - span extraction , 10 % are singlespan extraction problems , 8 % involve miscounting , another 8 % are wrong predictions on span number , the rest ( 5 % ) are due to various reasons such as incorrect preprocessing , negation error , and so on .
+See Appendix for some examples of the above error cases .
+Reading comprehension benchmarks Promising advancements have been made for reading comprehension due to the creation of many large datasets .
+While early research used cloze - style tests ( Hermann et al , 2015 ; Hill et al , 2016 ) , most of recent works ( Rajpurkar et al , 2016 ; Joshi et al , 2017 ) are designed to extract answers from the passage .
+Despite their success , these datasets only require shallow pattern matching and simple logical reasoning , thus being well solved Devlin et al , 2019 ) .
+Recently , Dua et al ( 2019 ) released a new benchmark named DROP that demands discrete reasoning as well as deeper paragraph understanding to find the answers .
+Saxton et al ( 2019 ) introduced a dataset consisting of different types of mathematics problems to focuses on mathematical computation .
+We choose to work on DROP to test both the numerical reasoning and linguistic comprehension abilities . 
+Neural reading models Previous neural reading models , such as BiDAF ( Seo et al , 2017 ) , R - Net ( Wang et al , 2017 ) , QANet ( Yu et al , 2018 ) , Reinforced Mreader ( Hu et al , 2018 ) , are usually designed to extract a continuous span of text as the answer .
+Dua et al ( 2019 ) enhanced prior single - type prediction to support various answer types such as span , count number , and addition / subtraction .
+Different from these approaches , our model additionally supports a new negation type to increase answer coverage , and learns to dynamically extract one or multiple spans .
+Morevoer , answer reranking has been well studied in several prior works ( Cui et al , 2016 ; Wang et al , 2018a , b , c ; Hu et al , 2019 ) .
+We follow this line of work , but propose ranking arithmetic expressions instead of candidate answers . 
+End - to - end symbolic reasoning Combining neural methods with symbolic reasoning was considered by Graves et al ( 2014 ) ; Sukhbaatar et al ( 2015 ) , where neural networks augmented with external memory are trained to execute simple programs .
+Later works on program induction ( Reed and De Freitas , 2016 ; Neelakantan et al , 2016 ; Liang et al , 2017 ) extended this idea by using several built - in logic operations along with a key - value memory to learn different types of compositional programs such as addition or sorting .
+In contrast to these works , MTMSN does not model various types of reasoning with a universal memory mechanism but instead deals each type with individual predicting strategies . 
+Visual question answering In computer vision community , the most similar work to our approach is Neural Module Networks ( Andreas et al , 2016b ) , where a dependency parser is used to lay out a neural network composed of several pre - defined modules .
+Later , Andreas et al ( 2016a ) proposed dynamically choosing an optimal layout structure from a list of layout candidates that are produced by off - the - shelf parsers .
+Hu et al ( 2017 ) introduced an end - to - end module network that learns to predict instance - specific network layouts without the aid of a parser .
+Compared to these approaches , MTMSN has a static network layout that can not be changed during training and evaluation , where pre - defined " modules " are used to handle different types of answers .
+We introduce MTMSN , a multi - type multi - span network for reading comprehension that requires discrete reasoning over the content of paragraphs .
+We enhance a multi - type answer predictor to support logical negation , propose a multi - span extraction method for producing multiple answers , and design an arithmetic expression reranking mechanism to further confirm the prediction .
+Our model achieves 79.9 F1 on the DROP hidden test set , creating new state - of - the - art results .
+As future work , we would like to consider handling additional types such as sorting or multiplication / division .
+We also plan to explore more advanced methods for performing complex numerical reasoning .
+We would like to thank the anonymous reviewers for their thoughtful comments and insightful feedback .
+This work was supported by the National Key Research and Development Program of China ( 2016YFB100101 ) .

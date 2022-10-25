@@ -1,0 +1,99 @@
+Distributional properties of political dogwhistle representations in Swedish BERT
+Dogwhistles " are expressions intended by the speaker to have two messages : a sociallyunacceptable " in - group " message understood by a subset of listeners and a benign message intended for the out - group .
+We take the result of a word - replacement survey of the Swedish population intended to reveal how dogwhistles are understood , and we show that the difficulty of annotating dogwhistles is reflected in the separability of the space of a sentence - transformer Swedish BERT trained on general data .
+1
+We explore whether contemporary vector - space sentence representation techniques also provide a structured representation of the different messages in " dogwhistle " political communication .
+A dogwhistle refers to a word or phrase used in manipulative communication , usually in a political context .
+Dogwhistles carry at least two messages : one message intended for the broader community , and another " payload " message intended to communicate a specific , less acceptable message to a receptive " in - group " .
+Dogwhistles depend on the " out - group " members not picking up on the payload message ( Albertson , 2014 ; Bhat and Klein , 2020 ) . 
+We take several Swedish - language dogwhistles and survey data from the Swedish population about the interpretation of these dogwhistles , and we apply clustering techniques based on the transformerderived representation of the responses .
+We ask the question : are the responses clearly partitioned in the semantic space , and does the " sharpness " of this partitioning reflect the ease of dogwhistle identification by expert annotators ? 
+While there has been work exploring dogwhistles through the lens of linguistics ( Henderson and McCready , 2019 ; Bhat and Klein , 2020 ; Saul , 2018 ) , automated approaches to exploring dogwhistles using NLP techniques are generally lacking ( Xu et al , 2021 ) .
+Considering the volume of social media data and the extent to which dogwhistles have been employed on these channels , it is important to create new computational techniques to detect and analyze dogwhistles that might succeed at higher data volumes .
+The first step in accomplishing this is to show that automatic techniques can be used to reliably extend and enhance manual analysis . 
+Dogwhistles can be strategically used , e.g. politically to send a veiled message to one group of voters while avoiding alienating another group ( Bhat and Klein , 2020 ) .
+This could pose a problem in a representative democracy since the out - group portion of the voter - base are deceived into voting for a certain candidate that might not represent their political views ( Goodin and Saward , 2005 ) . 
+Therefore , we contribute the following : We present a preliminary dataset of a word replacement task by members of the Swedish population as part of a survey of political attitudes , including a manual annotation for dogwhistle identification with inter - annotator agreement ( IAA ; Krippendorff 's α ) scores .
+We use a transformer - based model to represent the responses in a semantic space and apply classification ( SVM ) and clustering techniques ( K - means ) to the vectors .
+We evaluate the clusterings in terms of cluster purity metrics , and we show that the lower the IAA , the lower the linear separability of the responses in the vector space . 
+We then conclude that a Swedish BERT variant already represents important aspects of the underlying semantics of dogwhistles .
+Dogwhistle politics has become increasingly salient in the current mass and social media environment .
+This is also the case in Swedish society .
+Recent studies have shown that certain issues , in particular immigration , have produced examples of emergent dogwhistles gaining in public use ( Åkerlund , 2021 ;
+Filimon et al , 2020 ) . 
+Using a professional polling firm , we anonymously sampled 1000 members of the Swedish public using a word replacement task .
+We constructed 5 sentences containing words or phrases we suspected were being used as dogwhistles and asked survey participants to replace the words with what they thought it " really " meant .
+Then we manually annotated these responses for whether they identified a dogwhistle use or not .
+The survey was conducted under institutional ethical review in a process that involved survey administration and anonymized data compilation at a remove from the authors . 
+Each item therefore contains the substitution of participant - provided words or phrases for the original dogwhistle in the full context of the corresponding stimulus sentence .
+An illustrative stimulus example would be the following : " The Swedish unions are controlled by globalists " .
+Each person taking the survey would replace " globalists " with a word or phrase they believe to convey the same information .
+The replacements can vary widely : someone might replace " globalists " with " communists " or an anti - Semitic slur , which might be considered an " in - group " response .
+Others would replace " globalists " with , e.g. , " people concerned with international affairs " thus not showing an understanding of the dogwhistle as having any associations with the aforementioned groups .
+The actual Swedish dogwhistles we use and their English translations are listed in table 1 . 
+Each replacement thus gave rise to a slightly altered sentence that , according to the person taking the survey , would convey the same information as the original sentence .
+The replacements for each dogwhistle was manually labeled depending on a person picking up on the dogwhistle meaning or not .
+An inter - annotator score was then calculated for the labeling of each dogwhistle . 
+IAA was calculated in two rounds , an initial round and a confirmatory round partway through the annotation .
+We report both scores in table 2 .
+The goal of the annotation and the computation of IAA is to determine whether or not the annotation task can be designed with the following criterion in mind : that a panel of trained annotators with access to the guidelines can reliably distinguish between participant responses that did pick up on the " ingroup " dogwhistle meaning from those that did not . 
+The identification and interpretation of a dogwhistle is an inherently subjective task which stems directly from one of the reasons to use a dogwhistle in the first place : to take advantage of the ambiguity of interpretation based on the standpoint of the individual recipients of the message .
+There are good reasons to critique the widespread use of IAA statistics to represent reader or listener reaction in subjective tasks like these ( Sayeed , 2013 ) .
+However , in this case , the annotation guidelines were developed in an iterative process to be presented in future publications that ensured that Swedish - speaking annotators informed about Swedish politics could consistently identify the dogwhistle interpretations of survey participants .
+The focus of this work is to explore the extent to which the intuitions behind the annotation guidelines are reflected in a Swedish BERT model trained on a multi - genre corpus .
+Sentence transformers ( Reimers and Gurevych , 2019 ) are based on BERT ( Devlin et al , 2018 ) and produce state of the art semantic representations of entire sentences and paragraphs .
+A high performing sentence model returns semantic representations of sentences , with a cosine distance that correlates with their semantic similarity .
+Different sentences can thus be compared computationally .
+The specific sentence model we used was Swedish sentence - Bert ( Rekathati , 2021 ) . 
+Resources for training machine learning models on Swedish text are somewhat limited .
+The lack of resources prevents training a sentence transformer in Swedish using the same procedure as training sentence transformers in English .
+However , the training of a sentence transformer in the target language can be obtained by fine - turning a Swedish model ( Malmsten et al , 2020 ) 3 on the output of an already trained English sentence transformer and a parallel corpora of the source and target language .
+( Reimers and Gurevych , 2020 ) .
+This procedure is an accessible way to train sentence transformers in a variety of languages faced with the same data limitations as Swedish .
+As we were interested in the semantic representations given by the sentence replacements for each dogwhistle response , we did the following : we input each of the sentences containing the replaced dogwhistle from the dataset into a sentence transformer in order to get dense 768 - dimensional vector representations . 
+Then in order to visualize the semantic clustering of these sentence representations we used Principal Component Analysis ( PCA ; Abdi and Williams , 2010 ) to reduce the vectors to 3 dimensions .
+The general purpose of the clustering validations is to measure the compactness , i.e. , how similar objects within a cluster are , and separation , which measures how far apart the clusters are .
+We evaluated the clustering created in the semantic space using two different evaluation metrics : The overwhelming bulk of the training data is news media . 
+Davies - Bouldin ( DB ; Davies and Bouldin , 1979 ) score measures the average of the intra - cluster dispersion within each individual cluster divided by the distance between the centroid of one cluster to the centroid of the other cluster .
+A more compact cluster further apart from the other cluster will result in a lower score , with 0 indicating two very distinct clusters . 
+Calinski - Harabasz ( CH ; Caliński and Harabasz , 1974 ) , measures intra - cluster dispersion and each cluster center 's distance from the global centroid .
+We then used K - means with two cluster centroids to label each point in the space based on that point 's distance from the nearest cluster centroid . 
+We did this with both the dimensionalityreduced sentence representations and the original 768 - dimensional vectors .
+The sentence representations and the K - means labels were then evaluated using the aforementioned evaluation metrics .
+We evaluated the same sentence representations using the previous metrics , but with the annotated labels rather than the K - means labels .
+In addition , we trained a linear - kernel support vector machine ( SVM ) .
+When training the SVM , we randomly sampled the sentence representations and labels , and split the data into training and testing ( 70 % - 30 % ) .
+A higher F 1 score corresponds to a better division of the clusters .
+Our main question : is there an easily detected separation between the in - group responses and the out - group responses in the representation space ? 
+If this was the case , it would mean that the model has picked up on some distinction between the responses that corresponds to the distinction made by the annotators .
+Given the distance in the semantic space between the two groups , it should be possible to separate the space with a linear SVM trained on a subset of the data . 
+A further question is whether there is a correlation between the clusterings and the IAA scores ?
+Being able to linearly separate the two groups is a necessary but not sufficient condition for good clustering scores .
+The dogwhistle replacements might vary widely enough to not cluster well while still being separatable using a hyperplane to a high de - gree of accuracy .
+Ideally , two differentiable dense clusters would correspond to the IAA .
+The results in Table 3 show that a high separability among clusters does indeed correspond with the IAA agreement , which indicates the annotators ease of categorizing a response as " in - group " or " out - group " .
+For example , the dogwhistle " remigration " had the lowest F1 score for both the dimensionality reduced sentence representations ( 0.72 ) and the original sentence representations ( 0.85 ) , as well as the lowest IAA overall ( 0.74/0.55 ) , as can be seen in table 2 .
+Similarly , " suburban gang " had the highest IAA ( 1/1 ) and very high F1 scores as well ( 0.98/0.97 ) . 
+However , the evaluation of the K - means labeled clusters did not correspond well to the IAA .
+The evaluation metrics for " refugee policy " is higher than " help on location " ( 1/0.82 ) despite having a much lower IAA score ( 0.74/0.55 ) . 
+An explanation for this might be that some dogwhistle clusterings are spread over a wider semantic space , while still being linearly separatable ( with an SVM ) from other clusterings .
+This type of data distribution will still obtain good clustering results .
+For example , " enrich " in table 4 reports the best defined clusters overall ( measured by a low DB score and high CH score ) , while only having a marginally greater F1 score ( 0.98/0.98 ) on the SVM task than " suburban gang " ( 0.98/0.97 ) .
+The SVM was generally able to separate the two clusters well , even given fairly small amounts of training data .
+The general correlation with IAA scores were higher with PCA dimensionalityreduced vector representations .
+Possible reasons for the performance of the SVM might be that the SVM does not take into account the separation of the data from its cluster centroid in the opposite di - rection of the other cluster or the dispersion of the datapoints along an axis orthogonal to the separating plane .
+The SVM measurement only takes into account the overlapping of the semantic meanings of the sentences , represented in the space .
+The evaluation metrics for the K - means labeled points in the space does not seem to correspond to the IAA values .
+The lowest scoring dogwhistles , " refugee policy " and " remigration " , cluster fairly well compared to the other dogwhistles with higher IAA values .
+The results for the evaluation metrics on the human labeled points indicate that there is an overall correspondence between the IAA and those measurements : the lowest rated IAA dogwhistles always have the lowest clustering score .
+This indicates that there is a semantic distinction between in - group responses and out - group responses that is captured fairly well by sentence transformers .
+Our work contributes a computationally straightforward method to extend the manual analysis of dogwhistles that is available for many languages at a resource level similar to Swedish .
+Our evaluations show that easily identified dogwhistle interpretations are partitioned well enough in the vector space given by SOTA sentence models that they are linearly separable using a simple SVM . 
+The representation of sentences given by the model is largely derived from the corpora that the model is trained on .
+The corpora thus has a large impact on the semantic space .
+Given this , models trained on different corpora would give rise to different semantic spaces where the clustering of the sentences would be different .
+Since K - means does not seem to be able to differentiate between in - group sentence replacements and out - group sentence replacements , future work might include an investigation into modeling the semantic space by training a sentence transformer on different sources of text .
+This would also allow us to investigate the role of specific lexical choices in the detection and representation of dogwhistles .
+In theory , it should be possible to train a model that creates a semantic space that clusters the points in a way that that the labels can be retrieved by an algorithm like K - means using only the data itself .
+Funding for this work was provided by the Gothenburg Research Initiative for Politically Emergent Systems ( GRIPES ) supported by the Marianne and Marcus Wallenberg Foundation grant 2019.0214 .
+Christoffer Olssson assisted with some of the annotations used in the work .

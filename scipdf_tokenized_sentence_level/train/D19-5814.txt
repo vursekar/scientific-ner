@@ -1,0 +1,126 @@
+Machine Comprehension Improves Domain - Specific Japanese Predicate - Argument Structure Analysis
+To improve the accuracy of predicateargument structure ( PAS ) analysis , large - scale training data and knowledge for PAS analysis are indispensable .
+We focus on a specific domain , specifically Japanese blogs on driving , and construct two wide - coverage datasets as a form of QA using crowdsourcing : a PAS - QA dataset and a reading comprehension QA ( RC - QA ) dataset .
+We train a machine comprehension ( MC ) model based on these datasets to perform PAS analysis .
+Our experiments show that a stepwise training method is the most effective , which pre - trains an MC model based on the RC - QA dataset to acquire domain knowledge and then fine - tunes based on the PAS - QA dataset .
+To understand the meaning of a sentence or a text , it is essential to analyze relations between a predicate and its arguments .
+Such analysis is called semantic role labeling ( SRL ) or predicate - argument structure ( PAS ) analysis .
+For English , the accuracy of SRL has reached approximately 80 % - 90 % ( Ouchi et al , 2018 ; Strubell et al , 2018 ; Tan et al , 2018 ) .
+However , there are many omissions of arguments in Japanese , and the accuracy of Japanese PAS analysis on omitted arguments is still around 50 % - 60 % ( Shibata et al , 2016 ; Shibata and Kurohashi , 2018 ;
+Kurita et al , 2018 ; Ouchi et al , 2017 ) .
+A reason for such low accuracy is the shortage of gold datasets and knowledge about PAS analysis , which require a prohibitive cost of creation ( Iida et al , 2007 ; Kawahara et al , 2002 ) . 
+From the viewpoint of text understanding , machine comprehension ( MC ) has been actively studied in recent years .
+In MC studies , QA datasets consisting of triplets of a document , a question and *
+The current affiliation is Yahoo Japan Corporation . 
+its answer are constructed , and an MC model is trained using these datasets ( e.g. , Rajpurkar et al ( 2016 ) and
+Trischler et al ( 2017 ) ) .
+MC has made remarkable progress in the last couple of years , and MC models have even exceeded human accuracy in some datasets ( Devlin et al , 2019 ) .
+However , MC accuracy is not necessarily high for documents that contain anaphoric phenomena and those that need external knowledge or inference ( Mihaylov et al , 2018 ; . 
+In this paper , we propose a Japanese PAS analysis method based on the MC framework for a specific domain .
+In particular , we focus on a challenging task of finding an antecedent of a zero pronoun within PAS analysis .
+We construct a widecoverage QA dataset for PAS analysis ( PAS - QA ) in the domain and feed it to an MC model to perform PAS analysis .
+We also construct a QA dataset for reading comprehension ( RC - QA ) in the same domain and jointly use the two datasets in the MC model to improve PAS analysis . 
+We consider the domain of blogs on driving because of the following two reasons .
+Firstly , we can construct high - quality QA datasets in a short time using crowdsourcing .
+Crowdworkers can interpret driving blog articles based on the traffic commonsense shared by the society .
+Secondly , if computers can understand driving situations correctly by extracting driving behavior from blogs , it is possible to predict danger and warn drivers to achieve safer transportation . 
+Our contributions are summarized as follows . 
+FitzGerald et al ( 2018 ) and constructed QA - SRL Bank 2.0 and QAMRs using crowdsourcing , respectively .
+They asked crowdworkers to generate question - answer pairs that represent a PAS .
+These datasets are similar to our PAS - QA dataset , but different in that we focus on omitted arguments and automatically generate questions ( see Section 3.1 ) .
+Many RC - QA datasets have been constructed in recent years .
+For example , Rajpurkar et al ( 2016 ) constructed SQuAD 1.1 , which contains 100 K crowdsourced questions and answer spans in a Wikipedia article .
+Rajpurkar et
+al ( 2018 ) updated SQuAD 1.1 to 2.0 by adding unanswerable questions .
+Some RC - QA datasets have been built in a specific domain ( Welbl et al , 2017 ; Suster and Daelemans , 2018 ; Pampari et al , 2018 ) .
+Many MC models based on neural networks have been proposed to solve RC - QA datasets .
+For example , Devlin et al ( 2019 ) proposed an MC model using a language representation model , BERT , which achieved a high - ranked accuracy on the SQuAD 1.1 leaderboard as of September 30 , 2019 . 
+As a previous study of transfer learning of MC models to other tasks , Pan et al ( 2018 ) pre - trained an MC model using an RC - QA dataset and transfered the pre - trained knowledge to sequence - tosequence models .
+They used SQuAD 1.1 as the RC - QA dataset and experimented on translation and summarization .
+While they used different models for pre - training and fine - tuning , we use the same MC model by constructing PAS - QA and RC - QA datasets in the same QA form .
+We construct PAS - QA and RC - QA datasets in the driving domain .
+Both the QA datasets consist of triplets of a document , a question and its answer as in existing RC - QA datasets .
+We employ crowdsourcing to create large - scale datasets in a short time .
+Figure 1 and Figure 2 show examples of our PAS - QA and RC - QA datasets .
+We construct a PAS - QA dataset in which a question asks an omitted argument for a predicate .
+We focus on the ga case ( nominative ) , the wo case ( accusative ) , and the ni case ( dative ) , which are targeted in the Japanese PAS analysis literature ( Shibata et al , 2016 ; Shibata and Kurohashi , 2018 ;
+Kurita et al , 2018 ; Ouchi et al , 2017 ) . 
+As a source corpus , we use blog articles included in the Driving Experience Corpus ( Iwai et al , 2019 ) .
+We first detect a predicate that has an omitted argument of either of the target three cases by applying the existing PAS analyzer KNP 1 to the corpus .
+KNP tends to overgenerate such predicates , but most erroneous ones are filtered out by the following crowdsourcing step .
+We extract the sentence that contains the predicate and preceding three sentences as a document .
+Then , we automatically generate a question using the following template for nominative . 
+" author , " " other , " and " not sure . "
+The details of this procedure are described in the appendix .
+We generated questions from 2 , 146 blog articles .
+We asked five crowdworkers per question using Yahoo !
+crowdsourcing 2 .
+We adopted triplets with three or more votes if they are not " not sure . "
+For accusative and dative PAS - QA questions , we adopted triplets if they are " other . "
+In this case , there is not any antecedent of a zero pronoun in a document , and the answer is " NULL . "
+For nominative PAS - QA questions , we did not adopt triplets if they are " other " because a nominative always exists as a noun in a document or " author . "
+In addition , because " author " is not explicitly expressed in the document , we add a sentence " " ( The author wrote the following document . )
+to the beginning of the document to deal with " author " in MC models .
+We record the answers as spans in a document or NULL . 
+We randomly extracted 100 questions for each case from the PAS - QA dataset and judged whether we can answer them .
+As a result , 97 % nominative , 87 % accusative and 68 % dative questions were answerable .
+For accusative and dative , we checked all the questions and chose answerable ones .
+Finally , we created 12 , 468 nominative , 3 , 151 accusative and 1 , 069 dative triplets including 476 accusative and 126 dative questions whose answers are NULL .
+It took approximately 32 hours and approximately 210 , 000 JPY to create this dataset .
+We construct a driving - domain RC - QA dataset in the same way as SQuAD 1.1 .
+We extract a document from the Driving Experience Corpus and ask three crowdworkers to write questions and their answers about the document .
+After that , we ask another five crowdworkers to answer a question to validate its answerability and adopt questions with three or more same answers .
+We randomly extracted 200 questions from the RC - QA dataset and judged the question types .
+The result is shown in Table 2 .
+A question was classified according to whether it is a question asking for any argument of nominative , accusative or dative , and if applicable , whether it is an omission or not .
+As shown in Table 2 , the RC - QA dataset contains nearly 40 % of questions asking arguments of nominative , accusative and dative , and a few questions asking for omitted arguments , which are similar to the PAS - QA dataset .
+There are various other questions asking for arguments other than nominative , accusative and dative , and questions using why and how .
+We
+We conduct PAS analysis experiments of our MCsingle / merged / stepwise methods using the PAS - QA and RC - QA datasets .
+We also compare our methods with the neural network - based PAS analysis model ( Shibata and Kurohashi , 2018 ) ( hereafter , NN - PAS ) , which achieved the state - of - theart accuracy on Japanese PAS analysis .
+We adopt BERT ( Devlin et al , 2019 ) as an MC model .
+We split the triplets in the PAS - QA dataset as shown in Table 4 .
+All sentences in these datasets are preprocessed using the Japanese morphological analyzer , JUMAN++ 3 .
+We trained a Japanese pre - trained BERT model using Japanese Wikipedia , which consists of approximately 18 million sentences .
+The input sentences were segmented into words by JUMAN++ , and words were broken into subwords by applying BPE ( Sennrich et al , 2016 ) .
+The parameters of BERT are the same as English BERT BASE .
+The number of epochs for the pre - training was 30 . 
+The state - of - the - art baseline PAS analyzer , NN - PAS , was trained using the existing PAS dataset , KWDLC 4 ( Kyoto University Web Document Leads Corpus ) , as described in Shibata and Kurohashi ( 2018 ) .
+We also trained an NN - PAS model using the PAS - QA dataset in addition to KWDLC ( hereafter , NN - PAS ′ ) .
+For this training , the PAS - QA dataset was converted to the same format as KWDLC , where questions are deleted , and only answers are used . 
+The PAS - QA test data is used to compare the baseline methods with the proposed methods .
+As an evaluation measure , EM ( Exact Match ) is used for all the MC models .
+EM is defined as ( the number of questions in which the system answer matches the gold answer in the dataset ) /
+( the number of questions in the entire dataset ) .
+For each experimental condition , training and testing were conducted five times , and the average scores were calculated .
+3 and 4 , only the outputs of MC - stepwise were correct .
+We found some cases that MC - stepwise successfully captured knowledge in the driving domain .
+In the example shown in Figure 4 , the correspondence between " " ( climb up the slope ) and " " ( going up the slope ) can be recognized .
+MC - merged 's answer " " ( the hill road ) , which has a coreference relation with "
+" ( the slope ) , looked correct although " " ( the slope ) was the only answer from crowdsourcing .
+Supplying multiple answers considering coreference relations is our future work .
+From these results , we think that it is important to use an RC - QA dataset to acquire domain knowledge , and suggest that it is better to construct both PAS - QA and RC - QA datasets to develop a PAS analyzer for a new domain .
+We constructed driving - domain PAS - QA and RC - QA datasets using crowdsourcing 5 .
+We also proposed an MC - based PAS analysis method .
+In particular , the stepwise training method based on BERT was the most effective , which outperformed the previous state - of - the - art NN - PAS model .
+In the future , we will pre - train an MC model based on datasets other than the RC - QA dataset to acquire domain knowledge . 
+A Details of PAS - QA Dataset Construction We construct the PAS - QA dataset asking for omitted nominative arguments using the following procedure : 1 .
+We extract four consecutive sentences that satisfy the following conditions from the Driving Experience Corpus constructed by Iwai et al ( 2019 ) .
+The Driving Experience extracting CRF tool ( Iwai et al , 2018 ) judges that three or more sentences out of four sentences are driving experience .
+Each sentence contains at least one PAS . 
+The PAS analyzer , KNP , judges that there is a PAS whose nominative argument is omitted in the fourth sentence .
+Sentences include at least one " Driving Characteristic Word " ( Iwai et al , 2019 ) .
+2 . We automatically make crowdsourcing tasks using an extracted document and a PAS whose nominative argument is omitted ( See Figure 5 and Figure 6 ) .
+Each task consists of a document , a question and answer choices .
+Answer choices consist of nouns extracted from the document and special symbols , " author , " " other , " and " not sure . "
+For nominative PAS - QA questions , the special symbol " author " can often be an answer , but it is not explicitly expressed in the document .
+So we add it to the choices .
+We add " other " so that it can be selected when there is an appropriate answer besides the choices .
+We add " not sure " so that workers can select it if they can not find an answer .
+We add more explanations to crowdsourcing answer screen ( See Figure 5 and Figure 6 ) .
+3 . Using crowdsourcing , we ask five crowdworkers per question to select one or more appropriate answers from the choices .
+We asked five crowdworkers per question using Yahoo !
+crowdsourcing .
+We adopted triplets with three or more votes if they are not " not sure . "
+If they are " other , " we handled them as described in the main paper .
+We finally record the answers as spans in a document or NULL .

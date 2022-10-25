@@ -1,234 +1,25 @@
-XGLUE :
-A New Benchmark Dataset for Cross - lingual Pre - training , Understanding and Generation
-In this paper , we introduce XGLUE , a new benchmark dataset that can be used to train large - scale cross - lingual pre - trained models using multilingual and bilingual corpora and evaluate their performance across a diverse set of cross - lingual tasks .
-Comparing to GLUE ( Wang et al , 2019 ) , which is labeled in English for natural language understanding tasks only , XGLUE has two main advantages : ( 1 ) it provides 11 diversified tasks that cover both natural language understanding and generation scenarios ; ( 2 ) for each task , it provides labeled data in multiple languages .
-We extend a recent cross - lingual pre - trained model Unicoder to cover both understanding and generation tasks , which is evaluated on XGLUE as a strong baseline .
-We also evaluate the base versions ( 12 - layer ) of Multilingual BERT , XLM and XLM - R for comparison .
-1
-Pre - training + Fine - tuning has become a new NLP paradigm , where the general knowledge are firstly learnt from large - scale corpus by self - supervised learning and then transferred to downstream tasks by task - specific fine - tuning .
-Three different types of pre - trained models are explored recently , including monolingual pre - trained models ( Radford et al , 2018 ; Devlin et al , 2019 ; Yang et al , 2019b ; Lewis et al , 2019a ) , multilingual and cross - lingual pre - trained models ( Devlin et al , 2019 ; Conneau and Lample , 2019 ; and multimodal pre - trained models ( Lu et al , 2019 ; Li et al , 2020 ; .
-In this paper , we focus on the cross - lingual pretrained models , due to their importance to alleviating the low - resource issue among languages , where an NLP task often has rich training data in one language ( such as English ) but has few or no training data in other languages ( such as French and German ) .
-In order to further advance the development of cross - lingual pre - trained models for various downstream tasks in different languages , this paper introduces XGLUE , a new benchmark dataset that can be used to : ( i ) train large - scale cross - lingual pre - trained models using multilingual and bilingual corpora , ( ii ) evaluate generalization capabilities of the cross - lingual pre - trained models across a diverse set of cross - lingual tasks . 
-The contribution of XGLUE is two - fold .
-First , it provides 11 diversified cross - lingual tasks covering both understanding and generation scenarios .
-XTREME ) is a concurrent work of XGLUE .
-But it includes cross - lingual understanding tasks only .
-Besides , XGLUE introduces 6 new tasks selected from Search , Ads and News scenarios , which makes XGLUE have more practical values .
-Second , an extended version of Unicoder is described and evaluated as a strong cross - lingual pre - trained model baseline on XGLUE for both understanding and generation tasks .
-We also evaluate the base versions ( 12 - layer ) of Multilingual BERT ( Devlin et al , 2019 ) , XLM ( Conneau and Lample , 2019 ) and XLM - R for comparison .
-We collect two corpora , Small Corpus and Large Corpus , with different sizes for cross - lingual pretraining .
-Table 1 lists the data statistics .
-Multilingual Corpus We extract raw sentences from Wikipedia using WikiExtractor .
-It leads to a 101 G multilingual corpus covering 100 languages .
-Bilingual Corpus We use an in - house pipeline to extract bilingual sentence pairs from the Web , which leads to a 146 G bilingual corpus covering 27 languages , including Arabic , Bulgarian , Danish , German , Greek , English , Spanish , Finnish , French , Hebrew , Hindi , Hungarian , Indonesian , Italian , Japanese , Korean , Dutch , Polish , Portuguese , Russian , Swedish , Swahili , Thai , Turkish , Urdu , Vietnamese and Chinese .
-All the bilingual pairs are English to another language .
-Multilingual Corpus Following , we construct a clean version of Common Crawl ( CC ) 2 as the multilingual corpus .
-First , we use a language identification model trained based on Wikipedia to classify the language of each page in CC .
-Then , we train a language model for each language using the corresponding part of the Wikipedia corpus , and use it to filter documents as did .
-We use one CC dump for English and twelve CC dumps for other languages .
-It leads to a 2 , 500 G multilingual corpus covering 89 languages .
-We also include the 101 G multilingual corpus described in Section 2.1.1 .
-We reuse the bilingual corpus described in Section 2.1.1 .
-We will add CCMatrix ( Schwenk et al , 2019 ) in the future .
-We select 11 cross - lingual tasks in XGLUE , which are categorized into 3 groups : single - input understanding tasks , pair - input understanding tasks , and generation tasks .
-For each task , training set is only available in English .
-In order to obtain a good performance on XGLUE , a model should be able to learn how to do a task well using its English training set , and then transfer this ability to test sets in other languages .
-Table 2 gives the dataset statistics and Table 3 lists languages covered by all tasks . 
-2 https://commoncrawl.org/.
-NER We select a subset of the following two NER tasks , CoNLL - 2002NER ( Sang , 2002 and CoNLL - 2003 NER ( Sang andDe Meulder , 2003 ) , to form this cross - lingual NER dataset .
-It covers 4 languages , including English , German , Spanish and Dutch , and 4 types of named entities , including Person , Location , Organization and Miscellaneous entities that do not belong to the previous three types .
-F1 score is used as the metric . 
-POS Tagging ( POS )
-Following ( Kim et al , 2017 ) , we select a subset of Universal Dependencies ( UD ) Treebanks ( v2.5 ) ( Zeman et al , 2019 ) , which covers 18 languages .
-Accuracy ( ACC ) of the predicted POS tags is used as the metric . 
-News Classification ( NC )
-This task aims to predict the category given a news article .
-It covers 5 languages , including English , Spanish , French , German and Russian .
-Each labeled instance is a 3 - tuple : < news title , news body , category > .
-The category number is 10 .
-We crawl this dataset from Microsoft News ( MSN ) .
-Accuracy ( ACC ) of the multi - class classification is used as the metric .
-MLQA The MLQA ( Lewis et al , 2019b ) is a multilingual machine reading comprehension task , which contains QA annotations labeled in 7 languages , including English , Arabic , German , Spanish , Hindi , Vietnamese and Chinese .
-F1 score of the predicted answers is used as the metric . 
-XNLI
-We reuse the original XNLI dataset ( Conneau et al , 2018 ) in XGLUE . 
-PAWS - X The PAWS - X ( Yang et al , 2019a ) is a paraphrase identification dataset , which extends the Wikipedia portion of the PAWS (
-Zhang et al , 2019 ) evaluation to more languages .
-We select 4 languages , including English , Spanish , French and German , from the original dataset and use them in XGLUE .
-Accuracy ( ACC ) of the binary classification is used as the metric . 
-Query - Ad Matching ( QADSM )
-This task aims to predict whether an advertisement ( ad ) is relevant to an input query .
-It covers 3 languages , including English , French and German .
-Each labeled instance is a 4 - tuple : < query , ad title , ad description , label > .
-The label indicates whether the ad is relevant to the query ( Good ) , or not ( Bad ) .
-We con - struct this dataset based on Bing .
-Accuracy ( ACC ) of the binary classification is used as the metric . 
-Web Page Ranking ( WPR ) This task aims to predict whether a web page is relevant to an input query .
-It covers 7 languages , including English , German , French , Spanish , Italian , Portuguese and Chinese .
-Each labeled instance is a 4 - tuple : < query , web page title , web page snippet , label > .
-The relevance label contains 5 ratings : Perfect ( 4 ) , Excellent ( 3 ) , Good ( 2 ) , Fair ( 1 ) and Bad ( 0 ) .
-We construct this dataset based on Bing .
-Normalize Discounted Cumulative Gain ( nDCG ) is used as the metric . 
-QA Matching ( QAM )
-This task aims to predict whether a < question , passage > pair is a QA pair .
-It covers 3 languages , including English , French and German .
-Each labeled instance is a 3 - tuple : < question , passage , label > .
-The label indicates whether the passage is the answer of the question ( 1 ) , or not ( 0 ) .
-We construct this dataset based on Bing .
-Accuracy ( ACC ) of the binary classification is used as the metric .
-Question Generation ( QG )
-This task aims to generate a question for a given passage .
-We collect < passage , question > pairs from Bing .
-It covers 6 languages , including English , French , German , Spanish , Italian and Portuguese .
-BLEU - 4 score is used as the metric . 
-News Title Generation ( NTG )
-This task aims to generate a proper title for a given news body . 
-We collect < news body , news title > pairs from Microsoft News ( MSN ) .
-It covers 5 languages , including German , English , French , Spanish and Russian .
-BLEU - 4 score is used as the metric . 
-3 Pre - train Unicoder for Cross - lingual Understanding Tasks We select Unicoder as the backbone model .
-Section 3 introduces a simplified version of Unicoder using two pre - training tasks ( MLN and TLM ) for cross - lingual understanding tasks .
-Section 4 describes how to extend Unicoder to cover cross - lingual generation tasks .
-The original Unicoder includes more pre - training tasks besides MLM and TLM .
-But to keep the baseline pre - trained model simple and to reduce the experimental cost , we just use MLM and TLM in this paper .
-It means for understanding tasks , Unicoder is almost equal to XLM , except some hyper - parameter differences .
-Following Devlin et al ( 2019 ) , this task extends the masked language model task to multiple languages .
-At each iteration , a batch is composed of sentences sampled from different languages .
-The sampling probability of a language l i is defined as λ
-l i = p
-α l i /
-l
-i p
-α l i , where p l i is the percentage of the language l i in the entire corpus , the smoothing factor α is set to 0.3 .
-For each batch , we randomly sample 15 % of the words and replace them with ( i ) a special symbol
-[ MASK ] , ( ii ) a random token or ( iii ) keep them unchanged with probability 80 % , 10 % and 10 % , respectively .
-For each token , we only use its token embedding and position embedding , and discard segment embedding and language embedding .
-Following Conneau and Lample ( 2019 ) , this task extends the MLM task to bilingual corpus .
-Given a bilingual sentence pair , TLM first concatenates them into a single sentence , and then masks words using the same strategy of MLM .
-The pre - trained model learns to recover each masked word based on the bilingual context .
-We follow MLM to sample language pairs in each batch with α = 0.3 .
-Motivated by BART ( Lewis et al , 2019a ) , xDAE aims to predict the original text X = ( x 1 , x 2 , ... , x | X | )
-l i from a language l i based on its corrupted form c ( X ) , where c ( X ) is a noising function that corrupts an input text X as its output . 
-Four different text noising strategies for c ( ) are explored in this paper .
-( 1 ) Shuffle the input text X by adding a noise α ∼ U ( 0 , 3 ) to the input indices and then re - ordering X based on the rank of the noised indices .
-( 2 ) Drop words with a probability of 0.1 .
-( 3 ) Replace 10 % of the input words in X with the [ MASK ] symbol .
-( 4 ) Sample a number of token spans from X with span lengths drawn from a Poisson distribution ( λ = 3 ) , and then replace each token span with a single [ MASK ] token .
-Here , 0 - length spans correspond to the insertion of [ MASK ] tokens .
-Based on the performance of different noising strategies ( Table 10 ) , we select ( 4 ) and use it in pre - training .
-We leave finding better text noising strategies for future work . 
-We train Unicoder using this task by maximizing the following loss function L xDAE : L
-xDAE =
-l i L X
-l
-i | X | t=1 log p
-( x t | x < t , c ( X ) ) 
-where L = l 1 , ... , l N denotes N languages , X is an instance in the i th language
-l i , p ( x t | x < t , c ( X ) ) denotes the probability of generating a single token x t at time step t given c ( X ) and x < t .
-Motivated by ProphetNet ( Yan et al , 2020 ) , xFNP introduces a future n - gram prediction mechanism to natural language generation .
-It encourages the model to plan for the future tokens explicitly and prevents over - fitting on strong local correlations .
-Given an input text X = ( x 1 , x 2 , ... , x | X | )
-l i from a language l i , we randomly mask k token spans of X to generate the masked text X as the input , and concatenate all masked token spans into Y as the output .
-Details of this mask strategy are described in Section 6.1 .
-After this , xFNP first encodes X to H enc with the encoder : H enc = Encoder ( X ) Then , instead of predicting the next token only at each time step , xFNP generates n future tokens simultaneously at time step t with the decoder : p ( y t | y < t , X ) , ... , p ( y t+n−1 | y < t , X )
-= Decoder ( y < t , H enc ) 
-Following Yan et al ( 2020 ) , we set n = 2 . 
-We train Unicoder using this task by maximizing the following loss function L xF
-N P : L xF
-N P =
-l i L X l i { α 0
-|
-Y | t=1
-log p ( y t | y < t , X )
-+ α 1 | Y | −1 t=1 log p ( y
-t+1 |
-y < t , X ) } where X and Y are generated from X based on the method mentioned above .
-Following Yan et al ( 2020 ) , we set α 0
-= α 1 = 1 .
-For tasks QADSM , WPR , QAM and QG , we label the data on an Microsoft internal crowdsourcing platform .
-Each labeler must learn the guideline and pass the labeling test .
-Each sample is labeled by three labeler .
-We only keep the samples with two or three labeler have same label . 
-For tasks NC and NTG , we directly use the category label on MSN website .
-All the category label on MSN is review by human .
-Understanding Tasks The hyper - parameters are set as follows : 768 hidden units , 12 heads , GELU activation , a dropout rate of 0.1 , 512 max input length , 12 layers in encoder . 
-In the pre - training stage , we first initialize Unicoder LC with XLM - R base , and then run continue pre - training with the accumulated 8 , 192 batch size with gradients accumulation .
-We use Adam Optimizer with a linear warm - up and set the learning rate to 3e - 5 .
-We select different understanding tasks randomly in different batches .
-This costed 12 days on 16 V100 . 
-In the fine - tuning stage , the batch size is set to 32 .
-We use Adam Optimizer ( Kingma and Ba , 2014 ) with warm - up and set the learning rate to 5e - 6 .
-For all sentence classification tasks , we finetune 10 epochs .
-For POS Tagging and NER , we fine - tune 20 epochs .
-And for POS Tagging , we set the learning rate to 2e - 5 .
-For MLQA , we set the learning rate to 3e - 5 , batch size to 12 and train 2 epochs following BERT for SQuAD .
-After each epoch , we test the fine - tuned model on the dev sets of all languages .
-We select the model with the best average result on the dev sets of all languages .
-, the hyper - parameters are set as follows : 768 hidden units , 12 heads , GELU activation , a dropout rate of 0.1 , 512 max input length , 12 layers in encoder , 12 layers in decoder .
-In the pre - training stage , we first initialize encoder and decoder with XLM - R , and then run continue pre - training with 1 , 024 batch size .
-We use Adam optimizer with warm - up and set the learning rate to 2e - 4 .
-This costed 10 days on 16 V100 . 
-In the fine - tuning stage , the batch size is 1024 .
-We use Adam Optimizer with learning rate 1e - 5 and warm - up steps 2000 . 
-For Unicoder xF
-N P SC , the hyper - parameters are set as follows : 1 , 024 hidden size , 12 layers in encoder , 12 layers in decoder , 512 max input length . 
-In the pre - training stage , we pre - train the model from scratch and follow ProphetNet ( Yan et al , 2020 ) to randomly mask a continuous span ( with a fixed length 9 ) in every 64 tokens .
-About 15 % of the tokens in original sequence are masked in this step .
-We use a special symbol [ MASK ] to replace 80 % of the masked tokens , keep 10 % unchanged , and random replace 10 % of the masked tokens .
-We set the batch size to 1 , 024 , training steps to 350 , 000 .
-The learning rate is set to 1e - 4 .
-We set the number of future tokens n to 2 . 
-In the fine - tuning stage , we use Adam Optimizer and set the learning rate to 1e - 4 .
-We set the batch size to 64 and the warm - up steps to 1 , 000 .
-( Devlin et al , 2019 ) , XLM ( Conneau and Lample , 2019 ) and XLM - R base All models are ( 12 - layer ) based ones .
-Given a task , each pre - trained model is fine - tuned using its English training set only , and then applied to all test sets in different languages .
-AVG 2 U and AVG 2 G denote the average score of the average scores on 9 understanding tasks and 2 generation tasks , respectively .
-12 - layer Unicoder xF
-N P SC trained on Wikipedia corpus for 100 languages .
-Given a downstream task , each pre - trained model is fine - tuned using its English training set and then applied to all test sets in different languages .
-Note that , all results are reproduced by this paper , except the XLM † results on XNLI are from Conneau and Lample ( 2019 ) .
-QG M - BERT - - 0.1 - 7.8 0.1 0.1 - 0.2 - - 0.1 - - - - - - - 1.4 XLM - Rbase - - 0.1 - 6.0 0.0 0.0 - 0.1 - - 0.0 - - - - - - - 1 . We find ( 1 ) Unicoder LC performs slightly better than M - BERT and XLM - R base on the 9 understanding tasks , as it is pre - trained based on multilingual and bilingual corpora at the same time and uses TLM ; .
-But it is not a fair comparison , because they use different text denoising tasks ( sentence prediction vs. span prediction ) and different generation mechanisms ( single - token prediction vs. multi - token prediction ) .
-We leave combining these two tasks for future work .
-We define pivot - language ( pl ) fine - tuning as finetune a pre - trained model for a downstream task using its labeled data in a pivot language ( e.g. English ) and then apply the fine - tuned model to all languages .
-Table 4 chooses English as the pivot language , as all tasks in XGLUE have labeled data in English .
-But is English always the optimal choice ?
-Will the results become better , if we do fine - tuning using other pivot languages ? 
-To answer these questions , we evaluate Unicoder on XNLI and NTG using different pivot languages in fine - tuning and list comparison results in Table 5 and Table 6 , respectively .
-( 1 ) For each test set in language l
-i in Table 5 and Table 6 , its best result is often achieved when the model is fine - tuned using l i as the pivot language ; ( 2 ) For XNLI in Table 5 , the best pivot languages are Spanish ( es ) , Greek ( el ) and Turkish ( tr ) , rather than English ( en ) .
-For NTG in Table 6 , the best pivot language is French ( fr ) for both Unicoder
-xDAE
-SC and Unicoder xF
-N P SC .
-It means the average quality of a cross - lingual pre - trained model could be further improved on a downstream task , by selecting a specific pivot language in finetuning .
-We define multi - language ( ml ) fine - tuning as finetune a pre - trained model for a downstream task using all its available labeled data in different languages .
-We evaluate Unicoder on XNLI and NTG using this fine - tuning method and list evaluation results in Table 7 and Table 8 , respectively . 
-We find multi - language fine - tuning can achieve better results than pivot - language fine - tuning on both XNLI and NTG .
-It means the average quality of a cross - lingual pre - trained model could be significantly improved on a downstream task , by using combined labeled data in multiple languages .
-We define multi - task ( mt ) fine - tuning as fine - tune a pre - trained model for multiple downstream tasks using their combined labeled data .
-To reduce the experimental cost , we evaluate Unicoder on 5 understanding tasks : XNLI , PAWS - X , NC , QAM and QADSM , using their merged English labeled data in fine - tuning .
-Results are listed in Table 9 . 
-We find PAWS - X and QADSM can benefit from the joint fine - tuning strategy , but XNLI , NC and QAM can not .
-We leave discovering relationships between different tasks for better downstream task fine - tuning for future work .
-We investigate the impacts of different text noising strategies ( Section 4.1 ) in Unicoder xDAE SC , and list comparison results in Table 10 , where ( 1 ) + ( 2 ) + ( 3 ) denotes the result of using the first three strategies in pre - training , ( 4 ) denotes the result of using the last strategy in pre - training , ( 1 )
-+ ( 2 ) + ( 3 ) + ( 4 ) denotes the result of using all strategies in pretraining .
-To reduce experiment cost , we set max sequence length to 256 and only train 60 K steps .
-We find that ( 4 ) can achieve the best average result on NTG .
-So all results of Unicoder xDAE
-SC reported in this paper is pre - trained using ( 4 ) only .
-Dataset GLUE includes 9 natural language understanding tasks that are labeled in English only .
-Comparing to GLUE , XGLUE not only expands task annotations to multiple languages , but also includes natural language generation tasks .
-XNLI ( Conneau et al , 2018 ) , NER ( Sang , 2002 ; Sang and De Meulder , 2003 ) , POS Tagging ( Kim et al , 2017 ) , MLQA ( Lewis et al , 2019b ) and PAWS - X ( Yang et al , 2019a ) are 5 multilingual datasets built for specific tasks .
-XGLUE not only includes these 5 existing tasks , but also introduces 6 new tasks selected from real - world scenarios ( i.e. , Search , Ads and News ) .
-This makes XGLUE have more practical values .
-XTREME ) is a concurrent work of XGLUE .
-Comparing to it , XGLUE includes both understanding and generation tasks , which , to the best of our knowledge , is the first attempt in the cross - lingual dataset construction efforts . )
-is a RoBERTa - version XLM without using translation language model in pre - training .
-It is trained based on a much larger multilingual corpus ( i.e. Com - mon Crawl ) and become the new state - of - the - art on XNLI .
-In this paper , we use both the Common Crawl corpus and the bilingual corpus , aiming to build a stronger baseline model on XGLUE .
-BART ( Lewis et al , 2019a ) and ProphetNet ( Yan et al , 2020 ) are two latest generative pre - trained models .
-We borrow ideas from these two works and extend Unicoder to cross - lingual generation tasks , which goes a step further to verify and explore different text generation approaches in the cross - lingual scenario .
-We present XGLUE as a new cross - lingual benchmark and conduct comprehensive evaluations with interesting findings observed .
-We thank STC - A NLP , Bing Answers , Bing Ads , Bing Relevance and Microsoft News for providing the datasets . 
-A The fine - tune parameters of Unicoder on XGLUE .
+XGLUE : A New Benchmark Dataset for Cross - lingual Pre - training , Understanding and Generation
+In this paper , we introduce XGLUE , a new benchmark dataset that can be used to train large - scale cross - lingual pre - trained models using multilingual and bilingual corpora and evaluate their performance across a diverse set of cross - lingual tasks . Comparing to GLUE ( Wang et al , 2019 ) , which is labeled in English for natural language understanding tasks only , XGLUE has two main advantages : ( 1 ) it provides 11 diversified tasks that cover both natural language understanding and generation scenarios ; ( 2 ) for each task , it provides labeled data in multiple languages . We extend a recent cross - lingual pre - trained model Unicoder to cover both understanding and generation tasks , which is evaluated on XGLUE as a strong baseline . We also evaluate the base versions ( 12 - layer ) of Multilingual BERT , XLM and XLM - R for comparison . 1
+Pre - training + Fine - tuning has become a new NLP paradigm , where the general knowledge are firstly learnt from large - scale corpus by self - supervised learning and then transferred to downstream tasks by task - specific fine - tuning . Three different types of pre - trained models are explored recently , including monolingual pre - trained models ( Radford et al , 2018 ; Devlin et al , 2019 ; Yang et al , 2019b ; Lewis et al , 2019a ) , multilingual and cross - lingual pre - trained models ( Devlin et al , 2019 ; Conneau and Lample , 2019 ; and multimodal pre - trained models ( Lu et al , 2019 ; Li et al , 2020 ; . In this paper , we focus on the cross - lingual pretrained models , due to their importance to alleviating the low - resource issue among languages , where an NLP task often has rich training data in one language ( such as English ) but has few or no training data in other languages ( such as French and German ) . In order to further advance the development of cross - lingual pre - trained models for various downstream tasks in different languages , this paper introduces XGLUE , a new benchmark dataset that can be used to : ( i ) train large - scale cross - lingual pre - trained models using multilingual and bilingual corpora , ( ii ) evaluate generalization capabilities of the cross - lingual pre - trained models across a diverse set of cross - lingual tasks . The contribution of XGLUE is two - fold . First , it provides 11 diversified cross - lingual tasks covering both understanding and generation scenarios . XTREME ) is a concurrent work of XGLUE . But it includes cross - lingual understanding tasks only . Besides , XGLUE introduces 6 new tasks selected from Search , Ads and News scenarios , which makes XGLUE have more practical values . Second , an extended version of Unicoder is described and evaluated as a strong cross - lingual pre - trained model baseline on XGLUE for both understanding and generation tasks . We also evaluate the base versions ( 12 - layer ) of Multilingual BERT ( Devlin et al , 2019 ) , XLM ( Conneau and Lample , 2019 ) and XLM - R for comparison .
+We collect two corpora , Small Corpus and Large Corpus , with different sizes for cross - lingual pretraining . Table 1 lists the data statistics .
+Multilingual Corpus We extract raw sentences from Wikipedia using WikiExtractor . It leads to a 101 G multilingual corpus covering 100 languages . Bilingual Corpus We use an in - house pipeline to extract bilingual sentence pairs from the Web , which leads to a 146 G bilingual corpus covering 27 languages , including Arabic , Bulgarian , Danish , German , Greek , English , Spanish , Finnish , French , Hebrew , Hindi , Hungarian , Indonesian , Italian , Japanese , Korean , Dutch , Polish , Portuguese , Russian , Swedish , Swahili , Thai , Turkish , Urdu , Vietnamese and Chinese . All the bilingual pairs are English to another language .
+Multilingual Corpus Following , we construct a clean version of Common Crawl ( CC ) 2 as the multilingual corpus . First , we use a language identification model trained based on Wikipedia to classify the language of each page in CC . Then , we train a language model for each language using the corresponding part of the Wikipedia corpus , and use it to filter documents as did . We use one CC dump for English and twelve CC dumps for other languages . It leads to a 2 , 500 G multilingual corpus covering 89 languages . We also include the 101 G multilingual corpus described in Section 2.1.1 .
+We reuse the bilingual corpus described in Section 2.1.1 . We will add CCMatrix ( Schwenk et al , 2019 ) in the future .
+We select 11 cross - lingual tasks in XGLUE , which are categorized into 3 groups : single - input understanding tasks , pair - input understanding tasks , and generation tasks . For each task , training set is only available in English . In order to obtain a good performance on XGLUE , a model should be able to learn how to do a task well using its English training set , and then transfer this ability to test sets in other languages . Table 2 gives the dataset statistics and Table 3 lists languages covered by all tasks . 2 https://commoncrawl.org/.
+NER We select a subset of the following two NER tasks , CoNLL - 2002NER ( Sang , 2002 and CoNLL - 2003 NER ( Sang andDe Meulder , 2003 ) , to form this cross - lingual NER dataset . It covers 4 languages , including English , German , Spanish and Dutch , and 4 types of named entities , including Person , Location , Organization and Miscellaneous entities that do not belong to the previous three types . F1 score is used as the metric . POS Tagging ( POS ) Following ( Kim et al , 2017 ) , we select a subset of Universal Dependencies ( UD ) Treebanks ( v2.5 ) ( Zeman et al , 2019 ) , which covers 18 languages . Accuracy ( ACC ) of the predicted POS tags is used as the metric . News Classification ( NC ) This task aims to predict the category given a news article . It covers 5 languages , including English , Spanish , French , German and Russian . Each labeled instance is a 3 - tuple : < news title , news body , category > . The category number is 10 . We crawl this dataset from Microsoft News ( MSN ) . Accuracy ( ACC ) of the multi - class classification is used as the metric .
+MLQA The MLQA ( Lewis et al , 2019b ) is a multilingual machine reading comprehension task , which contains QA annotations labeled in 7 languages , including English , Arabic , German , Spanish , Hindi , Vietnamese and Chinese . F1 score of the predicted answers is used as the metric . XNLI We reuse the original XNLI dataset ( Conneau et al , 2018 ) in XGLUE . PAWS - X The PAWS - X ( Yang et al , 2019a ) is a paraphrase identification dataset , which extends the Wikipedia portion of the PAWS ( Zhang et al , 2019 ) evaluation to more languages . We select 4 languages , including English , Spanish , French and German , from the original dataset and use them in XGLUE . Accuracy ( ACC ) of the binary classification is used as the metric . Query - Ad Matching ( QADSM ) This task aims to predict whether an advertisement ( ad ) is relevant to an input query . It covers 3 languages , including English , French and German . Each labeled instance is a 4 - tuple : < query , ad title , ad description , label > . The label indicates whether the ad is relevant to the query ( Good ) , or not ( Bad ) . We con - struct this dataset based on Bing . Accuracy ( ACC ) of the binary classification is used as the metric . Web Page Ranking ( WPR ) This task aims to predict whether a web page is relevant to an input query . It covers 7 languages , including English , German , French , Spanish , Italian , Portuguese and Chinese . Each labeled instance is a 4 - tuple : < query , web page title , web page snippet , label > . The relevance label contains 5 ratings : Perfect ( 4 ) , Excellent ( 3 ) , Good ( 2 ) , Fair ( 1 ) and Bad ( 0 ) . We construct this dataset based on Bing . Normalize Discounted Cumulative Gain ( nDCG ) is used as the metric . QA Matching ( QAM ) This task aims to predict whether a < question , passage > pair is a QA pair . It covers 3 languages , including English , French and German . Each labeled instance is a 3 - tuple : < question , passage , label > . The label indicates whether the passage is the answer of the question ( 1 ) , or not ( 0 ) . We construct this dataset based on Bing . Accuracy ( ACC ) of the binary classification is used as the metric .
+Question Generation ( QG ) This task aims to generate a question for a given passage . We collect < passage , question > pairs from Bing . It covers 6 languages , including English , French , German , Spanish , Italian and Portuguese . BLEU - 4 score is used as the metric . News Title Generation ( NTG ) This task aims to generate a proper title for a given news body . We collect < news body , news title > pairs from Microsoft News ( MSN ) . It covers 5 languages , including German , English , French , Spanish and Russian . BLEU - 4 score is used as the metric . 3 Pre - train Unicoder for Cross - lingual Understanding Tasks We select Unicoder as the backbone model . Section 3 introduces a simplified version of Unicoder using two pre - training tasks ( MLN and TLM ) for cross - lingual understanding tasks . Section 4 describes how to extend Unicoder to cover cross - lingual generation tasks . The original Unicoder includes more pre - training tasks besides MLM and TLM . But to keep the baseline pre - trained model simple and to reduce the experimental cost , we just use MLM and TLM in this paper . It means for understanding tasks , Unicoder is almost equal to XLM , except some hyper - parameter differences .
+Following Devlin et al ( 2019 ) , this task extends the masked language model task to multiple languages . At each iteration , a batch is composed of sentences sampled from different languages . The sampling probability of a language l i is defined as λ l i = p α l i / l i p α l i , where p l i is the percentage of the language l i in the entire corpus , the smoothing factor α is set to 0.3 . For each batch , we randomly sample 15 % of the words and replace them with ( i ) a special symbol [ MASK ] , ( ii ) a random token or ( iii ) keep them unchanged with probability 80 % , 10 % and 10 % , respectively . For each token , we only use its token embedding and position embedding , and discard segment embedding and language embedding .
+Following Conneau and Lample ( 2019 ) , this task extends the MLM task to bilingual corpus . Given a bilingual sentence pair , TLM first concatenates them into a single sentence , and then masks words using the same strategy of MLM . The pre - trained model learns to recover each masked word based on the bilingual context . We follow MLM to sample language pairs in each batch with α = 0.3 .
+Motivated by BART ( Lewis et al , 2019a ) , xDAE aims to predict the original text X = ( x 1 , x 2 , ... , x | X | ) l i from a language l i based on its corrupted form c ( X ) , where c ( X ) is a noising function that corrupts an input text X as its output . Four different text noising strategies for c ( ) are explored in this paper . ( 1 ) Shuffle the input text X by adding a noise α ∼ U ( 0 , 3 ) to the input indices and then re - ordering X based on the rank of the noised indices . ( 2 ) Drop words with a probability of 0.1 . ( 3 ) Replace 10 % of the input words in X with the [ MASK ] symbol . ( 4 ) Sample a number of token spans from X with span lengths drawn from a Poisson distribution ( λ = 3 ) , and then replace each token span with a single [ MASK ] token . Here , 0 - length spans correspond to the insertion of [ MASK ] tokens . Based on the performance of different noising strategies ( Table 10 ) , we select ( 4 ) and use it in pre - training . We leave finding better text noising strategies for future work . We train Unicoder using this task by maximizing the following loss function L xDAE : L xDAE = l i L X l i | X | t=1 log p ( x t | x < t , c ( X ) ) where L = l 1 , ... , l N denotes N languages , X is an instance in the i th language l i , p ( x t | x < t , c ( X ) ) denotes the probability of generating a single token x t at time step t given c ( X ) and x < t .
+Motivated by ProphetNet ( Yan et al , 2020 ) , xFNP introduces a future n - gram prediction mechanism to natural language generation . It encourages the model to plan for the future tokens explicitly and prevents over - fitting on strong local correlations . Given an input text X = ( x 1 , x 2 , ... , x | X | ) l i from a language l i , we randomly mask k token spans of X to generate the masked text X as the input , and concatenate all masked token spans into Y as the output . Details of this mask strategy are described in Section 6.1 . After this , xFNP first encodes X to H enc with the encoder : H enc = Encoder ( X ) Then , instead of predicting the next token only at each time step , xFNP generates n future tokens simultaneously at time step t with the decoder : p ( y t | y < t , X ) , ... , p ( y t+n−1 | y < t , X ) = Decoder ( y < t , H enc ) Following Yan et al ( 2020 ) , we set n = 2 . We train Unicoder using this task by maximizing the following loss function L xF N P : L xF N P = l i L X l i { α 0 | Y | t=1 log p ( y t | y < t , X ) + α 1 | Y | −1 t=1 log p ( y t+1 | y < t , X ) } where X and Y are generated from X based on the method mentioned above . Following Yan et al ( 2020 ) , we set α 0 = α 1 = 1 .
+For tasks QADSM , WPR , QAM and QG , we label the data on an Microsoft internal crowdsourcing platform . Each labeler must learn the guideline and pass the labeling test . Each sample is labeled by three labeler . We only keep the samples with two or three labeler have same label . For tasks NC and NTG , we directly use the category label on MSN website . All the category label on MSN is review by human .
+Understanding Tasks The hyper - parameters are set as follows : 768 hidden units , 12 heads , GELU activation , a dropout rate of 0.1 , 512 max input length , 12 layers in encoder . In the pre - training stage , we first initialize Unicoder LC with XLM - R base , and then run continue pre - training with the accumulated 8 , 192 batch size with gradients accumulation . We use Adam Optimizer with a linear warm - up and set the learning rate to 3e - 5 . We select different understanding tasks randomly in different batches . This costed 12 days on 16 V100 . In the fine - tuning stage , the batch size is set to 32 . We use Adam Optimizer ( Kingma and Ba , 2014 ) with warm - up and set the learning rate to 5e - 6 . For all sentence classification tasks , we finetune 10 epochs . For POS Tagging and NER , we fine - tune 20 epochs . And for POS Tagging , we set the learning rate to 2e - 5 . For MLQA , we set the learning rate to 3e - 5 , batch size to 12 and train 2 epochs following BERT for SQuAD . After each epoch , we test the fine - tuned model on the dev sets of all languages . We select the model with the best average result on the dev sets of all languages . , the hyper - parameters are set as follows : 768 hidden units , 12 heads , GELU activation , a dropout rate of 0.1 , 512 max input length , 12 layers in encoder , 12 layers in decoder .
+In the pre - training stage , we first initialize encoder and decoder with XLM - R , and then run continue pre - training with 1 , 024 batch size . We use Adam optimizer with warm - up and set the learning rate to 2e - 4 . This costed 10 days on 16 V100 . In the fine - tuning stage , the batch size is 1024 . We use Adam Optimizer with learning rate 1e - 5 and warm - up steps 2000 . For Unicoder xF N P SC , the hyper - parameters are set as follows : 1 , 024 hidden size , 12 layers in encoder , 12 layers in decoder , 512 max input length . In the pre - training stage , we pre - train the model from scratch and follow ProphetNet ( Yan et al , 2020 ) to randomly mask a continuous span ( with a fixed length 9 ) in every 64 tokens . About 15 % of the tokens in original sequence are masked in this step . We use a special symbol [ MASK ] to replace 80 % of the masked tokens , keep 10 % unchanged , and random replace 10 % of the masked tokens . We set the batch size to 1 , 024 , training steps to 350 , 000 . The learning rate is set to 1e - 4 . We set the number of future tokens n to 2 . In the fine - tuning stage , we use Adam Optimizer and set the learning rate to 1e - 4 . We set the batch size to 64 and the warm - up steps to 1 , 000 . ( Devlin et al , 2019 ) , XLM ( Conneau and Lample , 2019 ) and XLM - R base All models are ( 12 - layer ) based ones . Given a task , each pre - trained model is fine - tuned using its English training set only , and then applied to all test sets in different languages . AVG 2 U and AVG 2 G denote the average score of the average scores on 9 understanding tasks and 2 generation tasks , respectively . 12 - layer Unicoder xF N P SC trained on Wikipedia corpus for 100 languages . Given a downstream task , each pre - trained model is fine - tuned using its English training set and then applied to all test sets in different languages . Note that , all results are reproduced by this paper , except the XLM † results on XNLI are from Conneau and Lample ( 2019 ) .
+QG M - BERT - - 0.1 - 7.8 0.1 0.1 - 0.2 - - 0.1 - - - - - - - 1.4 XLM - Rbase - - 0.1 - 6.0 0.0 0.0 - 0.1 - - 0.0 - - - - - - - 1 . We find ( 1 ) Unicoder LC performs slightly better than M - BERT and XLM - R base on the 9 understanding tasks , as it is pre - trained based on multilingual and bilingual corpora at the same time and uses TLM ; . But it is not a fair comparison , because they use different text denoising tasks ( sentence prediction vs. span prediction ) and different generation mechanisms ( single - token prediction vs. multi - token prediction ) . We leave combining these two tasks for future work .
+We define pivot - language ( pl ) fine - tuning as finetune a pre - trained model for a downstream task using its labeled data in a pivot language ( e.g. English ) and then apply the fine - tuned model to all languages . Table 4 chooses English as the pivot language , as all tasks in XGLUE have labeled data in English . But is English always the optimal choice ? Will the results become better , if we do fine - tuning using other pivot languages ? To answer these questions , we evaluate Unicoder on XNLI and NTG using different pivot languages in fine - tuning and list comparison results in Table 5 and Table 6 , respectively . ( 1 ) For each test set in language l i in Table 5 and Table 6 , its best result is often achieved when the model is fine - tuned using l i as the pivot language ; ( 2 ) For XNLI in Table 5 , the best pivot languages are Spanish ( es ) , Greek ( el ) and Turkish ( tr ) , rather than English ( en ) . For NTG in Table 6 , the best pivot language is French ( fr ) for both Unicoder xDAE SC and Unicoder xF N P SC . It means the average quality of a cross - lingual pre - trained model could be further improved on a downstream task , by selecting a specific pivot language in finetuning .
+We define multi - language ( ml ) fine - tuning as finetune a pre - trained model for a downstream task using all its available labeled data in different languages . We evaluate Unicoder on XNLI and NTG using this fine - tuning method and list evaluation results in Table 7 and Table 8 , respectively . We find multi - language fine - tuning can achieve better results than pivot - language fine - tuning on both XNLI and NTG . It means the average quality of a cross - lingual pre - trained model could be significantly improved on a downstream task , by using combined labeled data in multiple languages .
+We define multi - task ( mt ) fine - tuning as fine - tune a pre - trained model for multiple downstream tasks using their combined labeled data . To reduce the experimental cost , we evaluate Unicoder on 5 understanding tasks : XNLI , PAWS - X , NC , QAM and QADSM , using their merged English labeled data in fine - tuning . Results are listed in Table 9 . We find PAWS - X and QADSM can benefit from the joint fine - tuning strategy , but XNLI , NC and QAM can not . We leave discovering relationships between different tasks for better downstream task fine - tuning for future work .
+We investigate the impacts of different text noising strategies ( Section 4.1 ) in Unicoder xDAE SC , and list comparison results in Table 10 , where ( 1 ) + ( 2 ) + ( 3 ) denotes the result of using the first three strategies in pre - training , ( 4 ) denotes the result of using the last strategy in pre - training , ( 1 ) + ( 2 ) + ( 3 ) + ( 4 ) denotes the result of using all strategies in pretraining . To reduce experiment cost , we set max sequence length to 256 and only train 60 K steps . We find that ( 4 ) can achieve the best average result on NTG . So all results of Unicoder xDAE SC reported in this paper is pre - trained using ( 4 ) only .
+Dataset GLUE includes 9 natural language understanding tasks that are labeled in English only . Comparing to GLUE , XGLUE not only expands task annotations to multiple languages , but also includes natural language generation tasks . XNLI ( Conneau et al , 2018 ) , NER ( Sang , 2002 ; Sang and De Meulder , 2003 ) , POS Tagging ( Kim et al , 2017 ) , MLQA ( Lewis et al , 2019b ) and PAWS - X ( Yang et al , 2019a ) are 5 multilingual datasets built for specific tasks . XGLUE not only includes these 5 existing tasks , but also introduces 6 new tasks selected from real - world scenarios ( i.e. , Search , Ads and News ) . This makes XGLUE have more practical values . XTREME ) is a concurrent work of XGLUE . Comparing to it , XGLUE includes both understanding and generation tasks , which , to the best of our knowledge , is the first attempt in the cross - lingual dataset construction efforts . ) is a RoBERTa - version XLM without using translation language model in pre - training . It is trained based on a much larger multilingual corpus ( i.e. Com - mon Crawl ) and become the new state - of - the - art on XNLI . In this paper , we use both the Common Crawl corpus and the bilingual corpus , aiming to build a stronger baseline model on XGLUE . BART ( Lewis et al , 2019a ) and ProphetNet ( Yan et al , 2020 ) are two latest generative pre - trained models . We borrow ideas from these two works and extend Unicoder to cross - lingual generation tasks , which goes a step further to verify and explore different text generation approaches in the cross - lingual scenario .
+We present XGLUE as a new cross - lingual benchmark and conduct comprehensive evaluations with interesting findings observed . We thank STC - A NLP , Bing Answers , Bing Ads , Bing Relevance and Microsoft News for providing the datasets . A The fine - tune parameters of Unicoder on XGLUE .

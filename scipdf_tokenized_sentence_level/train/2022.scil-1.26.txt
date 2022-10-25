@@ -1,0 +1,45 @@
+Learning Input Strictly Local Functions :
+Comparing Approaches with Catalan Adjectives
+Input strictly local ( ISL ) functions are a class of subregular transductions that have well - understood mathematical and computational properties and that are sufficiently expressive to account for a wide variety of attested morphological and phonological patterns ( e.g. , Chandlee , 2014 ; Chandlee , 2017 ; .
+In this study , we compared several approaches to learning ISL functions :
+the ISL function learning algorithm ( ISLFLA ; Chandlee , 2014 ; and the classic OSTIA learner to which it is related ( Oncina et al , 1993 ) ; the Minimal Generalization Learner ( MGL ; Hayes , 2002 , 2003 ) ; and a novel deep neural network model presented here ( DNN - ISL ) . 
+The four models were evaluated on their ability to learn the mapping from feminine singular ( fem.sg . )
+to masculine singular ( masc.sg . )
+surface forms of Catalan adjectives ( and , separately , from provided underlying representations to fem.sg .
+and masc.sg .
+surface forms ) .
+The mappings to masc.sg .
+forms in Catalan involve several phonological modifications at the right edge of the word ( e.g. , Mascaró , 1976 ) , the empirical focus of our study .
+The relevant processes include obstruent devoicing and strengthening ( e.g. , [ rOZ@ ] fem.sg .
+[ rOtS ] masc.sg . ' red ' ) , post - tonic n - Deletion ( e.g. , [ san@ ]
+[ sa ] ' healthy ' ) , and cluster simplification ( e.g. , [ blaNk@ ]
+[ blaN ] ' white ' ) .
+There are opaque , counterfeeding interactions among some of the processes ( e.g. , [ f@kund@ ] [ f@kun ] / *
+[ f@ku ] ' fertile ' ) , consistent with the idea that the mappings are input - rather than output - determined ( see .
+A small number of apparent lexical exceptions to the typical modification pattern ( e.g. , [ blan@ ] [ blan ] / * [ bla ] ' soft ' ) are problematic for ISL learners that assume perfect homogeneity . 
+Our main findings were that the DNN - ISL learner achieved high accuracy on the Catalan data , with MGL coming in a close second , while ISLFLA and OSTIA performed much worse - either failing to learn any mapping at all or predicting the correct output for less than 5 % of held - out cases , even when lexical exceptions were removed from the data ( see Table 1 ) .
+The FestCat project ( Bonafonte et al , 2008 ) provides broad transcriptions for more than 53 , 000 adjectival surface forms in two major dialects of Catalan .
+We considered the Central Catalan forms and restricted our data to the nearly 6 , 500 lemmas that are also attested in a subtitle lexicon ( Boada et al , 2020 ) .
+While our main focus was on learning , we also developed a hand - written ISL transducer for the mapping to masc.sg .
+forms that is highly accurate ( > 98 % correct ) , along with custom code to derive plausible underlying representations from masc.sg . ∼ fem.sg .
+pairs .
+For the purposes of this abstract , we assume familiarity with ISLFLA , OSTIA , and MGL .
+We verified that the implementation of MGL learns only ISL phonological rules - rules conditioned on local phonological context in the result of a morphological operation such as affixation or truncation - a connection that has not previously been made in the literature . 
+The deep neural network model proposed here ( DNN - ISL ) also applies morphological operations followed by phonological modifications , the latter being implemented with weighted constraints rather than rules .
+A phonological constraint as learned by DNN - ISL is defined by : a three - segment featural pattern specifying the input context to which the constraint applies ; a preference for one type of modification applied to the center segment of the context ( i.e. , deletion , epenthesis before / after , or feature change ) ; target output features in the case of epenthesis or change ; and a real - valued strength . 
+Each constraint computes the degree to which its context matches every three - segment window in the input ( i.e. , it applies a novel feature based convolution operation to the input ) and imposes its preferred modification in proportion to the degree of match and its strength .
+These preferences are summed over constraints for each input position and applied to the positions independently to derive the phonological output .
+The parameters of the constraints are straightforwardly interpretable and visualizable as real - valued phonological feature coefficients , modification - type logits , and strengths .
+The model is fully differentiable and was trained with the Adagrad optimizer on small mini - batches for 20 epochs .
+We evaluated all four models on the same training / validation / testing data , as summarized in Table 1 .
+ISLFLA and OSTIA were unable to learn accurate mappings except when the fem.sg .
+and masc.sg .
+forms were artificially trimmed to their final VC * ( V ) sequences - a strong , languagespecific bias to attend to changes at the end of the word that the other models did not require .
+Results for larger training splits , and for mapping from URs to SRs , were similar .
+The errors made by DNN - ISL mostly involved underapplication of deletion ( e.g. , *
+[ blaNk ] ) .
+In summary , we evaluated four learning models on an ISL phonological mapping ( with a small number of exceptions ) found in a large , realistic body of natural language data .
+The models that have proofs of learnability and efficiency , ISLFLA and OSTIA , performed much worse than models that currently lack such theoretical guarantees but share the inductive bias for ISL patterns .
+The results highlight the need for further empirical and formal study of highperforming subsymbolic models such as DNN - ISL , and extension of our model to output - based patterns and learning of underlying representations .
+We plan to release our processed data , hand - written ISL transducer , and model implementations .
+Thanks to Coleman Haley and Marina Bedny for helpful discussion of this research , which was supported by NSF grant BCS - 1941593 to CW .

@@ -1,0 +1,273 @@
+Improving Graph - based Sentence Ordering with Iteratively Predicted Pairwise Orderings
+Dominant sentence ordering models can be classified into pairwise ordering models and set - to - sequence models .
+However , there is little attempt to combine these two types of models , which inituitively possess complementary advantages .
+In this paper , we propose a novel sentence ordering framework which introduces two classifiers to make better use of pairwise orderings for graph - based sentence ordering ( Yin et al , 2019 ( Yin et al , , 2021 .
+Specially , given an initial sentence - entity graph , we first introduce a graph - based classifier to predict pairwise orderings between linked sentences .
+Then , in an iterative manner , based on the graph updated by previously predicted highconfident pairwise orderings , another classifier is used to predict the remaining uncertain pairwise orderings .
+At last , we adapt a GRN - based sentence ordering model (
+Yin et al , 2019 ( Yin et
+al , , 2021 on the basis of final graph .
+Experiments on five commonly - used datasets demonstrate the effectiveness and generality of our model .
+Particularly , when equipped with BERT ( Devlin et al , 2019 ) and FHDecoder ( Yin et al , 2020 ) , our model achieves state - of - the - art performance .
+Our code is available at https:// github.com/DeepLearnXMU/IRSEG .
+With the rapid development and increasing applications of natural language processing ( NLP ) , modeling text coherence has become a significant task , since it can provide beneficial information for understanding , evaluating and generating multi - sentence texts .
+As an important subtask , sentence ordering aims at recovering unordered sentences back to naturally coherent paragraphs .
+It is required to deal with logic and syntactic consistency , and has increasingly attracted attention due to its wide applications on several tasks such as text generation ( Konstas and Lapata , 2012 ; Holtzman et al , 2018 )
+Recently , inspired by the great success of deep learning in other NLP tasks , researchers have resorted to neural sentence ordering models , which can be classified into : pairwise ordering models Agrawal et
+al , 2016 ; Li and Jurafsky , 2017 ; Moon et al , 2019 ; Kumar et al , 2020 ; Prabhumoye et al , 2020 ; Zhu et al , 2021 ) and set - to - sequence models ( Gong et al , 2016 ; Nguyen and Joty , 2017 ; Logeswaran et al , 2018 ; Mohiuddin et al , 2018 ; Cui et
+al , 2018 ; Yin
+et
+al , 2019 ;
+Oh et al , 2019 ;
+Yin et
+al , 2020 ;
+Cui et
+al , 2020 ;
+Yin et
+al , 2021 )
+.
+Generally , the former predicts the relative orderings between pairwise sentences , which are then leveraged to produce the final ordered sentence sequence .
+Its advantage lies in the lightweight pairwise ordering predictions , since the predictions only depend on the semantic representations of involved sentences .
+By contrast , the latter is mainly based on an encoder - decoder framework , where an encoder is first used to learn contexualized sentence representations by considering other sentences , and then a decoder , such as pointer network ( Vinyals et al , 2015a ) , outputs ordered sentences . 
+Overall , these two kinds of models have their own strengths , which are complementary to each other .
+To combine their advantages , Yin
+et al ( 2020 ) propose FHDecoder that is equipped with three pairwise ordering prediction modules to enhance the pointer network decoder .
+Along this line , Cui et al ( 2020 ) introduce BERT to exploit the deep semantic connection and relative orderings between sentences and achieve SOTA performance when equipped with FHDecoder .
+However , there still exist two drawbacks : 1 ) their pairwise ordering predictions only depend on involved sentence pairs , without considering other sentences in the same set ; 2 ) their one - pass pairwise ordering predictions are relatively rough , ignoring distinct difficulties in predicting different sentence pairs .
+Therefore , we believe that the potential of pairwise orderings in neural sentence ordering models has not been fully exploited . 
+In this paper , we propose a novel iterative pairwise ordering prediction framework which introduces two classifiers to make better use of pairwise orderings for graph - based sentence ordering ( Yin et al , 2019 ( Yin et al , , 2021 .
+As an extension of Sentence - Enity Graph Recurrent Network ( SE - GRN )
+( Yin et al , 2019 ( Yin et
+al , , 2021 , our framework enriches the graph representation with iteratively predicted orderings between pairwise sentences , which further benefits the subsequent generation of ordered sentences .
+The basic intuitions behind our work are two - fold .
+First , learning contextual sentence representations is helpful to predict pairwise orderings .
+Second , difficulties of predicting ordering vary with respect to different sentence pairs .
+Thus , it is more reasonable to first predict the orderings of pairwise sentences easily to be predicted , and then leverage these predicted orderings to refine the predictions for other pairwise sentences . 
+Concretely , we propose two graph - based classifiers to iteratively conduct ordering predictions for pairwise sentences .
+The first classifier takes the sentence - entity graph ( SE - Graph )
+( Yin et al , 2019 ( Yin et al , , 2021 as input and yields relative orderings of linked sentences via corresponding probabilities .
+Next , in an iterative manner , the second classifier enriches the previous graph representation by converting high - value probabilities into the weights of the corresponding edges , and then reconduct graph encoding to predict orderings for the other pairwise sentences .
+Based on the final weighted graph representation , we adapt SE - GRN to construct a graph - based sentence ordering model , of which the decoder is also a pointer network . 
+To the best of our knowledge , our work is the first to exploit pairwise orderings to enhance the graph encoding for graph - based set - to - squence sentence ordering .
+To investigate the effectiveness of our framework , we conduct extensive experiments on several commonly - used datasets .
+Experimental results and in - depth analyses show that our model enhanced with some proposed technologies ( Devlin et al , 2019 ;
+Yin et
+al , 2020 ) achieves the state - of - the - art performance .
+Early studies mainly focused on exploring humandesigned features for sentence ordering ( Lapata , 2003 ; Barzilay and Lee , 2004 ; Lapata , 2005 , 2008 ; Elsner and Charniak , 2011 ; Guinaudeau and Strube , 2013 ) .
+Recently , neural network based sentence ordering models have become dominant , consisting of the following two kinds of models : 1 ) Pairwise models .
+Generally , they first predict the pairwise orderings between sentences and then use them to produce the final sentence order via ranking algorithms Agrawal et
+al , 2016 ; Li and Jurafsky , 2017 ; Kumar et al , 2020 ; Prabhumoye et al , 2020 ; Zhu et al , 2021 ) .
+For example , first framed sentence ordering as a ranking task conditioned on pairwise scores .
+Agrawal et al ( 2016 ) conducted the same experiments as in the task of image caption storytelling .
+Similarly , Li and Jurafsky ( 2017 ) 2 ) Set - to - sequence Models .
+Basically , these models are based on an encoder - decoder framework , where the encoder is used to obtain sentence representations and then the decoder produces ordered sentences progressively .
+Among them , both Gong et al ( 2016 ) and Logeswaran et al ( 2018 )
+Cui et al ( 2018 ) proposed ATTOrderNet that uses self - attention mechanism to learn sentence representations .
+Inspired by the successful applications of graph neural network ( GNN ) in many NLP tasks Xue et al , 2019 ; , Yin
+et
+al ( 2019Yin et al ( , 2021 represented input sentences with a unified SE - Graph and then applied GRN to learn sentence representations .
+Very recently , we notice that Chowdhury et al ( 2021 ) proposes a BART - based sentence ordering model .
+Please note that our porposed framework is compatible with BART ( Lewis et al , 2020 ) .
+For ( Yin et al , 2019 ( Yin et
+al , , 2021 .
+example , we can easily adapt the BART encoder as our sentence encoder . 
+With similar motivation with ours , that is , to combine advantages of above - mentioned two kinds of models , Yin et
+al ( 2020 ) introduced three pairwise ordering predicting modules ( FHDecoder ) to enhance the pointer network decoder of ATTOrder - Net .
+Recently , Cui et al ( 2020 ) proposed BERSON that is also equipped with FHDecoder and utilizes BERT to exploit the deep semantic connection and relative ordering between sentences . 
+However , significantly different from them , we borrow the idea from the mask - predict framework ( Gu et al , 2018 ; Ghazvininejad et al , 2019 ; Deng et al , 2020 ) to progressively incorporate pairwise ordering information into SE - Graph , which is the basis of our graph - based sentence ordering model .
+To the best of our knowledge , our work is the first attempt to explore iteratively refined GNN for sentence ordering .
+In this section , we give a brief introduction to the SE - GRN ( Yin et al , 2019 ( Yin et
+al , , 2021 , which is selected as our baseline due to its competitive performance .
+As shown in Figure 1 , SE - GRN is composed of a Bi - LSTM sentence encoder , GRN paragraph encoder , and a pointer network ( Vinyals et al , 2015b ) decoder .
+o i .
+As illustrated in the middle of Figure 1 , each input sentence set is rep - resented as an undirected sentence - entity graph G =
+( V , E ) ,
+where V = { v i }
+I i=1 ∪ { v j } J j=1 and E =
+{
+e
+i , i } I ,
+I i=1 , i = 1 ∪ { ē i , j } I , J i=1 , j=1 ∪ { ê j , j } J , J j=1 , j = 1 represent the nodes and edges respectively .
+Here , nodes include sentence nodes ( such as v i ) and entity nodes ( such asv j ) , and each edge is 1 ) sentencesentence edge ( ss - edge , such as e i , i ) linking two sentences having the same entity ; or 2 ) sentenceentity edge ( se - edge , such asē i , j ) connecting an entity to a sentence that contains it .
+Each se - edge is assigned with a label including subject , object or other , based on the syntactic role of its involved entity ; or 3 ) entity - entity edge ( ee - edge , such asê j , j ) connecting two semantic related entities .
+Besides , a virtual global node connecting to all nodes is introduced to capture global information effectively .
+Node representations of each sentence and each entity are first initialized with the concatenation of bidirectional last states of the Bi - LSTM sentence encoder and the corresponding GloVe word embedding , respectively .
+Then , a GRN is adapted to encode the above sentence - entity graph , where node states are updated iteratively .
+During the process of updating hidden states , the messages for each node are aggregated from its adjacent nodes .
+Specifically , the sentence - level message m ( l ) i and entity - level messagem ( l ) i for a sentence s i are defined as follows : m ( l ) i
+=
+v i
+N i
+w ( κ ( l - 1 ) i , κ ( l - 1 ) i ) κ ( l - 1 ) i , m ( l )
+i =
+v j N iw
+( κ ( l - 1 ) i , ( l - 1 ) j , rij ) ( l - 1 ) j , ( 1 ) 
+where κ ( l - 1 ) i and ( l - 1 ) j stand for the neighboring sentence and entity representations of the i - th sentence node v i at the ( l − 1 ) - th layer ,
+N i andN
+i denote the sets of neighboring sentences and entities of v i , and both w ( * ) andw ( * ) are gating functions with single - layer networks , involving associated node states and edge label r ij ( if any ) . 
+Afterwards , κ ( l - 1 ) i is updated by concatenating its original representation κ ( 0 ) i , the messages from neighbours ( m ( l ) i andm ( l ) i ) and the global state g ( l - 1 ) via GRU : ξ ( l ) i
+= [ κ ( 0 ) i ; m ( l ) i ; m ( l ) i ; g ( l - 1 ) ] , κ ( l ) i = GRU ( ξ ( l ) i , κ ( l - 1 ) i ) . 
+( ) 2 Similar to updating sentence nodes , each entity state ( l - 1 ) j is updated based on its word embedding emb j , hidden states of its connected sentence nodes ( such as κ ( l - 1 ) i ) , and g ( l - 1 ) : m ( l )
+j =
+v i N jw ( ( l - 1 ) j , κ ( l - 1 ) i , rij ) κ ( l - 1 ) i , m ( l ) j = v j N jw ( ( l - 1 ) j , ( l - 1 ) j ) ( l - 1 ) j , ξ ( l ) j = [ embj ; m ( l ) j ; m ( l ) j ; g ( l - 1 ) ] , ( l ) j = GRU ( ξ ( l ) j , ( l - 1 ) j ) .
+( 3 ) Finally , the messages from both sentence and entity states are used to update global state g ( l - 1 ) via g ( l ) = GRU ( 1 | V |
+v i V κ ( l - 1 )
+i , 1 | V | v j V ( l - 1 ) j , g ( l - 1 ) ) .
+( 4 ) The above updating process is iterated for L times .
+Usually , the top hidden states are considered as fine - grained graph representations , which will provide dynamical context for the decoder via attention mechanism .
+Given the learned hidden states { κ ( L ) i } and g ( L ) , the prediction procedure for order o can be formalized as follows : P
+( o | K ( L ) )
+= I t=1 P ( o t | o < t , K ( L ) o t−1 ) , P ( o t | o < t , K ( L ) o t−1 )
+= softmax ( q T tanh ( W h d t + U K ( L ) o t−1 ) ) , h d t = LSTM ( h d t−1 , κ ( 0 ) o t−1 ) . 
+Here , q , W and U are learnable parameters , K and the decoder hidden state at the t - th time step , which is initialized by g ( L ) as t=0 , respectively .
+In this section , we give a detailed description to our framework .
+As shown in Figure 2 , we first introduce two graph - based classifiers to construct an iteratively refined sentence - entity graph ( IRSE - Graph ) .
+It is a weighted version of SE - Graph , where pairwise ordering inforamtion is iteratively incorporated to update ss - edge weights .
+Then , we adapt the conventional GRN to establish a neural sentence ordering model based on the final IRSE - Graph .
+As an extension of SE - Graph , IRSE - Graph can be denoted as G= ( V , E , W ) , where V and E share the same definitions with those of SE - Graph .
+Particularly , in IRSE - Graph , each ss - edge e i , i is a directed one with a weight
+w i , i W indicating the probability of sentence s i occurring before sentence s i .
+Meanwhile , there must exist a corresponding ssedge
+e i , i with the weight
+w i , i = 1−w
+i , i denoting the probability of s i appearing after s i .
+For example , in Figure 2 , for two linked sentence nodes v 1 and v 2 , there exist two ss - edges e 1 , 2 and e 2 , 1 with weights w 1 , 2 and w 2 , 1 respectively , both of which are iteratively updated during constructing IRSE - Graph .
+Inspired by Gui et al ( 2020 ) , we successively introduce two classifiers - initial classifier and iterative classifier to construct IRSE - Graph .
+Both classifiers are constructed using slightly adapted GRN and utilized to deal with different scenarios , respectively .
+In this way , we can fully exploit the potential of iterative classifier to predict better pairwise orderings .
+We will give a detail introduction to the slightly adapted GRN in Section 4.3 . 
+To better understand the procedure of constructing IRSE - Graph , we provide the details in Algorithm 1 .
+During this procedure , pairwise orderings are iteratively predicted and gradually incorporated to refine IRSE - Graph .
+Here we introduce a set VP ( k ) to collect sentence node pairs with uncertain pairwise orderings at the k - th iteration . 
+First , we bulid an initial classifier based on the initial IRSE - Graph , where the learned sentence representations are used to predict pairwise orderings between any two linked sentences only once ( Lines 2 - 6 ) .
+Note that in the initial IRSE - Graph , all weights of ss - edges are set to 0.5 .
+In this case , IRSE - Graph degrades to the conventional SE - Graph .
+Concretely , for any two linked sentence nodes v i and v i , we concatenate their vector representations κ
+i
+and κ i as [ κ i ; κ i ]
+and [ κ i ; κ i ] , which are fed into an MLP classifier to obtain two probabilities .
+Then , we normalize and convert these two probabilities into ss - edge weights
+w i , i and w i , i .
+If both w i , i and w i , i are within a prefixed interval [ δ min , δ max ] , we consider ( v i , v i ) as a sentence node pair with uncertain pairwise ordering and add it into VP ( 0 ) .
+Moreover , we replace both w i , i and w i , i with 0.5 , indicating that they will be repredicted in the next iteration . 
+In the following , we also construct an iterative classifier based on IRSE - Graph .
+However , in an easy - to - hard manner , we use iterative classifier to perform pairwise ordering predictions , where the ss - edge weights of IRSE - Graph are continously updated with previously - predicted pairwise orderings with high confidence ( Lines 13 - 26 ) .
+By doing so , graph representations can be continously refined for better subsequent predictions .
+More specifically , the k - th iteration of this classifier mainly involve three steps : In Step 1 , based on the current IRSE - Graph , we employ the adapted GRN to conduct graph encoding to learn sentence representations ( Line 15 ) . 
+In Step 2 , on the top of learned sentence representations , we stack an MLP classifier to predict pairwise orderings for sentence node pairs in VP ( k ) ( Lines 16 - 19 ) .
+Likewise , we collect sentence node pairs with uncertain pairwise orderings to form VP ( k+1 ) , and reassign their corresponding ss - edge weights as 0.5 , so as to avoid the negative effect of these uncertain ss - edge weights during the next Algorithm 1
+The procedure of constructing IRSE - Graph Input : the initial IRSE - Graph : G= ( V , E , W ) with all w i , i = 0 ; two thresholds : δmin , δmax Output : the final IRSE - Graph : G = ( V , E , W ) 1 : VP ( 0 ) 2 : { κi } I i=1 GRN ( G ) 3 : for any linked sentence node pair ( vi , v i ) & & i < i do 4 : w i , i InitialClassifer ( [ κi ; κ i ] ) 5 : w i , i InitialClassifer ( [
+κ i ; κi ] )
+6 : w i , i ,
+w i , i Normalize ( w i , i ,
+w i , i ) 7 : 
+if δmin ≤ w i , i ≤ δmax then 8 : VP ( 0 ) VP ( 0 ) ∪ { ( vi ,
+v i ) }
+9 : 
+w i , i 0.5 ,
+w i , i 0.5 10 : end if 11 : end for 12 : k 0 13 : repeat 14 : iteration ( Lines 20 - 23 ) . 
+VP ( k+1 ) 15 : { κi } I i=1 GRN ( G ) 16 : for ( vi ,
+v i ) VP ( k ) do 17 :
+w i , i IterativeClassifer ( [ κi ; κ i ] ) 18 : w i , i IterativeClassifer ( [ κ i ; κi ] ) 19 : w i , i ,
+w i , i Normalize ( w i , i ,
+w i , i ) 20 :
+if δmin ≤ w i , i ≤ δmax then 21 : VP ( k+1 ) VP ( k+1 ) ∪ { ( vi , v i ) } 22 : w i , i 0.5 , w i , i 0.5 23 : end if 24 : end for 25 : k k + 1 26 : until VP ( k+1 )
+= = VP ( k ) | | VP ( k ) = = 27 : return G In Step 3 , if VP ( k+1 ) is equal to VP ( k ) or empty , we believe the learning of IRSE - Graph G has converged and thus return it ( Lines 26 - 27 ) . 
+Although both of our classifiers are constructed using IRSE - Graph , their training procedures are slightly different .
+As for initial classifier , we directly train it on the initial IRSE - Graph without any pairwise ordering information ( all ss - edge weights are set to 0.5 ) .
+By contrast , we train iterative classifier on IRSE - Graph with partial pairwise orderings .
+To enable iterative classifier generalizable to any IRSE - Graph with partial predicted pairwise orderings , we first set al ss - edge weights to 1 or 0 according to their ground - truth pairwise orderings , and then train the classifier to correctly predict pari - wise orderings for other pairs .
+Concretely , if s i appears before s i , we set w
+i , i = 1 and w i , i = 0 , vice versa .
+For example , in the left part of Figure 3 , the ground - truth sentence sequence is s 1 , s 2 , s 3 , s 4 , and thus we assign the ss - edge weights of linked sentence node pairs ( v 1 , v 2 ) , ( v 3 , v 2 ) , ( v 3 , v 4 ) , ( v 2 , v 4 ) as follows : w 1 , 2 = 1 , w 2 , 3 = 1 , w 2 , 4 = 1 , w 3 , 4 = 1 , and w 2 , 1 = 0 , w 3 , 2 = 0 , w 4 , 2 = 0 , w 4 , 3 = 0 . 
+Moreover , to enhance the robustness of the iterative classifier , we randomly select a certain ratio η of sentence pairs and assign their ss - edges with incorrect weights .
+Let us revisit Figure 3 , for the randomly selected sentence node pair ( v 1 , v 2 ) , we assign ss - edges weights w 1 , 2 and w 2 , 1 with randomly generated noisy values 0.3 and 0.7 respectively .
+In this way , we expect that iterative classifier can conduct correct predictions even given incorrect previously - predicted pairwise orderings .
+Finally , following the conventional SE - GRN ( Yin et al , 2019 ( Yin et
+al , , 2021 , we construct a graph - based sentence ordering model .
+Note that the above two classifiers and our sentence ordering model are all based on IRSE - Graph rather than the conventional SE - Graph , which makes the standard GRN unable to be applied directly .
+To deal with this issue , we slightly adapt GRN to utilize pairwise ordering information for graph encoding .
+Specifically , we adapt Equation 1 to incorporate ss - edge weights into the message aggregation of sentence - level nodes : m ( l ) i
+=
+v i
+N i
+w i , i
+w ( κ ( l - 1 ) i , κ ( l - 1 ) i ) κ ( l - 1 ) i , w ( κ ( l - 1 ) i , κ ( l - 1 ) i )
+= σ ( Wg [ κ ( l - 1 ) i ; κ ( l - 1 ) i ] ) .
+( 6 ) Here σ denotes sigmoid function and W g is learnable parameter matrix .
+Equation 6 expresses that the sentence - level aggregation should consider not only the semantic representations of the two involved sentences , but also the relative ordering between them .
+In addition , other Equations are the same as those of conventional GRN , which have been described in Section 3.2 .
+Datasets .
+Following previous work ( Yin et al , 2020 ;
+Cui et al , 2018 ; Yin et al , 2021 ) , we carry out experiments on five benchmark datasets : SIND , ROCStory .
+SIND is a visual storytelling dataset and ROCStory ( Mostafazadeh et al , 2016 ) is about commonsense stories .
+Both two datasets are composed of 5 - sentence stories and randomly split by 8:1:1 for the training / validation / test sets .
+NIPS Abstract , AAN Abstract , arXiv Abstract .
+These three datasets consist of abstracts from research papers , which are collected from NIPS , ACL anthology and arXiv , respectively ( Radev et al , 2016 ; ( Yin et al , 2021 ) for our model and its variants .
+Specifically , we apply 100 - dimensional GloVe word embeddings , and set the sizes of Bi - LSTM hidden states , sentence node states , and entity node states as 512 , 512 and 150 , respectively .
+The recurrent step of GRN is 3 .
+We empirically set thresholds δ min and δ max as 0.2 and 0.8 , and set η as 20 % , 15 % , 25 % , 15 % , 15 % according to accuracies of initial classifier on validation sets .
+Besides , we individually set the coefficient λ ( See Equation 18 in ( Yin et al , 2020 ) ) as 0.5 , 0.5 , 0.2 , 0.4 , 0.5 on the five datasets .
+We adopt Adadelta ( Zeiler , 2012 ) with = 10 −6 , ρ = 0.95 and initial learning rate 1.0 as the optimizer .
+We employ L2 weight decay with coefficient 10 −5 , batch size of 16 and dropout rate of 0.5 . 
+When constructing our model based on BERT , we use the same settings as ( Cui et al , 2020 ) .
+Concretely , we set sizes of hidden states and node states to 768 , the learning rate of BERT as 3e - 3 , the batch size as 16 , 32 , 128 , 128 , 64 for the five datasets . Baselines .
+To demonstrate the effectiveness of our model ( IRSE - GRN ) , we compare it with SE - GRN ( Yin et al , 2021 ) .
+Besides , we report the performance of following sentence ordering models : 1 ) Pairwise models : Pairwise Model , RankTxNet ( Kumar et al , 2020 ) , andB - TSort ( Prabhumoye et al , 2020 ) , ConsGraph ( Zhu et al , 2021 ) ; 2 ) Set - to - sequence models : HAN ( Wang and Wan , 2019 ) , LSTM+PtrNet ( Gong et al , 2016 ) ,
+V - LSTM+PtrNet ( Logeswaran et al , 2018 ) , ATTOrderNet ( Cui et al , 2018 ) , TGCM
+( Oh et al , 2019 ) , SE - GRN ( Yin et al , 2019 ) , SE - GRN ( Yin et al , 2021 ) 2020 ) and BERSON ( Cui et al , 2020 ) .
+Furthermore , to examine the compatibility of other technologies with our model , we report the performance of IRSE - GRN equipped with some effective components : 1 ) IRSE - GRN+FHDecoder .
+In this variant , we equip our model with FHDecoder ( Yin et al , 2020 ) , where pairwise ordering information is incorporated ; 2 ) IRSE - GRN+BERT+FHDecoder .
+In addition to FHDecoder , we construct the sentence encoder based on BERT , where the mean - pooling outputs of all learned word representations are used to initialize sentence nodes .
+Evaluation Metrics .
+Following previous work ( Oh et al , 2019 ; Cui et al , 2020 ; Prabhumoye et al , 2020 ; Zhu et al , 2021 ; Yin
+et al , 2021 ) , we use the following three metrics : 1 ) Kendall 's Tau ( τ ) :
+Formally , this metric is calculated as 1 - 2× ( number of inversions ) / I 2 , where I denotes the sequence length and number of inversions is the number of pairs in the predicted sequence with incorrect relative order ( Lapata , 2003 )
+; 2 ) Perfect Match Ratio ( PMR ) :
+This metric calculates the ratio of samples where the entire sequence is correctly predicted ; 3 ) Accuracy ( Acc ) :
+This metric measures the percentage of sentences , whose absolute positions are correctly predicted ( Logeswaran et al , 2018 ) .
+Since pairwise ordering plays a crucial role in our proposed framework , we first compare the performance of different classifiers on various datasets .
+the predictions of pairwise orderings .
+Table 1 reports the overall experimental results of sentence ordering .
+When incorporating BERT and FHDecoder into IRSE - GRN , our model achieves SOTA performance on most of datasets .
+Besides , we arrive at the following conclusions : First , IRSE - GRN significantly surpasses SE - GRN on all datasets ( bootstrapping test , p<0.01 ) , indicating that iteratively refining graph representations indeed benefit the ordering of input sentences . 
+Second , IRSE - GRN+FHDecoder exhibits better performance than IRSE - GRN and all non - BERT baselines , which are shown above the upper dotted line of Table 1 , across datasets in different domains .
+Therefore , we confirm that our framework is orthogonal to the current approach exploiting pairwise ordering information for decoder . 
+Third , when constructing our model based on BERT , IRSE - GRN+BERT+FHDecoder also outperforms all BERT - based baselines , such as Cons - Graph , BERSON , achieving SOTA performance .
+It can be known that our proposed framework is also effective when combining with pretrained language model .
+Finally , we note that IRSE - GRN+BERT+FH - Decoder gains relatively marginal improvement on SIND and ROCStory , and performs worse than BERSON in PMR on SIND .
+We speculate that there exist less ss - edges on these two datasets , resulting in that our proposed framework can not achieve its full potential .
+Specifically , average edge numbers of SIND and ROCStory are 2.85 and 5.66 respectively , far fewer than 16.60 , 10.86 and 16.73 on NIPS Abstract , ANN Abstract and arXiv Abstract . 
+Besides , since it is a challenge to order longer paragraphs , we investigate the Kendall 's τ of our models and SE - GRN with respect to different sentence numbers , as shown in Figure 4 .
+Overall , all models degrade with the increase of sentence number .
+However , our model and its two enhanced versions always exhibit better performance than SE - GRN .
+As mentioned in previous studies ( Gong et al , 2016 ; Cui et al , 2018 ; Oh et al , 2019 ) , the first and last sentences are very important in a paragraph .
+Following these studies , we compare models by conducting experiments to predict the first and last sentences .
+As displayed in Table 3 , IRSE - GRN surpasses all non - BERT baselines , and IRSE - GRN+BERT+ FHDecoder wins against BERTSON .
+These results are consistent with those reported in Table 1 , further demonstrating the effectiveness of our model .
+We conduct several experiments to investigate the impacts of our proposed components on ROCstory dataset and arXiv dataset which are the two largest datasets .
+All results are provided in Table 4 , where we draw the following conclusions : First , using only iterative classifier , IRSE - GRN ( w/o initial classifier ) performs worse than IRSE - GRN .
+This result proves that iterative classifier fails to predict well from scratch and the pairwise ordering predicted by initial classifier is beneficial to construct a well - formed graph representation for iterative classifier . 
+Second , when the iteration number k is set as 1 , the performance of IRSE - GRN decreases .
+Moreover , if we remove iterative classifier , the performance of IRSE - GRN becomes even worse .
+Therefore , we confirm that the iterative predictions of pairwise ordering indeed benefit the learning of graph representations . 
+Finally , the result in the last line indicates that removing noisy weights leads to a significant performance drop .
+It suggests that the utilization of noisy weights is useful for the training of iterative classifier , which makes our model more robust .
+Following previous studies ( Barzilay and Lapata , 2005 ; Nayeem and Chali , 2017 ) spect the validity of our proposed framework via multi - document summarization .
+Concretely , we train different neural sentence ordering models on a large - scale summarization corpus ( Fabbri et al , 2019 ) , and then individually use them to reorder the small - scale summarization data of DUC2004 ( Task2 ) .
+Finally , we use coherence probability proposed by ( Nayeem and Chali , 2017 ) to evaluate the coherence of summaries .
+In this group of experiments , we conduct experiments using different weights : 0.5 and 0.8 , as implemented in ( Nayeem and Chali , 2017 ) and ( Yin et al , 2020 ) respectively . 
+The results are reported in Table 5 .
+We can observe that the summaries reordered by IRSE - GRN and its variants achieve higher coherence probabilities than baseline , verifying the effectiveness of our proposed framework in the downstream task .
+To provide more experimental results , we summarize the runtime on the validation sets and the numbers of parameters for our enhanced models and baseline SE - GRN in Table 6 .
+In this work , we propose a novel sentence ordering framework that makes better use of pairwise orderings for graph - based sentence ordering .
+Specifically , we introduce two classifiers to iteratively predict pairwise orderings , which are gradually incorporated into the graph as edge weights .
+Then , based on this refined graph , we construct a graph - based sentence ordering model .
+Experiments on five datasets demonstrate not only the superiority of our model over baselines , but also the compatibility to other modules utilizing pairwise ordering information .
+Moreover , when equipped with BERT and FHDecoder , our enhanced model achieves SOTA performance across datasets . 
+In the future , we plan to explore more effective GNN for sentence ordering .
+In particular , we will improve our model by iteratively merging nodes to refine the graph representation .
+The project was supported by National Key Research and Development Program of China ( No . 2020AAA0108004 ) , National Natural Science Foundation of China ( No . 61672440 ) , Natural Science Foundation of Fujian Province of China
+( No . 2020J06001 ) , and Youth Innovation Fund of Xiamen
+( No . 3502Z20206059 ) .
+We also thank the reviewers for their insightful comments .

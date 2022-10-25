@@ -4,8 +4,11 @@ import json
 import os
 from tqdm import tqdm
 
-path_to_tokenized = 'scipdf_tokenized/test/'
-path_to_tagged = 'scipdf_tagged_texts/test/'
+path_to_tokenized = 'scipdf_tokenized/train/'
+path_to_tagged = 'scipdf_tagged/train/'
+
+if not os.path.exists(path_to_tagged):
+    os.makedirs(path_to_tagged)
 
 for file in ['no_tag', 'metric_hp_plus_num_tag', 'rest']:
     if not os.path.exists(os.path.join(path_to_tagged,file+'.json')):

@@ -1,0 +1,285 @@
+LightningDOT : Pre - training Visual - Semantic Embeddings for Real - Time Image - Text Retrieval
+Multimodal pre - training has propelled great advancement in vision - and - language research .
+These large - scale pre - trained models , although successful , fatefully suffer from slow inference speed due to enormous computation cost mainly from cross - modal attention in Transformer architecture .
+When applied to reallife applications , such latency and computation demand severely deter the practical use of pre - trained models .
+In this paper , we study Image - text retrieval ( ITR ) , the most mature scenario of V+L application , which has been widely studied even prior to the emergence of recent pre - trained models .
+We propose a simple yet highly effective approach , LightningDOT that accelerates the inference time of ITR by thousands of times , without sacrificing accuracy .
+LightningDOT removes the time - consuming cross - modal attention by pre - training on three novel learning objectives , extracting feature indexes offline , and employing instant dot - product matching with further re - ranking , which significantly speeds up retrieval process .
+In fact , Light - ningDOT achieves new state of the art across multiple ITR benchmarks such as Flickr30k , COCO and Multi30 K , outperforming existing pre - trained models that consume 1000× magnitude of computational hours .
+1
+Image - text retrieval ( ITR ) has been widely studied as a staple benchmark task in both NLP and computer vision communities .
+Traditional ITR search engines typically deploy ranking - based models built upon visual - semantic embedding matching ( Faghri et al , 2017 ; Huang et al , 2018 ) or deep cross - modal fusion with attention mechanism ( Lee et al , 2018 ; Li et al , 2020a , b ) .
+Earliest works ( Kiros et al , 2014 ; Faghri et al , 2017 ( a ) Early work ( Faghri et al , 2017 ) using dot product to learn the similarity between global image features and global text features .
+( b ) Later study ( Lee et al , 2018 ) applying cross - attention between the features of each region and each word .
+( c ) Pre - trained V+L models with deep Transformer .
+( d ) LightningDOT without cross - attention .
+CMR , SMRM and VMLM refer to different pre - training tasks , which will be introduced later in method section .
+employ separate image encoder ( e.g. , CNN ) and text encoder ( e.g. , RNN ) , the embeddings from which are then measured by doc product for similarity matching ( Figure 1 ( a ) ) . 
+Later studies ( Lee et al , 2018Wang et al , 2019 ; improve this paradigm by employing advanced region - level visual encoder ( e.g. , Faster - RCNN ) and applying cross - attention between word features and region features for multimodal fusion ( Figure 1 ( b ) ) . 
+With the advent of Transformer ( Vaswani et al , 2017 ) and BERT ( Devlin et al , 2019 ) , crossmodal retrieval tasks are more recently dominated by vision - and - language ( V+L ) pre - trained models , such as ViLBERT , UNITER , OSCAR ( Li et al , 2020b ) , and VILLA .
+Large - scale pre - trained models learned from massive corpus of image - text pairs can power heterogeneous downstream tasks that take diverse modalities as inputs ( e.g. , text , image , video , audio ) .
+These models benefit from the self - attention mechanism in Transformer architecture , learning joint image+text embeddings through pre - training objectives such as masked language modeling ( MLM ) and masked region modeling ( MRM )
+( Figure 1 ( c ) ) . 
+However , the very ingredient that engenders the success of these pre - trained models , crossmodal attention between two modalities ( through self - attention ) , also destines the inevitable latency and huge computation cost in training and deploying such massive - scale models .
+For example , UNITER builds upon 12/24 Transformer layers , and trains over 10 million image+text pairs .
+The inference time of such large models with 110 million parameters is 48 seconds on average for text query from COCO dataset ( Chen et al , 2015 ) , not scalable in real - life applications serving millions of queries per second . 
+To make real - time ITR possible with low latency , we ask a bold question : can we go back to the beginning , reverting to simple dot product for efficient cross - modal retrieval ?
+To make this retro experiment feasible , we rely on Transformer to pre - train high - quality image and text encoders , but use efficient dot product for multimodal fusion instead of computationally heavy self - attention .
+To still facilitate effective cross - modal embedding learning , we use a special [ CLS ] token on both encoders , which transfers the learned embedding from the other modality ( Figure 1 ( d ) ) .
+We name this new paradigm LightningDOT , for its lightening speed benefiting from dot product computation . 
+By removing the time - consuming cross - attention between modalities , the model can learn visualsemantic embeddings without extensive matching between each image - text pair during inference , as used in existing pre - trained models Li et al , 2020b ; .
+Further , by eliminating the dependency on real - time computation over image - text pairs , we can compute all image and text embeddings independently offline just for once , and reuse these embeddings as cached indexes for new queries on the fly ( Figure 2 ) . 
+For model training , we propose three learning objectives to jointly train two Transformer blocks :
+Image Encoder and Language Encoder .
+Specifically , Visual - embedding fused MLM ( namely VMLM ) and Semantic - embedding fused MRM ( namely SMRM ) ensure cross - modal information is harnessed even without cross - modality self - attention .
+A cross - modal retrieval objective ( namely CMR ) encourages the model to learn multimodal fusion through pre - training .
+To maintain competitive model performance , we further introduce a reranking mechanism to bring back the benefit of cross - attention methods . 
+In summary , LightningDOT is designed with late fusion to learn visual - semantic embeddings .
+Experiments on popular ITR benchmarks show that LightningDOT is 600/1900 times faster than existing pre - trained models on Flickr30k / COCO , while achieving new state - of - the - art results .
+When retrieving from larger candidate pool ( > 120 K images ) , LightningDOT is 23 , 000 times faster .
+To the best of our knowledge , this is the first known effort on improving V+L model efficiency .
+V+L Pre - training
+Inspired by the success of Transformer - based ( Vaswani et al , 2017 ) language model pre - training ( Devlin et al , 2019 ; Yang et al , 2019 ; Raffel et al , 2020 ;
+Lan et al , 2020 ; Clark et al , 2020 ) , vision - andlanguage pre - training ( Huang et al , 2020b ; Su et al , 2020 ; Li
+et al , 2020bLi et al , , 2019a has become the prevailing paradigm in learning multimodal representations , with strong results on tasks such as image - text retrieval ( Kiros et al , 2014 ) , visual question answering ( Antol et al , 2015 ) and referring expression comprehension ( Yu et al , 2016 ) .
+Exemplary works include two - stream ( Tan and Bansal , 2019 ; and single - stream models Li et al , 2020a ; .
+Multi - task learning and adversarial training are also explored .
+This family of pre - training methods aims for general - purpose V+L without computation cost consideration .
+To the best of our knowledge , our work is the first known effort on pre - training visualsemantic embedding that enables low - latency realtime cross - modal retrieval .
+Ours is concurrent work with CLIP ( Radford et al , 2021 ) . 
+Image - Text Retrieval Early cross - modal embedding works ( Kiros et al , 2014 ; Faghri et al , 2017 ) focus on using a twostream model to learn a unified visual - semantic embedding , with progressive improvement on two popular benchmarks : Flickr30 K ( Plummer et al , 2015 ) and COCO ( Chen et al , 2015 ) .
+Later methods with cross - attention ( Lee et al , 2018Wang et al , 2019 ; become more popular , with significant performance gain .
+Pre - trained V+L models also fall into this category .
+By exploiting large - scale image - text datasets , pretrained V+L models further push the performance on Flickr30 K and COCO .
+Although achieving high recall , cross - attention requires excessive computation cost during inference that can not be overlooked .
+2
+In this work , inspired by dense retrieval in text retrieval domain ( Guu et al , 2020 ; Karpukhin et al , 2020 ; Xiong et al , 2020 ; Mao et al , 2020 ; Lewis et al , 2020 ) , we propose a more efficient attention - less framework .
+With pre - training , our model achieves better performance while being significantly faster than cross - modal attention methods .
+Note that the proposed approach is orthogonal to model compression techniques that reduce the number of layers / parameters ( Sun et al , 2019 ; Jiao et al , 2020 ) , since we do not reduce the number of parameters from the UNITER baseline .
+These two approaches can be combined to further boost the speed , which is an interesting future work direction .
+In this section , we present the proposed Light - ningDOT framework , which consists of two deep Transformers as image and language encoders .
+We first introduce three tasks designed to pre - train the model , then present our inference pipeline from offline feature extraction to online instant retrieval .
+We denote the Transformer - based ( Vaswani et al , 2017 ) image encoder and language encoder by f θ V and f θ L , respectively ( θ V , θ L are learnable parameters ) .
+Given a dataset of paired image and text { ( i , t ) } , we first extract region features v = { v 0 , v 1 , . . .
+, v N } ( v j R dv ,
+N is the number of regions ) for image
+i , along with bounding box positions of regions via a pre - trained Faster - RCNN ( Ren et al , 2015 ; Anderson et al , 2018 ) .
+3
+The image encoder f θ V encodes this sequence of image regions into a d - dimensional space f θ V ( v ) = h = { h 0 , . . . , h N } ( h j R d ) . 
+The corresponding text t is tokenized into sub - word units and projected into high - dimensional feature vectors
+w = { w 0 , w 1 , ... , w T } ( w j R dw , T is the number of tokens ) following Devlin et al ( 2019 ) .
+4
+Similarly , the text encoding process can be written as f θ L ( w ) =
+z = { z 0 , . . .
+, z T } ( z j R d ) .
+We regard the output [ CLS ] embedding h 0 as global image representation , and z 0 as global text representation .
+Following sections discuss how to jointly train these two encoders to learn strong visual - semantic embeddings , through three pre - training objectives .
+L MLM ( t )
+= − log P θ L ( w m | w \m )
+= − 1 M M k=1 log P θ mlm ( w m k |
+z m k ) , ( 1 ) where θ mlm is the additional parameters introduced to map hidden states z to word probabilities .
+Under the V+L setting , the textual input is usually highly correlated with the image .
+To leverage this cross - modal relation , we propose visualembedding fused MLM ( VMLM ) , in which the paired image i is considered as additional input when training the model to reconstruct masked tokens in sentence t.
+The loss function of VMLM can be formulated as : L VMLM ( t , i )
+= − log P θ ( w m | w \m , i )
+= − 1 M M k=1 log P θ mlm ( w m k |
+z m
+k + h 0 ) , ( 2 ) where θ = { θ V , θ L } and the word probabilities P θ are conditioned on the corresponding image i via the global image representation h 0 .
+Although VMLM takes a similar mathematical form to the MLM task proposed in UNITER , they differ in two main aspects : 1 ) LightningDOT uses two separate encoders ( h 0 is computed by f θ V ) ; and 2 ) visual dependency is explicitly injected to text representations ( z m k + h 0 ) , instead of implicitly learned through cross - modal attention . 
+Semantic - embedding Fused Masked Region Modeling ( SMRM )
+Recent works on V+L pretraining Tan and Bansal , 2019 ) have shown that mask - then - reconstruct pre - training on image regions also helps image+text embedding learning .
+Similar to MLM , Masked Region Modeling ( MRM ) is supervised by : L MRM ( i )
+= D θmrm ( v m , f θ V ( v \m ) )
+= 1 M M k=1 D θmrm ( v m k , h m k ) , ( 3 ) where D can be any differentiable distance function .
+Among the variants of MRM , we consider Masked Region Feature Regression ( MRFR ) with L2 distance and Masked Region Classification with KL - Divergence ( MRC - kl ) , due to their proven success in learning V+L representations .
+6 In MRFR , the L 2 distance between two feature vectors x and y is defined as : D θ fr ( x , y )
+= k x k − g θ fr ( y k ) 2 2 , where 2 denotes L 2 - norm , and g θ fr ( ) is a learnable Multi - layer Perceptron ( MLP ) with parameters θ fr .
+The KL - divergence D KL in MRC - kl measures distance between two probability distributions : D θmrc ( x , y )
+= k D KL ( c ( x k )
+| | g θmrc ( y k ) ) , where θ mrc is the parameters of a trainable MLP that maps feature vector
+x k to the object class distribution c ( x k ) predicted by Faster R - CNN . 
+To incorporate language information encoded in the paired text , we extend MRM to Semanticembedding fused MRM ( SMRM ) , where the global text representation z 0 is exploited when reconstructing masked regions . 
+L SMRM ( i , t )
+= D θmrm ( v m , f θ V ( v \m ) , t )
+= 1 M M k=1 D θmrm ( v m k , h m k + z 0 ) .
+( 4 ) The specific variants SMRFR and SMRC - kl can be derived using the corresponding distance function , which is omitted for simplicity .
+Note that both the cross - modal fusion introduced in Eqn . ( 2 ) and Eqn .
+( 4 ) uses simple addition without introducing extra parameters from their uni - modal counterpart .
+Moreover , the extra parameters θ mlm and θ mrm is not needed at downstream inference so will not slow down the retrieval . 
+Cross - modal Retrieval Objective ( CMR )
+Beyond image or text focused reconstructive objectives , we also propose a new pre - training task , Cross - modal Retrieval ( CMR ) , to leverage the paired information between image and text .
+With this learning objective , the model is optimized to promote high similarity score for a matched imagesentence pair ( i , t ) and vice versa .
+The similarity score between query t and image i is defined as : S ( t , i ) =
+z 0 , h 0 , ( 5 ) where , denotes the inner product between two vectors , and h 0 and z 0 are the output [ CLS ] embeddings from image encoder f θ V and language encoder f θ L , respectively .
+In order to capture both image - retrieval and textretrieval supervision signals in a single forwardbackward pass , we propose a bi - directional variant of contrastive loss .
+Given any matched image - text pair ( i , t ) , we treat text t as the query , sample n − 1 negative images { i 2 , i 3 , . .
+.
+, i n } , and then compute the objective function as : L ( t )
+IR = − log e S ( t , i 1 ) n k=1 e S ( t , i k ) , 
+where t 1 : = t. Similarly , we take image i as query ( i 1 : = i ) , sample n − 1 negative text , and compute : L ( i ) TR = − log e S ( i , t 1 ) 
+n k=1 e S
+( i , t k ) to optimize for text retrieval . 
+Following Henderson et al ( 2017 ) ; Gillick et al ( 2019 ) ; Karpukhin et al ( 2020 ) , we use in - batch negatives to avoid the actual sampling of a negative image or text : given a batch of n positive image - text pairs B = { ( i 1 , t 1 ) , . . .
+, ( i n , t n ) } , we use all other images from within the batch as negatives ( { i j } , where j { 1 , 2 , . . .
+, n } and j = k ) for every positive pair
+( i k , t k ) , and vice versa for negative text .
+The final CMR loss for batch B is : L CMR ( B ) = 1 2n n k=1 L
+( i k ) TR + L ( t k ) IR .
+( 6 ) An illustration of L CMR is presented in Figure 3 . 7 Through joint pre - training with CMR , VMLM and SMRM , the visual - semantic embeddings learned from image encoder and language encoder can be readily applied to downstream tasks .
+During finetuning stage , we directly adopt CMR loss to supervise the training process .
+7 The whole similarity matrix can be computed efficiently with one batched matrix multiplication call .
+This operation can take advantage of GPU hardware with Tensor Cores for faster training .
+For simplicity , we take text - to - image retrieval as an example to introduce the real - time inference pipeline ( Figure 2 Offline Feature Extraction Image retrieval task requires the model to rank every image i in an image database I based on its similarity to a text query t.
+In LightningDOT , we first apply the image encoder f θ V to all images in I , and cache the resulting global image representations { h ( Johnson et al , 2019 ) in memory for later use .
+Note that the entire image - to - index process , including Faster - RCNN feature extraction and Transformer encoding , can all be conducted offline .
+Therefore , for every new query t at real time , the cached index can be reused for maximum inference time saving . 
+( i )
+0
+R d |
+i
+I }
+into an index Online Retrieval
+During inference , given a text query t , we encode it with the language encoder θ L , and then compute its similarity score to the embedding of every image in I ( stored in memory index ) via Eqn ( 5 ) .
+Finally , the images will be ranked by their similarity scores , from the highest to lowest .
+In practice , people are more interested in top - K retrieval , with a list of K images I t satisfying : I t :
+= { i m k } K k=1 , where S ( t , i m 1 ) ≥ S ( t , i m 2 ) ≥ ≥ S ( t , i m K ) and S ( t , i m K ) ≥ S ( t , i ) ∀i ( I \ I t ) .
+( 7 ) This optimization problem has been well studied , and we use FAISS ( Johnson et al , 2019 ) to solve it in our implementation .
+It is worth noting that in order to apply fast search , the similarity function has to be decomposable .
+Therefore , we choose the simple dot product as S instead of a more complicated neural network function .
+Similarly , for text retrieval , the same architecture can be applied by simply pre - computing the embedding for all sentences and using an image as query instead . 
+Re - ranking To further improve retrieval accuracy , we propose a two - stage approach by adopting an optional re - ranking model .
+In the first stage , we use LightningDOT to retrieve top - M images ( or texts ) , where M is an integer much smaller R@1 R@5
+R@10 R@1 R@5
+R@10
+AR R@1
+R@5
+R@10 R@1 R@5
+R@10 AR
+This section discusses our experiments on pretraining and evaluating LightningDOT on downstream ITR benchmarks .
+For pre - training , we use pre - processed data provided by , including 4.2 million 8 The computation time of LightningDOT is negligible compared to that of UNITER .
+Therefore , the empirical speed is proportional to the number of pairs UNITER has to rank : constant M for LightningDOT + UNITER vs. the whole database ( index ) size for UNITER only .
+images with 9.5 million associated captions from COCO ( Chen et al , 2015 ) , VG ( Krishna et al , 2017 ) , Conceptual Captions ( Sharma et al , 2018 ) , and SBU captions ( Ordonez et al , 2011 ) . 
+For evaluation , we use Flickr30k ( Plummer et al , 2015 ) and COCO ( Lin et al , 2014 ) datasets , which include 31K/123 K images , respectively , each associated with 5 human - written captions .
+Following ( Faghri et al , 2017 ) , we split COCO into 114K/5K/5 K and Flickr30 K into 29K/1k/1k images for train , validation and test . 
+Downstream performance is measured by recall at K ( R@K ) for both image and text retrieval tasks .
+We also use an additional metric " AR " , the average of R@K for all K across both image and sentence retrieval tasks .
+We compare the proposed approach with state - ofthe - art methods ( with and without pre - training ) and report the results in Table 1 .
+Without crossattention , our method outperforms non - pre - training approaches by large margins on all metrics .
+Specifically , our model improves over CAAN ( SOTA method with cross - attention ) by 3.3 % ( 73.5 vs. 70.2 ) on COCO and 9.5 % ( 89.3 vs. 79.8 ) on Flickr30 K in terms of AR .
+When compared with methods without cross - attention ( VSE++ ( Faghri et al , 2017 ) and SCO ( Huang et al , 2018 ) ) , LightningDOT achieves nearly Model COCO Full ( 123 K Images )
+Flickr30 K Full ( 31 K Images ) 
+Text Retrieval Image Retrieval Text Retrieval Image Retrieval R@5
+R@10 R@20 R@5 R@10
+R@20
+AR R@5
+R@10 R@20 R@5 R@10
+R@20 AR
+( Lee et al , 2018 ) .
+LightningDOT with / without UNITER - base re - ranker is significantly faster . 
+20 - point gain on AR .
+Although LightningDOT achieves slightly lower AR than UNITER ( pretraining method with cross - attention ) , with 3.5/1.1 points drop on Flickr30K / COCO , it is 600/1900 × faster than UNITER during inference time . 
+We further apply second - stage re - ranking , and use UNITER to score top - M retrieved image - text pairs from LightningDOT to obtain the final top - K ranked lists .
+With re - ranking , LightningDOT achieves an instant performance lift , surpassing UNITER on both benchmarks , while still 46 - 95 times faster than UNITER .
+With an even stronger re - ranker OSCAR , LightningDOT achieves similar results to the state - of - the - art performance on COCO .
+To demonstrate the efficiency of LightningDOT , we use UNITER - base as baseline to compare inference speed .
+We also compare with a more lightweight cross - attention method SCAN ( Lee et al , 2018 ) , which uses GRU ( Chung et al , 2014 ) instead of a 12 - layer Transformer .
+All methods are tested on a single TITAN RTX GPU , with batch size of 400 .
+As shown in Table 3 , SCAN is ∼1.9× faster than UNITER - base across both benchmarks , as the computational cost of GRU is much cheaper than that of Transformer ( performance drop is significant though ) .
+However , the speedup from SCAN is limited , as it computes cross - attention between each query and all images .
+On the other hand , LightningDOT is 639× faster than UNITER on Flickr30K. When tested with 5 times more i m - ages in COCO , the speedup from LightningDOT is 1927×. Even with re - ranking , LightningDOT is still much more efficient than UNITER - base ( 46× faster on Flickr30 K and 95× faster on COCO ) . 
+To mimic a real - life scenario for image retrieval , where the candidate pool contains hundreds of thousands of images , we combine all images from training , validation and test set to form a larger candidate pool .
+Note that models are still trained on the training set .
+Although the number of text queries remain the same , the number of candidate images scales up by > 20× , where cross - attention methods immediately become impractical .
+We refer this setting on both benchmarks as Flickr30k - full ( 31k ) and COCO - full ( 123k ) .
+Our algorithm is 6 , 591× faster on Flickr30k - full and 23 , 869× faster on COCO - full , which clearly shows the advantage of LightningDOT and its potential in real - world applications .
+With re - ranking , LightningDOT is still more than 1 , 000× and 2 , 000× faster on Flickr30kfull and COCO - full , respectively .
+In general , for other re - rankers such as OSCAR , our algorithm can approximately speed up inference by N images /M times , where N images is the number of candidate images , and M is number of re - ranked images from top - M retrieved results by LightningDOT . 
+Similarly , we construct a full setting for text retrieval by combining all text queries from training , validation and test set .
+Results are summarized in Table 2 .
+Considering the size of candidate pool has become more than 20× larger , we adopt recall at top 5 , 10 , 50 as evaluation metrics .
+Our method achieves reasonably good performance , with AR of 44.4 on COCO and 70.2 on Flickr30K. Re - ranking further lifts AR to 56.4 and 76.2 .
+Results from UNITER or SCAN are not included as the computation of pairwise scores is extremely expensive , given the excessive amount of retrieval candidates .
+While LightningDOT only takes minutes to evaluate , UNITER - base is estimated to take about 28 days 9 to evaluate under the full setting for both Text Retrieval Image Retrieval Method R@1
+R@5
+R@10 R@1 R@5
+R@10 AR
+Image Retrieval LightningDOT R@1 R@5
+R@10 R@1 R@5
+R@10 AR image retrieval and text retrieval . 
+In addition , We compare all models with the same setting : cache as much as possible for fastest speed , where our model outperforms others in both speed and space on image retrieval .
+The proposed algorithm maps each image to a 768 - dimensional vector , which only consumes about 300Mb storage space for the whole COCO dataset .
+For crossattention models such as SCAN , UNITER or OS - CAR , they also need to cache image features , which typically requires to save a 36 x 2048 dimensional vector per image , and it consumes about 28 GB storage space for COCO dataset .
+We conduct ablation studies on Flickr30 K ( Table 4 ) and compare LightningDOT ( L4 ) against 3 ablated instances : ( i ) " R - CNN only " ( L1 ) :
+image representations are extracted from Faster R - CNN directly , with no image encoder applied ; ( ii ) " + Image Encoder " ( L2 ) : regional features are encoded with a 12 - layer Transformer as the image encoder ; ( iii ) " + PT † " ( L3 ) :
+our model is pre - trained with MLM+MRM+CMR , then finetuned on Flickr30K. Note that the difference between MLM vs. VMLM and MRM vs. SMRM is whether the predictions of masked tokens ( regions ) rely on infused embeddings from the other modality .
+Multi30 K and COCO datasets .
+We compare with task - specific methods :
+S - LIWE ( Wehrmann et al , 2019 ) , MULE , SMALR ( Burns et al , 2020 ) , pre - trained method M 3 P ( Huang et al , 2020a ) Results show that " R - CNN only " is not sufficient in learning good image representations for ITR task , while image encoder with Transformer architecture can effectively learn contextualized image representations , hence achieving better performance .
+Pre - trained models ( L3 - 4 ) generally achieve better performance , compared to nonpretrained models ( L1 - 2 ) .
+Comparing " + PT † " to the full instance of LightningDOT , dependency on the other modality in VMLM and SMRM brings universal performance lift across all metrics .
+This indicates that these cross - modal dependencies introduced by VMLM and SMRM are effective in learning the association between image and text inputs . 
+In addition , we investigate the effectiveness of each pre - training task in Table 5 .
+Comparing to baseline without pre - training , pre - training with CMR alone lifts +1.4 on AR .
+Pre - training with all three tasks achieves the best performance , indicating that the learning of contextualized word and region representations promotes better global alignment between image and text , and these three pre - training tasks work collaboratively to yield better visual - semantic embeddings .
+We further report results on multilingual image - text retrieval tasks .
+Specially , we evaluate Lightning - DOT under the translate - test setting , which is to translate the test captions in other languages to English by leveraging Machine Translation ( MT ) tool .
+10 Note that our method is only trained on English captions , without exploiting the original or translated captions from multilingual benchmarks .
+We consider two benchmarks : Multi30 K ( Elliott et al , 2016 ( Elliott et al , , 2017Barrault et al , 2018 ) with captions in German , French and Czech ; and COCO Japanese ( Yoshikawa et al , 2017 ) and Chinese ( Li et al , 2019b ) . 
+Average Recall ( AR ) is used as the evaluation metric .
+Meta - Ave , the average of AR over different languages across two benchmarks , is used as a global metric .
+More details on multilingual ITR benchmarks are included in Appendix . 
+We compare LightningDOT against 3 task - specific methods : S - LIWE ( Wehrmann et al , 2019 ) , MULE and SMALR
+( Burns et al , 2020 ) , which all exploit captions in different languages to learn multilingual or language - agnostic word embeddings .
+We also compare with a pre - trained model M 3 P ( Huang et al , 2020a ) , which is alternatively pre - trained with image - caption pairs labeled in English and cross - lingual corpus in 100 different languages .
+Note that all methods discussed above are trained / finetuned on captions in different languages .
+For fair comparison , we report performance of UNITER under the same translate - test setting , which is finetuned with English captions only and tested on translated captions . 
+Table 6 shows similar trends of performance improvements as on English benchmarks .
+Compared to both state - of - the - art task - specific methods and pre - trained models , LightningDOT under translatetest setting achieves new state of the art on most languages and establishes a strong baseline for future study on these multilingual benchmarks .
+We show an example of image retrieval results here at figure 4 for query as " Sky view of a blue and yellow biplane flying near each other " .
+In addition to the ground truth image in the red rectangle , all the 10 images retrieved by our model are valid retrieval since multiple keywords ( " sky " , " blue " , " yellow " , " airplane " , " near " ) are captured for each image .
+Please see the appendix A.4 for more examples .
+In this paper , we propose a pre - training framework that learns joint visual - semantic embedding without any cross - attention between modalities .
+Light - ningDOT outperforms previous state of the art , while significantly speeding up inference time by 600 - 2000× on Flickr30 K and COCO image - text retrieval benchmarks .
+Future work includes extending the efficient training framework to other V+L tasks .
+When evaluating on ITR under the multilingual setting , we consider two benchmarks : Multi30 K ( Elliott et al , 2016 ( Elliott et al , , 2017Barrault et al , 2018 ) and COCO Japanese ( Yoshikawa et al , 2017 ) and Chinese ( Li et al , 2019b ) .
+Multi30 K is constructed by manually translating English captions in Flickr30 K ( Plummer et al , 2015 ) to German , French , and Czech .
+Each image in Multi30 K is paired with 5 captions in German , 1 caption in French and Czech .
+We adopt the same train / val / test split as in Flickr30K. COCO Japanese ( Yoshikawa et al , 2017 ) collected 820 K Japanese captions for 165 K COCO images ( Lin et al , 2014 ) .
+We use the same train / dev / test splits for COCO Japanese as in Karpathy and Fei - Fei ( 2015 ) , and present results on the 1 K test set .
+Similarly , Li et al ( 2019b ) collected 1 - 2 Chinese captions per image for 20 K COCO images to build COCO Chinese .
+We follow the original split defined in Li et al ( 2019b ) .
+We present the detailed inference time of UNITERbase , SCAN the proposed LightningDOT and LightningDOT with UNITER - base re - ranker in Table 7 , measured by seconds / query .
+UNITER clearly is the slowest , as the 12 - layer Transformer model inference needs to be run between each query and all images .
+Comparing between Flickr30k - test and COCO - test , its inference time scales up linearly with the number of images .
+With the lightweight GRU ( Chung et al , 2014 ) , SCAN is ∼1.9× faster than UNITER .
+Across all settings , LightningDOT is significantly faster than both cross - attention methods ( UNITER - base and SCAN ) .
+When adding UNITER - base as the re - ranker , our method slows down by ∼10 , but still achieves decent speedup .
+We show several qualitative results of image retrieval ( top - 10 ) .
+All results are retrieved from COCO -
+Full dataset ( 123k images in total ) .
+Our model can well understand the underlying semantic meaning .
+For example , " romantic " only appears twice in the whole COCO dataset annotations , yet the top retrieved images are all topic - related ( Figure 5 ) .
+With multiple keywords , our model attempts to retrieve the combinations of them ( if not all ) .
+For example , for the query " blue girl boy ball " with four keywords , our model retrieves images Figure 5 : Retrieved top - 10 images for query " romantic " . 
+Figure 6 : Retrieved top - 10 images for query " blue girl boy ball " that capture at least three keywords ( Figure 6 ) . 
+We also present image retrieval results where the text query is sampled from COCO dataset .
+We randomly sample 3 queries and present the results as below ( ground truth on the top , retrieved top - 10 images at the bottom ) .
+Clearly , our model retrieves related images from the full dataset .
+To further facilitate the reproductivity of our proposed method , we include more details about the choice of model size and hyper - parameters for both pre - training and fine - tuning . 
+The model dimensions are set to ( L=12 , H=768 , A=12 ) for both image encoder and language encoder , where L is the number of stacked Transformer blocks ; H stands for hidden activation dimension , and A is the number of attention heads .
+The total number of parameters in LightningDOT is 220M. Pre - training and finetuning learn the parameters of both encoders .
+During inference , with offline representation caching , only the forwarding pass with one encoder from the query modality will be performed online . 
+For both pre - training and finetuning , AdamW ( Loshchilov and Hutter , 2019 ) is used to optimize the model training , with β 1 = 0.9 , β 2 = 0.98 .
+We adopt a learning rate warmup strategy , where the learning rate is linearly increased during the first 10 % of training steps , followed by a linear decay to 0 .
+We set the L2 weight decay to be 0.01 . 
+During pre - training , we follow UNITER to randomly sample 1 task per minibatch update .
+11
+Our best model is pre - trained on VMLM+SMRM+CRM for 300 , 000 optimization steps .
+We set the batch size to 10240 per GPU ( batch size is specified by # tokens + # regions , as in UNITER ) .
+Pre - training experiments are conducted on 8× V100 GPUs with 6 - step gradient accumulation , and the learning rate is set to be 5e - 5 .
+For ablation studies presented in Table 5 , the ablated instances of our model are pre - trained for 30k steps on COCO dataset ( Lin et al , 2014 ) only , and the same choice of learning rate and batch size are applied as in the best pre - training setting . 
+For finetuning , we set batch size n to 96 ( n is in examples , instead of the sequence length of tokens and regions ) , and search learning rate from { 1e - 5 , 2e - 5 , 5e - 5 } .
+We select models based on their AR on the validation set .
+The best learning rate is 5e - 5 for COCO and 1e - 5 for Flickr30K.
+Our models are trained for 15 epochs on Flickr30k , and 20 epochs on COCO .
+For re - ranking , we choose k from { 20 , 50 } .

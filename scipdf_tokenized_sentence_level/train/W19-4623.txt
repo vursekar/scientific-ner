@@ -1,0 +1,140 @@
+ZCU - NLP at MADAR 2019 :
+Recognizing Arabic Dialects
+In this paper , we present our systems for the MADAR Shared Task : Arabic Fine - Grained Dialect Identification .
+The shared task consists of two subtasks .
+The goal of Subtask - 1 ( S - 1 ) is to detect an Arabic city dialect in a given text and the goal of Subtask - 2 ( S - 2 ) is to predict the country of origin of a Twitter user by using tweets posted by the user .
+In S - 1 , our proposed systems are based on language modelling .
+We use language models to extract features that are later used as an input for other machine learning algorithms .
+We also experiment with recurrent neural networks ( RNN ) , but these experiments showed that simpler machine learning algorithms are more successful .
+Our system achieves 0.658 macro F 1 - score and our rank is 6 th out of 19 teams in S - 1 and 7 th in S - 2 with 0.475 macro F 1 - score .
+The Madar shared tasks ( Bouamor et al , 2019 ) are a follow - up to Salameh 's work with the synthetic corpus of Bouamor ( Bouamor et al , 2014 ) and Salameh 's work with tweets based on the corpus .
+Two corpora are provided , a six - city corpus of travel sentences rendered into the dialects of five cities and MSA 1 , and a 25 - city + MSA corpus using a smaller number of sentences .
+In the first task , test data is classified as one of the 25 cities or MSA .
+For the second task , the organizers chose training , development and test tweet - sets for download from Twitter .
+The tweets are from 21 Arabic countries , and the goal is to determine , for each tweet author , the country of origin . 
+For S - 1 we did not use any external data , only data provided by the shared task organizers .
+1
+The organizers provided training and development data 2 consisting of sentences in different dialects with a label denoting the corresponding dialect . 
+The training data contain 41 K sentences and development data contain 5.2 K sentences .
+Organizers also provided additional data with Arabic sentences in seven dialects . 
+S - 2 uses a corpus of tweets .
+Twitter does not permit the organizers to distribute tweets , only the user ids and tweet ids .
+Every participant must arrange with Twitter to download the tweets themselves , and because tweets are subject to deletion over time , it is possible that each participant 's version of the corpus and test is unique .
+The Arabic dialects have a common written form and unified literary tradition , so it seems most logical to distinguish dialects on the basis of acoustics , and there is a fair amount of work there , including Hanani et al ( 2013Hanani et al ( , 2015 ; . - - Biadsy et al ( 2009 ) distinguish four Arabic dialects and MSA based on ( audio ) phone sequences ; the phones were obtained by phone recognizers for English , German , Japanese , Hindi , Mandarin , Spanish , and three different MSA phone - recognizer implementations .
+The dialects were distinguished by phoneme sequences , and the results of classifications based on each phonerecognizer were combined using a logistic regression classifier .
+They train on 150 hours per dialect of telephone recordings .
+They report 61 % accuracy on 5 - second segments , and 84 % accuracy on 120 second segments .
+Zaidan and Callison - Burch ( 2011 ) describe building a text corpus , based on reader commen - tary on newspaper websites , with significant dialect content ; the goal is to provide a corpus to improve machine translation for Arabic dialects .
+They used Amazon Mechanical Turk to provide annotation for a portion of the corpus .
+Zaidan and Callison - Burch ( 2014 ) describe the same work in greater detail , including dialect classifiers they built using the Mechanical Turk data for classes and origin metadata as additional features .
+They say these classifiers are ' approaching human quality . '
+ElFardy and Diab ( 2013 ) classify EGY 3 and MSA sentences from the Zaidan and Callison - Burch ( 2011 ) corpus , that is , from text .
+Not only is this a binary task , but orthographic hints , including repeated long vowels , emojis and multiple punctuations , give strong clues of the register , and hence whether MSA is being employed .
+They do a number of experiments comparing various preprocessing schemes and different training sizes , ranging from 2 - 28 million tokens .
+They achieve 80 % - 86 % accuracy for all of their attempts .
+Malmasi et al ( 2015 ) do Arabic dialect identification from text corpora , including the Multi - Dialect Parallel Corpus of Arabic ( Bouamor et al , 2014 ) and the Arabic Online Commentary database ( Zaidan and Callison - Burch , 2011 ) .
+Hanani et al ( 2015 ) perform recognition of several Palestinian regional accents , evaluating four different acoustic models , achieving 81.5 % accuracy for their best system , an I - vector framework with 64 Gaussian components .
+developed the corpus on which the DSL Arabic shared task is based .
+Their own dialect detection efforts depended largely on acoustical cues . 
+Arabic dialect recognition appeared in the 2016 edition of the VarDial workshop 's shared task ( Malmasi et al , 2016 ) .
+The shared task data was text - only . 
+The best classifiers ( Malmasi et al , 2016 ; Ionescu and Popescu , 2016 ) for the shared task performed far below the best results reported by some of the preceding researchers , in particular which used some of the same data . 
+Part of the reason must be that the amount of training data for the workshop is much smaller than that used by some of the other researchers ; the workshop data also did not include the audio recordings on which the transcripts are based .
+3
+The absence of audio was remedied for the 2017 and 2018 VarDial workshops , ( Zampieri et al , 2017 ( Zampieri et al , , 2018
+However , the five dialects plus MSA targeted by the VarDial shared task comprise a small fraction of Arabic 's dialectical variation .
+Salameh et al ) use a corpus which differentiates between twentyfive different cities and MSA .
+This still does n't address urban rural divides , but it begins to reflect more realistic diversity .
+In S - 1 , both of our systems used for the official submission take as an input language model features .
+In our case the objective of a language model in its simplest form is to predict probability p ( S ) of sentence S which is composed from strings ( words or character n - grams ) s 1 , s 2 . . .
+s
+N , where N is a number of strings in the sentence .
+The probability estimation of p ( S ) can be computed as a product of conditional probabilities p
+( s i |
+h i ) of its strings s 1 , s 2 . . .
+s
+N , where h i is a history of a string s i .
+The probability of string s i is conditioned by history h i i.e. n − 1 preceding strings s i−n+1 , s i−n+2 , . . .
+s i−1 which can be rewritten as s i−1 i−n+1 .
+The resulting formula for the p ( S ) estimation looks as follows : p ( S )
+=
+N i=1
+p ( s i |
+h i )
+=
+N i=1
+p ( s i | s i−1 i−n+1 )
+( 1 ) The conditioned probability p ( s i | h i ) can be estimated with Maximum Likelihood Estimate ( MLE ) which is defined as : p M LE ( s i |
+h i )
+= c ( s i−n+1 , s i−n+2 . . .
+s
+i ) c ( s i−n+1 , s i−n+2 .
+. .
+s i−1 )
+( 2 ) where c ( s i−n+1 , s i−n+2 . . .
+s
+i ) is a number of occurrences of string s i with history h i and c ( s i−n+1 , s i−n+2 . . .
+s i−1 ) is a number of occurrences of history h i .
+These counts are taken from a training corpus . 
+We followed Salameh ) in using the kenlm language modelling tool ( Heafield et al , 2013 ) .
+kenlm does n't have an option to use character n - grams instead of words , so in order to get character - based language models , we prepared input files with characters separated by spaces .
+Instead of encoding space as a special word , we surrounded words with a < w></w > pair .
+This enables noticing strings which occur at the beginning or end of a word ( as would a special sequence for space ) but reduces the possible amount of inter - word information which the language model can keep for a given order , the parameter which indicates to kenlm the largest n - gram to index .
+We used order 5 for all our kenlm language models .
+We prebuilt models for each dialect .
+We prepared six directories , each containing word or character models for each dialect in one of the three corpora . 
+We wrote a LangModel class which quacks like a sklearn classifier , that is , it supports fit ( ) , predict ( ) , and predict proba ( ) , but its choices are based on a directory of language models .
+predict ( ) returns the dialect name whose model gives the highest score .
+predict proba ( ) provides a list of languagemodel - score features , adjusted to probabilities .
+In this section we describe our models 4 .
+We submitted results for the S - 1 from two systems - Tortuous Classifier and Neural Network Classifier .
+This submission uses a jumble of features and classifiers , most from the sklearn module ( Buitinck et al , 2013 ) .
+The final classifier is a hard voting classifier with three input streams : 
+1 .
+Soft voting classifier on : on language - model - scores for character and language models on the corpus - 6 language models and character language models for the corpus - 26 language models . 
+2 . Support vector machine , svm .
+SVC ( gamma='scale ' , kernel = ' poly ' , degree = 2 ) with the same features as item 1e .
+word and char language model features for corpus - 6 and corpus - 26 features , tfid vectorized word 1 - 2grams , and tfid vectorized char 3 - 5grams . 
+The classifier did better on the development data , suggesting that it is over - fitted , but the language model features , which are the most predictive , also did better on the development data .
+We experimented with several neural networks . 
+Our model for the S - 1 submission uses as input 26 features which correspond to one of our 26 pretrained dialect language models .
+Each feature represents the probability of a given sentence for one language model .
+The probability scores measure how close each sentence is to the dialect .
+We train Multilayer Perceptron ( MLP ) with one hidden ( dense ) layer with 400 units .
+The output of the hidden layer is passed to a final fullyconnected softmax layer .
+The output of the softmax layer is a probability distribution over all 26 classes .
+The class with the highest probability is predicted as a final output of our model .
+As an activation function in the hidden layer of the MLP a Rectified Linear Unit ( ReLu ) is employed . 
+We also tried to combine character n - gram features with the language model features .
+The input is a sequence of first 200 character n - grams of a given text .
+Each sequence of character n - grams is used as a separate input followed by a randomly initialized embedding layer and then two layers of Bidirectional LSTM ( BiLSTM ) ( Graves and Schmidhuber , 2005 ) with 64 units are employed ( see Figure 1 ) . 
+The output vector of the BiLSTM layers is concatenated with the language model features and this concatenated vector is passed to the MLP layer with 400 units ( the same as described above ) .
+All models were implemented by using Keras ( Chollet et al , 2015 ) with TensorFlow backend ( Abadi et al , 2015 )
+We tune all hyperparameters on the development data .
+We train our model with Adam ( Kingma and Ba , 2014 ) optimizer with learning rate 0.01 and without any dropout .
+The number of epochs is 800 and we do not use mini - batches or dropout regularization technique .
+The model with these hyperparameters achieves the best result ( 0.661 macro F 1 - score ) on the development data and was used for the final submission . 
+We also experimented with the n - gram inputs .
+We tried a different number of character n - grams and we achieve the best result ( 0.555 macro F 1score ) on the development data using three inputs - character unigrams , bigrams and trigrams , with learning rate 0.005 , mini - batches of size 256 for 11 epochs and with the Adam optimizer .
+Our tortuous classifier did less well on the tweet data , so we used a simpler classifier . 
+The features are the kenlm language model scores for the 21 countries , computed for each of the training tweets , then exponentiated and normalized to sum to 1 .
+The tweets are classified using y_test = KNeighborsClassifier ( n_neighbors=31 ) .fit
+( X_train , y_train ) .predict ( X_test ) 
+The users are predicted based on the plurality prediction for all of their tweets , that is , the country to which the largest number of their tweets were assigned .
+There were a significant number of tweets unavailable , about 10 % in the training and development sets , and 12 % in the test set .
+After the submissions had closed we experimented with eliminating the unavailable and non - Arabic tweets from True labels 127 0 0 12 3 4 1 7 0 0 30 1 0 0 8 0 1 0 0 0 0 3 1 0 1 1 0 160 1 1 0 1 0 0 8 0 0 1 7 1 1 4 1 4 2 2 2 1 0 1 1 1 0 3 149 4 16 1 0 0 1 10 1 1 1 2 1 8 0 0 0 0 0 0 2 0 0 0 9 0 2 118 2 1 0 6 2 8 9 7 0 2 18 3 0 0 2 0 2 7 1 0 1 0 0 0 21 4 134 1 1 0 0 19 1 4 1 3 4 2 0 0 0 0 3 1 0 0 1 0 2 0 0 5 2 127 25 1 3 1 1 3 0 1 0 4 3 3 1 0 9 2 5 2 0 0 1 1 1 2 1 29 128 1 2 0 1 6 0 1 0 0 8 2 3 0 5 2 3 2 1 0 8 1 0 7 2 1 1 129 2 3 18 0 0 1 9 3 0 1 2 1 3 5 0 0 2 1 2 5 0 6 9 3 1 1 131 2 1 8 0 4 2 0 0 0 2 0 6 1 4 1 11 0 6 4 19 3 37 2 0 0 2 100 2 1 1 5 1 9 0 0 0 0 3 0 1 0 2 2 16 0 1 16 4 4 2 17 2 3 108 4 1 2 10 0 0 0 0 0 0 8 1 0 1 0 1 1 0 4 2 2 3 1 1 1 0 150 1 8 4 5 0 1 3 1 4 2 1 1 2 1 0 7 1 1 2 0 0 0 0 2 1 4 136 3 0 2 0 1 2 31 1 1 1 3 0 1 1 1 1 6 4 0 0 2 5 3 3 14 1 123 1 6 0 1 3 0 10 5 5 1 3 1 7 2 1 26 2 1 2 7 5 1 1 6 0 2 121 2 0 0 1 0 2 9 1 0 1 0 0 2 3 8 10 1 1 1 0 1 1 3 0 4 2 147 1 12 0 0 0 0 1 0 2 0 1 0 0 0 0 3 8 0 1 0 0 0 0 1 0 0 167 1 1 0 6 4 5 0 1 1 1 7 2 2 0 1 0 0 2 1 1 0 0 0 1 9 1 158 4 0 7 1 1 0 1 0 2 3 1 3 1 3 1 1 5 1 3 15 1 8 1 10 0 32 83 1 16 4 4 0 1 0 1 7 0 3 0 0 0 0 2 0 1 1 36 1 2 1 0 0 0 139 0 1 0 3 1 1 2 0 0 3 0 2 2 3 6 5 0 13 1 18 1 1 2 9 7 0 115 2 7 0 1 0 3 3 1 12 3 2 2 5 3 2 7 10 0 5 12 2 1 3 2 0 7 109 4 1 1 0 1 1 1 2 1 6 2 1 3 1 1 7 0 9 1 3 4 3 1 0 6 4 140 0 2 0 2 6 0 1 1 2 3 0 3 1 2 0 2 0 2 0 0 0 2 1 3 1 0 146 0 22 1 3 0 2 3 0 0 2 9 2 0 4 0 2 2 4 0 0 1 1 4 1 1 4 151 3 1 training and testing and choosing Saudi Arabia ( which is the origin for the plurality of tweets at 36 % ) for users with no remaining tweets .
+This improved tweet classification accuracy by about 5 % , but actually decreased user classification accuracy on the development set .
+For the Subtask - 1 we achieved 0.658 macro F 1score on the test data , sixth among nineteen submissions with the Tortuous Classifier .
+The Neural Network Classifier achieved a macro F 1 - score of 0.648 on the test data .
+For the Subtask - 2 we submitted a single entry .
+It ranked 7 th among 9 submissions with 0.475 macro F 1 - score . 
+Figure 2 shows that many of the errors are geographically plausible .
+For example , ASWan ALXandria and CAIro are all in Egypt , and each has a sizeable chunk of mistaken identity for the others .
+Similarly , DAMascus , ALEppo , AMMan , BEIrut , JERusalem which are all ' Levantine ' and only a few hundred miles apart .
+This paper presents an automatic approach for Arabic dialect detection in the MADAR Shared Task .
+Our proposed systems for the Subtask - 1 use language model features .
+Our experiments showed that simpler machine learning algorithms outperform RNN using language model features .
+Subtask - 2 turned out to be more challenging because Tweets , which are real - world wild data , are more difficult to process than systematically prepared texts .
+This work has been partly supported by Grant No .
+SGS - 2019 - 018 Processing of heterogeneous data and its specialized applications , and was partly supported from ERDF " Research and Development of Intelligent Components of Advanced Technologies for the Pilsen Metropolitan Area ( InteCom ) " .
+Access to computing and storage facilities owned by parties and projects contributing to the National Grid Infrastructure MetaCentrum provided under the programme " Projects of Large Research , Development , and Innovations Infrastructures " ( CESNET LM2015042 ) , is greatly appreciated .

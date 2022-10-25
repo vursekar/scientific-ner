@@ -1,0 +1,148 @@
+Automatic Generation of Contrast Sets from Scene Graphs : Probing the Compositional Consistency of GQA
+Recent works have shown that supervised models often exploit data artifacts to achieve good test scores while their performance severely degrades on samples outside their training distribution .
+Contrast sets quantify this phenomenon by perturbing test samples in a minimal way such that the output label is modified .
+While most contrast sets were created manually , requiring intensive annotation effort , we present a novel method which leverages rich semantic input representation to automatically generate contrast sets for the visual question answering task .
+Our method computes the answer of perturbed questions , thus vastly reducing annotation cost and enabling thorough evaluation of models ' performance on various semantic aspects ( e.g. , spatial or relational reasoning ) .
+We demonstrate the effectiveness of our approach on the popular GQA dataset ( Hudson and Manning , 2019 ) and its semantic scene graph image representation .
+We find that , despite GQA 's compositionality and carefully balanced label distribution , two strong models drop 13 - 17 % in accuracy on our automatically - constructed contrast set compared to the original validation set .
+Finally , we show that our method can be applied to the training set to mitigate the degradation in performance , opening the door to more robust models .
+1
+NLP benchmarks typically evaluate in - distribution generalization , where test sets are drawn i.i.d from a distribution similar to the training set .
+Recent works showed that high performance on test sets sampled in this manner is often achieved by exploiting systematic gaps , annotation artifacts , lexical cues and other heuristics , rather than learning meaningful task - related signal .
+As a result , 1 Our contrast sets and code are available at https://github.com/yonatanbitton/ AutoGenOfContrastSetsFromSceneGraphs . 
+Figure 1 : Illustration of our approach based on an example from the GQA dataset .
+Top : QA pairs and an image annotated with bounding boxes from the scene graph .
+Bottom : relations among the objects in the scene graph .
+First line at the top is the original QA pair , while the following 3 lines show our pertubated questions : replacing a single element in the question ( a fence ) with other options ( a wall , men , an elephant ) , leading to a change in the output label .
+For each QA pair , the LXMERT predicted output is shown . the out - of - domain performance of these models is often severely deteriorated ( Jia and Liang , 2017 ; Ribeiro et
+al , 2018 ; Gururangan et al , 2018 ;
+Geva et al , 2019 ; McCoy et al , 2019 ; Feng et al , 2019 ; Stanovsky et al , 2019 ) .
+Recently , Kaushik et al ( 2019 ) and introduced the contrast sets approach to probe out - of - domain generalization .
+Contrast sets are constructed via minimal modifications to test inputs , such that their label is modified .
+For example , in Fig . 1 , replacing " a fence " with " a wall " , changes the answer from " Yes " to " No " .
+Since such perturbations introduce minimal additional semantic complexity , robust models are expected to perform similarly on the test and contrast sets .
+However , a range of NLP models severely degrade in performance on contrast sets , hinting that they do not generalize well .
+Except two recent exceptions for textual datasets ( Li et al , 2020 ; Rosenman et al , 2020 ) , contrast sets have so far been built manually , requiring extensive human effort and expertise . 
+In this work , we propose a method for automatic generation of large contrast sets for visual question answering ( VQA ) .
+We experiment with the GQA dataset ( Hudson and Manning , 2019 ) .
+GQA includes semantic scene graphs ( Krishna et al , 2017 ) representing the spatial relations between objects in the image , as exemplified in Fig .
+1 .
+The scene graphs , along with functional programs that represent the questions , are used to balance the dataset , thus aiming to mitigate spurious dataset correlations .
+We leverage the GQA scene graphs to create contrast sets , by automatically computing the answers to question perturbations , e.g. , verifying that there is no wall near the puddle in Fig .
+1 . We create automatic contrast sets for 29 K samples or ≈22 % of the validation set .
+We manually verify the correctness of 1 , 106 of these samples on Mechanical Turk .
+Following , we evaluate two leading models , LXMERT ( Tan and Bansal , 2019 ) and MAC ( Hudson and Manning , 2019 ) on our contrast sets , and find a 13 - 17 % reduction in performance compared to the original validation set .
+Finally , we show that our automatic method for contrast set construction can be used to improve performance by employing it during training .
+We augment the GQA training set with automatically constructed training contrast sets ( adding 80 K samples to the existing 943 K in GQA ) , and observe that when trained with it , both LXMERT and MAC improve by about 14 % on the contrast sets , while maintaining their original validation performance . 
+Our key contributions are : ( 1 ) We present an automatic method for creating contrast sets for VQA datasets with structured input representations ; ( 2 ) We automatically create contrast sets for GQA , and find that for two strong models , performance on the contrast sets is lower than on the original validation set ; and ( 3 ) We apply our method to augment the training data , improving both models ' performance on the contrast sets .
+To construct automatic contrast sets for GQA we first identify a large subset of questions requiring specific reasoning skills ( 2.1 ) .
+Using the scene graph representation , we perturb each question in a manner which changes its gold answer ( 2.2 ) .
+Finally , we validate the automatic process via crowdsourcing ( 2.3 ) .
+The questions in the GQA dataset present a diverse set of modelling challenges , as exemplified in Table 1 , including object identification and grounding , spatial reasoning and color identification .
+Following the contrast set approach , we create perturbations testing whether models are capable of solving questions which require this skill set , but that diverge from their training distribution . 
+To achieve this , we identify commonly recurring question templates which specifically require such skills .
+For example , to answer the question " Are there any cats near the boat ? "
+a model needs to identify objects in the image ( cats , boat ) , link them to the question , and identify their relative position . 
+We identify six question templates , testing various skills ( Table 1 ) .
+We abstract each question template with a regular expression which identifies the question types as well as the physical objects , their attributes ( e.g. , colors ) , and spatial relations .
+Overall , these regular expressions match 29 K questions in the validation set ( ≈22 % ) , and 80 K questions in the training set ( ≈8 % ) .
+We design a perturbation method which guarantees a change in the gold answer for each question template .
+For example , looking at Fig . 2 , for the question template are there X near the Y ?
+( e.g. , " Is there any fence near the players ? " ) , we replace either X or Y with a probable distractor ( e.g. " replace " fence " with " trees " ) . 
+We use the scene graph to ensure that the answer to the question is indeed changed .
+In our example , this would entail grounding " players " in the question to the scene graph ( either via exact match or several other heuristics such as hard - coded lists of synonyms or co - hyponyms ) , locating its neighbors , and verifying that none of them are " trees . "
+We then apply heuristics to fix syntax ( e.g. , changing from singular to plural determiner , see Appendix A.3 ) , and verify that the perturbed sample Are there any cats near the boat ?
+Is there any bush near the boat ?
+Is the X Rel the Y ? 
+Is the boy to the right of the man ?
+Is the boy to the left of the man ?
+Is the X Rel the Y ? 
+Is the boy to the right of the man ?
+Is the zebra to the right of the man ?
+does not already exist in GQA .
+The specific perturbation is performed per question template .
+In question templates with two objects ( X and Y ) , we replace X with X ' , such that X ' is correlated with Y in other GQA scene graphs .
+In question templates with a single object X , we replace X with a textually - similar X ' .
+For example in the first row in Table 1 we replace dishwasher with dishes .
+Our perturbation code is publicly available .
+This process may yield an arbitrarily large number of contrasting samples per question , as there are many candidates for replacing objects participating in questions .
+We report experiments with up to 1 , 3 and 5 contrasting samples per question . 
+Illustrating the perturbation process .
+Looking at Fig .
+1 , we see the scene - graph information : objects have bounding - boxes around them in the image ( e.g. , zebra ) ; Objects have attributes ( wood is an attribute of the fence object ) ; and there are relationships between the objects ( the puddle is to the right of the zebra , and it is near the fence ) .
+The original ( question , answer ) pair is ( " is there a fence near the puddle ? " , " Yes " ) .
+We first identify the question template by regular expressions : " Is there X near the Y " , and isolate X = fence , Y = puddle .
+The answer is " Yes " , so we know that X is indeed near Y. We then use the existing information given in the scene - graph .
+We search for X ' that is not near Y. To achieve this , we sample a random object ( wall ) , and verify that it does n't exist in the set of scenegraph objects .
+This results in a perturbed example " Is there a wall near the puddle ? " , and now the ground truth is computed to be " No " .
+Consider a different example : ( " Is the puddle to the left of the zebra ? " , " Yes " ) .
+We identify the question template " Is the X
+Rel the Y " , where X = puddle , Rel = to the left , Y = zebra .
+The answer is " Yes " .
+Now we can easily change Rel'=to the right , resulting in the ( question , answer ) pair ( " Is the puddle to the right of the zebra ? " , " No " ) . 
+We highlight the following : ( 1 ) This process is done entirely automatically ( we validate it in Section 2.3 ) ; ( 2 ) The answer is deterministic given the information in the scene - graph ; ( 3 ) We do not produce unanswerable questions .
+If we could n't find an alternative atom for which the presuppositions hold , we do not create the perturbed ( question , answer ) pair ; ( 4 ) Grounding objects from the question to the scene - graph can be tricky .
+It can involve exact match , number match ( dogs in the question , and dog in the scene - graph ) , hyponyms ( animal in the question , and dog in the scene - graph ) , and synonyms ( motorbike in the question , and motorcycle in the scene - graph ) .
+The details are in the published code ; ( 5 ) The only difference between the original and the perturbed instance is a single atom : an object , relationship , or attribute .
+To verify the correctness of our automatic process , we sampled 553 images , each one with an original and perturbed QA pair for a total of 1 , 106 instances ( ≈4 % of the validation contrast pairs ) .
+The ( image , question ) pairs were answered independently by human annotators on Amazon Mechanical Turk ( see Fig .
+3 in Appendix A.4 ) , oblivious to whether the question originated from GQA or from our automatic contrast set .
+We found that the workers were able to correctly answer 72.3 % of the perturbed questions , slightly lower than their performance on the original questions ( 76.6 % ) .
+2 We observed high agreement between annotators ( κ = 0.679 ) . 
+Our analysis shows that the human performance difference between the perturbed questions and the original questions can be attributed to the scene Figure 2 : GQA image ( left ) with example perturbations for different question templates ( right ) .
+Each perturbation aims to change the label in a predetermined manner , e.g. , from " yes " to " no " .
+Training graph annotation errors in the GQA dataset : 3.5 % of the 4 % difference is caused by a discrepancy between image and scene graph ( objects appearing in the image and not in the graph , and vice versa ) .
+Examples are available in Fig .
+5 in Appendix A.5 .
+We experiment with two top - performing GQA models , MAC ( Hudson and Manning , 2018 ) and LXMERT ( Tan and Bansal , 2019 ) , 3 to test their generalization on our automatic contrast sets , leading to various key observations .
+Models struggle with our contrast set .
+had the smallest performance drop , potentially because the models performance on such multi - class , subjective questions is relatively low to begin with . 
+Training on perturbed set leads to more robust models .
+Previous works tried to mitigate spurious datasets biases by explicitly balancing labels during dataset construction ( Goyal et al , 2017 ; Zhu et al , 2016 ; Zhang et al , 2016 ) or using adversarial filtering ( Zellers et al , 2018 ( Zellers et al , , 2019 .
+In this work we take an inoculation approach ( Liu et al , 2019 )
+This allows us to measure the contrast consistency of our contrast set , defined as the percentage of the contrast sets for which a model 's predictions are correct for all examples in the set ( including the original example ) .
+For example , in Fig .
+1 the set size is 4 , and only 2/4 predictions are correct .
+We experiment with 1 , 3 , and 5 augmentations per question with the LXMERT model trained on the original GQA training set .
+Our results ( Table 4 ) show that sampling more objects leads to similar accuracy levels for the LXMERT model , indicating that quality of our contrast sets does not depend on the specific selection of replacements .
+However , we observe that consistency drops fast as the size of the contrast sets per QA instance grows , indicating that model success on a specific instance does not mean it can generalize robustly to perturbations .
+Our results suggest that both MAC and LXMERT under - perform when tested out of distribution .
+A remaining question is whether this is due to model architecture or dataset design .
+claim that both of these models are prone to fail on compositional generalization because they do not decompose the problem into smaller sub - tasks .
+Our results support this claim .
+On the other hand , it is possible that a different dataset could prevent these models from finding shortcuts .
+Is there a dataset that can prevent all shortcuts ?
+Our automatic method for creating contrast sets allows us to ask those questions , while we believe that future work in better training mechanisms , as suggested in and Jin et al ( 2020 ) , could help in making more robust models . 
+We proposed an automatic method for creating contrast sets for VQA datasets that use annotated scene graphs .
+We created contrast sets for the GQA dataset , which is designed to be compositional , balanced , and robust against statistical biases .
+We observed a large performance drop between the original and augmented sets .
+As our contrast sets can be generated cheaply , we further augmented the GQA training data with additional perturbed questions , and showed that this improves models ' performance on the contrast set .
+Our proposed method can be extended to other VQA datasets .
+We created contrast sets automatically , and verified their correctness via the crowdsourcing annotation of a sample of roughly 1 K instances .
+Section 2.3 describes the annotation process on Amazon Mechanical Turk .
+The images and original questions were sampled from the public GQA dataset ( Hudson and Manning , 2019 ) , in the English language .
+Fig .
+3 in Appendix A.4 provides example of the annotation task .
+Overall , the crowdsourcing task resulted in ≈6 hours of work , which paid an average of 11USD per hour per annotator . 
+Reproducibility The augmentations were performed with a MacBook Pro laptop .
+Augmentations for the validation data takes < 1 hour per question template , and for the training data < 3 hours per question template .
+Overall process , < 24 hours . 
+The experiments have been performed with the public implementations of MAC ( Hudson and Manning , 2018 ) and LXMERT ( Tan and Bansal , 2019 ) , models : https : //github.com / airsplay / lxmert , https://github.com/stanfordnlp/ mac - network/. 
+The configurations were modified to not include the validation set in the training process .
+The experiments were performed with a Linux virtual machine with a NVIDIA 's Tesla V100 GPU .
+The training took ∼1 - 2 days in each model .
+Validation took ∼ 30 minutes .
+Table 5 reports the basic statistics of automatic contrast sets generation method when applied on the GQA validation dataset .
+It shows the overall number of images and QA pairs that matched the 6 question types we identified .
+Tables 6 shows the statistics per question type , indicating how productive each augmentation method is .
+Tables 7 and 8
+For each question type , we select an object in the image scene graph , and update the question by substituting the reference to this object by another object .
+When substituting one object by another , we need to adjust the question to keep it fluent .
+Table 10 shows the specific linguistic rules we verify when performing this substitution . 
+A.4 Annotation Task for Verifying Generated Contrast Sets Fig .
+3 shows the annotation task that is shown to Turkers to validate the QA pairs generated by our method .
+We thank the reviewers for the helpful comments and feedback .
+We thank the authors of GQA for building the dataset , and the authors of LXMERT and MAC for sharing their code and making it usable .
+This work was supported in part by the Center for Interdisciplinary Data Science Research at the Hebrew University of Jerusalem , and research gifts from the Allen Institute for AI .
+Singular vs. plural If the noun is singular and countable : add " a " or " an " If needed , replace " Are " and " Is " " a fence " , " men " " a boy " , " an elephant " Definite vs. indefinite Do not change definite articles to indefinite articles , and vice versa " is there any fence near the boy " suggests that there is a boy in the scene graph , which is not always correct
+Meaning can be changed When replacing to general or specific terms " Cats in the image " = > " Animals in the image " , " Animals not in the image " = > " cats not in the image " , The opposite directions not necessarily holds Countable vs. uncountable If the noun is uncountable , do not add " a " or " an " " A cat " , " water " Table 10 : Partial linguistic rules to notice using our method .
