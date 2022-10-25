@@ -8,7 +8,7 @@
 *.bib
 
 # Ignore all notebook checkpoint files
-*.ipynb
+notebooks/.ipynb_checkpoints
 
 # Ignore all .data files
 *.data
