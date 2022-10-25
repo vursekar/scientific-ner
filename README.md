@@ -1,3 +1,3 @@
 # scientific-ner
 
-Initial scratch code to fetch PDFs and obtain tokenized data. 
+This repository contains code and minimal data to scrape, parse, tokenize, and tag scientific (ACL) PDFs. Code for performing these tasks are under utils. 
