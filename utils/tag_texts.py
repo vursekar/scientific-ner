@@ -16,7 +16,7 @@ for file in ['no_tag', 'metric_hp_plus_num_tag', 'rest']:
 
 filenames = os.listdir(path_to_tokenized)
 
-with open('entity_corpus/pwc_entities.json') as f:
+with open('data/entity_corpus/pwc_entities.json') as f:
     entity_type_map = json.load(f)
 
 hp_names = ['number of layers', 'number of units', 'activation function', 'L2 regularization', 'epoch number',
